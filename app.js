@@ -15,6 +15,25 @@ const db = getFirestore(app);
 
 let editingDocId = null; 
 
+// --- AUTO CALCULATE BMI ---
+const weightInput = document.getElementById('Weight');
+const heightInput = document.getElementById('Height');
+const bmiInput = document.getElementById('BMI');
+
+function calculateBMI() {
+    const w = parseFloat(weightInput.value);
+    const h = parseFloat(heightInput.value);
+    if (w > 0 && h > 0) {
+        const heightInMeters = h / 100;
+        const bmi = w / (heightInMeters * heightInMeters);
+        bmiInput.value = bmi.toFixed(1); // Rounds to 1 decimal place
+    } else {
+        bmiInput.value = '';
+    }
+}
+weightInput.addEventListener('input', calculateBMI);
+heightInput.addEventListener('input', calculateBMI);
+
 // --- Build Patient Card ---
 function buildPatientCard(data, docId, isNewlySaved = false) {
     let detailsTable = '<table class="table table-sm table-bordered mt-2" style="font-size: 0.85rem;"><tbody>';
@@ -39,7 +58,7 @@ function buildPatientCard(data, docId, isNewlySaved = false) {
                     <i class="fa-solid fa-file-medical me-2"></i>${data.Name || 'Unknown Patient'}
                 </h4>
                 <p class="mb-1"><strong>File No:</strong> ${data.File_No} | <strong>Civil ID:</strong> ${data.Civil_ID}</p>
-                <p class="mb-1"><strong>Entered By:</strong> ${data.Doctor_Name || 'Unknown'} </p>
+                <p class="mb-1"><strong>Entered By:</strong> <span class="badge bg-secondary">${data.Doctor_Name || 'Unknown'}</span></p>
                 <p class="mb-3 text-muted"><small>Record Date: ${data.timestamp ? new Date(data.timestamp).toLocaleDateString() : new Date().toLocaleDateString()}</small></p>
                 ${detailsTable}
             </div>
@@ -58,6 +77,17 @@ function buildPatientCard(data, docId, isNewlySaved = false) {
 document.getElementById('hfForm').addEventListener('submit', async (e) => {
     e.preventDefault(); 
     
+    // --- LOUD VALIDATION CHECK FOR MOBILE ---
+    const docName = document.getElementById('Doctor_Name').value;
+    const patName = document.getElementById('Name').value;
+    const civilId = document.getElementById('Civil_ID').value;
+    const fileNo = document.getElementById('File_No').value;
+    
+    if (!docName || !patName || !civilId || !fileNo) {
+        alert("⚠️ PLEASE STOP:\nYou must fill out:\n1. Doctor Name\n2. Patient Name\n3. Civil ID\n4. File No\nbefore the app will let you save!");
+        return; // Stops the save process immediately
+    }
+
     const submitBtn = document.getElementById('submitBtn');
     submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Saving...';
     submitBtn.disabled = true;
@@ -80,7 +110,7 @@ document.getElementById('hfForm').addEventListener('submit', async (e) => {
         if (editingDocId) {
             const patientRef = doc(db, "patients", editingDocId);
             await updateDoc(patientRef, patientData);
-            alert(`Success! File No: ${patientData.File_No} updated.`);
+            alert(`✅ Success! File No: ${patientData.File_No} has been updated.`);
             editingDocId = null;
             document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-user-plus me-2 text-danger"></i>New Patient Entry';
             document.getElementById('cancelEditBtn').classList.add('d-none');
@@ -89,18 +119,23 @@ document.getElementById('hfForm').addEventListener('submit', async (e) => {
             dataToRender.timestamp = patientData.timestamp;
             const docRef = await addDoc(collection(db, "patients"), patientData);
             docIdToRender = docRef.id;
-            alert(`Success! Patient added.`);
+            alert(`✅ Success! New patient has been added to the Registry.`);
         }
 
+        // IMMEDIATELY SHOW THE PDF BUTTON AND PATIENT FILE
         resultsDiv.innerHTML = buildPatientCard(dataToRender, docIdToRender, true);
+        
         document.getElementById('hfForm').reset(); 
         submitBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up me-2"></i>Save Patient to Registry';
         submitBtn.disabled = false;
+        
+        // SCROLL TO TOP TO SEE PDF BUTTON
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
     } catch (error) {
         console.error("Error saving: ", error);
-        alert("Error saving data.");
+        alert("❌ Error saving data. Please check your connection.");
+        submitBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up me-2"></i>Save Patient to Registry';
         submitBtn.disabled = false;
     }
 });
@@ -141,7 +176,6 @@ document.getElementById('searchBtn').addEventListener('click', async () => {
 
 // --- ADMIN DASHBOARD ---
 document.getElementById('adminBtn').addEventListener('click', async () => {
-    // THIS IS THE PIN CODE (You can change "1234" to anything you want)
     const pin = prompt("Enter Admin PIN:");
     if (pin !== "1234") {
         alert("Incorrect PIN.");
@@ -150,6 +184,7 @@ document.getElementById('adminBtn').addEventListener('click', async () => {
 
     const adminPanel = document.getElementById('adminPanel');
     const tbody = document.getElementById('adminTableBody');
+    const totalSpan = document.getElementById('totalPatients');
     tbody.innerHTML = "<tr><td colspan='6' class='text-center py-4'><i class='fa-solid fa-spinner fa-spin fa-2x text-primary'></i><br>Loading Database...</td></tr>";
     adminPanel.classList.remove('d-none');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -157,6 +192,7 @@ document.getElementById('adminBtn').addEventListener('click', async () => {
     try {
         const querySnapshot = await getDocs(collection(db, "patients"));
         tbody.innerHTML = "";
+        totalSpan.innerText = querySnapshot.size; // Updates the total number of patients
         
         if(querySnapshot.empty) {
             tbody.innerHTML = "<tr><td colspan='6' class='text-center py-3'>No patients in the database yet.</td></tr>";
@@ -205,7 +241,7 @@ window.editPatient = function(docId, dataString) {
     document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-pen-to-square me-2 text-primary"></i>Editing Patient: ' + (data.Name || '');
     document.getElementById('submitBtn').innerHTML = '<i class="fa-solid fa-floppy-disk me-2"></i>Update Patient Data';
     document.getElementById('cancelEditBtn').classList.remove('d-none');
-    document.getElementById('adminPanel').classList.add('d-none'); // Close admin panel if open
+    document.getElementById('adminPanel').classList.add('d-none');
     document.getElementById('hfForm').scrollIntoView({ behavior: 'smooth' });
 };
 
