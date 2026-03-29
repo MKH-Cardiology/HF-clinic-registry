@@ -10,7 +10,7 @@
     
     <style>
         body { background-color: #f4f6f9; }
-        .clinic-header { background: linear-gradient(135deg, #8b0000 0%, #b30000 100%); color: white; padding: 30px 0; border-radius: 0 0 15px 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .clinic-header { background: linear-gradient(135deg, #8b0000 0%, #b30000 100%); color: white; padding: 30px 0; border-radius: 0 0 15px 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: relative; }
         .card { border: none; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 25px; }
         .section-title { color: #8b0000; font-weight: bold; border-bottom: 2px solid #e9ecef; padding-bottom: 8px; margin-top: 25px; margin-bottom: 15px; }
         label { font-weight: 600; font-size: 0.85rem; color: #495057; }
@@ -23,12 +23,29 @@
 <body>
 
 <div class="clinic-header text-center mb-4">
+    <button class="btn btn-dark btn-sm position-absolute top-0 end-0 m-3 shadow" id="adminBtn"><i class="fa-solid fa-lock me-1"></i>Admin</button>
     <i class="fa-solid fa-heart-pulse fa-4x mb-2"></i>
     <h1 class="fw-bold">Mubarak Al-Kabeer Hospital</h1>
     <h4 class="fw-light">Heart Failure Clinic Registry</h4>
 </div>
 
 <div class="container mb-5">
+    
+    <div id="adminPanel" class="card border-dark border-2 d-none shadow-lg">
+        <div class="card-header bg-dark text-white fw-bold d-flex justify-content-between align-items-center">
+            <span><i class="fa-solid fa-database me-2"></i>Master Database Viewer</span>
+            <button class="btn btn-sm btn-danger" id="closeAdminBtn"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="card-body overflow-auto" style="max-height: 400px;">
+            <table class="table table-hover table-sm text-center align-middle" style="font-size: 0.85rem;">
+                <thead class="table-dark">
+                    <tr><th>File No</th><th>Patient Name</th><th>Civil ID</th><th>Entered By</th><th>Date</th><th>Action</th></tr>
+                </thead>
+                <tbody id="adminTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
     <div class="card border-top border-4 border-danger">
         <div class="card-body">
             <h5 class="text-secondary fw-bold"><i class="fa-solid fa-magnifying-glass me-2"></i>Search Patient Database</h5>
@@ -45,15 +62,16 @@
             <h4 class="mb-4 text-dark fw-bold" id="formTitle"><i class="fa-solid fa-user-plus me-2 text-danger"></i>New Patient Entry</h4>
             
             <form id="hfForm">
-                <h6 class="section-title">1. Demographics</h6>
+                <h6 class="section-title">1. Demographics & Entry Info</h6>
                 <div class="row g-2">
-                    <div class="col-md-3"><label>Name</label><input type="text" class="form-control" id="Name" required></div>
+                    <div class="col-md-3"><label class="text-danger">Data Entered By</label><select class="form-select border-danger" id="Doctor_Name" required><option value="">Select Doctor...</option><option value="Dr Farouk">Dr Farouk</option><option value="Dr Badawy">Dr Badawy</option><option value="Dr Ali">Dr Ali</option><option value="Dr Hamza">Dr Hamza</option><option value="Dr Ahmed">Dr Ahmed</option></select></div>
+                    <div class="col-md-3"><label>Patient Name</label><input type="text" class="form-control" id="Name" required></div>
                     <div class="col-md-3"><label>Civil ID</label><input type="number" class="form-control" id="Civil_ID" required></div>
-                    <div class="col-md-2"><label>File No</label><input type="number" class="form-control" id="File_No" required></div>
-                    <div class="col-md-1"><label>Age</label><input type="number" class="form-control" id="Age"></div>
+                    <div class="col-md-3"><label>File No</label><input type="number" class="form-control" id="File_No" required></div>
+                    <div class="col-md-2"><label>Age</label><input type="number" class="form-control" id="Age"></div>
                     <div class="col-md-3"><label>Gender</label><select class="form-select" id="Gender"><option value="">Select...</option><option value="Male">Male</option><option value="Female">Female</option></select></div>
                     <div class="col-md-3"><label>Nationality</label><input type="text" class="form-control" id="Nationality"></div>
-                    <div class="col-md-3"><label>Mobile</label><input type="number" class="form-control" id="Mobile"></div>
+                    <div class="col-md-4"><label>Mobile</label><input type="number" class="form-control" id="Mobile"></div>
                 </div>
 
                 <h6 class="section-title">2. HF Diagnosis & Status</h6>
@@ -110,7 +128,6 @@
                     <div class="col-md-3"><label>Dyslipidemia</label><select class="form-select" id="Dyslipidemia"><option value="No">No</option><option value="Yes">Yes</option></select></div>
                     <div class="col-md-2"><label>CVA</label><select class="form-select" id="CVA"><option value="No">No</option><option value="Yes">Yes</option></select></div>
                     <div class="col-md-3"><label>Thyroid Disease</label><select class="form-select" id="Thyroid"><option value="No">No</option><option value="Yes">Yes</option></select></div>
-                    
                     <div class="col-md-2"><label>PVD</label><select class="form-select" id="PVD"><option value="No">No</option><option value="Yes">Yes</option></select></div>
                     <div class="col-md-3"><label>Chronic Lung Disease</label><select class="form-select" id="Lung_Disease"><option value="No">No</option><option value="Yes">Yes</option></select></div>
                     <div class="col-md-3"><label>Chronic Liver Disease</label><select class="form-select" id="Liver_Disease"><option value="No">No</option><option value="Yes">Yes</option></select></div>
@@ -160,10 +177,11 @@
                     <div class="col-md-3"><label>Diuretics</label><select class="form-select" id="Med_Diuretic"><option value="None">None</option><option value="Furosemide">Furosemide</option><option value="Metolazone">Metolazone</option></select></div>
                     <div class="col-md-3"><label>GLP1 Agonist</label><select class="form-select" id="Med_GLP1"><option value="None">None</option><option value="Maunjaro">Maunjaro</option><option value="Ozempic">Ozempic</option></select></div>
                     <div class="col-md-3"><label>OAC</label><select class="form-select" id="Med_OAC"><option value="None">None</option><option value="Warfarin">Warfarin</option><option value="Xarelto">Xarelto</option><option value="Eliquis">Eliquis</option></select></div>
-                    <div class="col-md-3"><label>Lipid Lowering</label><input type="text" class="form-control" id="Med_Lipid" placeholder="e.g. Zocor, Lipitor, Crestor, Repatha..."></div>
-                    <div class="col-md-3"><label>Antiplatelets</label><input type="text" class="form-control" id="Med_Antiplatelet" placeholder="e.g. ASA, Plavix, Brilinta..."></div>
-                    <div class="col-md-3"><label>Potassium Chelators</label><select class="form-select" id="Med_K_Chelator"><option value="None">None</option><option value="Veltassa">Veltassa</option><option value="Lokelma">Lokelma</option></select></div>
                     
+                    <div class="col-md-3"><label>Lipid Lowering</label><select class="form-select" id="Med_Lipid"><option value="None">None</option><option value="Zocor">Zocor</option><option value="Lipitor">Lipitor</option><option value="Crestor">Crestor</option><option value="Ezetrol 10">Ezetrol 10</option><option value="Repatha">Repatha</option><option value="Praluent">Praluent</option><option value="Atozet">Atozet</option><option value="Zympass">Zympass</option><option value="Fibrates">Fibrates</option><option value="Omacor">Omacor</option></select></div>
+                    <div class="col-md-3"><label>Antiplatelets</label><select class="form-select" id="Med_Antiplatelet"><option value="None">None</option><option value="ASA">ASA</option><option value="Plavix">Plavix</option><option value="Brilinta">Brilinta</option></select></div>
+                    
+                    <div class="col-md-3"><label>Potassium Chelators</label><select class="form-select" id="Med_K_Chelator"><option value="None">None</option><option value="Veltassa">Veltassa</option><option value="Lokelma">Lokelma</option></select></div>
                     <div class="col-md-3"><label>Anti-arrhythmic</label><select class="form-select" id="Med_AntiArrhythmic"><option value="None">None</option><option value="Cordarone">Cordarone</option><option value="Flecainide">Flecainide</option><option value="Sotalol">Sotalol</option><option value="Propafenone">Propafenone</option></select></div>
                     <div class="col-md-3"><label>Procorolan</label><select class="form-select" id="Med_Procorolan"><option value="No">No</option><option value="Yes">Yes</option></select></div>
                     <div class="col-md-3"><label>CCB</label><select class="form-select" id="Med_CCB"><option value="No">No</option><option value="Yes">Yes</option></select></div>
