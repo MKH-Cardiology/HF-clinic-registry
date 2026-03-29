@@ -16,24 +16,8 @@ const db = getFirestore(app);
 let editingDocId = null;
 
 // =============================================
-// 1. AUTO BMI CALCULATOR
+// 1. (BMI is manual entry — no auto-calculation)
 // =============================================
-const weightInput = document.getElementById(‘Weight’);
-const heightInput = document.getElementById(‘Height’);
-const bmiInput = document.getElementById(‘BMI’);
-
-function calculateBMI() {
-const w = parseFloat(weightInput.value);
-const h = parseFloat(heightInput.value);
-if (w > 0 && h > 0) {
-const bmi = w / ((h / 100) ** 2);
-bmiInput.value = bmi.toFixed(1);
-} else {
-bmiInput.value = ‘’;
-}
-}
-weightInput.addEventListener(‘input’, calculateBMI);
-heightInput.addEventListener(‘input’, calculateBMI);
 
 // =============================================
 // 2. SUCCESS POPUP MODAL
@@ -169,7 +153,6 @@ try {
     resultsDiv.innerHTML = buildPatientCard(dataToRender, docIdToRender, true);
 
     document.getElementById('hfForm').reset();
-    bmiInput.value = ''; // Clear BMI after reset
     submitBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up me-2"></i>Save Patient to Registry';
     submitBtn.disabled = false;
 
@@ -307,9 +290,6 @@ for (let key in data) {
     }
 }
 
-// Recalculate BMI from loaded data
-calculateBMI();
-
 document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-pen-to-square me-2 text-primary"></i>Editing Patient: ' + (data.Name || '');
 document.getElementById('submitBtn').innerHTML = '<i class="fa-solid fa-floppy-disk me-2"></i>Update Patient Data';
 document.getElementById('cancelEditBtn').classList.remove('d-none');
@@ -323,7 +303,6 @@ document.getElementById('hfForm').scrollIntoView({ behavior: 'smooth' });
 document.getElementById(‘cancelEditBtn’).addEventListener(‘click’, () => {
 editingDocId = null;
 document.getElementById(‘hfForm’).reset();
-bmiInput.value = ‘’;
 document.getElementById(‘formTitle’).innerHTML = ‘<i class="fa-solid fa-user-plus me-2 text-danger"></i>New Patient Entry’;
 document.getElementById(‘submitBtn’).innerHTML = ‘<i class="fa-solid fa-cloud-arrow-up me-2"></i>Save Patient to Registry’;
 document.getElementById(‘cancelEditBtn’).classList.add(‘d-none’);
