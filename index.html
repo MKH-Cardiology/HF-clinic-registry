@@ -20,18 +20,26 @@
         .btn-medical:hover { background-color: #5c0000; color: white; }
 
 ```
-    /* Success Modal */
+    /* Success Modal — hidden by default with multiple safeguards */
     .success-overlay {
-        display: none;
+        display: none !important;
+        visibility: hidden;
+        opacity: 0;
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         background: rgba(0,0,0,0.5); z-index: 9999;
         justify-content: center; align-items: center;
     }
-    .success-overlay.show { display: flex; }
+    .success-overlay.show {
+        display: flex !important;
+        visibility: visible;
+        opacity: 1;
+    }
     .success-box {
         background: white; border-radius: 16px; padding: 40px 30px;
         text-align: center; max-width: 400px; width: 90%;
         box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .success-overlay.show .success-box {
         animation: popIn 0.4s ease;
     }
     @keyframes popIn {
@@ -144,7 +152,7 @@
                 
                 <div class="col-md-2"><label class="text-primary fw-bold">Height (cm)</label><input type="number" class="form-control border-primary" id="Height"></div>
                 <div class="col-md-2"><label class="text-primary fw-bold">Weight (kg)</label><input type="number" class="form-control border-primary" id="Weight"></div>
-                <div class="col-md-2"><label class="text-success fw-bold">BMI (Auto)</label><input type="number" class="form-control bg-light text-success fw-bold" id="BMI" readonly placeholder="Auto"></div>
+                <div class="col-md-2"><label>BMI</label><input type="text" class="form-control" id="BMI"></div>
                 
                 <div class="col-md-2"><label>Dry Wt (kg)</label><input type="number" class="form-control" id="Dry_Weight"></div>
                 <div class="col-md-2"><label>Edema</label><select class="form-select" id="Edema"><option value="No">No</option><option value="Yes">Yes</option></select></div>
