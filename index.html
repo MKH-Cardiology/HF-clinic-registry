@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -7,84 +8,434 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
     <style>
-        body { background-color: #f4f6f9; font-size: 0.9rem; }
-        .clinic-header { background: linear-gradient(135deg, #8b0000 0%, #b30000 100%); color: white; padding: 20px 0; border-radius: 0 0 15px 15px; position: relative; }
-        .card { border: none; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .section-title { color: #8b0000; font-weight: bold; border-bottom: 2px solid #eee; padding-bottom: 5px; margin-top: 20px; }
-        label { font-weight: 600; color: #444; margin-bottom: 2px; display: block; }
-        .form-control, .form-select { border-radius: 5px; }
-        .btn-medical { background-color: #8b0000; color: white; font-weight: bold; width: 100%; padding: 12px; }
+        :root { --primary: #8b0000; --primary-dark: #5c0000; }
+        body { background: #f4f6f9; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+        .clinic-header { background: linear-gradient(135deg, var(--primary), #b30000); color: white; padding: 30px 0; border-radius: 0 0 15px 15px; box-shadow: 0 4px 6px rgba(0,0,0,.1); position: relative; }
+        .card { border: none; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,.05); margin-bottom: 25px; }
+        .section-title { color: var(--primary); font-weight: bold; border-bottom: 2px solid #e9ecef; padding-bottom: 8px; margin-top: 25px; margin-bottom: 15px; }
+        label { font-weight: 600; font-size: .85rem; color: #495057; margin-bottom: 2px; }
+        .form-control, .form-select { border-radius: 6px; border: 1px solid #ced4da; font-size: .9rem; }
+        .form-control:focus, .form-select:focus { border-color: var(--primary); box-shadow: 0 0 0 .2rem rgba(139,0,0,.25); }
+        .btn-medical { background: var(--primary); color: #fff; font-weight: bold; }
+        .btn-medical:hover { background: var(--primary-dark); color: #fff; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 9999; display: flex; justify-content: center; align-items: center; }
+        .modal-box { background: #fff; border-radius: 16px; padding: 35px 25px; text-align: center; max-width: 380px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,.3); animation: pop .35s ease; }
+        @keyframes pop { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .modal-icon { width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; font-size: 34px; color: #fff; }
+        .page { display: none; }
+        .page.active { display: block; }
     </style>
 </head>
 <body>
 
-<div class="clinic-header text-center">
-    <button class="btn btn-dark btn-sm position-absolute top-0 end-0 m-2" id="adminBtn">Admin</button>
-    <i class="fa-solid fa-heart-pulse fa-3x mb-1"></i>
-    <h2 class="mb-0">Mubarak Al-Kabeer Hospital</h2>
-    <p class="mb-0">HF Clinic Registry</p>
+<!-- ===== MAIN PAGE ===== -->
+
+<div id="pageMain" class="page active">
+    <div class="clinic-header text-center mb-4">
+        <button class="btn btn-dark btn-sm position-absolute top-0 end-0 m-3 shadow" onclick="showAdminLogin()"><i class="fa-solid fa-lock me-1"></i>Admin</button>
+        <i class="fa-solid fa-heart-pulse fa-4x mb-2"></i>
+        <h1 class="fw-bold">Mubarak Al-Kabeer Hospital</h1>
+        <h4 class="fw-light">Heart Failure Clinic Registry</h4>
+    </div>
+    <div class="container mb-5">
+        <!-- Search -->
+        <div class="card border-top border-4 border-danger">
+            <div class="card-body">
+                <h5 class="text-secondary fw-bold"><i class="fa-solid fa-magnifying-glass me-2"></i>Search Patient Database</h5>
+                <div class="input-group mt-3">
+                    <input type="text" id="searchInput" class="form-control form-control-lg" placeholder="Enter Civil ID or File Number...">
+                    <button class="btn btn-primary px-4 fw-bold" onclick="searchPatient()">Search</button>
+                </div>
+                <div id="searchResults" class="mt-4"></div>
+            </div>
+        </div>
+        <!-- Form -->
+        <div class="card border-top border-4 border-danger">
+            <div class="card-body bg-white">
+                <h4 class="mb-4 text-dark fw-bold" id="formTitle"><i class="fa-solid fa-user-plus me-2 text-danger"></i>New Patient Entry</h4>
+                <div id="hfForm">
+                    <h6 class="section-title">1. Demographics &amp; Entry Info</h6>
+                    <div class="row g-2">
+                        <div class="col-md-3"><label class="text-primary fw-bold">Data Entered By *</label><select class="form-select border-primary" id="Doctor_Name"><option value="">Select Doctor...</option><option>Dr Farouk</option><option>Dr Badawy</option><option>Dr Ali</option><option>Dr Hamza</option><option>Dr Ahmed</option></select></div>
+                        <div class="col-md-3"><label>Patient Name *</label><input type="text" class="form-control" id="Name"></div>
+                        <div class="col-md-3"><label>Civil ID *</label><input type="number" class="form-control" id="Civil_ID"></div>
+                        <div class="col-md-3"><label>File No *</label><input type="number" class="form-control" id="File_No"></div>
+                        <div class="col-md-2"><label>Age</label><input type="number" class="form-control" id="Age"></div>
+                        <div class="col-md-3"><label>Gender</label><select class="form-select" id="Gender"><option value="">Select...</option><option>Male</option><option>Female</option></select></div>
+                        <div class="col-md-3"><label>Nationality</label><input type="text" class="form-control" id="Nationality"></div>
+                        <div class="col-md-4"><label>Mobile</label><input type="number" class="form-control" id="Mobile"></div>
+                    </div>
+                    <h6 class="section-title">2. HF Diagnosis &amp; Status</h6>
+                    <div class="row g-2">
+                        <div class="col-md-3"><label>HF Type</label><select class="form-select" id="HF_Type"><option value="">Select...</option><option>HFrEF</option><option>HFmrEF</option><option>HFpEF</option></select></div>
+                        <div class="col-md-3"><label>EF at Diagnosis (%)</label><input type="number" class="form-control" id="EF_Diagnosis"></div>
+                        <div class="col-md-3"><label>Advanced HF</label><select class="form-select" id="Advanced_HF"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-md-3"><label>Other Cardiomyopathies</label><input type="text" class="form-control" id="Other_Cardio"></div>
+                        <div class="col-md-3"><label>Valvular Disease</label><select class="form-select" id="Valvular_Disease"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-md-3"><label>Admissions Last Yr</label><input type="number" class="form-control" id="Admissions"></div>
+                        <div class="col-md-3"><label>Last Admission Date</label><input type="date" class="form-control" id="Last_Admission"></div>
+                        <div class="col-md-3"><label>Length of Stay</label><input type="number" class="form-control" id="LOS"></div>
+                    </div>
+                    <h6 class="section-title">3. Symptoms &amp; Signs</h6>
+                    <div class="row g-2">
+                        <div class="col-md-2"><label>Fatigue</label><select class="form-select" id="Fatigue"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-md-2"><label>NYHA</label><select class="form-select" id="NYHA"><option value="">Select...</option><option>I</option><option>II</option><option>III</option><option>IV</option></select></div>
+                        <div class="col-md-2"><label>Chest Pain</label><select class="form-select" id="Chest_Pain"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-md-2"><label>Pulse</label><input type="text" class="form-control" id="Pulse"></div>
+                        <div class="col-md-2"><label>BP</label><input type="text" class="form-control" id="BP" placeholder="120/80"></div>
+                        <div class="col-md-2"><label>SpO2 (%)</label><input type="number" class="form-control" id="SpO2"></div>
+                        <div class="col-md-2"><label>Height (cm)</label><input type="number" class="form-control" id="Height"></div>
+                        <div class="col-md-2"><label>Weight (kg)</label><input type="number" class="form-control" id="Weight"></div>
+                        <div class="col-md-2"><label>BMI</label><input type="text" class="form-control" id="BMI"></div>
+                        <div class="col-md-2"><label>Dry Wt</label><input type="number" class="form-control" id="Dry_Weight"></div>
+                        <div class="col-md-2"><label>Edema</label><select class="form-select" id="Edema"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-md-2"><label>JVP</label><select class="form-select" id="JVP"><option>Normal</option><option>Raised</option></select></div>
+                        <div class="col-md-3"><label>Pulmonary Rales</label><select class="form-select" id="Rales"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-md-3"><label>S3 Gallop</label><select class="form-select" id="S3"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-md-3"><label>Murmur</label><input type="text" class="form-control" id="Murmur"></div>
+                    </div>
+                    <h6 class="section-title">4. Investigations &amp; Procedures</h6>
+                    <div class="row g-2">
+                        <div class="col-md-4"><label>ECG</label><input type="text" class="form-control" id="ECG"></div>
+                        <div class="col-md-4"><label>ECHO</label><input type="text" class="form-control" id="ECHO"></div>
+                        <div class="col-md-4"><label>CT Angio</label><input type="text" class="form-control" id="CT_Angio"></div>
+                        <div class="col-md-3"><label>CMR</label><input type="text" class="form-control" id="CMR"></div>
+                        <div class="col-md-3"><label>6 Min Walk</label><input type="text" class="form-control" id="Walk_Test"></div>
+                        <div class="col-md-3"><label>Rt Side Cath</label><input type="text" class="form-control" id="Cath"></div>
+                        <div class="col-md-3"><label>Device</label><input type="text" class="form-control" id="Device"></div>
+                    </div>
+                    <h6 class="section-title">5. Comorbidities</h6>
+                    <div class="row g-2">
+                        <div class="col-md-2"><label>DM</label><select class="form-select" id="DM"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-md-2"><label>HTN</label><select class="form-select" id="HTN"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-md-2"><label>IHD</label><select class="form-select" id="IHD"><option>No</option><option>STEMI</option><option>NSTEMI</option></select></div>
+                        <div class="col-md-2"><label>AF</label><select class="form-select" id="AF"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-md-2"><label>Smoker</label><select class="form-select" id="Smoker"><option>Never</option><option>Current</option><option>Former</option></select></div>
+                        <div class="col-md-2"><label>CKD</label><select class="form-select" id="CKD"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-md-2"><label>PCI/CABG</label><select class="form-select" id="PCI_CABG"><option>No</option><option>PCI</option><option>CABG</option></select></div>
+                        <div class="col-md-2"><label>Dyslipidemia</label><select class="form-select" id="Dyslipidemia"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-md-2"><label>CVA</label><select class="form-select" id="CVA"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-md-2"><label>Thyroid Dz</label><select class="form-select" id="Thyroid"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-md-2"><label>PVD</label><select class="form-select" id="PVD"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-md-2"><label>Obese</label><select class="form-select" id="Obese"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-md-2"><label>OSA</label><select class="form-select" id="OSA"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-md-3"><label>Lung Dz</label><select class="form-select" id="Lung_Disease"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-md-3"><label>Liver Dz</label><select class="form-select" id="Liver_Disease"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-md-4"><label>F.H. Cardio</label><select class="form-select" id="FH_Cardio"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-md-4"><label>Genetics</label><input type="text" class="form-control" id="Genetics"></div>
+                        <div class="col-md-4"><label>Other</label><input type="text" class="form-control" id="Other_Comorbidities"></div>
+                    </div>
+                    <h6 class="section-title">6. Labs</h6>
+                    <div class="row g-2">
+                        <div class="col-md-2"><label>HbA1c</label><input type="text" class="form-control" id="Lab_HbA1c"></div>
+                        <div class="col-md-2"><label>Gluc</label><input type="text" class="form-control" id="Lab_Gluc"></div>
+                        <div class="col-md-2"><label>Urea</label><input type="text" class="form-control" id="Lab_Urea"></div>
+                        <div class="col-md-2"><label>Creat</label><input type="text" class="form-control" id="Lab_Creat"></div>
+                        <div class="col-md-2"><label>eGFR</label><input type="text" class="form-control" id="Lab_eGFR"></div>
+                        <div class="col-md-2"><label>Na</label><input type="text" class="form-control" id="Lab_Na"></div>
+                        <div class="col-md-2"><label>K</label><input type="text" class="form-control" id="Lab_K"></div>
+                        <div class="col-md-2"><label>BNP</label><input type="text" class="form-control" id="Lab_BNP"></div>
+                        <div class="col-md-2"><label>NT-proBNP</label><input type="text" class="form-control" id="Lab_NTproBNP"></div>
+                        <div class="col-md-2"><label>INR</label><input type="text" class="form-control" id="Lab_INR"></div>
+                        <div class="col-md-2"><label>Iron</label><input type="text" class="form-control" id="Lab_Iron"></div>
+                        <div class="col-md-2"><label>Tr Sats</label><input type="text" class="form-control" id="Lab_TransferrinSats"></div>
+                        <div class="col-md-2"><label>Ferritin</label><input type="text" class="form-control" id="Lab_Ferritin"></div>
+                        <div class="col-md-2"><label>WBC</label><input type="text" class="form-control" id="Lab_WBC"></div>
+                        <div class="col-md-2"><label>Hb</label><input type="text" class="form-control" id="Lab_Hb"></div>
+                        <div class="col-md-2"><label>Plt</label><input type="text" class="form-control" id="Lab_Plt"></div>
+                        <div class="col-md-2"><label>TSH</label><input type="text" class="form-control" id="Lab_TSH"></div>
+                        <div class="col-md-2"><label>Free T4</label><input type="text" class="form-control" id="Lab_FreeT4"></div>
+                        <div class="col-md-2"><label>LDL</label><input type="text" class="form-control" id="Lab_LDL"></div>
+                        <div class="col-md-2"><label>HDL</label><input type="text" class="form-control" id="Lab_HDL"></div>
+                        <div class="col-md-2"><label>TG</label><input type="text" class="form-control" id="Lab_TG"></div>
+                        <div class="col-md-2"><label>Alb/Creat</label><input type="text" class="form-control" id="Lab_AlbCreat"></div>
+                    </div>
+                    <h6 class="section-title">7. Medications</h6>
+                    <div class="row g-2">
+                        <div class="col-md-3"><label>B-Blockers</label><select class="form-select" id="Med_BBlocker"><option>None</option><option>Betaloc</option><option>Concor</option><option>Dilatrend</option><option>Lopressor</option></select></div>
+                        <div class="col-md-3"><label>ACEi</label><select class="form-select" id="Med_ACEi"><option>None</option><option>Zestril</option><option>Tritace</option><option>Capoten</option></select></div>
+                        <div class="col-md-3"><label>ARB</label><select class="form-select" id="Med_ARB"><option>None</option><option>Diovan</option><option>Atacand</option></select></div>
+                        <div class="col-md-3"><label>ARNI</label><select class="form-select" id="Med_ARNI"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-md-3"><label>MRA</label><select class="form-select" id="Med_MRA"><option>None</option><option>Aldactone</option><option>Elprenone</option><option>Finerenone</option></select></div>
+                        <div class="col-md-3"><label>SGLT2i</label><select class="form-select" id="Med_SGLT2i"><option>None</option><option>Forxiga</option><option>Jardiance</option></select></div>
+                        <div class="col-md-3"><label>Hydralazine</label><select class="form-select" id="Med_Hydralazine"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-md-3"><label>Nitrates</label><select class="form-select" id="Med_Nitrates"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-md-3"><label>Diuretics</label><select class="form-select" id="Med_Diuretic"><option>None</option><option>Furosemide</option><option>Metolazone</option></select></div>
+                        <div class="col-md-3"><label>GLP1</label><select class="form-select" id="Med_GLP1"><option>None</option><option>Maunjaro</option><option>Ozempic</option></select></div>
+                        <div class="col-md-3"><label>OAC</label><select class="form-select" id="Med_OAC"><option>None</option><option>Warfarin</option><option>Xarelto</option><option>Eliquis</option></select></div>
+                        <div class="col-md-3"><label>Lipid</label><select class="form-select" id="Med_Lipid"><option>None</option><option>Zocor</option><option>Lipitor</option><option>Crestor</option><option>Ezetrol 10</option><option>Repatha</option><option>Praluent</option><option>Atozet</option><option>Zympass</option><option>Fibrates</option><option>Omacor</option></select></div>
+                        <div class="col-md-3"><label>Antiplatelets</label><select class="form-select" id="Med_Antiplatelet"><option>None</option><option>ASA</option><option>Plavix</option><option>Brilinta</option></select></div>
+                        <div class="col-md-3"><label>K Chelators</label><select class="form-select" id="Med_K_Chelator"><option>None</option><option>Veltassa</option><option>Lokelma</option></select></div>
+                        <div class="col-md-3"><label>Anti-arrhythmic</label><select class="form-select" id="Med_AntiArrhythmic"><option>None</option><option>Cordarone</option><option>Flecainide</option><option>Sotalol</option><option>Propafenone</option></select></div>
+                        <div class="col-md-3"><label>Procorolan</label><select class="form-select" id="Med_Procorolan"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-md-3"><label>CCB</label><select class="form-select" id="Med_CCB"><option>No</option><option>Yes</option></select></div>
+                    </div>
+                    <h6 class="section-title">8. Outcomes &amp; GDMT</h6>
+                    <div class="row g-2">
+                        <div class="col-md-4"><label>Quadruple GDMT?</label><select class="form-select" id="Quad_GDMT"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-md-4"><label>Triple GDMT?</label><select class="form-select" id="Triple_GDMT"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-md-4"><label>Mortality</label><select class="form-select" id="Mortality"><option>Alive</option><option>In-hospital</option><option>Out of hospital</option></select></div>
+                    </div>
+                    <h6 class="section-title">9. Plan &amp; Compliance</h6>
+                    <div class="row g-2">
+                        <div class="col-md-3"><label>Compliant?</label><select class="form-select" id="Compliance"><option>Yes</option><option>No</option></select></div>
+                        <div class="col-md-3"><label>Cardiac Rehab</label><select class="form-select" id="Cardiac_Rehab"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-md-3"><label>Vaccination</label><select class="form-select" id="Vaccination"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-md-3"><label>Smoking Cessation</label><select class="form-select" id="Smoking_Cessation"><option>N/A</option><option>Initiated</option><option>Referred</option></select></div>
+                        <div class="col-md-6"><label>Adverse Effects</label><input type="text" class="form-control" id="Adverse_Effects"></div>
+                        <div class="col-md-6"><label>Plan</label><input type="text" class="form-control" id="Plan"></div>
+                        <div class="col-md-12"><label>Notes</label><textarea class="form-control" id="Other_Notes" rows="2"></textarea></div>
+                    </div>
+                    <hr class="mt-5 mb-4 border-danger">
+                    <button type="button" class="btn btn-medical w-100 py-3 fs-5 shadow-sm" id="submitBtn" onclick="savePatient()"><i class="fa-solid fa-cloud-arrow-up me-2"></i>Save Patient to Registry</button>
+                    <button type="button" class="btn btn-secondary w-100 py-2 mt-2 d-none" id="cancelEditBtn" onclick="cancelEdit()">Cancel Edit</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<div class="container mt-3 mb-5">
-    <div id="adminPanel" class="card border-dark d-none shadow-lg">
-        <div class="card-header bg-dark text-white d-flex justify-content-between">
-            <span>Registry Database (<span id="totalPatients">0</span>)</span>
-            <button class="btn btn-sm btn-danger" id="closeAdminBtn">X</button>
-        </div>
-        <div class="card-body overflow-auto" style="max-height: 400px;">
-            <table class="table table-sm table-hover text-center">
-                <thead><tr><th>File</th><th>Name</th><th>Doctor</th><th>Action</th></tr></thead>
-                <tbody id="adminTableBody"></tbody>
-            </table>
-        </div>
+<!-- ===== ADMIN PAGE ===== -->
+
+<div id="pageAdmin" class="page">
+    <div class="clinic-header text-center mb-4">
+        <button class="btn btn-light btn-sm position-absolute top-0 start-0 m-3 shadow" onclick="goToMain()"><i class="fa-solid fa-arrow-left me-1"></i>Back</button>
+        <i class="fa-solid fa-database fa-3x mb-2"></i>
+        <h2 class="fw-bold">Admin Dashboard</h2>
+        <p class="mb-0">Total: <span id="totalPatients" class="fw-bold">0</span> Patients</p>
     </div>
-
-    <div class="card p-3 border-danger border-top">
-        <label>Search Patient</label>
-        <div class="input-group">
-            <input type="text" id="searchInput" class="form-control" placeholder="Civil ID or File No">
-            <button class="btn btn-primary" id="searchBtn">Search</button>
+    <div class="container mb-5">
+        <div class="card">
+            <div class="card-body overflow-auto" style="max-height:70vh;">
+                <table class="table table-hover table-sm text-center align-middle" style="font-size:.85rem;">
+                    <thead class="table-dark"><tr><th>File No</th><th>Patient</th><th>Civil ID</th><th>Doctor</th><th>Date</th><th>Actions</th></tr></thead>
+                    <tbody id="adminTableBody"><tr><td colspan="6" class="py-4 text-muted">Loading...</td></tr></tbody>
+                </table>
+            </div>
         </div>
-        <div id="searchResults" class="mt-3"></div>
-    </div>
-
-    <div class="card p-3">
-        <h4 id="formTitle" class="text-danger fw-bold">New Entry</h4>
-        <form id="hfForm">
-            <h6 class="section-title">1. Demographics</h6>
-            <div class="row g-2">
-                <div class="col-6"><label>Doctor *</label><select id="Doctor_Name" class="form-select border-primary" required><option value="">Select...</option><option>Dr Farouk</option><option>Dr Badawy</option><option>Dr Ali</option><option>Dr Hamza</option><option>Dr Ahmed</option></select></div>
-                <div class="col-6"><label>Patient Name *</label><input type="text" id="Name" class="form-control" required></div>
-                <div class="col-6"><label>Civil ID *</label><input type="number" id="Civil_ID" class="form-control" required></div>
-                <div class="col-6"><label>File No *</label><input type="number" id="File_No" class="form-control" required></div>
-            </div>
-
-            <h6 class="section-title">2. Signs & BMI</h6>
-            <div class="row g-2">
-                <div class="col-4"><label>Height (cm)</label><input type="number" id="Height" class="form-control"></div>
-                <div class="col-4"><label>Weight (kg)</label><input type="number" id="Weight" class="form-control"></div>
-                <div class="col-4"><label>BMI (Auto)</label><input type="text" id="BMI" class="form-control bg-light" readonly></div>
-                <div class="col-4"><label>Pulse</label><input type="text" id="Pulse" class="form-control"></div>
-                <div class="col-4"><label>BP</label><input type="text" id="BP" class="form-control"></div>
-                <div class="col-4"><label>SpO2</label><input type="number" id="SpO2" class="form-control"></div>
-            </div>
-
-            <h6 class="section-title">3. Medications & Labs</h6>
-            <div class="row g-2">
-                <div class="col-6"><label>HF Type</label><select id="HF_Type" class="form-select"><option>HFrEF</option><option>HFmrEF</option><option>HFpEF</option></select></div>
-                <div class="col-6"><label>EF (%)</label><input type="number" id="EF" class="form-control"></div>
-                <div class="col-6"><label>Lipids</label><select id="Lipids" class="form-select"><option>None</option><option>Zocor</option><option>Lipitor</option><option>Crestor</option><option>Repatha</option></select></div>
-                <div class="col-6"><label>Antiplatelet</label><select id="Antiplatelet" class="form-select"><option>None</option><option>ASA</option><option>Plavix</option><option>Brilinta</option></select></div>
-            </div>
-
-            <button type="submit" class="btn btn-medical mt-4 shadow" id="submitBtn">SAVE DATA</button>
-            <button type="button" class="btn btn-secondary w-100 mt-2 d-none" id="cancelEditBtn">Cancel Edit</button>
-        </form>
     </div>
 </div>
 
-<div id="pdf-box" style="display:none; padding:20px;"></div>
-<script type="module" src="app.js"></script>
+<script>
+// Firebase init — compat mode (works everywhere)
+firebase.initializeApp({
+    apiKey: "AIzaSyAQ8wAh0gLV7-_lVEXXdIzZ7LmkMnshOiE",
+    authDomain: "hf-clinic-registry.firebaseapp.com",
+    projectId: "hf-clinic-registry",
+    storageBucket: "hf-clinic-registry.firebasestorage.app",
+    messagingSenderId: "898458296631",
+    appId: "1:898458296631:web:85fea7a2c6661ae0563ab2"
+});
+var db = firebase.firestore();
+var editingDocId = null;
+var PC = {}; // patient cache
+
+// All form field IDs
+var FIELDS = ["Doctor_Name","Name","Civil_ID","File_No","Age","Gender","Nationality","Mobile","HF_Type","EF_Diagnosis","Advanced_HF","Other_Cardio","Valvular_Disease","Admissions","Last_Admission","LOS","Fatigue","NYHA","Chest_Pain","Pulse","BP","SpO2","Height","Weight","BMI","Dry_Weight","Edema","JVP","Rales","S3","Murmur","ECG","ECHO","CT_Angio","CMR","Walk_Test","Cath","Device","DM","HTN","IHD","AF","Smoker","CKD","PCI_CABG","Dyslipidemia","CVA","Thyroid","PVD","Obese","OSA","Lung_Disease","Liver_Disease","FH_Cardio","Genetics","Other_Comorbidities","Lab_HbA1c","Lab_Gluc","Lab_Urea","Lab_Creat","Lab_eGFR","Lab_Na","Lab_K","Lab_BNP","Lab_NTproBNP","Lab_INR","Lab_Iron","Lab_TransferrinSats","Lab_Ferritin","Lab_WBC","Lab_Hb","Lab_Plt","Lab_TSH","Lab_FreeT4","Lab_LDL","Lab_HDL","Lab_TG","Lab_AlbCreat","Med_BBlocker","Med_ACEi","Med_ARB","Med_ARNI","Med_MRA","Med_SGLT2i","Med_Hydralazine","Med_Nitrates","Med_Diuretic","Med_GLP1","Med_OAC","Med_Lipid","Med_Antiplatelet","Med_K_Chelator","Med_AntiArrhythmic","Med_Procorolan","Med_CCB","Quad_GDMT","Triple_GDMT","Mortality","Compliance","Cardiac_Rehab","Vaccination","Smoking_Cessation","Adverse_Effects","Plan","Other_Notes"];
+
+// === Navigation ===
+function goToMain() {
+    document.getElementById("pageAdmin").classList.remove("active");
+    document.getElementById("pageMain").classList.add("active");
+    window.scrollTo(0,0);
+}
+function showAdminLogin() {
+    var pin = prompt("Enter Admin PIN:");
+    if (pin !== "1234") { if (pin !== null) alert("Incorrect PIN."); return; }
+    document.getElementById("pageMain").classList.remove("active");
+    document.getElementById("pageAdmin").classList.add("active");
+    window.scrollTo(0,0);
+    loadAdmin();
+}
+
+// === Popup ===
+function showPopup(type, title, msg, fileNo) {
+    var old = document.getElementById("popupOv");
+    if (old) old.remove();
+    var bg = type === "success" ? "#28a745" : "#dc3545";
+    var icon = type === "success" ? "fa-check" : "fa-trash";
+    var btnCls = type === "success" ? "btn-success" : "btn-danger";
+    var fhtml = fileNo ? "<p class='fw-bold text-primary mt-2'>File No: " + fileNo + "</p>" : "";
+    var ov = document.createElement("div");
+    ov.id = "popupOv";
+    ov.className = "modal-overlay";
+    ov.innerHTML = "<div class='modal-box'><div class='modal-icon' style='background:" + bg + ";'><i class='fa-solid " + icon + "'></i></div><h4 class='fw-bold' style='color:" + bg + ";'>" + title + "</h4><p class='text-muted'>" + msg + "</p>" + fhtml + "<button class='btn " + btnCls + " fw-bold px-4 mt-2' onclick='closePop()'>OK</button></div>";
+    document.body.appendChild(ov);
+    ov.addEventListener("click", function(e) { if (e.target === ov) closePop(); });
+}
+function closePop() { var el = document.getElementById("popupOv"); if (el) el.remove(); }
+
+// === Collect form data ===
+function collectData() {
+    var d = {};
+    for (var i = 0; i < FIELDS.length; i++) {
+        var el = document.getElementById(FIELDS[i]);
+        if (el) d[FIELDS[i]] = el.value;
+    }
+    return d;
+}
+
+// === Reset form ===
+function resetForm() {
+    for (var i = 0; i < FIELDS.length; i++) {
+        var el = document.getElementById(FIELDS[i]);
+        if (el) {
+            if (el.tagName === "SELECT") el.selectedIndex = 0;
+            else el.value = "";
+        }
+    }
+    editingDocId = null;
+    document.getElementById("formTitle").innerHTML = '<i class="fa-solid fa-user-plus me-2 text-danger"></i>New Patient Entry';
+    document.getElementById("submitBtn").innerHTML = '<i class="fa-solid fa-cloud-arrow-up me-2"></i>Save Patient to Registry';
+    document.getElementById("submitBtn").disabled = false;
+    document.getElementById("cancelEditBtn").classList.add("d-none");
+}
+
+// === Save ===
+function savePatient() {
+    var dn = document.getElementById("Doctor_Name").value;
+    var pn = document.getElementById("Name").value;
+    var ci = document.getElementById("Civil_ID").value;
+    var fn = document.getElementById("File_No").value;
+    if (!dn || !pn || !ci || !fn) {
+        alert("⚠️ REQUIRED FIELDS:\n\n• Doctor Name\n• Patient Name\n• Civil ID\n• File No");
+        return;
+    }
+    var btn = document.getElementById("submitBtn");
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Saving...';
+    btn.disabled = true;
+    var data = collectData();
+    data.lastUpdated = new Date().toISOString();
+
+    if (editingDocId) {
+        db.collection("patients").doc(editingDocId).update(data).then(function() {
+            showPopup("success", "Updated!", "\"" + pn + "\" updated.", fn);
+            renderCard(data, editingDocId, true);
+            resetForm();
+        }).catch(function(e) { alert("Error: " + e.message); btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up me-2"></i>Save Patient to Registry'; });
+    } else {
+        data.timestamp = new Date().toISOString();
+        db.collection("patients").add(data).then(function(ref) {
+            showPopup("success", "Saved!", "\"" + pn + "\" added to registry.", fn);
+            renderCard(data, ref.id, true);
+            resetForm();
+        }).catch(function(e) { alert("Error: " + e.message); btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up me-2"></i>Save Patient to Registry'; });
+    }
+}
+
+// === Render patient card ===
+function renderCard(data, docId, isNew) {
+    PC[docId] = data;
+    var div = document.getElementById("searchResults");
+    var bc = isNew ? "border-success" : "border-primary";
+    var hd = isNew ? "<div class='card-header bg-success text-white fw-bold'><i class='fa-solid fa-check-circle me-2'></i>Saved Successfully</div>" : "";
+    var ds = data.timestamp ? new Date(data.timestamp).toLocaleDateString() : new Date().toLocaleDateString();
+    var rows = "";
+    for (var k in data) { if (data[k] && k !== "timestamp" && k !== "lastUpdated") rows += "<tr><th class='w-25 bg-light'>" + k.replace(/_/g," ") + "</th><td>" + data[k] + "</td></tr>"; }
+
+    div.innerHTML = "<div class='card border " + bc + " mb-3 shadow'>" + hd +
+        "<div class='card-body' id='prt-" + docId + "'>" +
+        "<h4 class='text-primary border-bottom pb-2'><i class='fa-solid fa-file-medical me-2'></i>" + (data.Name||"") + "</h4>" +
+        "<p class='mb-1'><b>File No:</b> " + (data.File_No||"") + " | <b>Civil ID:</b> " + (data.Civil_ID||"") + "</p>" +
+        "<p class='mb-1'><b>Doctor:</b> <span class='badge bg-secondary'>" + (data.Doctor_Name||"") + "</span></p>" +
+        "<p class='mb-3 text-muted'><small>" + ds + "</small></p>" +
+        "<table class='table table-sm table-bordered' style='font-size:.85rem'><tbody>" + rows + "</tbody></table></div>" +
+        "<div class='card-footer bg-white d-flex gap-2 flex-wrap'>" +
+        "<button class='btn btn-outline-primary fw-bold' onclick='editPt(\"" + docId + "\")'><i class='fa-solid fa-pen-to-square me-1'></i>Edit</button>" +
+        "<button class='btn btn-danger fw-bold' onclick='pdfCard(\"prt-" + docId + "\",\"" + (data.File_No||"r") + "\")'><i class='fa-solid fa-file-pdf me-1'></i>PDF</button>" +
+        "<button class='btn btn-outline-danger fw-bold' onclick='delPt(\"" + docId + "\")'><i class='fa-solid fa-trash me-1'></i>Delete</button>" +
+        "</div></div>";
+    window.scrollTo({top:0,behavior:"smooth"});
+}
+
+// === Search ===
+function searchPatient() {
+    var t = document.getElementById("searchInput").value.trim();
+    var div = document.getElementById("searchResults");
+    if (!t) { div.innerHTML = "<span class='text-danger'>Enter Civil ID or File No.</span>"; return; }
+    div.innerHTML = "<div class='text-primary fw-bold'><i class='fa-solid fa-spinner fa-spin me-2'></i>Searching...</div>";
+
+    db.collection("patients").where("Civil_ID","==",t).get().then(function(s) {
+        if (s.empty) return db.collection("patients").where("File_No","==",t).get();
+        return s;
+    }).then(function(s) {
+        if (s.empty) { div.innerHTML = "<div class='alert alert-warning fw-bold'>No patient found.</div>"; return; }
+        div.innerHTML = "";
+        s.forEach(function(d) { renderCard(d.data(), d.id, false); });
+    }).catch(function(e) { div.innerHTML = "<div class='alert alert-danger'>Error: " + e.message + "</div>"; });
+}
+
+// === Admin load ===
+function loadAdmin() {
+    var tb = document.getElementById("adminTableBody");
+    var ts = document.getElementById("totalPatients");
+    tb.innerHTML = "<tr><td colspan='6' class='py-4'><i class='fa-solid fa-spinner fa-spin fa-2x text-primary'></i><br>Loading...</td></tr>";
+
+    db.collection("patients").get().then(function(snap) {
+        tb.innerHTML = ""; ts.innerText = snap.size;
+        if (snap.empty) { tb.innerHTML = "<tr><td colspan='6' class='py-3 text-muted'>No patients.</td></tr>"; return; }
+        snap.forEach(function(docSnap) {
+            var d = docSnap.data(), id = docSnap.id;
+            PC[id] = d;
+            var ds = d.timestamp ? new Date(d.timestamp).toLocaleDateString() : "N/A";
+            tb.innerHTML += "<tr><td class='fw-bold text-primary'>" + (d.File_No||"N/A") + "</td><td>" + (d.Name||"N/A") + "</td><td>" + (d.Civil_ID||"N/A") + "</td><td><span class='badge bg-secondary'>" + (d.Doctor_Name||"") + "</span></td><td>" + ds + "</td><td><div class='btn-group btn-group-sm'>" +
+                "<button class='btn btn-outline-primary' onclick='editFromAdmin(\"" + id + "\")'><i class='fa-solid fa-pen-to-square'></i></button>" +
+                "<button class='btn btn-outline-danger' onclick='delPt(\"" + id + "\")'><i class='fa-solid fa-trash'></i></button>" +
+                "<button class='btn btn-outline-dark' onclick='pdfAdmin(\"" + id + "\")'><i class='fa-solid fa-file-pdf'></i></button>" +
+                "</div></td></tr>";
+        });
+    }).catch(function(e) { tb.innerHTML = "<tr><td colspan='6' class='text-danger'>Error: " + e.message + "</td></tr>"; });
+}
+
+// === Edit ===
+function editPt(docId) {
+    var d = PC[docId]; if (!d) { alert("Data not found."); return; }
+    editingDocId = docId;
+    for (var k in d) { var el = document.getElementById(k); if (el) el.value = d[k]; }
+    document.getElementById("formTitle").innerHTML = '<i class="fa-solid fa-pen-to-square me-2 text-primary"></i>Editing: ' + (d.Name||"");
+    document.getElementById("submitBtn").innerHTML = '<i class="fa-solid fa-floppy-disk me-2"></i>Update Patient';
+    document.getElementById("cancelEditBtn").classList.remove("d-none");
+    document.getElementById("submitBtn").scrollIntoView({behavior:"smooth"});
+}
+function editFromAdmin(docId) { editPt(docId); goToMain(); setTimeout(function(){ document.getElementById("submitBtn").scrollIntoView({behavior:"smooth"}); }, 300); }
+function cancelEdit() { resetForm(); }
+
+// === Delete ===
+function delPt(docId) {
+    var d = PC[docId], nm = d ? d.Name : "this patient";
+    if (!confirm("⚠️ DELETE\n\nPermanently delete \"" + nm + "\"?\nCannot be undone.")) return;
+    db.collection("patients").doc(docId).delete().then(function() {
+        showPopup("delete", "Deleted", "\"" + nm + "\" removed.", null);
+        delete PC[docId];
+        if (document.getElementById("pageAdmin").classList.contains("active")) loadAdmin();
+        var rd = document.getElementById("searchResults");
+        if (rd.innerHTML.indexOf(docId) !== -1) rd.innerHTML = "<div class='alert alert-info'>Patient deleted.</div>";
+    }).catch(function(e) { alert("Error: " + e.message); });
+}
+
+// === PDF from card ===
+function pdfCard(elId, fno) {
+    var el = document.getElementById(elId); if (!el) return;
+    el.classList.remove("card-body");
+    html2pdf().set({ margin:.5, filename:"HF_Report_"+fno+".pdf", image:{type:"jpeg",quality:.98}, html2canvas:{scale:2}, jsPDF:{unit:"in",format:"letter",orientation:"portrait"} }).from(el).save().then(function(){ el.classList.add("card-body"); });
+}
+
+// === PDF from admin ===
+function pdfAdmin(docId) {
+    var d = PC[docId]; if (!d) { alert("Data not found."); return; }
+    var div = document.createElement("div");
+    div.style.cssText = "position:absolute;left:-9999px;top:0;width:800px;background:#fff;padding:20px;";
+    var rows = "";
+    for (var k in d) { if (d[k] && k!=="timestamp" && k!=="lastUpdated") rows += "<tr><th style='background:#f8f9fa;width:30%;padding:6px 10px;border:1px solid #dee2e6;font-size:13px'>" + k.replace(/_/g," ") + "</th><td style='padding:6px 10px;border:1px solid #dee2e6;font-size:13px'>" + d[k] + "</td></tr>"; }
+    var ds = d.timestamp ? new Date(d.timestamp).toLocaleDateString() : "N/A";
+    div.innerHTML = "<div style='text-align:center;margin-bottom:20px'><h2 style='color:#8b0000'>Mubarak Al-Kabeer Hospital</h2><h4 style='color:#555'>Heart Failure Clinic — Patient Report</h4><hr style='border-color:#8b0000'></div><h3 style='color:#0d6efd'>" + (d.Name||"") + "</h3><p><b>File No:</b> " + (d.File_No||"") + " | <b>Civil ID:</b> " + (d.Civil_ID||"") + " | <b>Doctor:</b> " + (d.Doctor_Name||"") + " | <b>Date:</b> " + ds + "</p><table style='width:100%;border-collapse:collapse;margin-top:15px'>" + rows + "</table>";
+    document.body.appendChild(div);
+    html2pdf().set({ margin:.5, filename:"HF_Report_"+(d.File_No||"x")+".pdf", image:{type:"jpeg",quality:.98}, html2canvas:{scale:2}, jsPDF:{unit:"in",format:"letter",orientation:"portrait"} }).from(div).save().then(function(){ div.remove(); });
+}
+</script>
+
 </body>
 </html>
