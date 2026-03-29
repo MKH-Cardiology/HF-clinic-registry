@@ -185,6 +185,9 @@
     </div>
 </div>
 
+<!-- Hidden container for PDF generation -->
+<div id="pdfContainer" style="position:absolute; left:-9999px; top:-9999px;"></div>
+
 <script>
 firebase.initializeApp({
     apiKey:"AIzaSyAQ8wAh0gLV7-_lVEXXdIzZ7LmkMnshOiE",
@@ -343,11 +346,70 @@ function loadAdmin(){
         snap.forEach(docSnap=>{
             var d=docSnap.data(), id=docSnap.id; 
             PC[id]=d;
-            tb.innerHTML+="<tr><td>"+(d.File_No||'')+"</td><td>"+(d.Patient_Name||'')+"</td><td>"+(d.Doctor_Name||'')+"</td><td><button class='btn btn-sm btn-primary me-1' onclick='editFromAdmin(\""+id+"\")'>Edit</button><button class='btn btn-sm btn-danger' onclick='delPt(\""+id+"\")'>Del</button></td></tr>";
+            tb.innerHTML+="<tr><td>"+(d.File_No||'')+"</td><td>"+(d.Patient_Name||'')+"</td><td>"+(d.Doctor_Name||'')+"</td><td><button class='btn btn-sm btn-primary me-1' onclick='editFromAdmin(\""+id+"\")'>Edit</button><button class='btn btn-sm btn-info me-1 text-white' onclick='pdfFromAdmin(\""+id+"\")'>PDF</button><button class='btn btn-sm btn-danger' onclick='delPt(\""+id+"\")'>Del</button></td></tr>";
         });
     })
     .catch(error=>{
         tb.innerHTML="<tr><td colspan='4' class='text-danger'>Error loading data</td></tr>";
+    });
+}
+
+function pdfFromAdmin(id){
+    var data = PC[id];
+    if(!data){
+        showPopup("error","Error","Patient data not found");
+        return;
+    }
+    
+    // Create temporary card for PDF
+    var container = document.getElementById('pdfContainer');
+    container.innerHTML = '';
+    
+    // Define ALL possible fields in order of sections
+    var allFields = [
+        ['Patient_Name', 'Civil_ID', 'File_No', 'Age', 'Gender', 'Nationality', 'Mobile', 'Doctor_Name'],
+        ['HF_Type', 'EF_Diagnosis', 'Advanced_HF', 'Other_Cardio', 'Valvular_Disease', 'Admissions', 'Last_Admission', 'LOS'],
+        ['Height', 'Weight', 'BMI', 'Dry_Weight', 'NYHA', 'Fatigue', 'Pulse', 'BP', 'SpO2', 'Edema', 'JVP', 'Rales', 'S3', 'Murmur'],
+        ['ECG', 'ECHO', 'CMR_CT', 'Walk_Test', 'Device_Info', 'Cath'],
+        ['DM', 'HTN', 'AF', 'IHD', 'PCI_CABG', 'CKD', 'CVA', 'PVD', 'Smoker', 'Obese_OSA', 'Lung_Dz', 'Liver_Dz', 'FH_Genetics'],
+        ['Lab_HbA1c', 'Lab_Gluc', 'Lab_UreaCreat', 'Lab_eGFR', 'Lab_NaK', 'Lab_BNP', 'Lab_IronFerritin', 'Lab_TrSats', 'Lab_CBC', 'Lab_Thyroid', 'Lab_Lipids', 'Lab_AlbCreat'],
+        ['Med_ARNI', 'Med_SGLT2i', 'Med_BB', 'Med_MRA', 'Med_ACEiARB', 'Med_Diuretic', 'Med_Lipid', 'Med_Antiplat', 'Med_OAC', 'Med_Arrhythmia', 'Med_Misc', 'Med_K_Chelator'],
+        ['Quad_GDMT', 'Compliance', 'Mortality', 'Rehab', 'Notes']
+    ];
+    
+    var sectionNames = ['Demographics', 'HF Diagnosis & Status', 'Symptoms & Signs', 'Investigations', 'Comorbidities', 'Laboratory Results', 'Medications', 'Outcomes & Management'];
+    
+    // Create PDF content
+    var html = "<div class='card p-4 patient-card' style='width:800px; background:white;'>";
+    html += "<div class='text-center mb-4'><h3 style='color:#8b0000;'>Mubarak Al-Kabeer Hospital</h3><h4>Heart Failure Clinic Registry</h4><hr></div>";
+    html += "<h4 class='text-primary mb-3'>"+(data.Patient_Name||'Unknown')+" - File: "+(data.File_No||'N/A')+"</h4>";
+    
+    allFields.forEach((section, idx)=>{
+        html += "<h5 style='color:#8b0000; border-bottom:2px solid #e9ecef; padding-bottom:5px; margin-top:20px;'>"+sectionNames[idx]+"</h5>";
+        html += "<table class='table table-bordered table-sm' style='font-size:0.75rem;'>";
+        section.forEach(field=>{
+            var val = data[field];
+            var displayVal = (val && val !== '') ? val : '-';
+            var label = field.replace(/_/g, " ").replace(/Lab /g, "").replace(/Med /g, "");
+            html += "<tr><th style='width:40%; background:#f8f9fa;'>"+label+"</th><td>"+displayVal+"</td></tr>";
+        });
+        html += "</table>";
+    });
+    
+    html += "<div style='margin-top:30px; text-align:center; font-size:0.7rem; color:#666;'><p>Generated on: "+new Date().toLocaleString()+"</p></div>";
+    html += "</div>";
+    
+    container.innerHTML = html;
+    var element = container.firstChild;
+    
+    // Generate PDF
+    html2pdf().from(element).set({
+        margin: 0.5,
+        filename: "HF_Report_"+(data.File_No||'unknown')+"_"+(data.Patient_Name||'patient')+".pdf",
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    }).save().then(() => {
+        container.innerHTML = ''; // Clean up
     });
 }
 
