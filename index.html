@@ -321,6 +321,7 @@
         <button class="btn btn-light btn-sm position-absolute top-0 start-0 m-2" onclick="goToMain()">Back</button>
         <h2 class="fw-bold mb-0">Admin Dashboard</h2>
         <p class="mb-0">Total Registry: <span id="totalPatients">0</span> Patients</p>
+        <button class="btn btn-success btn-sm mt-2" onclick="exportAdminExcel()"><i class="fa fa-file-excel"></i> Export Master Registry</button>
     </div>
     <div class="container mt-3">
         <div class="card p-3 border-top border-4 border-warning shadow-sm mb-3">
@@ -665,7 +666,47 @@ function loadAdmin(){
 }
 
 // -------------------------------------------------------------
-// EXCEL EXPORT - FULLY EXPANDED AND ROBUST
+// NEW FUNCTION: EXPORT MASTER ADMIN REGISTRY
+// -------------------------------------------------------------
+function exportAdminExcel() {
+    if(Object.keys(PC).length === 0){ 
+        showPopup("warning", "Empty", "No patients found to export."); 
+        return; 
+    }
+    
+    var wb = XLSX.utils.book_new();
+    var rows = [];
+    
+    // Dynamically grab all possible fields to ensure no data is missed
+    var allKeys = new Set();
+    Object.values(PC).forEach(dataObj => {
+        Object.keys(dataObj).forEach(k => {
+            if(k !== 'timestamp') allKeys.add(k); // skip internal timestamp
+        });
+    });
+    
+    // Create header row
+    var headers = Array.from(allKeys);
+    rows.push(headers);
+    
+    // Fill data rows
+    Object.values(PC).forEach(dataObj => {
+        var row = [];
+        headers.forEach(h => {
+            row.push(dataObj[h] || '');
+        });
+        rows.push(row);
+    });
+    
+    var ws = XLSX.utils.aoa_to_sheet(rows);
+    XLSX.utils.book_append_sheet(wb, ws, "Master Registry");
+    
+    XLSX.writeFile(wb, "Mubarak_HF_Master_Registry.xlsx");
+    showPopup("success", "Exported", "Master Registry downloaded successfully.");
+}
+
+// -------------------------------------------------------------
+// EXCEL EXPORT (SINGLE PATIENT)
 // -------------------------------------------------------------
 function exportPatientExcel(id){
     var data = PC[id];
