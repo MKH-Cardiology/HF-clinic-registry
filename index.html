@@ -58,7 +58,6 @@
         <div class="card p-3 border-top border-4 border-danger">
             <h4 class="mb-3 text-dark fw-bold" id="formTitle">New Patient Entry</h4>
             <div id="hfForm">
-                <!-- Original 8 Sections -->
                 <h6 class="section-title">1. Demographics & Entry Info</h6>
                 <div class="row g-2">
                     <div class="col-6 col-md-3"><label class="text-primary fw-bold">Entered By *</label><select class="form-select border-primary" id="Doctor_Name"><option value="">Select...</option><option>Dr Farouk</option><option>Dr Badawy</option><option>Dr Ali</option><option>Dr Hamza</option><option>Dr Ahmed</option></select></div>
@@ -109,7 +108,6 @@
                     <div class="col-8 col-md-3"><label>Murmur</label><input type="text" class="form-control" id="Murmur"></div>
                 </div>
 
-                <!-- Continue with sections 4-8 (same as before) -->
                 <h6 class="section-title">4. Investigations & Procedures</h6>
                 <div class="row g-2">
                     <div class="col-12 col-md-6"><label>ECG (LBBB/QRS/Arrhythmia)</label><input type="text" class="form-control" id="ECG"></div>
@@ -157,14 +155,16 @@
                 <div class="row g-2">
                     <div class="col-6 col-md-3"><label>ARNI (Entresto)</label><select class="form-select" id="Med_ARNI"><option>No</option><option>Yes</option></select></div>
                     <div class="col-6 col-md-3"><label>SGLT2i</label><select class="form-select" id="Med_SGLT2i"><option>None</option><option>Forxiga</option><option>Jardiance</option></select></div>
-                    <div class="col-6 col-md-3"><label>B-Blockers</label><select class="form-select" id="Med_BB"><option>None</option><option>Concor</option><option>Dilatrend</option><option>Betaloc</option></select></div>
-                    <div class="col-6 col-md-3"><label>MRA</label><select class="form-select" id="Med_MRA"><option>None</option><option>Aldactone</option><option>Inspra</option></select></div>
-                    <div class="col-6 col-md-3"><label>ACEi/ARB</label><select class="form-select" id="Med_ACEiARB"><option>None</option><option>Zestril</option><option>Diovan</option></select></div>
+                    <div class="col-6 col-md-3"><label>GLP1 Agonist</label><select class="form-select" id="Med_GLP1"><option>None</option><option>Mounjaro</option><option>Ozempic</option></select></div>
+                    <div class="col-6 col-md-3"><label>B-Blockers</label><select class="form-select" id="Med_BB"><option>None</option><option>Concor</option><option>Dilatrend</option><option>Betaloc</option><option>Lopressor</option></select></div>
+                    <div class="col-6 col-md-3"><label>MRA</label><select class="form-select" id="Med_MRA"><option>None</option><option>Aldactone</option><option>Eplerenone</option><option>Finerenone</option><option>Inspra</option></select></div>
+                    <div class="col-6 col-md-3"><label>ACEi/ARB</label><select class="form-select" id="Med_ACEiARB"><option>None</option><option>Zestril</option><option>Tritace</option><option>Capoten</option><option>Diovan</option><option>Atacand</option></select></div>
+                    <div class="col-6 col-md-3"><label>Vasodilators</label><select class="form-select" id="Med_Vasodilator"><option>None</option><option>Hydralazine</option><option>Nitrates</option><option>Both</option></select></div>
                     <div class="col-6 col-md-3"><label>Diuretics</label><select class="form-select" id="Med_Diuretic"><option>None</option><option>Furosemide</option><option>Metolazone</option></select></div>
-                    <div class="col-6 col-md-3"><label>Lipid Lowering</label><select class="form-select" id="Med_Lipid"><option>None</option><option>Lipitor</option><option>Crestor</option><option>Repatha</option></select></div>
+                    <div class="col-6 col-md-3"><label>Lipid Lowering</label><select class="form-select" id="Med_Lipid"><option>None</option><option>Zocor</option><option>Lipitor</option><option>Crestor</option><option>Ezetrol</option><option>Repatha</option><option>Praluent</option><option>Atozet</option><option>Zympass</option><option>Fibrates</option><option>Omacor</option></select></div>
                     <div class="col-6 col-md-3"><label>Antiplatelets</label><select class="form-select" id="Med_Antiplat"><option>None</option><option>ASA</option><option>Plavix</option><option>Brilinta</option></select></div>
                     <div class="col-6 col-md-3"><label>OAC</label><select class="form-select" id="Med_OAC"><option>None</option><option>Warfarin</option><option>Eliquis</option><option>Xarelto</option></select></div>
-                    <div class="col-6 col-md-3"><label>Anti-arrhythmics</label><select class="form-select" id="Med_Arrhythmia"><option>None</option><option>Cordarone</option><option>Sotalol</option></select></div>
+                    <div class="col-6 col-md-3"><label>Anti-arrhythmics</label><select class="form-select" id="Med_Arrhythmia"><option>None</option><option>Cordarone</option><option>Flecainide</option><option>Sotalol</option><option>Propafenone</option></select></div>
                     <div class="col-6 col-md-3"><label>Procorolan/CCB</label><select class="form-select" id="Med_Misc"><option>No</option><option>Yes</option></select></div>
                     <div class="col-6 col-md-3"><label>K Chelators</label><select class="form-select" id="Med_K_Chelator"><option>None</option><option>Veltassa</option><option>Lokelma</option></select></div>
                 </div>
@@ -178,7 +178,6 @@
                     <div class="col-12 col-md-12"><label>Management Plan / Notes</label><textarea class="form-control" id="Notes" rows="2"></textarea></div>
                 </div>
 
-                <!-- NEW: Section 9 - Visits & Follow-ups -->
                 <h6 class="section-title">9. Visits & Follow-ups</h6>
                 <div id="visitHistory" class="mb-3"></div>
                 
@@ -256,6 +255,7 @@
                         <div class="col-6 col-md-3"><label>Entresto</label><input type="text" class="form-control" id="V_Entresto" placeholder="mg" inputmode="numeric"></div>
                         <div class="col-6 col-md-3"><label>Aldactone</label><input type="text" class="form-control" id="V_Aldactone" placeholder="mg" inputmode="numeric"></div>
                         <div class="col-6 col-md-3"><label>Eplerenone</label><input type="text" class="form-control" id="V_Eplerenone" placeholder="mg" inputmode="numeric"></div>
+                        <div class="col-6 col-md-3"><label>Finerenone</label><input type="text" class="form-control" id="V_Finerenone" placeholder="mg" inputmode="numeric"></div>
                         <div class="col-6 col-md-3"><label>Forxiga</label><input type="text" class="form-control" id="V_Forxiga" placeholder="mg" inputmode="numeric"></div>
                         <div class="col-6 col-md-3"><label>Jardiance</label><input type="text" class="form-control" id="V_Jardiance" placeholder="mg" inputmode="numeric"></div>
                         <div class="col-6 col-md-3"><label>Hydralazine</label><input type="text" class="form-control" id="V_Hydralazine" placeholder="mg" inputmode="numeric"></div>
@@ -275,6 +275,7 @@
                         <div class="col-6 col-md-3"><label>Praluent</label><input type="text" class="form-control" id="V_Praluent" placeholder="mg" inputmode="numeric"></div>
                         <div class="col-6 col-md-3"><label>Atozet</label><input type="text" class="form-control" id="V_Atozet" placeholder="mg" inputmode="numeric"></div>
                         <div class="col-6 col-md-3"><label>Vytorin</label><input type="text" class="form-control" id="V_Vytorin" placeholder="mg" inputmode="numeric"></div>
+                        <div class="col-6 col-md-3"><label>Zympass</label><input type="text" class="form-control" id="V_Zympass" placeholder="mg" inputmode="numeric"></div>
                         <div class="col-6 col-md-3"><label>Fibrates</label><input type="text" class="form-control" id="V_Fibrates" placeholder="mg" inputmode="numeric"></div>
                         <div class="col-6 col-md-3"><label>Omacor</label><input type="text" class="form-control" id="V_Omacor" placeholder="mg" inputmode="numeric"></div>
                         <div class="col-6 col-md-3"><label>Veltassa</label><input type="text" class="form-control" id="V_Veltassa" placeholder="mg" inputmode="numeric"></div>
@@ -324,7 +325,6 @@
     </div>
 </div>
 
-<!-- Hidden container for PDF generation -->
 <div id="pdfContainer" style="position:absolute; left:-9999px; top:-9999px;"></div>
 
 <script>
@@ -559,7 +559,7 @@ function renderCard(data, id){
         ['ECG', 'ECHO', 'CMR_CT', 'Walk_Test', 'Device_Info', 'Cath'],
         ['DM', 'HTN', 'AF', 'IHD', 'PCI_CABG', 'CKD', 'CVA', 'PVD', 'Smoker', 'Obese_OSA', 'Lung_Dz', 'Liver_Dz', 'FH_Genetics'],
         ['Lab_HbA1c', 'Lab_Gluc', 'Lab_UreaCreat', 'Lab_eGFR', 'Lab_NaK', 'Lab_BNP', 'Lab_IronFerritin', 'Lab_TrSats', 'Lab_CBC', 'Lab_Thyroid', 'Lab_Lipids', 'Lab_AlbCreat'],
-        ['Med_ARNI', 'Med_SGLT2i', 'Med_BB', 'Med_MRA', 'Med_ACEiARB', 'Med_Diuretic', 'Med_Lipid', 'Med_Antiplat', 'Med_OAC', 'Med_Arrhythmia', 'Med_Misc', 'Med_K_Chelator'],
+        ['Med_ARNI', 'Med_SGLT2i', 'Med_GLP1', 'Med_BB', 'Med_MRA', 'Med_ACEiARB', 'Med_Vasodilator', 'Med_Diuretic', 'Med_Lipid', 'Med_Antiplat', 'Med_OAC', 'Med_Arrhythmia', 'Med_Misc', 'Med_K_Chelator'],
         ['Quad_GDMT', 'Compliance', 'Mortality', 'Rehab', 'Notes']
     ];
     
@@ -615,7 +615,6 @@ function exportPatientExcel(id){
         return;
     }
     
-    // Load visits then export
     db.collection("patients").doc(id).collection("visits").orderBy("visitDate","desc").get()
     .then(visitSnap=>{
         var visitsData = [];
@@ -630,10 +629,8 @@ function exportPatientExcel(id){
 }
 
 function generateExcel(data, visitsData, id){
-    // Create workbook
     var wb = XLSX.utils.book_new();
     
-    // Sheet 1: Patient Info
     var patientRows = [];
     patientRows.push(["MUBARAK AL-KABEER HOSPITAL - HEART FAILURE REGISTRY"]);
     patientRows.push(["Patient Name:", data.Patient_Name || '']);
@@ -646,14 +643,13 @@ function generateExcel(data, visitsData, id){
     patientRows.push(["Doctor:", data.Doctor_Name || '']);
     patientRows.push([]);
     
-    // Add all sections
     var sections = [
         {name:'HF DIAGNOSIS', fields:['HF_Type', 'EF_Diagnosis', 'Advanced_HF', 'Other_Cardio', 'Valvular_Disease', 'Admissions', 'Last_Admission', 'LOS']},
         {name:'SYMPTOMS & SIGNS', fields:['Height', 'Weight', 'BMI', 'Dry_Weight', 'NYHA', 'Fatigue', 'Pulse', 'BP', 'SpO2', 'Edema', 'JVP', 'Rales', 'S3', 'Murmur']},
         {name:'INVESTIGATIONS', fields:['ECG', 'ECHO', 'CMR_CT', 'Walk_Test', 'Device_Info', 'Cath']},
         {name:'COMORBIDITIES', fields:['DM', 'HTN', 'AF', 'IHD', 'PCI_CABG', 'CKD', 'CVA', 'PVD', 'Smoker', 'Obese_OSA', 'Lung_Dz', 'Liver_Dz', 'FH_Genetics']},
         {name:'LABORATORY', fields:['Lab_HbA1c', 'Lab_Gluc', 'Lab_UreaCreat', 'Lab_eGFR', 'Lab_NaK', 'Lab_BNP', 'Lab_IronFerritin', 'Lab_TrSats', 'Lab_CBC', 'Lab_Thyroid', 'Lab_Lipids', 'Lab_AlbCreat']},
-        {name:'MEDICATIONS', fields:['Med_ARNI', 'Med_SGLT2i', 'Med_BB', 'Med_MRA', 'Med_ACEiARB', 'Med_Diuretic', 'Med_Lipid', 'Med_Antiplat', 'Med_OAC', 'Med_Arrhythmia', 'Med_Misc', 'Med_K_Chelator']},
+        {name:'MEDICATIONS', fields:['Med_ARNI', 'Med_SGLT2i', 'Med_GLP1', 'Med_BB', 'Med_MRA', 'Med_ACEiARB', 'Med_Vasodilator', 'Med_Diuretic', 'Med_Lipid', 'Med_Antiplat', 'Med_OAC', 'Med_Arrhythmia', 'Med_Misc', 'Med_K_Chelator']},
         {name:'OUTCOMES', fields:['Quad_GDMT', 'Compliance', 'Mortality', 'Rehab', 'Notes']}
     ];
     
@@ -669,7 +665,6 @@ function generateExcel(data, visitsData, id){
     var ws1 = XLSX.utils.aoa_to_sheet(patientRows);
     XLSX.utils.book_append_sheet(wb, ws1, "Patient Info");
     
-    // Sheet 2: Visits (if any)
     if(visitsData.length > 0){
         var visitRows = [];
         visitRows.push(["VISIT HISTORY"]);
@@ -705,7 +700,6 @@ function generateExcel(data, visitsData, id){
         XLSX.utils.book_append_sheet(wb, ws2, "Visits");
     }
     
-    // Save file
     XLSX.writeFile(wb, "HF_Registry_"+(data.File_No||'unknown')+"_"+(data.Patient_Name||'patient')+".xlsx");
     showPopup("success","Excel Exported!","File downloaded successfully.");
 }
@@ -776,7 +770,7 @@ function generatePDF(data, visitsData, id){
         {name:'Investigations', fields:['ECG', 'ECHO', 'CMR_CT', 'Walk_Test', 'Device_Info', 'Cath']},
         {name:'Comorbidities', fields:['DM', 'HTN', 'AF', 'IHD', 'PCI_CABG', 'CKD', 'CVA', 'PVD', 'Smoker', 'Obese_OSA', 'Lung_Dz', 'Liver_Dz', 'FH_Genetics']},
         {name:'Laboratory', fields:['Lab_HbA1c', 'Lab_Gluc', 'Lab_UreaCreat', 'Lab_eGFR', 'Lab_NaK', 'Lab_BNP', 'Lab_IronFerritin', 'Lab_TrSats', 'Lab_CBC', 'Lab_Thyroid', 'Lab_Lipids', 'Lab_AlbCreat']},
-        {name:'Medications', fields:['Med_ARNI', 'Med_SGLT2i', 'Med_BB', 'Med_MRA', 'Med_ACEiARB', 'Med_Diuretic', 'Med_Lipid', 'Med_Antiplat', 'Med_OAC', 'Med_Arrhythmia', 'Med_Misc', 'Med_K_Chelator']},
+        {name:'Medications', fields:['Med_ARNI', 'Med_SGLT2i', 'Med_GLP1', 'Med_BB', 'Med_MRA', 'Med_ACEiARB', 'Med_Vasodilator', 'Med_Diuretic', 'Med_Lipid', 'Med_Antiplat', 'Med_OAC', 'Med_Arrhythmia', 'Med_Misc', 'Med_K_Chelator']},
         {name:'Outcomes', fields:['Quad_GDMT', 'Compliance', 'Mortality', 'Rehab', 'Notes']}
     ];
     
