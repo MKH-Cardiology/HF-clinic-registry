@@ -74,8 +74,8 @@
                         <input type="text" class="form-control" id="File_No" inputmode="numeric" pattern="[0-9]*" maxlength="6" oninput="validateFileNo(this)" onkeypress="return isNumberKey(event)">
                         <small class="error-msg" id="fileError">Must be exactly 6 digits</small>
                     </div>
-                    <div class="col-4 col-md-2"><label>Age</label><input type="number" class="form-control" id="Age" inputmode="numeric"></div>
-                    <div class="col-4 col-md-2"><label>Gender</label><select class="form-select" id="Gender"><option value="">Select...</option><option>Male</option><option>Female</option></select></div>
+                    <div class="col-4 col-md-2"><label>Age</label><input type="number" class="form-control" id="Age" inputmode="numeric" oninput="calcBaselineEGFR(); calcEGFR();"></div>
+                    <div class="col-4 col-md-2"><label>Gender</label><select class="form-select" id="Gender" onchange="calcBaselineEGFR(); calcEGFR();"><option value="">Select...</option><option>Male</option><option>Female</option></select></div>
                     <div class="col-4 col-md-4"><label>Nationality</label><input type="text" class="form-control" id="Nationality"></div>
                     <div class="col-12 col-md-4"><label>Mobile</label><input type="tel" class="form-control" id="Mobile" inputmode="tel"></div>
                 </div>
@@ -141,8 +141,8 @@
                 <div class="row g-2">
                     <div class="col-4 col-md-2"><label>HbA1c</label><input type="text" class="form-control" id="Lab_HbA1c" inputmode="decimal"></div>
                     <div class="col-4 col-md-2"><label>Gluc</label><input type="text" class="form-control" id="Lab_Gluc" inputmode="decimal"></div>
-                    <div class="col-4 col-md-2"><label>Urea/Creat</label><input type="text" class="form-control" id="Lab_UreaCreat" inputmode="decimal"></div>
-                    <div class="col-4 col-md-2"><label>eGFR</label><input type="text" class="form-control" id="Lab_eGFR" inputmode="decimal"></div>
+                    <div class="col-4 col-md-2"><label>Urea/Creat</label><input type="text" class="form-control" id="Lab_UreaCreat" inputmode="decimal" oninput="calcBaselineEGFR()" placeholder="e.g. 5/80"></div>
+                    <div class="col-4 col-md-2"><label class="text-success fw-bold">eGFR (Auto)</label><input type="text" class="form-control bg-light text-success fw-bold" id="Lab_eGFR" readonly></div>
                     <div class="col-4 col-md-2"><label>Na/K</label><input type="text" class="form-control" id="Lab_NaK" inputmode="decimal"></div>
                     <div class="col-4 col-md-2"><label>NT-proBNP</label><input type="text" class="form-control" id="Lab_BNP" inputmode="decimal"></div>
                     <div class="col-4 col-md-2"><label>Iron/Ferritin</label><input type="text" class="form-control" id="Lab_IronFerritin" inputmode="decimal"></div>
@@ -226,7 +226,7 @@
                         <div class="col-3 col-md-2"><label>HbA1c</label><input type="text" class="form-control" id="V_HbA1c" inputmode="decimal"></div>
                         <div class="col-3 col-md-2"><label>Gluc</label><input type="text" class="form-control" id="V_Gluc" inputmode="decimal"></div>
                         <div class="col-3 col-md-2"><label>Urea</label><input type="text" class="form-control" id="V_Urea" inputmode="decimal"></div>
-                        <div class="col-3 col-md-2"><label>Creat</label><input type="text" class="form-control" id="V_Creat" inputmode="decimal" oninput="calcEGFR()"></div>
+                        <div class="col-3 col-md-2"><label>Creat (µmol/L)</label><input type="text" class="form-control" id="V_Creat" inputmode="decimal" oninput="calcEGFR()" placeholder="e.g. 80"></div>
                         <div class="col-3 col-md-2"><label class="text-success fw-bold">eGFR (Auto)</label><input type="text" class="form-control bg-light text-success fw-bold" id="V_eGFR" readonly></div>
                         <div class="col-3 col-md-2"><label>Na</label><input type="text" class="form-control" id="V_Na" inputmode="decimal"></div>
                         <div class="col-3 col-md-2"><label>K</label><input type="text" class="form-control" id="V_K" inputmode="decimal"></div>
@@ -388,17 +388,41 @@ function calcBMI(){
     document.getElementById("BMI").value=(w&&h)?(w/((h/100)**2)).toFixed(1):"";
 }
 
-// Auto eGFR Calculator
+// Auto eGFR Calculator for Section 6 (Baseline) - CALIBRATED FOR µmol/L
+function calcBaselineEGFR() {
+    var age = parseFloat(document.getElementById("Age").value);
+    var gender = document.getElementById("Gender").value;
+    var input = document.getElementById("Lab_UreaCreat").value || "";
+    
+    // Smart parsing: if user types "5/80", it grabs "80"
+    var creatStr = input.includes('/') ? input.split('/')[1] : input;
+    var creat = parseFloat(creatStr);
+    var eGfrField = document.getElementById("Lab_eGFR");
+    
+    if(!age || !gender || !creat || isNaN(creat)) { eGfrField.value = ""; return; }
+    
+    // ALWAYS convert µmol/L to mg/dL for the CKD-EPI formula
+    var cr_mgdl = creat / 88.4;
+    var kappa = gender === "Female" ? 0.7 : 0.9;
+    var alpha = gender === "Female" ? -0.244 : -0.302;
+    if(cr_mgdl > kappa) alpha = -1.200;
+    var multiplier = gender === "Female" ? 1.012 : 1;
+    
+    var egfr = 142 * Math.pow(cr_mgdl / kappa, alpha) * Math.pow(0.9938, age) * multiplier;
+    eGfrField.value = Math.round(egfr);
+}
+
+// Auto eGFR Calculator for Section 9 (Visits) - CALIBRATED FOR µmol/L
 function calcEGFR() {
     var age = parseFloat(document.getElementById("Age").value);
     var gender = document.getElementById("Gender").value;
     var creat = parseFloat(document.getElementById("V_Creat").value);
     var eGfrField = document.getElementById("V_eGFR");
     
-    if(!age || !gender || !creat) { eGfrField.value = ""; return; }
+    if(!age || !gender || !creat || isNaN(creat)) { eGfrField.value = ""; return; }
     
-    // Convert µmol/L to mg/dL if value is large (common in Kuwait labs)
-    var cr_mgdl = creat > 15 ? creat / 88.4 : creat;
+    // ALWAYS convert µmol/L to mg/dL for the CKD-EPI formula
+    var cr_mgdl = creat / 88.4;
     var kappa = gender === "Female" ? 0.7 : 0.9;
     var alpha = gender === "Female" ? -0.244 : -0.302;
     if(cr_mgdl > kappa) alpha = -1.200;
@@ -640,15 +664,33 @@ function loadAdmin(){
     }).catch(error=>{ tb.innerHTML="<tr><td colspan='4' class='text-danger'>Error loading data</td></tr>"; });
 }
 
+// -------------------------------------------------------------
+// EXCEL EXPORT - FULLY EXPANDED AND ROBUST
+// -------------------------------------------------------------
 function exportPatientExcel(id){
-    var data = PC[id]; if(!data) return;
-    db.collection("patients").doc(id).collection("visits").orderBy("visitDate","desc").get().then(visitSnap=>{
-        var visitsData = []; visitSnap.forEach(doc=>{ visitsData.push(doc.data()); }); generateExcel(data, visitsData, id);
-    }).catch(()=>{ generateExcel(data, [], id); });
+    var data = PC[id];
+    if(!data){
+        showPopup("error","Error","Patient data not found");
+        return;
+    }
+    
+    db.collection("patients").doc(id).collection("visits").orderBy("visitDate","desc").get()
+    .then(visitSnap=>{
+        var visitsData = [];
+        visitSnap.forEach(doc=>{
+            visitsData.push(doc.data());
+        });
+        generateExcel(data, visitsData, id);
+    })
+    .catch(()=>{
+        generateExcel(data, [], id);
+    });
 }
 
 function generateExcel(data, visitsData, id){
     var wb = XLSX.utils.book_new();
+    
+    // Sheet 1: Main Patient Information
     var patientRows = [];
     patientRows.push(["MUBARAK AL-KABEER HOSPITAL - HEART FAILURE REGISTRY"]);
     patientRows.push(["Patient Name:", data.Patient_Name || '']);
@@ -661,14 +703,15 @@ function generateExcel(data, visitsData, id){
     patientRows.push(["Doctor:", data.Doctor_Name || '']);
     patientRows.push([]);
     
+    // Group all the data section by section
     var sections = [
         {name:'HF DIAGNOSIS', fields:['HF_Type', 'EF_Diagnosis', 'Advanced_HF', 'Other_Cardio', 'Valvular_Disease', 'Admissions', 'Last_Admission', 'LOS']},
         {name:'SYMPTOMS & SIGNS', fields:['Height', 'Weight', 'BMI', 'Dry_Weight', 'NYHA', 'Fatigue', 'Pulse', 'BP', 'SpO2', 'Edema', 'JVP', 'Rales', 'S3', 'Murmur']},
         {name:'INVESTIGATIONS', fields:['ECG', 'ECHO', 'CMR_CT', 'Walk_Test', 'Device_Info', 'Cath']},
         {name:'COMORBIDITIES', fields:['DM', 'HTN', 'AF', 'IHD', 'PCI_CABG', 'CKD', 'CVA', 'PVD', 'Smoker', 'Obese_OSA', 'Lung_Dz', 'Liver_Dz', 'FH_Genetics']},
-        {name:'LABORATORY', fields:['Lab_HbA1c', 'Lab_Gluc', 'Lab_UreaCreat', 'Lab_eGFR', 'Lab_NaK', 'Lab_BNP', 'Lab_IronFerritin', 'Lab_TrSats', 'Lab_CBC', 'Lab_Thyroid', 'Lab_Lipids', 'Lab_AlbCreat']},
+        {name:'LABORATORY (BASELINE)', fields:['Lab_HbA1c', 'Lab_Gluc', 'Lab_UreaCreat', 'Lab_eGFR', 'Lab_NaK', 'Lab_BNP', 'Lab_IronFerritin', 'Lab_TrSats', 'Lab_CBC', 'Lab_Thyroid', 'Lab_Lipids', 'Lab_AlbCreat']},
         {name:'MEDICATIONS', fields:['Med_ARNI', 'Med_SGLT2i', 'Med_GLP1', 'Med_BB', 'Med_MRA', 'Med_ACEiARB', 'Med_Vasodilator', 'Med_Diuretic', 'Med_Lipid', 'Med_Antiplat', 'Med_OAC', 'Med_Arrhythmia', 'Med_Misc', 'Med_K_Chelator']},
-        {name:'OUTCOMES', fields:['Quad_GDMT', 'Compliance', 'Mortality', 'Rehab', 'Notes', 'Next_Appt']}
+        {name:'OUTCOMES & FOLLOW-UP', fields:['Quad_GDMT', 'Compliance', 'Mortality', 'Rehab', 'Notes', 'Next_Appt']}
     ];
     
     sections.forEach(sec=>{
@@ -683,6 +726,7 @@ function generateExcel(data, visitsData, id){
     var ws1 = XLSX.utils.aoa_to_sheet(patientRows);
     XLSX.utils.book_append_sheet(wb, ws1, "Patient Info");
     
+    // Sheet 2: Visit History (if the patient has any visits)
     if(visitsData.length > 0){
         var visitRows = [];
         visitRows.push(["VISIT HISTORY"]);
@@ -694,23 +738,47 @@ function generateExcel(data, visitsData, id){
             visitRows.push(["Fatigue", visit.V_Fatigue || '-']);
             visitRows.push(["NYHA", visit.V_NYHA || '-']);
             visitRows.push(["Edema", visit.V_Edema || '-']);
+            
             visitRows.push(["Vitals"]);
             visitRows.push(["Pulse", visit.V_Pulse || '-']);
             visitRows.push(["BP", visit.V_BP || '-']);
             visitRows.push(["SpO2", visit.V_SpO2 || '-']);
             visitRows.push(["Weight", visit.V_Weight || '-']);
+            visitRows.push(["JVP", visit.V_JVP || '-']);
+            visitRows.push(["Rales", visit.V_Rales || '-']);
+            visitRows.push(["S3", visit.V_S3 || '-']);
+            
+            visitRows.push(["ECG & Echo"]);
+            visitRows.push(["LBBB", visit.V_LBBB || '-']);
+            visitRows.push(["QRS Width", visit.V_QRS || '-']);
+            visitRows.push(["Arrhythmia", visit.V_Arrhythmia || '-']);
+            visitRows.push(["EF Change", visit.V_EF_Change || '-']);
+            visitRows.push(["Other Echo Findings", visit.V_Echo_Other || '-']);
+            
             visitRows.push(["Labs"]);
             visitRows.push(["HbA1c", visit.V_HbA1c || '-']);
             visitRows.push(["Gluc", visit.V_Gluc || '-']);
             visitRows.push(["Urea", visit.V_Urea || '-']);
-            visitRows.push(["Creat", visit.V_Creat || '-']);
+            visitRows.push(["Creat (umol/L)", visit.V_Creat || '-']);
             visitRows.push(["eGFR", visit.V_eGFR || '-']);
             visitRows.push(["Na", visit.V_Na || '-']);
             visitRows.push(["K", visit.V_K || '-']);
             visitRows.push(["BNP", visit.V_BNP || '-']);
             visitRows.push(["NT-pro BNP", visit.V_NTproBNP || '-']);
-            visitRows.push(["Plan", visit.V_Plan || '-']);
+            visitRows.push(["INR", visit.V_INR || '-']);
+            visitRows.push(["Iron", visit.V_Iron || '-']);
+            visitRows.push(["Transferrin", visit.V_Transferrin || '-']);
+            visitRows.push(["Ferritin", visit.V_Ferritin || '-']);
+            visitRows.push(["WBC", visit.V_WBC || '-']);
+            visitRows.push(["Hb", visit.V_Hb || '-']);
+            visitRows.push(["Plt", visit.V_Plt || '-']);
+            visitRows.push(["TSH", visit.V_TSH || '-']);
+            visitRows.push(["Free T4", visit.V_FreeT4 || '-']);
+            
+            visitRows.push(["Plan & Notes"]);
             visitRows.push(["Adverse Effects", visit.V_Adverse || '-']);
+            visitRows.push(["Plan", visit.V_Plan || '-']);
+            visitRows.push(["Other Notes", visit.V_Others || '-']);
             visitRows.push([]);
         });
         
@@ -718,10 +786,14 @@ function generateExcel(data, visitsData, id){
         XLSX.utils.book_append_sheet(wb, ws2, "Visits");
     }
     
+    // Trigger download
     XLSX.writeFile(wb, "HF_Registry_"+(data.File_No||'unknown')+"_"+(data.Patient_Name||'patient')+".xlsx");
     showPopup("success","Excel Exported!","File downloaded successfully.");
 }
 
+// -------------------------------------------------------------
+// PDF EXPORT - FULLY EXPANDED
+// -------------------------------------------------------------
 function pdfFromAdmin(id){
     var data = PC[id];
     if(!data){ showPopup("error","Error","Patient data not found"); return; }
@@ -749,7 +821,7 @@ function generatePDF(data, visitsData, id){
         {name:'Symptoms & Signs', fields:['Height', 'Weight', 'BMI', 'Dry_Weight', 'NYHA', 'Fatigue', 'Pulse', 'BP', 'SpO2', 'Edema', 'JVP', 'Rales', 'S3', 'Murmur']},
         {name:'Investigations', fields:['ECG', 'ECHO', 'CMR_CT', 'Walk_Test', 'Device_Info', 'Cath']},
         {name:'Comorbidities', fields:['DM', 'HTN', 'AF', 'IHD', 'PCI_CABG', 'CKD', 'CVA', 'PVD', 'Smoker', 'Obese_OSA', 'Lung_Dz', 'Liver_Dz', 'FH_Genetics']},
-        {name:'Laboratory', fields:['Lab_HbA1c', 'Lab_Gluc', 'Lab_UreaCreat', 'Lab_eGFR', 'Lab_NaK', 'Lab_BNP', 'Lab_IronFerritin', 'Lab_TrSats', 'Lab_CBC', 'Lab_Thyroid', 'Lab_Lipids', 'Lab_AlbCreat']},
+        {name:'Laboratory (Baseline)', fields:['Lab_HbA1c', 'Lab_Gluc', 'Lab_UreaCreat', 'Lab_eGFR', 'Lab_NaK', 'Lab_BNP', 'Lab_IronFerritin', 'Lab_TrSats', 'Lab_CBC', 'Lab_Thyroid', 'Lab_Lipids', 'Lab_AlbCreat']},
         {name:'Medications', fields:['Med_ARNI', 'Med_SGLT2i', 'Med_GLP1', 'Med_BB', 'Med_MRA', 'Med_ACEiARB', 'Med_Vasodilator', 'Med_Diuretic', 'Med_Lipid', 'Med_Antiplat', 'Med_OAC', 'Med_Arrhythmia', 'Med_Misc', 'Med_K_Chelator']},
         {name:'Outcomes & Follow-up', fields:['Quad_GDMT', 'Compliance', 'Mortality', 'Rehab', 'Notes', 'Next_Appt']}
     ];
