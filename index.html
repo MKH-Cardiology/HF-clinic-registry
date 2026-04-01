@@ -751,10 +751,25 @@ function generateExcel(data, visitsData, id){
 }
 
 function pdfFromAdmin(id){
-    var data = PC[id]; if(!data){ showPopup("error","Error","Patient data not found"); return; }
-    db.collection("patients").doc(id).collection("visits").orderBy("visitDate","desc").get().then(visitSnap=>{
-        var visitsData = []; visitSnap.forEach(doc=>{ visitsData.push(doc.data()); }); generatePDF(data, visitsData, id);
-    }).catch(()=>{ generatePDF(data, [], id); });
+    var data = PC[id];
+    if(data){
+        // Data is in cache, proceed with PDF generation
+        db.collection("patients").doc(id).collection("visits").orderBy("visitDate","desc").get().then(visitSnap=>{
+            var visitsData = []; visitSnap.forEach(doc=>{ visitsData.push(doc.data()); });
+            generatePDF(data, visitsData, id);
+        }).catch(()=>{ generatePDF(data, [], id); });
+    } else {
+        // Data not in cache, fetch from Firestore directly
+        db.collection("patients").doc(id).get().then(docSnap=>{
+            if(!docSnap.exists){ showPopup("error","Error","Patient not found in database"); return; }
+            var freshData = docSnap.data();
+            PC[id] = freshData; // Cache for future use
+            db.collection("patients").doc(id).collection("visits").orderBy("visitDate","desc").get().then(visitSnap=>{
+                var visitsData = []; visitSnap.forEach(doc=>{ visitsData.push(doc.data()); });
+                generatePDF(freshData, visitsData, id);
+            }).catch(()=>{ generatePDF(freshData, [], id); });
+        }).catch(err=>{ showPopup("error","Error","Failed to fetch patient data: "+err.message); });
+    }
 }
 
 function generatePDF(data, visitsData, id){
