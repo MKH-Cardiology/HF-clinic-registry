@@ -25,6 +25,7 @@
 
 ```
     /* ===== LOGIN SCREEN ===== */
+    body.login-active { background: #8b0000 !important; }
     #pageLogin {
         display: none;
         min-height: 100vh;
@@ -493,10 +494,12 @@ auth.onAuthStateChanged(function(user) {
     if (user) {
         // Logged in — show app
         document.getElementById('pageLogin').style.display = 'none';
+        document.body.classList.remove('login-active');
         document.getElementById('pageMain').classList.add('active');
     } else {
         // Not logged in — show login
         document.getElementById('pageLogin').style.display = 'flex';
+        document.body.classList.add('login-active');
         document.getElementById('pageMain').classList.remove('active');
         document.getElementById('pageAdmin').classList.remove('active');
     }
