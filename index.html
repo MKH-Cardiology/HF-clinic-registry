@@ -447,47 +447,36 @@ function calcEGFR() {
 
 function calcMAGGIC() {
     var pts = 0;
-    
     var age = parseInt(document.getElementById('Age').value) || 0;
     if(age>=85) pts+=7; else if(age>=80) pts+=6; else if(age>=75) pts+=5; else if(age>=70) pts+=4; else if(age>=65) pts+=3; else if(age>=60) pts+=2; else if(age>=55) pts+=1;
-    
     var ef = parseInt(document.getElementById('EF_Diagnosis').value) || 0;
     if(ef>0){ if(ef<20) pts+=7; else if(ef<25) pts+=6; else if(ef<30) pts+=5; else if(ef<35) pts+=3; else if(ef<40) pts+=2; }
-    
     var bpStr = document.getElementById('BP').value || "";
     var sysBP = parseInt(bpStr.split('/')[0]) || 0;
     if(sysBP>0){ if(sysBP<110) pts+=5; else if(sysBP<120) pts+=4; else if(sysBP<130) pts+=3; else if(sysBP<140) pts+=2; else if(sysBP<150) pts+=1; }
-    
     var bmi = parseFloat(document.getElementById('BMI').value) || 0;
     if(bmi>0){ if(bmi<15) pts+=6; else if(bmi<20) pts+=5; else if(bmi<25) pts+=3; else if(bmi<30) pts+=2; }
-    
     var crStr = document.getElementById('Lab_UreaCreat').value || "";
     var cr = parseFloat(crStr.includes('/') ? crStr.split('/')[1] : crStr) || 0;
     if(cr>0){ if(cr>=250) pts+=8; else if(cr>=210) pts+=6; else if(cr>=170) pts+=5; else if(cr>=150) pts+=4; else if(cr>=130) pts+=3; else if(cr>=110) pts+=2; else if(cr>=90) pts+=1; }
-    
     var nyha = document.getElementById('NYHA').value;
     if(nyha==='II') pts+=2; else if(nyha==='III') pts+=6; else if(nyha==='IV') pts+=8;
-    
     if(document.getElementById('Gender').value==='Male') pts+=1;
     if(document.getElementById('Smoker').value==='Current') pts+=1;
     if(document.getElementById('DM').value==='Yes') pts+=3;
     if(document.getElementById('Lung_Dz').value==='Yes') pts+=2;
     if(document.getElementById('HF_Dur').value==='Yes') pts+=2;
-    
     var bb = document.getElementById('Med_BB').value;
     if(bb==='None' || bb==='') pts+=3;
-    
     var ace = document.getElementById('Med_ACEiARB').value;
     var arni = document.getElementById('Med_ARNI').value;
     if((ace==='None' || ace==='') && (arni==='No' || arni==='')) pts+=1;
-    
     var risk1 = "<5%", risk3 = "<10%";
     if(pts>35){ risk1=">40%"; risk3=">70%"; }
     else if(pts>30){ risk1="~30%"; risk3="~60%"; }
     else if(pts>25){ risk1="~20%"; risk3="~45%"; }
     else if(pts>20){ risk1="~10%"; risk3="~25%"; }
     else if(pts>15){ risk1="~6%";  risk3="~15%"; }
-    
     document.getElementById('MAGGIC_Score').value = pts;
     document.getElementById('MAGGIC_Risk').value = risk1 + " | " + risk3;
 }
@@ -527,19 +516,15 @@ function showPopup(type, title, msg){
 function savePatient(){
     var civilID = document.getElementById("Civil_ID").value;
     var fileNo = document.getElementById("File_No").value;
-    
     if(civilID.length !== 12){ showPopup("error","Invalid Civil ID","Civil ID must be exactly 12 digits"); return; }
     if(fileNo.length !== 6){ showPopup("error","Invalid File No","File Number must be exactly 6 digits"); return; }
-    
     var data={}; 
     document.querySelectorAll('#hfForm input, #hfForm select, #hfForm textarea').forEach(el=>{ 
         if(el.id && !el.id.startsWith('V_') && el.id !== 'Next_Appt') data[el.id]=el.value; 
     });
     if(!data.Doctor_Name || !data.Patient_Name){ showPopup("error","Missing Fields","Please fill Name, Doctor Name, Civil ID and File No."); return; }
-    
     var btn=document.getElementById("submitBtn"); 
     btn.disabled=true; btn.innerText="Saving..."; btn.classList.add("loading");
-
     if(editingDocId){
         db.collection("patients").doc(editingDocId).update(data).then(()=>{ 
             showPopup("success","Updated!","Patient record updated successfully."); 
@@ -564,19 +549,15 @@ function savePatient(){
 
 function saveVisit(){
     if(!currentPatientId && !editingDocId){ showPopup("error","Error","Please save patient data first before adding visits."); return; }
-    
     var patientId = currentPatientId || editingDocId;
     var visitData = {};
     var visitDate = document.getElementById("Visit_Date").value;
     var nextAppt = document.getElementById("Next_Appt").value;
-    
     if(!visitDate){ showPopup("error","Error","Please enter visit date."); return; }
-    
     document.querySelectorAll('[id^="V_"]').forEach(el=>{ if(el.id) visitData[el.id]=el.value; });
     visitData.visitDate = visitDate;
     visitData.visitType = document.getElementById("Visit_Type").value;
     visitData.timestamp = new Date().toISOString();
-    
     db.collection("patients").doc(patientId).collection("visits").add(visitData).then(()=>{
         if(nextAppt){ db.collection("patients").doc(patientId).update({ Next_Appt: nextAppt }); }
         showPopup("success","Visit Added!","Follow-up visit saved successfully.");
@@ -594,7 +575,6 @@ function clearVisitForm(){
 function loadVisits(patientId){
     if(!patientId) return;
     currentPatientId = patientId;
-    
     db.collection("patients").doc(patientId).collection("visits").orderBy("visitDate","desc").get().then(snapshot=>{
         visits = []; var html = "";
         if(snapshot.size > 0){
@@ -616,10 +596,8 @@ function resetForm(){
     document.getElementById("searchResults").innerHTML="";
     editingDocId=null; currentPatientId=null; visits=[];
     document.getElementById("visitHistory").innerHTML="";
-    
     document.getElementById("visitsContainer").style.display = "none";
     document.getElementById("visitToggleIcon").className = "fa fa-plus-circle me-1";
-    
     document.getElementById("submitBtn").disabled=false; 
     document.getElementById("submitBtn").innerText="SAVE PATIENT DATA";
     document.getElementById("submitBtn").classList.remove("loading");
@@ -642,7 +620,6 @@ function generateCardHTML(data, id) {
         ['Quad_GDMT', 'Compliance', 'Mortality', 'Rehab', 'HF_Dur', 'MAGGIC_Score', 'MAGGIC_Risk', 'Notes', 'Next_Appt']
     ];
     var sectionNames = ['Demographics', 'HF Diagnosis', 'Symptoms & Signs', 'Investigations', 'Comorbidities', 'Baseline Labs', 'Medications', 'Outcomes & Management'];
-    
     var html = "<div class='card p-3 border-primary shadow-sm patient-card' id='pdf-"+id+"'><h4 class='text-primary mb-3'>"+(data.Patient_Name||'Unknown')+"</h4><div class='row'>";
     allFields.forEach((section, idx)=>{
         html += "<div class='col-12 mb-3'><h6 class='text-secondary border-bottom pb-1'>"+sectionNames[idx]+"</h6><table class='table table-sm table-bordered'>";
@@ -653,7 +630,6 @@ function generateCardHTML(data, id) {
         });
         html += "</table></div>";
     });
-    
     html += "</div><div class='d-flex flex-wrap gap-2 mt-2'>";
     html += "<button class='btn btn-sm btn-primary' onclick='editPt(\""+id+"\")'>Edit</button>";
     html += "<button class='btn btn-sm btn-info text-white' onclick='showTrends(\""+id+"\")'><i class='fa fa-chart-line'></i> Trends</button>";
@@ -668,7 +644,6 @@ function searchPatient(){
     var res = document.getElementById("searchResults"); 
     if(!val){ res.innerHTML=""; return; }
     res.innerHTML="<div class='text-center'><i class='fa fa-spinner fa-spin'></i> Searching Database...</div>";
-    
     db.collection("patients").get().then(s=>{
         res.innerHTML = "<div class='mb-2'><button class='btn btn-sm btn-outline-dark fw-bold' onclick='clearSearchResults()'><i class='fa fa-arrow-left'></i> Back to Search</button></div>";
         var found = 0;
@@ -677,17 +652,11 @@ function searchPatient(){
             var name = (data.Patient_Name || "").toLowerCase();
             var civil = data.Civil_ID || "";
             var fno = data.File_No || "";
-            
             if(civil === val || fno === val || name.includes(val)){
-                found++;
-                PC[d.id] = data; 
-                res.innerHTML += generateCardHTML(data, d.id);
+                found++; PC[d.id] = data; res.innerHTML += generateCardHTML(data, d.id);
             }
         });
-        
-        if(found === 0){
-            res.innerHTML="<div class='alert alert-warning'>No patient found matching that Name or ID. <button class='btn btn-sm btn-outline-dark ms-2' onclick='clearSearchResults()'>Back</button></div>";
-        }
+        if(found === 0){ res.innerHTML="<div class='alert alert-warning'>No patient found matching that Name or ID. <button class='btn btn-sm btn-outline-dark ms-2' onclick='clearSearchResults()'>Back</button></div>"; }
     }).catch(error=>{ res.innerHTML="<div class='alert alert-danger'>Error searching: "+error.message+"</div>"; });
 }
 
@@ -696,61 +665,29 @@ function showTrends(patientId) {
     db.collection("patients").doc(patientId).collection("visits").orderBy("visitDate","asc").get().then(snapshot => {
         var dates = [], weights = [], bnps = [], ntpros = [];
         snapshot.forEach(doc => {
-            var v = doc.data();
-            dates.push(v.visitDate);
-            weights.push(parseFloat(v.V_Weight) || null);
-            bnps.push(parseFloat(v.V_BNP) || null);
-            ntpros.push(parseFloat(v.V_NTproBNP) || null);
+            var v = doc.data(); dates.push(v.visitDate); weights.push(parseFloat(v.V_Weight) || null); bnps.push(parseFloat(v.V_BNP) || null); ntpros.push(parseFloat(v.V_NTproBNP) || null);
         });
-
-        if(dates.length === 0){
-            document.getElementById('chartModal').classList.add('d-none');
-            showPopup("warning", "No Data", "No visits recorded for this patient yet.");
-            return;
-        }
-        
+        if(dates.length === 0){ document.getElementById('chartModal').classList.add('d-none'); showPopup("warning", "No Data", "No visits recorded for this patient yet."); return; }
         if(weightChartInst) weightChartInst.destroy();
         if(ntproChartInst) ntproChartInst.destroy();
         if(bnpChartInst) bnpChartInst.destroy();
-        
         var commonOptions = { responsive: true, maintainAspectRatio: false, scales: { x: { ticks: { font: { size: 10 } } } } };
-
-        weightChartInst = new Chart(document.getElementById('weightChart').getContext('2d'), {
-            type: 'line',
-            data: { labels: dates, datasets: [{ label: 'Weight (kg)', data: weights, borderColor: '#17a2b8', backgroundColor: '#17a2b8', tension: 0.3, spanGaps: true }] },
-            options: commonOptions
-        });
-
-        ntproChartInst = new Chart(document.getElementById('ntproChart').getContext('2d'), {
-            type: 'line',
-            data: { labels: dates, datasets: [{ label: 'NT-proBNP', data: ntpros, borderColor: '#dc3545', backgroundColor: '#dc3545', tension: 0.3, spanGaps: true }] },
-            options: commonOptions
-        });
-
-        bnpChartInst = new Chart(document.getElementById('bnpChart').getContext('2d'), {
-            type: 'line',
-            data: { labels: dates, datasets: [{ label: 'BNP', data: bnps, borderColor: '#ffc107', backgroundColor: '#ffc107', tension: 0.3, spanGaps: true }] },
-            options: commonOptions
-        });
+        weightChartInst = new Chart(document.getElementById('weightChart').getContext('2d'), { type: 'line', data: { labels: dates, datasets: [{ label: 'Weight (kg)', data: weights, borderColor: '#17a2b8', backgroundColor: '#17a2b8', tension: 0.3, spanGaps: true }] }, options: commonOptions });
+        ntproChartInst = new Chart(document.getElementById('ntproChart').getContext('2d'), { type: 'line', data: { labels: dates, datasets: [{ label: 'NT-proBNP', data: ntpros, borderColor: '#dc3545', backgroundColor: '#dc3545', tension: 0.3, spanGaps: true }] }, options: commonOptions });
+        bnpChartInst = new Chart(document.getElementById('bnpChart').getContext('2d'), { type: 'line', data: { labels: dates, datasets: [{ label: 'BNP', data: bnps, borderColor: '#ffc107', backgroundColor: '#ffc107', tension: 0.3, spanGaps: true }] }, options: commonOptions });
     });
 }
 
 function loadAdmin(){
     var tb=document.getElementById("adminTableBody"); 
     tb.innerHTML="<tr><td colspan='4' class='text-center'><i class='fa fa-spinner fa-spin'></i> Loading...</td></tr>";
-    
     var today = new Date().toISOString().split('T')[0];
     var upcomingHTML = "";
-
     db.collection("patients").orderBy("timestamp","desc").get().then(snap=>{
-        tb.innerHTML=""; 
-        document.getElementById("totalPatients").innerText=snap.size;
+        tb.innerHTML=""; document.getElementById("totalPatients").innerText=snap.size;
         if(snap.size===0){ tb.innerHTML="<tr><td colspan='4'>No patients yet</td></tr>"; return; }
-        
         snap.forEach(docSnap=>{
-            var d=docSnap.data(), id=docSnap.id; 
-            PC[id]=d;
-            
+            var d=docSnap.data(), id=docSnap.id; PC[id]=d;
             if(d.Next_Appt && d.Next_Appt >= today) {
                 var daysAway = Math.floor((new Date(d.Next_Appt) - new Date(today)) / (1000*60*60*24));
                 if(daysAway <= 14) {
@@ -758,38 +695,21 @@ function loadAdmin(){
                     upcomingHTML += "<div class='alert alert-"+color+" py-1 px-2 mb-1 d-flex justify-content-between align-items-center' style='font-size:0.85rem;'><span><b>"+(d.Patient_Name||'Unknown')+"</b> ("+(d.File_No||'')+ ")</span><span><i class='fa fa-calendar'></i> "+d.Next_Appt+" (in "+daysAway+" days)</span></div>";
                 }
             }
-
             tb.innerHTML+="<tr><td>"+(d.File_No||'')+"</td><td>"+(d.Patient_Name||'')+"</td><td>"+(d.Doctor_Name||'')+"</td><td><button class='btn btn-sm btn-primary me-1' onclick='editFromAdmin(\""+id+"\")'>Edit</button><button class='btn btn-sm btn-info text-white me-1' onclick='pdfFromAdmin(\""+id+"\")'>PDF</button><button class='btn btn-sm btn-success me-1' onclick='exportPatientExcel(\""+id+"\")'>Excel</button><button class='btn btn-sm btn-danger' onclick='delPt(\""+id+"\")'>Del</button></td></tr>";
         });
-        
         document.getElementById("upcomingAppts").innerHTML = upcomingHTML || "<p class='text-muted small mb-0'>No appointments in the next 14 days.</p>";
     }).catch(error=>{ tb.innerHTML="<tr><td colspan='4' class='text-danger'>Error loading data</td></tr>"; });
 }
 
 function exportPatientExcel(id){
-    var data = PC[id];
-    if(!data){
-        showPopup("error","Error","Patient data not found");
-        return;
-    }
-    
-    db.collection("patients").doc(id).collection("visits").orderBy("visitDate","desc").get()
-    .then(visitSnap=>{
-        var visitsData = [];
-        visitSnap.forEach(doc=>{
-            visitsData.push(doc.data());
-        });
-        generateExcel(data, visitsData, id);
-    })
-    .catch(()=>{
-        generateExcel(data, [], id);
-    });
+    var data = PC[id]; if(!data){ showPopup("error","Error","Patient data not found"); return; }
+    db.collection("patients").doc(id).collection("visits").orderBy("visitDate","desc").get().then(visitSnap=>{
+        var visitsData = []; visitSnap.forEach(doc=>{ visitsData.push(doc.data()); }); generateExcel(data, visitsData, id);
+    }).catch(()=>{ generateExcel(data, [], id); });
 }
 
 function generateExcel(data, visitsData, id){
-    var wb = XLSX.utils.book_new();
-    
-    var patientRows = [];
+    var wb = XLSX.utils.book_new(); var patientRows = [];
     patientRows.push(["MUBARAK AL-KABEER HOSPITAL - HEART FAILURE REGISTRY"]);
     patientRows.push(["Patient Name:", data.Patient_Name || '']);
     patientRows.push(["Civil ID:", data.Civil_ID || '']);
@@ -800,7 +720,6 @@ function generateExcel(data, visitsData, id){
     patientRows.push(["Mobile:", data.Mobile || '']);
     patientRows.push(["Doctor:", data.Doctor_Name || '']);
     patientRows.push([]);
-    
     var sections = [
         {name:'HF DIAGNOSIS', fields:['HF_Type', 'EF_Diagnosis', 'Advanced_HF', 'Other_Cardio', 'Valvular_Disease', 'Admissions', 'Last_Admission', 'LOS']},
         {name:'SYMPTOMS & SIGNS', fields:['Height', 'Weight', 'BMI', 'Dry_Weight', 'NYHA', 'Fatigue', 'Pulse', 'BP', 'SpO2', 'Edema', 'JVP', 'Rales', 'S3', 'Murmur']},
@@ -810,103 +729,39 @@ function generateExcel(data, visitsData, id){
         {name:'MEDICATIONS', fields:['Med_ARNI', 'Med_SGLT2i', 'Med_GLP1', 'Med_BB', 'Med_MRA', 'Med_ACEiARB', 'Med_Vasodilator', 'Med_Diuretic', 'Med_Lipid', 'Med_Antiplat', 'Med_OAC', 'Med_Arrhythmia', 'Med_Misc', 'Med_K_Chelator']},
         {name:'OUTCOMES & FOLLOW-UP', fields:['Quad_GDMT', 'Compliance', 'Mortality', 'Rehab', 'HF_Dur', 'MAGGIC_Score', 'MAGGIC_Risk', 'Notes', 'Next_Appt']}
     ];
-    
     sections.forEach(sec=>{
         patientRows.push([sec.name]);
-        sec.fields.forEach(field=>{
-            var label = field.replace(/_/g, " ").replace(/Lab /g, "").replace(/Med /g, "");
-            patientRows.push([label, data[field] || '-']);
-        });
+        sec.fields.forEach(field=>{ var label = field.replace(/_/g, " ").replace(/Lab /g, "").replace(/Med /g, ""); patientRows.push([label, data[field] || '-']); });
         patientRows.push([]);
     });
-    
-    var ws1 = XLSX.utils.aoa_to_sheet(patientRows);
-    XLSX.utils.book_append_sheet(wb, ws1, "Patient Info");
-    
+    var ws1 = XLSX.utils.aoa_to_sheet(patientRows); XLSX.utils.book_append_sheet(wb, ws1, "Patient Info");
     if(visitsData.length > 0){
-        var visitRows = [];
-        visitRows.push(["VISIT HISTORY"]);
-        visitRows.push([]);
-        
+        var visitRows = []; visitRows.push(["VISIT HISTORY"]); visitRows.push([]);
         visitsData.forEach((visit, idx)=>{
             visitRows.push(["Visit #"+(visitsData.length-idx), "Date: "+visit.visitDate, "Type: "+visit.visitType]);
-            visitRows.push(["Symptoms"]);
-            visitRows.push(["Fatigue", visit.V_Fatigue || '-']);
-            visitRows.push(["NYHA", visit.V_NYHA || '-']);
-            visitRows.push(["Edema", visit.V_Edema || '-']);
-            
-            visitRows.push(["Vitals"]);
-            visitRows.push(["Pulse", visit.V_Pulse || '-']);
-            visitRows.push(["BP", visit.V_BP || '-']);
-            visitRows.push(["SpO2", visit.V_SpO2 || '-']);
-            visitRows.push(["Weight", visit.V_Weight || '-']);
-            visitRows.push(["JVP", visit.V_JVP || '-']);
-            visitRows.push(["Rales", visit.V_Rales || '-']);
-            visitRows.push(["S3", visit.V_S3 || '-']);
-            
-            visitRows.push(["ECG & Echo"]);
-            visitRows.push(["LBBB", visit.V_LBBB || '-']);
-            visitRows.push(["QRS Width", visit.V_QRS || '-']);
-            visitRows.push(["Arrhythmia", visit.V_Arrhythmia || '-']);
-            visitRows.push(["EF Change", visit.V_EF_Change || '-']);
-            visitRows.push(["Other Echo Findings", visit.V_Echo_Other || '-']);
-            
-            visitRows.push(["Labs"]);
-            visitRows.push(["HbA1c", visit.V_HbA1c || '-']);
-            visitRows.push(["Gluc", visit.V_Gluc || '-']);
-            visitRows.push(["Urea", visit.V_Urea || '-']);
-            visitRows.push(["Creat (umol/L)", visit.V_Creat || '-']);
-            visitRows.push(["eGFR", visit.V_eGFR || '-']);
-            visitRows.push(["Na", visit.V_Na || '-']);
-            visitRows.push(["K", visit.V_K || '-']);
-            visitRows.push(["BNP", visit.V_BNP || '-']);
-            visitRows.push(["NT-pro BNP", visit.V_NTproBNP || '-']);
-            visitRows.push(["INR", visit.V_INR || '-']);
-            visitRows.push(["Iron", visit.V_Iron || '-']);
-            visitRows.push(["Transferrin", visit.V_Transferrin || '-']);
-            visitRows.push(["Ferritin", visit.V_Ferritin || '-']);
-            visitRows.push(["WBC", visit.V_WBC || '-']);
-            visitRows.push(["Hb", visit.V_Hb || '-']);
-            visitRows.push(["Plt", visit.V_Plt || '-']);
-            visitRows.push(["TSH", visit.V_TSH || '-']);
-            visitRows.push(["Free T4", visit.V_FreeT4 || '-']);
-            
-            visitRows.push(["Plan & Notes"]);
-            visitRows.push(["Adverse Effects", visit.V_Adverse || '-']);
-            visitRows.push(["Plan", visit.V_Plan || '-']);
-            visitRows.push(["Other Notes", visit.V_Others || '-']);
-            visitRows.push([]);
+            visitRows.push(["Symptoms"]); visitRows.push(["Fatigue", visit.V_Fatigue || '-']); visitRows.push(["NYHA", visit.V_NYHA || '-']); visitRows.push(["Edema", visit.V_Edema || '-']);
+            visitRows.push(["Vitals"]); visitRows.push(["Pulse", visit.V_Pulse || '-']); visitRows.push(["BP", visit.V_BP || '-']); visitRows.push(["SpO2", visit.V_SpO2 || '-']); visitRows.push(["Weight", visit.V_Weight || '-']); visitRows.push(["JVP", visit.V_JVP || '-']); visitRows.push(["Rales", visit.V_Rales || '-']); visitRows.push(["S3", visit.V_S3 || '-']);
+            visitRows.push(["ECG & Echo"]); visitRows.push(["LBBB", visit.V_LBBB || '-']); visitRows.push(["QRS Width", visit.V_QRS || '-']); visitRows.push(["Arrhythmia", visit.V_Arrhythmia || '-']); visitRows.push(["EF Change", visit.V_EF_Change || '-']); visitRows.push(["Other Echo Findings", visit.V_Echo_Other || '-']);
+            visitRows.push(["Labs"]); visitRows.push(["HbA1c", visit.V_HbA1c || '-']); visitRows.push(["Gluc", visit.V_Gluc || '-']); visitRows.push(["Urea", visit.V_Urea || '-']); visitRows.push(["Creat (umol/L)", visit.V_Creat || '-']); visitRows.push(["eGFR", visit.V_eGFR || '-']); visitRows.push(["Na", visit.V_Na || '-']); visitRows.push(["K", visit.V_K || '-']); visitRows.push(["BNP", visit.V_BNP || '-']); visitRows.push(["NT-pro BNP", visit.V_NTproBNP || '-']); visitRows.push(["INR", visit.V_INR || '-']); visitRows.push(["Iron", visit.V_Iron || '-']); visitRows.push(["Transferrin", visit.V_Transferrin || '-']); visitRows.push(["Ferritin", visit.V_Ferritin || '-']); visitRows.push(["WBC", visit.V_WBC || '-']); visitRows.push(["Hb", visit.V_Hb || '-']); visitRows.push(["Plt", visit.V_Plt || '-']); visitRows.push(["TSH", visit.V_TSH || '-']); visitRows.push(["Free T4", visit.V_FreeT4 || '-']);
+            visitRows.push(["Plan & Notes"]); visitRows.push(["Adverse Effects", visit.V_Adverse || '-']); visitRows.push(["Plan", visit.V_Plan || '-']); visitRows.push(["Other Notes", visit.V_Others || '-']); visitRows.push([]);
         });
-        
-        var ws2 = XLSX.utils.aoa_to_sheet(visitRows);
-        XLSX.utils.book_append_sheet(wb, ws2, "Visits");
+        var ws2 = XLSX.utils.aoa_to_sheet(visitRows); XLSX.utils.book_append_sheet(wb, ws2, "Visits");
     }
-    
-    XLSX.writeFile(wb, "HF_Registry_"+(data.File_No||'unknown')+"_"+(data.Patient_Name||'patient')+".xlsx");
-    showPopup("success","Excel Exported!","File downloaded successfully.");
+    XLSX.writeFile(wb, "HF_Registry_"+(data.File_No||'unknown')+"_"+(data.Patient_Name||'patient')+".xlsx"); showPopup("success","Excel Exported!","File downloaded successfully.");
 }
 
 function pdfFromAdmin(id){
-    var data = PC[id];
-    if(!data){ showPopup("error","Error","Patient data not found"); return; }
-    
+    var data = PC[id]; if(!data){ showPopup("error","Error","Patient data not found"); return; }
     db.collection("patients").doc(id).collection("visits").orderBy("visitDate","desc").get().then(visitSnap=>{
         var visitsData = []; visitSnap.forEach(doc=>{ visitsData.push(doc.data()); }); generatePDF(data, visitsData, id);
     }).catch(()=>{ generatePDF(data, [], id); });
 }
 
 function generatePDF(data, visitsData, id){
-    var container = document.getElementById('pdfContainer');
-    container.innerHTML = '';
-    
+    var container = document.getElementById('pdfContainer'); container.innerHTML = '';
     var html = "<div style='width:800px; background:white; padding:20px; font-family:Arial;'>";
-    html += "<div style='text-align:center; border-bottom:3px solid #8b0000; padding-bottom:10px; margin-bottom:20px;'>";
-    html += "<h2 style='color:#8b0000; margin:0;'>Mubarak Al-Kabeer Hospital</h2>";
-    html += "<h3 style='margin:5px 0;'>Heart Failure Clinic Registry</h3>";
-    html += "</div>";
-    
+    html += "<div style='text-align:center; border-bottom:3px solid #8b0000; padding-bottom:10px; margin-bottom:20px;'><h2 style='color:#8b0000; margin:0;'>Mubarak Al-Kabeer Hospital</h2><h3 style='margin:5px 0;'>Heart Failure Clinic Registry</h3></div>";
     html += "<h3 style='color:#333;'>Patient: "+(data.Patient_Name||'Unknown')+" | File: "+(data.File_No||'N/A')+"</h3>";
-    
     var sections = [
         {name:'Demographics', fields:['Patient_Name', 'Civil_ID', 'File_No', 'Age', 'Gender', 'Nationality', 'Mobile', 'Doctor_Name']},
         {name:'HF Diagnosis', fields:['HF_Type', 'EF_Diagnosis', 'Advanced_HF', 'Other_Cardio', 'Valvular_Disease', 'Admissions', 'Last_Admission', 'LOS']},
@@ -917,63 +772,29 @@ function generatePDF(data, visitsData, id){
         {name:'Medications', fields:['Med_ARNI', 'Med_SGLT2i', 'Med_GLP1', 'Med_BB', 'Med_MRA', 'Med_ACEiARB', 'Med_Vasodilator', 'Med_Diuretic', 'Med_Lipid', 'Med_Antiplat', 'Med_OAC', 'Med_Arrhythmia', 'Med_Misc', 'Med_K_Chelator']},
         {name:'Outcomes & Follow-up', fields:['Quad_GDMT', 'Compliance', 'Mortality', 'Rehab', 'HF_Dur', 'MAGGIC_Score', 'MAGGIC_Risk', 'Notes', 'Next_Appt']}
     ];
-    
     sections.forEach(sec=>{
-        html += "<h4 style='background:#f0f0f0; padding:8px; margin-top:15px; color:#8b0000;'>"+sec.name+"</h4>";
-        html += "<table style='width:100%; border-collapse:collapse; font-size:12px;'>";
-        sec.fields.forEach(field=>{
-            var val = data[field] || '-';
-            var label = field.replace(/_/g, " ").replace(/Lab /g, "").replace(/Med /g, "");
-            html += "<tr style='border-bottom:1px solid #ddd;'><td style='width:40%; padding:6px; background:#fafafa; font-weight:bold;'>"+label+"</td><td style='padding:6px;'>"+val+"</td></tr>";
-        });
+        html += "<h4 style='background:#f0f0f0; padding:8px; margin-top:15px; color:#8b0000;'>"+sec.name+"</h4><table style='width:100%; border-collapse:collapse; font-size:12px;'>";
+        sec.fields.forEach(field=>{ var val = data[field] || '-'; var label = field.replace(/_/g, " ").replace(/Lab /g, "").replace(/Med /g, ""); html += "<tr style='border-bottom:1px solid #ddd;'><td style='width:40%; padding:6px; background:#fafafa; font-weight:bold;'>"+label+"</td><td style='padding:6px;'>"+val+"</td></tr>"; });
         html += "</table>";
     });
-    
     if(visitsData.length > 0){
-        html += "<div style='page-break-before:always;'></div>";
-        html += "<h3 style='color:#8b0000; margin-top:20px;'>Visit History & Follow-ups</h3>";
-        
+        html += "<div style='page-break-before:always;'></div><h3 style='color:#8b0000; margin-top:20px;'>Visit History & Follow-ups</h3>";
         visitsData.forEach((visit, idx)=>{
-            html += "<div style='border:2px solid #17a2b8; margin:15px 0; padding:15px; border-radius:8px;'>";
-            html += "<h4 style='color:#17a2b8; margin-top:0;'>Visit #"+(visitsData.length-idx)+": "+visit.visitDate+" ("+visit.visitType+")</h4>";
-            
+            html += "<div style='border:2px solid #17a2b8; margin:15px 0; padding:15px; border-radius:8px;'><h4 style='color:#17a2b8; margin-top:0;'>Visit #"+(visitsData.length-idx)+": "+visit.visitDate+" ("+visit.visitType+")</h4>";
             var vSections = [
-                {name:'Symptoms', fields:['V_Fatigue', 'V_NYHA', 'V_Edema']},
-                {name:'Signs/Vitals', fields:['V_Pulse', 'V_BP', 'V_SpO2', 'V_Weight', 'V_JVP', 'V_Rales', 'V_S3']},
-                {name:'ECG', fields:['V_LBBB', 'V_QRS', 'V_Arrhythmia']},
-                {name:'Echo', fields:['V_EF_Change', 'V_Echo_Other']},
-                {name:'Labs', fields:['V_HbA1c', 'V_Gluc', 'V_Urea', 'V_Creat', 'V_eGFR', 'V_Na', 'V_K', 'V_BNP', 'V_NTproBNP', 'V_INR', 'V_Iron', 'V_Transferrin', 'V_Ferritin', 'V_WBC', 'V_Hb', 'V_Plt', 'V_TSH', 'V_FreeT4']},
-                {name:'Plan', fields:['V_Adverse', 'V_Plan', 'V_Others']}
+                {name:'Symptoms', fields:['V_Fatigue', 'V_NYHA', 'V_Edema']}, {name:'Signs/Vitals', fields:['V_Pulse', 'V_BP', 'V_SpO2', 'V_Weight', 'V_JVP', 'V_Rales', 'V_S3']}, {name:'ECG', fields:['V_LBBB', 'V_QRS', 'V_Arrhythmia']}, {name:'Echo', fields:['V_EF_Change', 'V_Echo_Other']}, {name:'Labs', fields:['V_HbA1c', 'V_Gluc', 'V_Urea', 'V_Creat', 'V_eGFR', 'V_Na', 'V_K', 'V_BNP', 'V_NTproBNP', 'V_INR', 'V_Iron', 'V_Transferrin', 'V_Ferritin', 'V_WBC', 'V_Hb', 'V_Plt', 'V_TSH', 'V_FreeT4']}, {name:'Plan', fields:['V_Adverse', 'V_Plan', 'V_Others']}
             ];
-            
             vSections.forEach(vsec=>{
-                html += "<h5 style='margin:10px 0 5px 0; color:#555;'>"+vsec.name+"</h5>";
-                html += "<table style='width:100%; border-collapse:collapse; font-size:11px; margin-bottom:10px;'>";
-                vsec.fields.forEach(vf=>{
-                    if(visit[vf]){
-                        var vlabel = vf.replace('V_', '').replace(/_/g, ' ');
-                        html += "<tr style='border-bottom:1px solid #eee;'><td style='width:40%; padding:4px; background:#f5f5f5;'>"+vlabel+"</td><td style='padding:4px;'>"+visit[vf]+"</td></tr>";
-                    }
-                });
+                html += "<h5 style='margin:10px 0 5px 0; color:#555;'>"+vsec.name+"</h5><table style='width:100%; border-collapse:collapse; font-size:11px; margin-bottom:10px;'>";
+                vsec.fields.forEach(vf=>{ if(visit[vf]){ var vlabel = vf.replace('V_', '').replace(/_/g, ' '); html += "<tr style='border-bottom:1px solid #eee;'><td style='width:40%; padding:4px; background:#f5f5f5;'>"+vlabel+"</td><td style='padding:4px;'>"+visit[vf]+"</td></tr>"; } });
                 html += "</table>";
             });
-            
             html += "</div>";
         });
     }
-    
-    html += "<div style='margin-top:30px; text-align:center; font-size:11px; color:#666;'>Generated: "+new Date().toLocaleString()+"</div>";
-    html += "</div>";
-    
-    container.innerHTML = html;
-    var element = container.firstChild;
-    
-    html2pdf().from(element).set({
-        margin: 0.5,
-        filename: "HF_Report_"+(data.File_No||'unknown')+"_"+(data.Patient_Name||'patient')+".pdf",
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-    }).save().then(() => { container.innerHTML = ''; });
+    html += "<div style='margin-top:30px; text-align:center; font-size:11px; color:#666;'>Generated: "+new Date().toLocaleString()+"</div></div>";
+    container.innerHTML = html; var element = container.firstChild;
+    html2pdf().from(element).set({ margin: 0.5, filename: "HF_Report_"+(data.File_No||'unknown')+"_"+(data.Patient_Name||'patient')+".pdf", html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } }).save().then(() => { container.innerHTML = ''; });
 }
 
 function editPt(id){
@@ -982,21 +803,14 @@ function editPt(id){
     document.getElementById("formTitle").innerText="Editing: "+d.Patient_Name;
     document.getElementById("cancelEditBtn").classList.remove("d-none"); 
     document.getElementById("submitBtn").innerText="Update Patient";
-    loadVisits(id); 
-    
-    document.getElementById("visitsContainer").style.display = "block";
+    loadVisits(id); document.getElementById("visitsContainer").style.display = "block";
     document.getElementById("visitToggleIcon").className = "fa fa-minus-circle me-1";
-    
     window.scrollTo({top:0, behavior:"smooth"});
 }
 
 function editFromAdmin(id){ editPt(id); goToMain(); }
 
-function delPt(id){ 
-    if(confirm("Permanently delete this patient record?")){ 
-        db.collection("patients").doc(id).delete().then(()=>{ loadAdmin(); }); 
-    } 
-}
+function delPt(id){ if(confirm("Permanently delete this patient record?")){ db.collection("patients").doc(id).delete().then(()=>{ loadAdmin(); }); } }
 </script>
 </body>
 </html>
