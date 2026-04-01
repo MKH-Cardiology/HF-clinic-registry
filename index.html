@@ -3,6 +3,14 @@
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mubarak Al-Kabeer HF Registry</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="HF Registry">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Hospital_sign.svg/512px-Hospital_sign.svg.png">
+    <link rel="icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Hospital_sign.svg/512px-Hospital_sign.svg.png">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -52,7 +60,7 @@
         <div class="card p-3 border-top border-4 border-danger shadow">
             <h6 class="text-secondary fw-bold mb-2">Search Patient</h6>
             <div class="input-group">
-                <input type="text" id="searchInput" class="form-control" placeholder="Civil ID (12 digits) or File Number (6 digits)">
+                <input type="text" id="searchInput" class="form-control" placeholder="Search by Civil ID, File No, or Name">
                 <button class="btn btn-primary px-4" onclick="searchPatient()">Search</button>
             </div>
             <div id="searchResults" class="mt-3"></div>
@@ -75,8 +83,8 @@
                         <input type="text" class="form-control" id="File_No" inputmode="numeric" pattern="[0-9]*" maxlength="6" oninput="validateFileNo(this)" onkeypress="return isNumberKey(event)">
                         <small class="error-msg" id="fileError">Must be exactly 6 digits</small>
                     </div>
-                    <div class="col-4 col-md-2"><label>Age</label><input type="number" class="form-control" id="Age" inputmode="numeric" oninput="calcBaselineEGFR(); calcEGFR();"></div>
-                    <div class="col-4 col-md-2"><label>Gender</label><select class="form-select" id="Gender" onchange="calcBaselineEGFR(); calcEGFR();"><option value="">Select...</option><option>Male</option><option>Female</option></select></div>
+                    <div class="col-4 col-md-2"><label>Age</label><input type="number" class="form-control" id="Age" inputmode="numeric" oninput="calcBaselineEGFR(); calcEGFR(); calcMAGGIC();"></div>
+                    <div class="col-4 col-md-2"><label>Gender</label><select class="form-select" id="Gender" onchange="calcBaselineEGFR(); calcEGFR(); calcMAGGIC();"><option value="">Select...</option><option>Male</option><option>Female</option></select></div>
                     <div class="col-4 col-md-4"><label>Nationality</label><input type="text" class="form-control" id="Nationality"></div>
                     <div class="col-12 col-md-4"><label>Mobile</label><input type="tel" class="form-control" id="Mobile" inputmode="tel"></div>
                 </div>
@@ -84,7 +92,7 @@
                 <h6 class="section-title">2. HF Diagnosis & Status</h6>
                 <div class="row g-2">
                     <div class="col-6 col-md-3"><label>Type of HF</label><select class="form-select" id="HF_Type"><option value="">Select...</option><option>HFrEF</option><option>HFmrEF</option><option>HFpEF</option></select></div>
-                    <div class="col-6 col-md-2"><label>EF at Diagnosis (%)</label><input type="number" class="form-control" id="EF_Diagnosis" inputmode="numeric"></div>
+                    <div class="col-6 col-md-2"><label>EF at Diagnosis (%)</label><input type="number" class="form-control" id="EF_Diagnosis" inputmode="numeric" oninput="calcMAGGIC();"></div>
                     <div class="col-6 col-md-2"><label>Advanced HF</label><select class="form-select" id="Advanced_HF"><option>No</option><option>Yes</option></select></div>
                     <div class="col-6 col-md-5"><label>Other Cardiomyopathies</label><input type="text" class="form-control" id="Other_Cardio"></div>
                     <div class="col-6 col-md-3"><label>Valvular Disease</label><select class="form-select" id="Valvular_Disease"><option>No</option><option>Yes</option></select></div>
@@ -99,10 +107,10 @@
                     <div class="col-4 col-md-2"><label class="text-primary">Weight (kg)</label><input type="number" class="form-control border-primary" id="Weight" oninput="calcBMI()" inputmode="numeric"></div>
                     <div class="col-4 col-md-2"><label class="text-success fw-bold">BMI (Auto)</label><input type="text" class="form-control bg-light text-success fw-bold" id="BMI" readonly></div>
                     <div class="col-4 col-md-2"><label>Dry Weight (kg)</label><input type="number" class="form-control" id="Dry_Weight" inputmode="numeric"></div>
-                    <div class="col-4 col-md-2"><label>NYHA Visit</label><select class="form-select" id="NYHA"><option value="">Select...</option><option>I</option><option>II</option><option>III</option><option>IV</option></select></div>
+                    <div class="col-4 col-md-2"><label>NYHA Visit</label><select class="form-select" id="NYHA" onchange="calcMAGGIC();"><option value="">Select...</option><option>I</option><option>II</option><option>III</option><option>IV</option></select></div>
                     <div class="col-4 col-md-2"><label>Fatigue</label><select class="form-select" id="Fatigue"><option>No</option><option>Yes</option></select></div>
                     <div class="col-4 col-md-2"><label>Pulse</label><input type="text" class="form-control" id="Pulse" inputmode="numeric"></div>
-                    <div class="col-4 col-md-2"><label>BP</label><input type="text" class="form-control" id="BP" placeholder="120/80"></div>
+                    <div class="col-4 col-md-2"><label>BP</label><input type="text" class="form-control" id="BP" placeholder="120/80" oninput="calcMAGGIC();"></div>
                     <div class="col-4 col-md-2"><label>SpO2 (%)</label><input type="number" class="form-control" id="SpO2" inputmode="numeric"></div>
                     <div class="col-4 col-md-2"><label>Edema</label><select class="form-select" id="Edema"><option>No</option><option>Yes</option></select></div>
                     <div class="col-4 col-md-2"><label>JVP</label><select class="form-select" id="JVP"><option>Normal</option><option>Raised</option></select></div>
@@ -123,7 +131,7 @@
 
                 <h6 class="section-title">5. Comorbidities</h6>
                 <div class="row g-2">
-                    <div class="col-4 col-md-2"><label>DM</label><select class="form-select" id="DM"><option>No</option><option>Yes</option></select></div>
+                    <div class="col-4 col-md-2"><label>DM</label><select class="form-select" id="DM" onchange="calcMAGGIC();"><option>No</option><option>Yes</option></select></div>
                     <div class="col-4 col-md-2"><label>HTN</label><select class="form-select" id="HTN"><option>No</option><option>Yes</option></select></div>
                     <div class="col-4 col-md-2"><label>AF</label><select class="form-select" id="AF"><option>No</option><option>Yes</option></select></div>
                     <div class="col-4 col-md-2"><label>IHD</label><select class="form-select" id="IHD"><option>No</option><option>STEMI</option><option>NSTEMI</option></select></div>
@@ -131,9 +139,9 @@
                     <div class="col-4 col-md-2"><label>CKD</label><select class="form-select" id="CKD"><option>No</option><option>Yes</option></select></div>
                     <div class="col-4 col-md-2"><label>CVA</label><select class="form-select" id="CVA"><option>No</option><option>Yes</option></select></div>
                     <div class="col-4 col-md-2"><label>PVD</label><select class="form-select" id="PVD"><option>No</option><option>Yes</option></select></div>
-                    <div class="col-4 col-md-2"><label>Smoker</label><select class="form-select" id="Smoker"><option>Never</option><option>Current</option><option>Former</option></select></div>
+                    <div class="col-4 col-md-2"><label>Smoker</label><select class="form-select" id="Smoker" onchange="calcMAGGIC();"><option>Never</option><option>Current</option><option>Former</option></select></div>
                     <div class="col-4 col-md-2"><label>Obese/OSA</label><select class="form-select" id="Obese_OSA"><option>No</option><option>Yes</option></select></div>
-                    <div class="col-6 col-md-3"><label>Chronic Lung Disease</label><select class="form-select" id="Lung_Dz"><option>No</option><option>Yes</option></select></div>
+                    <div class="col-6 col-md-3"><label>Chronic Lung Disease</label><select class="form-select" id="Lung_Dz" onchange="calcMAGGIC();"><option>No</option><option>Yes</option></select></div>
                     <div class="col-6 col-md-3"><label>Liver Disease</label><select class="form-select" id="Liver_Dz"><option>No</option><option>Yes</option></select></div>
                     <div class="col-12 col-md-6"><label>F.H. Cardio/Genetics</label><input type="text" class="form-control" id="FH_Genetics"></div>
                 </div>
@@ -142,7 +150,7 @@
                 <div class="row g-2">
                     <div class="col-4 col-md-2"><label>HbA1c</label><input type="text" class="form-control" id="Lab_HbA1c"></div>
                     <div class="col-4 col-md-2"><label>Gluc</label><input type="text" class="form-control" id="Lab_Gluc"></div>
-                    <div class="col-4 col-md-2"><label>Urea/Creat</label><input type="text" class="form-control" id="Lab_UreaCreat" oninput="calcBaselineEGFR()" placeholder="e.g. 5/80"></div>
+                    <div class="col-4 col-md-2"><label>Urea/Creat</label><input type="text" class="form-control" id="Lab_UreaCreat" oninput="calcBaselineEGFR(); calcMAGGIC();" placeholder="e.g. 5/80"></div>
                     <div class="col-4 col-md-2"><label class="text-success fw-bold">eGFR (Auto)</label><input type="text" class="form-control bg-light text-success fw-bold" id="Lab_eGFR" readonly></div>
                     <div class="col-4 col-md-2"><label>Na/K</label><input type="text" class="form-control" id="Lab_NaK"></div>
                     <div class="col-4 col-md-2"><label>NT-proBNP</label><input type="text" class="form-control" id="Lab_BNP"></div>
@@ -159,9 +167,9 @@
                     <div class="col-6 col-md-3"><label>ARNI (Entresto)</label><select class="form-select" id="Med_ARNI"><option>No</option><option>Yes</option></select></div>
                     <div class="col-6 col-md-3"><label>SGLT2i</label><select class="form-select" id="Med_SGLT2i"><option>None</option><option>Forxiga</option><option>Jardiance</option></select></div>
                     <div class="col-6 col-md-3"><label>GLP1 Agonist</label><select class="form-select" id="Med_GLP1"><option>None</option><option>Mounjaro</option><option>Ozempic</option></select></div>
-                    <div class="col-6 col-md-3"><label>B-Blockers</label><select class="form-select" id="Med_BB"><option>None</option><option>Concor</option><option>Dilatrend</option><option>Betaloc</option><option>Lopressor</option></select></div>
+                    <div class="col-6 col-md-3"><label>B-Blockers</label><select class="form-select" id="Med_BB" onchange="calcMAGGIC();"><option>None</option><option>Concor</option><option>Dilatrend</option><option>Betaloc</option><option>Lopressor</option></select></div>
                     <div class="col-6 col-md-3"><label>MRA</label><select class="form-select" id="Med_MRA"><option>None</option><option>Aldactone</option><option>Eplerenone</option><option>Finerenone</option><option>Inspra</option></select></div>
-                    <div class="col-6 col-md-3"><label>ACEi/ARB</label><select class="form-select" id="Med_ACEiARB"><option>None</option><option>Zestril</option><option>Tritace</option><option>Capoten</option><option>Diovan</option><option>Atacand</option></select></div>
+                    <div class="col-6 col-md-3"><label>ACEi/ARB</label><select class="form-select" id="Med_ACEiARB" onchange="calcMAGGIC();"><option>None</option><option>Zestril</option><option>Tritace</option><option>Capoten</option><option>Diovan</option><option>Atacand</option></select></div>
                     <div class="col-6 col-md-3"><label>Vasodilators</label><select class="form-select" id="Med_Vasodilator"><option>None</option><option>Hydralazine</option><option>Nitrates</option><option>Both</option></select></div>
                     <div class="col-6 col-md-3"><label>Diuretics</label><select class="form-select" id="Med_Diuretic"><option>None</option><option>Furosemide</option><option>Metolazone</option></select></div>
                     <div class="col-6 col-md-3"><label>Lipid Lowering</label><select class="form-select" id="Med_Lipid"><option>None</option><option>Zocor</option><option>Lipitor</option><option>Crestor</option><option>Ezetrol</option><option>Repatha</option><option>Praluent</option><option>Atozet</option><option>Zympass</option><option>Fibrates</option><option>Omacor</option></select></div>
@@ -178,6 +186,12 @@
                     <div class="col-6 col-md-3"><label>Compliance</label><select class="form-select" id="Compliance"><option>Yes</option><option>No</option></select></div>
                     <div class="col-6 col-md-3"><label>Mortality</label><select class="form-select" id="Mortality"><option>Alive</option><option>In-hospital</option><option>Out-of-hospital</option></select></div>
                     <div class="col-6 col-md-3"><label>Cardiac Rehab</label><select class="form-select" id="Rehab"><option>No</option><option>Yes</option></select></div>
+                    
+                    <div class="col-12 col-md-12 mt-2">
+                        <label class="text-success fw-bold"><i class="fa fa-calculator"></i> MAGGIC Risk Score (Auto-Calculated)</label>
+                        <input type="text" class="form-control bg-light text-success fw-bold" id="MAGGIC_Score" readonly placeholder="Enter vitals, labs, and history to calculate">
+                    </div>
+
                     <div class="col-12 col-md-12"><label>Management Plan / Notes</label><textarea class="form-control" id="Notes" rows="2"></textarea></div>
                 </div>
 
@@ -344,604 +358,4 @@
 
 <div id="chartModal" class="modal-overlay d-none">
     <div class="modal-box" style="text-align:left; max-width: 600px;">
-        <div class="d-flex justify-content-between align-items-center mb-2 border-bottom pb-2">
-            <h5 class="m-0 text-primary fw-bold"><i class="fa fa-chart-line"></i> Patient Trends</h5>
-            <button class="btn-close" onclick="document.getElementById('chartModal').classList.add('d-none')"></button>
-        </div>
-        <div class="chart-container">
-            <canvas id="weightChart"></canvas>
-        </div>
-        <div class="chart-container">
-            <canvas id="ntproChart"></canvas>
-        </div>
-        <div class="chart-container">
-            <canvas id="bnpChart"></canvas>
-        </div>
-    </div>
-</div>
-
-<div id="pdfContainer" style="position:absolute; left:-9999px; top:-9999px;"></div>
-
-<script>
-firebase.initializeApp({
-    apiKey:"AIzaSyAQ8wAh0gLV7-_lVEXXdIzZ7LmkMnshOiE",
-    authDomain:"hf-clinic-registry.firebaseapp.com",
-    projectId:"hf-clinic-registry",
-    storageBucket:"hf-clinic-registry.firebasestorage.app",
-    messagingSenderId:"898458296631",
-    appId:"1:898458296631:web:85fea7a2c6661ae0563ab2"
-});
-var db=firebase.firestore(), editingDocId=null, currentPatientId=null, PC={}, visits=[];
-var weightChartInst = null, bnpChartInst = null, ntproChartInst = null;
-
-function isNumberKey(evt){
-    var charCode = (evt.which) ? evt.which : evt.keyCode;
-    if (charCode > 31 && (charCode < 48 || charCode > 57)) return false;
-    return true;
-}
-
-function validateCivilID(input){
-    var val = input.value;
-    var errorMsg = document.getElementById('civilError');
-    if(val.length !== 12 && val.length > 0){ input.classList.add('input-error'); errorMsg.style.display = 'block'; } 
-    else { input.classList.remove('input-error'); errorMsg.style.display = 'none'; }
-}
-
-function validateFileNo(input){
-    var val = input.value;
-    var errorMsg = document.getElementById('fileError');
-    if(val.length !== 6 && val.length > 0){ input.classList.add('input-error'); errorMsg.style.display = 'block'; } 
-    else { input.classList.remove('input-error'); errorMsg.style.display = 'none'; }
-}
-
-function calcBMI(){
-    var w=parseFloat(document.getElementById("Weight").value), h=parseFloat(document.getElementById("Height").value);
-    document.getElementById("BMI").value=(w&&h)?(w/((h/100)**2)).toFixed(1):"";
-}
-
-function calcBaselineEGFR() {
-    var age = parseFloat(document.getElementById("Age").value);
-    var gender = document.getElementById("Gender").value;
-    var input = document.getElementById("Lab_UreaCreat").value || "";
-    
-    var creatStr = input.includes('/') ? input.split('/')[1] : input;
-    var creat = parseFloat(creatStr);
-    var eGfrField = document.getElementById("Lab_eGFR");
-    
-    if(!age || !gender || !creat || isNaN(creat)) { eGfrField.value = ""; return; }
-    
-    var cr_mgdl = creat / 88.4;
-    var kappa = gender === "Female" ? 0.7 : 0.9;
-    var alpha = gender === "Female" ? -0.244 : -0.302;
-    if(cr_mgdl > kappa) alpha = -1.200;
-    var multiplier = gender === "Female" ? 1.012 : 1;
-    
-    var egfr = 142 * Math.pow(cr_mgdl / kappa, alpha) * Math.pow(0.9938, age) * multiplier;
-    eGfrField.value = Math.round(egfr);
-}
-
-function calcEGFR() {
-    var age = parseFloat(document.getElementById("Age").value);
-    var gender = document.getElementById("Gender").value;
-    var creat = parseFloat(document.getElementById("V_Creat").value);
-    var eGfrField = document.getElementById("V_eGFR");
-    
-    if(!age || !gender || !creat || isNaN(creat)) { eGfrField.value = ""; return; }
-    
-    var cr_mgdl = creat / 88.4;
-    var kappa = gender === "Female" ? 0.7 : 0.9;
-    var alpha = gender === "Female" ? -0.244 : -0.302;
-    if(cr_mgdl > kappa) alpha = -1.200;
-    var multiplier = gender === "Female" ? 1.012 : 1;
-    
-    var egfr = 142 * Math.pow(cr_mgdl / kappa, alpha) * Math.pow(0.9938, age) * multiplier;
-    eGfrField.value = Math.round(egfr);
-}
-
-// Collapsible Visits Logic
-function toggleVisits() {
-    var container = document.getElementById("visitsContainer");
-    var icon = document.getElementById("visitToggleIcon");
-    if (container.style.display === "none" || container.style.display === "") {
-        container.style.display = "block";
-        icon.className = "fa fa-minus-circle me-1";
-    } else {
-        container.style.display = "none";
-        icon.className = "fa fa-plus-circle me-1";
-    }
-}
-
-// Clear Search Results Logic
-function clearSearchResults() {
-    document.getElementById("searchInput").value = "";
-    document.getElementById("searchResults").innerHTML = "";
-}
-
-function showAdminLogin(){
-    if(prompt("Admin PIN:")==="1234"){ document.getElementById("pageMain").classList.remove("active"); document.getElementById("pageAdmin").classList.add("active"); loadAdmin(); }
-    else alert("Wrong PIN");
-}
-
-function goToMain(){ document.getElementById("pageAdmin").classList.remove("active"); document.getElementById("pageMain").classList.add("active"); }
-
-function showPopup(type, title, msg){
-    var old=document.getElementById("popOv"); if(old) old.remove();
-    var color=type==="success"?"#28a745":type==="delete"?"#dc3545":"#ffc107", icon=type==="success"?"fa-check-circle":type==="delete"?"fa-trash-alt":"fa-exclamation-triangle";
-    var ov=document.createElement("div"); ov.id="popOv"; ov.className="modal-overlay";
-    ov.innerHTML="<div class='modal-box'><div class='modal-icon' style='background:"+color+"'><i class='fa-solid "+icon+"'></i></div><h4 style='color:"+color+"'>"+title+"</h4><p class='text-muted'>"+msg+"</p><button class='btn btn-dark w-100' onclick='this.parentElement.parentElement.remove()'>OK</button></div>";
-    document.body.appendChild(ov);
-}
-
-function savePatient(){
-    var civilID = document.getElementById("Civil_ID").value;
-    var fileNo = document.getElementById("File_No").value;
-    
-    if(civilID.length !== 12){ showPopup("error","Invalid Civil ID","Civil ID must be exactly 12 digits"); return; }
-    if(fileNo.length !== 6){ showPopup("error","Invalid File No","File Number must be exactly 6 digits"); return; }
-    
-    var data={}; 
-    document.querySelectorAll('#hfForm input, #hfForm select, #hfForm textarea').forEach(el=>{ 
-        if(el.id && !el.id.startsWith('V_') && el.id !== 'Next_Appt') data[el.id]=el.value; 
-    });
-    if(!data.Doctor_Name || !data.Patient_Name){ showPopup("error","Missing Fields","Please fill Name, Doctor Name, Civil ID and File No."); return; }
-    
-    var btn=document.getElementById("submitBtn"); 
-    btn.disabled=true; btn.innerText="Saving..."; btn.classList.add("loading");
-
-    if(editingDocId){
-        db.collection("patients").doc(editingDocId).update(data).then(()=>{ 
-            showPopup("success","Updated!","Patient record updated successfully."); 
-            resetForm();
-            window.scrollTo({top:0, behavior:"smooth"});
-        }).catch((error)=>{
-            showPopup("error","Error", error.message);
-            btn.disabled=false; btn.innerText="Update Patient"; btn.classList.remove("loading");
-        });
-    } else {
-        data.timestamp=new Date().toISOString();
-        db.collection("patients").add(data).then((docRef)=>{ 
-            showPopup("success","Saved!","New patient added successfully."); 
-            resetForm();
-            window.scrollTo({top:0, behavior:"smooth"});
-        }).catch((error)=>{
-            showPopup("error","Error Saving", error.message);
-            btn.disabled=false; btn.innerText="SAVE PATIENT DATA"; btn.classList.remove("loading");
-        });
-    }
-}
-
-function saveVisit(){
-    if(!currentPatientId && !editingDocId){ showPopup("error","Error","Please save patient data first before adding visits."); return; }
-    
-    var patientId = currentPatientId || editingDocId;
-    var visitData = {};
-    var visitDate = document.getElementById("Visit_Date").value;
-    var nextAppt = document.getElementById("Next_Appt").value;
-    
-    if(!visitDate){ showPopup("error","Error","Please enter visit date."); return; }
-    
-    document.querySelectorAll('[id^="V_"]').forEach(el=>{ if(el.id) visitData[el.id]=el.value; });
-    visitData.visitDate = visitDate;
-    visitData.visitType = document.getElementById("Visit_Type").value;
-    visitData.timestamp = new Date().toISOString();
-    
-    db.collection("patients").doc(patientId).collection("visits").add(visitData).then(()=>{
-        if(nextAppt){ db.collection("patients").doc(patientId).update({ Next_Appt: nextAppt }); }
-        showPopup("success","Visit Added!","Follow-up visit saved successfully.");
-        clearVisitForm(); loadVisits(patientId);
-    }).catch(error=>{ showPopup("error","Error", error.message); });
-}
-
-function clearVisitForm(){
-    document.querySelectorAll('[id^="V_"]').forEach(el=>{ el.value=""; });
-    document.getElementById("Visit_Date").value="";
-    document.getElementById("Next_Appt").value="";
-    document.getElementById("Visit_Type").value="Routine";
-}
-
-function loadVisits(patientId){
-    if(!patientId) return;
-    currentPatientId = patientId;
-    
-    db.collection("patients").doc(patientId).collection("visits").orderBy("visitDate","desc").get().then(snapshot=>{
-        visits = []; var html = "";
-        if(snapshot.size > 0){
-            html = "<div class='alert alert-info'><h6>Previous Visits:</h6>";
-            snapshot.forEach(doc=>{
-                var v = doc.data(); visits.push({id: doc.id, ...v});
-                html += "<div class='visit-history'><strong>"+v.visitDate+"</strong> ("+v.visitType+")<br>";
-                html += "<small>NYHA: "+(v.V_NYHA||'-')+", BP: "+(v.V_BP||'-')+", Weight: "+(v.V_Weight||'-')+"kg</small></div>";
-            });
-            html += "</div>";
-        }
-        document.getElementById("visitHistory").innerHTML = html;
-    });
-}
-
-function resetForm(){
-    document.querySelectorAll('#hfForm input, #hfForm select, #hfForm textarea').forEach(el=>{ el.value=""; });
-    document.getElementById("searchInput").value="";
-    document.getElementById("searchResults").innerHTML="";
-    editingDocId=null; currentPatientId=null; visits=[];
-    document.getElementById("visitHistory").innerHTML="";
-    
-    // Auto-collapse the visits section
-    document.getElementById("visitsContainer").style.display = "none";
-    document.getElementById("visitToggleIcon").className = "fa fa-plus-circle me-1";
-    
-    document.getElementById("submitBtn").disabled=false; 
-    document.getElementById("submitBtn").innerText="SAVE PATIENT DATA";
-    document.getElementById("submitBtn").classList.remove("loading");
-    document.getElementById("cancelEditBtn").classList.add("d-none"); 
-    document.getElementById("formTitle").innerText="New Patient Entry";
-    document.getElementById("Civil_ID").classList.remove('input-error');
-    document.getElementById("File_No").classList.remove('input-error');
-    document.querySelectorAll('.error-msg').forEach(el=>el.style.display='none');
-}
-
-function searchPatient(){
-    var val=document.getElementById("searchInput").value.trim(), res=document.getElementById("searchResults"); 
-    if(!val){ res.innerHTML=""; return; }
-    res.innerHTML="<div class='text-center'><i class='fa fa-spinner fa-spin'></i> Searching...</div>";
-    db.collection("patients").where("Civil_ID","==",val).get()
-    .then(s=>{ if(s.empty) return db.collection("patients").where("File_No","==",val).get(); return s; })
-    .then(s=>{
-        res.innerHTML=""; 
-        if(s.empty){ res.innerHTML="<div class='alert alert-warning'>No patient found.</div>"; return; }
-        s.forEach(d=>{ renderCard(d.data(), d.id); });
-    }).catch(error=>{ res.innerHTML="<div class='alert alert-danger'>Error searching: "+error.message+"</div>"; });
-}
-
-function renderCard(data, id){
-    PC[id]=data;
-    var allFields = [
-        ['Patient_Name', 'Civil_ID', 'File_No', 'Age', 'Gender', 'Nationality', 'Mobile', 'Doctor_Name'],
-        ['HF_Type', 'EF_Diagnosis', 'Advanced_HF', 'Other_Cardio', 'Valvular_Disease', 'Admissions', 'Last_Admission', 'LOS'],
-        ['Height', 'Weight', 'BMI', 'Dry_Weight', 'NYHA', 'Fatigue', 'Pulse', 'BP', 'SpO2', 'Edema', 'JVP', 'Rales', 'S3', 'Murmur'],
-        ['ECG', 'ECHO', 'CMR_CT', 'Walk_Test', 'Device_Info', 'Cath'],
-        ['DM', 'HTN', 'AF', 'IHD', 'PCI_CABG', 'CKD', 'CVA', 'PVD', 'Smoker', 'Obese_OSA', 'Lung_Dz', 'Liver_Dz', 'FH_Genetics'],
-        ['Lab_HbA1c', 'Lab_Gluc', 'Lab_UreaCreat', 'Lab_eGFR', 'Lab_NaK', 'Lab_BNP', 'Lab_IronFerritin', 'Lab_TrSats', 'Lab_CBC', 'Lab_Thyroid', 'Lab_Lipids', 'Lab_AlbCreat'],
-        ['Med_ARNI', 'Med_SGLT2i', 'Med_GLP1', 'Med_BB', 'Med_MRA', 'Med_ACEiARB', 'Med_Vasodilator', 'Med_Diuretic', 'Med_Lipid', 'Med_Antiplat', 'Med_OAC', 'Med_Arrhythmia', 'Med_Misc', 'Med_K_Chelator'],
-        ['Quad_GDMT', 'Compliance', 'Mortality', 'Rehab', 'Notes', 'Next_Appt']
-    ];
-    var sectionNames = ['Demographics', 'HF Diagnosis', 'Symptoms & Signs', 'Investigations', 'Comorbidities', 'Baseline Labs', 'Medications', 'Outcomes & Management'];
-    
-    // NEW "BACK TO SEARCH" BUTTON AT THE TOP OF RESULTS
-    var html = "<div class='mb-2'><button class='btn btn-sm btn-outline-dark fw-bold' onclick='clearSearchResults()'><i class='fa fa-arrow-left'></i> Back to Search</button></div>";
-    
-    html += "<div class='card p-3 border-primary shadow-sm patient-card' id='pdf-"+id+"'><h4 class='text-primary mb-3'>"+(data.Patient_Name||'Unknown')+"</h4><div class='row'>";
-    allFields.forEach((section, idx)=>{
-        html += "<div class='col-12 mb-3'><h6 class='text-secondary border-bottom pb-1'>"+sectionNames[idx]+"</h6><table class='table table-sm table-bordered'>";
-        section.forEach(field=>{
-            var val = data[field]; var displayVal = (val && val !== '') ? val : '<span class="empty-field">-</span>';
-            var label = field.replace(/_/g, " ").replace(/Lab /g, "").replace(/Med /g, "");
-            html += "<tr><th>"+label+"</th><td>"+displayVal+"</td></tr>";
-        });
-        html += "</table></div>";
-    });
-    
-    html += "</div><div class='d-flex flex-wrap gap-2 mt-2'>";
-    html += "<button class='btn btn-sm btn-primary' onclick='editPt(\""+id+"\")'>Edit</button>";
-    html += "<button class='btn btn-sm btn-info text-white' onclick='showTrends(\""+id+"\")'><i class='fa fa-chart-line'></i> Trends</button>";
-    html += "<button class='btn btn-sm btn-danger' onclick='pdfFromAdmin(\""+id+"\")'>PDF</button>";
-    html += "<button class='btn btn-sm btn-success' onclick='exportPatientExcel(\""+id+"\")'><i class='fa fa-file-excel'></i> Excel</button>";
-    html += "</div></div>";
-    
-    document.getElementById("searchResults").innerHTML = html;
-}
-
-function showTrends(patientId) {
-    document.getElementById("chartModal").classList.remove("d-none");
-    db.collection("patients").doc(patientId).collection("visits").orderBy("visitDate","asc").get().then(snapshot => {
-        var dates = [], weights = [], bnps = [], ntpros = [];
-        snapshot.forEach(doc => {
-            var v = doc.data();
-            dates.push(v.visitDate);
-            weights.push(parseFloat(v.V_Weight) || null);
-            bnps.push(parseFloat(v.V_BNP) || null);
-            ntpros.push(parseFloat(v.V_NTproBNP) || null);
-        });
-
-        if(dates.length === 0){
-            document.getElementById('chartModal').classList.add('d-none');
-            showPopup("warning", "No Data", "No visits recorded for this patient yet.");
-            return;
-        }
-        
-        if(weightChartInst) weightChartInst.destroy();
-        if(ntproChartInst) ntproChartInst.destroy();
-        if(bnpChartInst) bnpChartInst.destroy();
-        
-        var commonOptions = { responsive: true, maintainAspectRatio: false, scales: { x: { ticks: { font: { size: 10 } } } } };
-
-        weightChartInst = new Chart(document.getElementById('weightChart').getContext('2d'), {
-            type: 'line',
-            data: { labels: dates, datasets: [{ label: 'Weight (kg)', data: weights, borderColor: '#17a2b8', backgroundColor: '#17a2b8', tension: 0.3, spanGaps: true }] },
-            options: commonOptions
-        });
-
-        ntproChartInst = new Chart(document.getElementById('ntproChart').getContext('2d'), {
-            type: 'line',
-            data: { labels: dates, datasets: [{ label: 'NT-proBNP', data: ntpros, borderColor: '#dc3545', backgroundColor: '#dc3545', tension: 0.3, spanGaps: true }] },
-            options: commonOptions
-        });
-
-        bnpChartInst = new Chart(document.getElementById('bnpChart').getContext('2d'), {
-            type: 'line',
-            data: { labels: dates, datasets: [{ label: 'BNP', data: bnps, borderColor: '#ffc107', backgroundColor: '#ffc107', tension: 0.3, spanGaps: true }] },
-            options: commonOptions
-        });
-    });
-}
-
-function loadAdmin(){
-    var tb=document.getElementById("adminTableBody"); 
-    tb.innerHTML="<tr><td colspan='4' class='text-center'><i class='fa fa-spinner fa-spin'></i> Loading...</td></tr>";
-    
-    var today = new Date().toISOString().split('T')[0];
-    var upcomingHTML = "";
-
-    db.collection("patients").orderBy("timestamp","desc").get().then(snap=>{
-        tb.innerHTML=""; 
-        document.getElementById("totalPatients").innerText=snap.size;
-        if(snap.size===0){ tb.innerHTML="<tr><td colspan='4'>No patients yet</td></tr>"; return; }
-        
-        snap.forEach(docSnap=>{
-            var d=docSnap.data(), id=docSnap.id; 
-            PC[id]=d;
-            
-            if(d.Next_Appt && d.Next_Appt >= today) {
-                var daysAway = Math.floor((new Date(d.Next_Appt) - new Date(today)) / (1000*60*60*24));
-                if(daysAway <= 14) {
-                    var color = daysAway <= 3 ? "danger" : (daysAway <= 7 ? "warning" : "info");
-                    upcomingHTML += "<div class='alert alert-"+color+" py-1 px-2 mb-1 d-flex justify-content-between align-items-center' style='font-size:0.85rem;'><span><b>"+(d.Patient_Name||'Unknown')+"</b> ("+(d.File_No||'')+ ")</span><span><i class='fa fa-calendar'></i> "+d.Next_Appt+" (in "+daysAway+" days)</span></div>";
-                }
-            }
-
-            tb.innerHTML+="<tr><td>"+(d.File_No||'')+"</td><td>"+(d.Patient_Name||'')+"</td><td>"+(d.Doctor_Name||'')+"</td><td><button class='btn btn-sm btn-primary me-1' onclick='editFromAdmin(\""+id+"\")'>Edit</button><button class='btn btn-sm btn-info text-white me-1' onclick='pdfFromAdmin(\""+id+"\")'>PDF</button><button class='btn btn-sm btn-success me-1' onclick='exportPatientExcel(\""+id+"\")'>Excel</button><button class='btn btn-sm btn-danger' onclick='delPt(\""+id+"\")'>Del</button></td></tr>";
-        });
-        
-        document.getElementById("upcomingAppts").innerHTML = upcomingHTML || "<p class='text-muted small mb-0'>No appointments in the next 14 days.</p>";
-    }).catch(error=>{ tb.innerHTML="<tr><td colspan='4' class='text-danger'>Error loading data</td></tr>"; });
-}
-
-function exportPatientExcel(id){
-    var data = PC[id];
-    if(!data){
-        showPopup("error","Error","Patient data not found");
-        return;
-    }
-    
-    db.collection("patients").doc(id).collection("visits").orderBy("visitDate","desc").get()
-    .then(visitSnap=>{
-        var visitsData = [];
-        visitSnap.forEach(doc=>{
-            visitsData.push(doc.data());
-        });
-        generateExcel(data, visitsData, id);
-    })
-    .catch(()=>{
-        generateExcel(data, [], id);
-    });
-}
-
-function generateExcel(data, visitsData, id){
-    var wb = XLSX.utils.book_new();
-    
-    var patientRows = [];
-    patientRows.push(["MUBARAK AL-KABEER HOSPITAL - HEART FAILURE REGISTRY"]);
-    patientRows.push(["Patient Name:", data.Patient_Name || '']);
-    patientRows.push(["Civil ID:", data.Civil_ID || '']);
-    patientRows.push(["File No:", data.File_No || '']);
-    patientRows.push(["Age:", data.Age || '']);
-    patientRows.push(["Gender:", data.Gender || '']);
-    patientRows.push(["Nationality:", data.Nationality || '']);
-    patientRows.push(["Mobile:", data.Mobile || '']);
-    patientRows.push(["Doctor:", data.Doctor_Name || '']);
-    patientRows.push([]);
-    
-    var sections = [
-        {name:'HF DIAGNOSIS', fields:['HF_Type', 'EF_Diagnosis', 'Advanced_HF', 'Other_Cardio', 'Valvular_Disease', 'Admissions', 'Last_Admission', 'LOS']},
-        {name:'SYMPTOMS & SIGNS', fields:['Height', 'Weight', 'BMI', 'Dry_Weight', 'NYHA', 'Fatigue', 'Pulse', 'BP', 'SpO2', 'Edema', 'JVP', 'Rales', 'S3', 'Murmur']},
-        {name:'INVESTIGATIONS', fields:['ECG', 'ECHO', 'CMR_CT', 'Walk_Test', 'Device_Info', 'Cath']},
-        {name:'COMORBIDITIES', fields:['DM', 'HTN', 'AF', 'IHD', 'PCI_CABG', 'CKD', 'CVA', 'PVD', 'Smoker', 'Obese_OSA', 'Lung_Dz', 'Liver_Dz', 'FH_Genetics']},
-        {name:'LABORATORY (BASELINE)', fields:['Lab_HbA1c', 'Lab_Gluc', 'Lab_UreaCreat', 'Lab_eGFR', 'Lab_NaK', 'Lab_BNP', 'Lab_IronFerritin', 'Lab_TrSats', 'Lab_CBC', 'Lab_Thyroid', 'Lab_Lipids', 'Lab_AlbCreat']},
-        {name:'MEDICATIONS', fields:['Med_ARNI', 'Med_SGLT2i', 'Med_GLP1', 'Med_BB', 'Med_MRA', 'Med_ACEiARB', 'Med_Vasodilator', 'Med_Diuretic', 'Med_Lipid', 'Med_Antiplat', 'Med_OAC', 'Med_Arrhythmia', 'Med_Misc', 'Med_K_Chelator']},
-        {name:'OUTCOMES & FOLLOW-UP', fields:['Quad_GDMT', 'Compliance', 'Mortality', 'Rehab', 'Notes', 'Next_Appt']}
-    ];
-    
-    sections.forEach(sec=>{
-        patientRows.push([sec.name]);
-        sec.fields.forEach(field=>{
-            var label = field.replace(/_/g, " ").replace(/Lab /g, "").replace(/Med /g, "");
-            patientRows.push([label, data[field] || '-']);
-        });
-        patientRows.push([]);
-    });
-    
-    var ws1 = XLSX.utils.aoa_to_sheet(patientRows);
-    XLSX.utils.book_append_sheet(wb, ws1, "Patient Info");
-    
-    if(visitsData.length > 0){
-        var visitRows = [];
-        visitRows.push(["VISIT HISTORY"]);
-        visitRows.push([]);
-        
-        visitsData.forEach((visit, idx)=>{
-            visitRows.push(["Visit #"+(visitsData.length-idx), "Date: "+visit.visitDate, "Type: "+visit.visitType]);
-            visitRows.push(["Symptoms"]);
-            visitRows.push(["Fatigue", visit.V_Fatigue || '-']);
-            visitRows.push(["NYHA", visit.V_NYHA || '-']);
-            visitRows.push(["Edema", visit.V_Edema || '-']);
-            
-            visitRows.push(["Vitals"]);
-            visitRows.push(["Pulse", visit.V_Pulse || '-']);
-            visitRows.push(["BP", visit.V_BP || '-']);
-            visitRows.push(["SpO2", visit.V_SpO2 || '-']);
-            visitRows.push(["Weight", visit.V_Weight || '-']);
-            visitRows.push(["JVP", visit.V_JVP || '-']);
-            visitRows.push(["Rales", visit.V_Rales || '-']);
-            visitRows.push(["S3", visit.V_S3 || '-']);
-            
-            visitRows.push(["ECG & Echo"]);
-            visitRows.push(["LBBB", visit.V_LBBB || '-']);
-            visitRows.push(["QRS Width", visit.V_QRS || '-']);
-            visitRows.push(["Arrhythmia", visit.V_Arrhythmia || '-']);
-            visitRows.push(["EF Change", visit.V_EF_Change || '-']);
-            visitRows.push(["Other Echo Findings", visit.V_Echo_Other || '-']);
-            
-            visitRows.push(["Labs"]);
-            visitRows.push(["HbA1c", visit.V_HbA1c || '-']);
-            visitRows.push(["Gluc", visit.V_Gluc || '-']);
-            visitRows.push(["Urea", visit.V_Urea || '-']);
-            visitRows.push(["Creat (umol/L)", visit.V_Creat || '-']);
-            visitRows.push(["eGFR", visit.V_eGFR || '-']);
-            visitRows.push(["Na", visit.V_Na || '-']);
-            visitRows.push(["K", visit.V_K || '-']);
-            visitRows.push(["BNP", visit.V_BNP || '-']);
-            visitRows.push(["NT-pro BNP", visit.V_NTproBNP || '-']);
-            visitRows.push(["INR", visit.V_INR || '-']);
-            visitRows.push(["Iron", visit.V_Iron || '-']);
-            visitRows.push(["Transferrin", visit.V_Transferrin || '-']);
-            visitRows.push(["Ferritin", visit.V_Ferritin || '-']);
-            visitRows.push(["WBC", visit.V_WBC || '-']);
-            visitRows.push(["Hb", visit.V_Hb || '-']);
-            visitRows.push(["Plt", visit.V_Plt || '-']);
-            visitRows.push(["TSH", visit.V_TSH || '-']);
-            visitRows.push(["Free T4", visit.V_FreeT4 || '-']);
-            
-            visitRows.push(["Plan & Notes"]);
-            visitRows.push(["Adverse Effects", visit.V_Adverse || '-']);
-            visitRows.push(["Plan", visit.V_Plan || '-']);
-            visitRows.push(["Other Notes", visit.V_Others || '-']);
-            visitRows.push([]);
-        });
-        
-        var ws2 = XLSX.utils.aoa_to_sheet(visitRows);
-        XLSX.utils.book_append_sheet(wb, ws2, "Visits");
-    }
-    
-    XLSX.writeFile(wb, "HF_Registry_"+(data.File_No||'unknown')+"_"+(data.Patient_Name||'patient')+".xlsx");
-    showPopup("success","Excel Exported!","File downloaded successfully.");
-}
-
-function pdfFromAdmin(id){
-    var data = PC[id];
-    if(!data){ showPopup("error","Error","Patient data not found"); return; }
-    
-    db.collection("patients").doc(id).collection("visits").orderBy("visitDate","desc").get().then(visitSnap=>{
-        var visitsData = []; visitSnap.forEach(doc=>{ visitsData.push(doc.data()); }); generatePDF(data, visitsData, id);
-    }).catch(()=>{ generatePDF(data, [], id); });
-}
-
-function generatePDF(data, visitsData, id){
-    var container = document.getElementById('pdfContainer');
-    container.innerHTML = '';
-    
-    var html = "<div style='width:800px; background:white; padding:20px; font-family:Arial;'>";
-    html += "<div style='text-align:center; border-bottom:3px solid #8b0000; padding-bottom:10px; margin-bottom:20px;'>";
-    html += "<h2 style='color:#8b0000; margin:0;'>Mubarak Al-Kabeer Hospital</h2>";
-    html += "<h3 style='margin:5px 0;'>Heart Failure Clinic Registry</h3>";
-    html += "</div>";
-    
-    html += "<h3 style='color:#333;'>Patient: "+(data.Patient_Name||'Unknown')+" | File: "+(data.File_No||'N/A')+"</h3>";
-    
-    var sections = [
-        {name:'Demographics', fields:['Patient_Name', 'Civil_ID', 'File_No', 'Age', 'Gender', 'Nationality', 'Mobile', 'Doctor_Name']},
-        {name:'HF Diagnosis', fields:['HF_Type', 'EF_Diagnosis', 'Advanced_HF', 'Other_Cardio', 'Valvular_Disease', 'Admissions', 'Last_Admission', 'LOS']},
-        {name:'Symptoms & Signs', fields:['Height', 'Weight', 'BMI', 'Dry_Weight', 'NYHA', 'Fatigue', 'Pulse', 'BP', 'SpO2', 'Edema', 'JVP', 'Rales', 'S3', 'Murmur']},
-        {name:'Investigations', fields:['ECG', 'ECHO', 'CMR_CT', 'Walk_Test', 'Device_Info', 'Cath']},
-        {name:'Comorbidities', fields:['DM', 'HTN', 'AF', 'IHD', 'PCI_CABG', 'CKD', 'CVA', 'PVD', 'Smoker', 'Obese_OSA', 'Lung_Dz', 'Liver_Dz', 'FH_Genetics']},
-        {name:'Laboratory (Baseline)', fields:['Lab_HbA1c', 'Lab_Gluc', 'Lab_UreaCreat', 'Lab_eGFR', 'Lab_NaK', 'Lab_BNP', 'Lab_IronFerritin', 'Lab_TrSats', 'Lab_CBC', 'Lab_Thyroid', 'Lab_Lipids', 'Lab_AlbCreat']},
-        {name:'Medications', fields:['Med_ARNI', 'Med_SGLT2i', 'Med_GLP1', 'Med_BB', 'Med_MRA', 'Med_ACEiARB', 'Med_Vasodilator', 'Med_Diuretic', 'Med_Lipid', 'Med_Antiplat', 'Med_OAC', 'Med_Arrhythmia', 'Med_Misc', 'Med_K_Chelator']},
-        {name:'Outcomes & Follow-up', fields:['Quad_GDMT', 'Compliance', 'Mortality', 'Rehab', 'Notes', 'Next_Appt']}
-    ];
-    
-    sections.forEach(sec=>{
-        html += "<h4 style='background:#f0f0f0; padding:8px; margin-top:15px; color:#8b0000;'>"+sec.name+"</h4>";
-        html += "<table style='width:100%; border-collapse:collapse; font-size:12px;'>";
-        sec.fields.forEach(field=>{
-            var val = data[field] || '-';
-            var label = field.replace(/_/g, " ").replace(/Lab /g, "").replace(/Med /g, "");
-            html += "<tr style='border-bottom:1px solid #ddd;'><td style='width:40%; padding:6px; background:#fafafa; font-weight:bold;'>"+label+"</td><td style='padding:6px;'>"+val+"</td></tr>";
-        });
-        html += "</table>";
-    });
-    
-    if(visitsData.length > 0){
-        html += "<div style='page-break-before:always;'></div>";
-        html += "<h3 style='color:#8b0000; margin-top:20px;'>Visit History & Follow-ups</h3>";
-        
-        visitsData.forEach((visit, idx)=>{
-            html += "<div style='border:2px solid #17a2b8; margin:15px 0; padding:15px; border-radius:8px;'>";
-            html += "<h4 style='color:#17a2b8; margin-top:0;'>Visit #"+(visitsData.length-idx)+": "+visit.visitDate+" ("+visit.visitType+")</h4>";
-            
-            var vSections = [
-                {name:'Symptoms', fields:['V_Fatigue', 'V_NYHA', 'V_Edema']},
-                {name:'Signs/Vitals', fields:['V_Pulse', 'V_BP', 'V_SpO2', 'V_Weight', 'V_JVP', 'V_Rales', 'V_S3']},
-                {name:'ECG', fields:['V_LBBB', 'V_QRS', 'V_Arrhythmia']},
-                {name:'Echo', fields:['V_EF_Change', 'V_Echo_Other']},
-                {name:'Labs', fields:['V_HbA1c', 'V_Gluc', 'V_Urea', 'V_Creat', 'V_eGFR', 'V_Na', 'V_K', 'V_BNP', 'V_NTproBNP', 'V_INR', 'V_Iron', 'V_Transferrin', 'V_Ferritin', 'V_WBC', 'V_Hb', 'V_Plt', 'V_TSH', 'V_FreeT4']},
-                {name:'Plan', fields:['V_Adverse', 'V_Plan', 'V_Others']}
-            ];
-            
-            vSections.forEach(vsec=>{
-                html += "<h5 style='margin:10px 0 5px 0; color:#555;'>"+vsec.name+"</h5>";
-                html += "<table style='width:100%; border-collapse:collapse; font-size:11px; margin-bottom:10px;'>";
-                vsec.fields.forEach(vf=>{
-                    if(visit[vf]){
-                        var vlabel = vf.replace('V_', '').replace(/_/g, ' ');
-                        html += "<tr style='border-bottom:1px solid #eee;'><td style='width:40%; padding:4px; background:#f5f5f5;'>"+vlabel+"</td><td style='padding:4px;'>"+visit[vf]+"</td></tr>";
-                    }
-                });
-                html += "</table>";
-            });
-            
-            html += "</div>";
-        });
-    }
-    
-    html += "<div style='margin-top:30px; text-align:center; font-size:11px; color:#666;'>Generated: "+new Date().toLocaleString()+"</div>";
-    html += "</div>";
-    
-    container.innerHTML = html;
-    var element = container.firstChild;
-    
-    html2pdf().from(element).set({
-        margin: 0.5,
-        filename: "HF_Report_"+(data.File_No||'unknown')+"_"+(data.Patient_Name||'patient')+".pdf",
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-    }).save().then(() => { container.innerHTML = ''; });
-}
-
-function editPt(id){
-    var d=PC[id]; editingDocId=id; currentPatientId=id;
-    Object.keys(d).forEach(k=>{ var el=document.getElementById(k); if(el) el.value=d[k]||""; });
-    document.getElementById("formTitle").innerText="Editing: "+d.Patient_Name;
-    document.getElementById("cancelEditBtn").classList.remove("d-none"); 
-    document.getElementById("submitBtn").innerText="Update Patient";
-    loadVisits(id); 
-    
-    // Auto-expand visits when editing
-    document.getElementById("visitsContainer").style.display = "block";
-    document.getElementById("visitToggleIcon").className = "fa fa-minus-circle me-1";
-    
-    window.scrollTo({top:0, behavior:"smooth"});
-}
-
-function editFromAdmin(id){ editPt(id); goToMain(); }
-
-function delPt(id){ 
-    if(confirm("Permanently delete this patient record?")){ 
-        db.collection("patients").doc(id).delete().then(()=>{ loadAdmin(); }); 
-    } 
-}
-
-function pdfCard(id, fno){ 
-    var el=document.getElementById(id); if(!el) return; 
-    html2pdf().from(el).set({margin:0.5, filename:"HF_"+fno+".pdf", html2canvas:{scale:2}}).save(); 
-}
-</script>
-</body>
-</html>
+        <div class="d-flex justify-content-between align-items-center mb-2 border-bottom pb-2
