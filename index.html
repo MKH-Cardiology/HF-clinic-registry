@@ -30,9 +30,12 @@
     /* ===== LOGIN SCREEN ===== */
     #pageLogin {
         display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
         min-height: 100vh;
+        width: 100%;
+        z-index: 9999;
         background: linear-gradient(160deg, #1a0000 0%, #3d0000 40%, #8b0000 100%);
-        position: relative;
         overflow: hidden;
     }
     #pageLogin::before {
@@ -661,6 +664,7 @@ auth.onAuthStateChanged(function(user) {
     } else {
         // Not logged in — show login
         document.getElementById('pageLogin').style.display = 'flex';
+        document.body.classList.add('login-active');
         document.getElementById('pageMain').classList.remove('active');
         document.getElementById('pageAdmin').classList.remove('active');
     }
