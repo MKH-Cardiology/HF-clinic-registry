@@ -1,17 +1,9 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HF Registry</title>
-    <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%20%22HF%20Registry%22%2C%20%22short_name%22%3A%20%22HF%20Registry%22%2C%20%22start_url%22%3A%20%22./%22%2C%20%22display%22%3A%20%22standalone%22%2C%20%22background_color%22%3A%20%22%238b0000%22%2C%20%22theme_color%22%3A%20%22%238b0000%22%2C%20%22icons%22%3A%20%5B%7B%22src%22%3A%20%22./icon.png%22%2C%20%22sizes%22%3A%20%22192x192%22%2C%20%22type%22%3A%20%22image/png%22%7D%2C%20%7B%22src%22%3A%20%22./icon.png%22%2C%20%22sizes%22%3A%20%22512x512%22%2C%20%22type%22%3A%20%22image/png%22%7D%5D%7D">
-    <link rel="apple-touch-icon" href="./icon.png">
-    <link rel="icon" type="image/png" href="./icon.png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="HF Registry">
-    <meta name="theme-color" content="#8b0000">
+    <title>HF Registry Pro</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -23,278 +15,140 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root{--primary:#8b0000;--primary-dark:#5c0000;--secondary:#6c757d}
-        body{background:#f4f6f9;font-family:'DM Sans',sans-serif;font-size:0.85rem}
-        body.login-active{background:#8b0000!important;}
+        body{background:#f4f6f9;font-family:'DM Sans',sans-serif;font-size:0.85rem;padding-bottom:80px;}
+        body.login-active{background:#8b0000!important;padding-bottom:0;}
 
-```
-    /* ===== LOGIN SCREEN ===== */
-    #pageLogin{display:none;position:fixed;top:0;left:0;right:0;bottom:0;min-height:100vh;width:100%;z-index:9999;background:linear-gradient(160deg,#1a0000 0%,#3d0000 40%,#8b0000 100%);overflow:hidden;}
-    #pageLogin::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at center,rgba(139,0,0,0.15) 0%,transparent 60%);animation:pulse-bg 4s ease-in-out infinite;}
-    @keyframes pulse-bg{0%,100%{transform:scale(1);opacity:0.5}50%{transform:scale(1.1);opacity:1}}
-    .login-container{position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:30px 20px;}
-    .login-logo{text-align:center;margin-bottom:40px;animation:fadeDown 0.8s ease forwards;}
-    @keyframes fadeDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
-    .login-logo .heart-icon{font-size:3rem;color:#ff6b6b;filter:drop-shadow(0 0 20px rgba(255,107,107,0.5));animation:heartbeat 1.5s ease-in-out infinite;}
-    @keyframes heartbeat{0%,100%{transform:scale(1)}15%{transform:scale(1.15)}30%{transform:scale(1)}45%{transform:scale(1.08)}}
-    .login-logo h1{font-family:'Crimson Pro',serif;color:#fff;font-size:1.6rem;font-weight:700;margin:12px 0 4px;letter-spacing:0.02em;}
-    .login-logo p{color:rgba(255,255,255,0.6);font-size:0.8rem;font-weight:300;letter-spacing:0.08em;text-transform:uppercase;}
-    .login-card{background:rgba(255,255,255,0.07);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.12);border-radius:20px;padding:35px 28px;width:100%;max-width:380px;animation:fadeUp 0.8s ease 0.2s forwards;opacity:1;}
-    @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-    .login-card h2{font-family:'Crimson Pro',serif;color:#fff;font-size:1.4rem;font-weight:600;margin-bottom:6px;}
-    .login-card .subtitle{color:rgba(255,255,255,0.5);font-size:0.78rem;margin-bottom:28px;}
-    .login-field{margin-bottom:16px;}
-    .login-field label{color:rgba(255,255,255,0.7);font-size:0.72rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;display:block;margin-bottom:6px;}
-    .login-field .input-wrap{position:relative;}
-    .login-field .input-wrap i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,0.4);font-size:0.85rem;}
-    .login-field input{width:100%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:12px 14px 12px 38px;color:#fff;font-size:0.9rem;font-family:'DM Sans',sans-serif;transition:all 0.2s;outline:none;}
-    .login-field input:focus{border-color:rgba(255,107,107,0.6);background:rgba(255,255,255,0.12);box-shadow:0 0 0 3px rgba(255,107,107,0.15);}
-    .login-field input::placeholder{color:rgba(255,255,255,0.3);}
-    .btn-login{width:100%;padding:13px;background:linear-gradient(135deg,#c0392b,#8b0000);border:none;border-radius:10px;color:#fff;font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:600;letter-spacing:0.05em;cursor:pointer;transition:all 0.2s;margin-top:8px;box-shadow:0 4px 20px rgba(139,0,0,0.4);}
-    .btn-login:hover{transform:translateY(-1px);box-shadow:0 6px 25px rgba(139,0,0,0.5);}
-    .btn-login:active{transform:translateY(0);}
-    .btn-login:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
-    .login-error{background:rgba(220,53,69,0.2);border:1px solid rgba(220,53,69,0.4);border-radius:8px;color:#ff8a8a;font-size:0.8rem;padding:10px 14px;margin-top:14px;display:none;text-align:center;}
-    .login-footer{margin-top:28px;text-align:center;color:rgba(255,255,255,0.3);font-size:0.72rem;}
+        /* ===== LOGIN SCREEN ===== */
+        #pageLogin{display:none;position:fixed;top:0;left:0;right:0;bottom:0;min-height:100vh;width:100%;z-index:9999;background:linear-gradient(160deg,#1a0000 0%,#3d0000 40%,#8b0000 100%);overflow:hidden;}
+        #pageLogin::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at center,rgba(139,0,0,0.15) 0%,transparent 60%);animation:pulse-bg 4s ease-in-out infinite;}
+        @keyframes pulse-bg{0%,100%{transform:scale(1);opacity:0.5}50%{transform:scale(1.1);opacity:1}}
+        .login-container{position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:30px 20px;}
+        .login-logo{text-align:center;margin-bottom:40px;animation:fadeDown 0.8s ease forwards;}
+        @keyframes fadeDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+        .login-logo .heart-icon{font-size:3rem;color:#ff6b6b;filter:drop-shadow(0 0 20px rgba(255,107,107,0.5));animation:heartbeat 1.5s ease-in-out infinite;}
+        @keyframes heartbeat{0%,100%{transform:scale(1)}15%{transform:scale(1.15)}30%{transform:scale(1)}45%{transform:scale(1.08)}}
+        .login-logo h1{font-family:'Crimson Pro',serif;color:#fff;font-size:1.6rem;font-weight:700;margin:12px 0 4px;letter-spacing:0.02em;}
+        .login-logo p{color:rgba(255,255,255,0.6);font-size:0.8rem;font-weight:300;letter-spacing:0.08em;text-transform:uppercase;}
+        .login-card{background:rgba(255,255,255,0.07);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.12);border-radius:20px;padding:35px 28px;width:100%;max-width:380px;animation:fadeUp 0.8s ease 0.2s forwards;opacity:1;}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+        .login-card h2{font-family:'Crimson Pro',serif;color:#fff;font-size:1.4rem;font-weight:600;margin-bottom:6px;}
+        .login-card .subtitle{color:rgba(255,255,255,0.5);font-size:0.78rem;margin-bottom:28px;}
+        .login-field{margin-bottom:16px;}
+        .login-field label{color:rgba(255,255,255,0.7);font-size:0.72rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;display:block;margin-bottom:6px;}
+        .login-field .input-wrap{position:relative;}
+        .login-field .input-wrap i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,0.4);font-size:0.85rem;}
+        .login-field input{width:100%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:12px 14px 12px 38px;color:#fff;font-size:0.9rem;font-family:'DM Sans',sans-serif;transition:all 0.2s;outline:none;}
+        .login-field input:focus{border-color:rgba(255,107,107,0.6);background:rgba(255,255,255,0.12);box-shadow:0 0 0 3px rgba(255,107,107,0.15);}
+        .login-field input::placeholder{color:rgba(255,255,255,0.3);}
+        .btn-login{width:100%;padding:13px;background:linear-gradient(135deg,#c0392b,#8b0000);border:none;border-radius:10px;color:#fff;font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:600;letter-spacing:0.05em;cursor:pointer;transition:all 0.2s;margin-top:8px;box-shadow:0 4px 20px rgba(139,0,0,0.4);}
+        .btn-login:hover{transform:translateY(-1px);box-shadow:0 6px 25px rgba(139,0,0,0.5);}
+        .btn-login:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
+        .login-error{background:rgba(220,53,69,0.2);border:1px solid rgba(220,53,69,0.4);border-radius:8px;color:#ff8a8a;font-size:0.8rem;padding:10px 14px;margin-top:14px;display:none;text-align:center;}
+        .login-footer{margin-top:28px;text-align:center;color:rgba(255,255,255,0.3);font-size:0.72rem;}
 
-    /* ===== LOADING SCREEN ===== */
-    #pageLoading{display:flex;min-height:100vh;background:linear-gradient(160deg,#1a0000 0%,#8b0000 100%);align-items:center;justify-content:center;flex-direction:column;gap:16px;}
-    .loading-heart{font-size:2.5rem;animation:heartbeat 1.2s ease-in-out infinite;}
-    .loading-text{color:rgba(255,255,255,0.6);font-size:0.85rem;letter-spacing:0.06em;}
+        /* ===== LOADING SCREEN ===== */
+        #pageLoading{display:flex;min-height:100vh;background:linear-gradient(160deg,#1a0000 0%,#8b0000 100%);align-items:center;justify-content:center;flex-direction:column;gap:16px;}
+        .loading-heart{font-size:2.5rem;animation:heartbeat 1.2s ease-in-out infinite;}
+        .loading-text{color:rgba(255,255,255,0.6);font-size:0.85rem;letter-spacing:0.06em;}
 
-    /* ===== MAIN APP ===== */
-    .clinic-header{background:linear-gradient(135deg,var(--primary),#b30000);color:#fff;padding:25px 0;border-radius:0 0 15px 15px;position:relative}
-    .card{border:none;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.05);margin-bottom:20px}
-    .section-title{color:var(--primary);font-weight:bold;border-bottom:2px solid #e9ecef;padding-bottom:5px;margin-top:20px;margin-bottom:12px}
-    .visit-section{background:#fff;border-left:4px solid var(--primary);padding:15px;margin-bottom:15px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
-    label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom:2px}
-    .form-control,.form-select{border-radius:6px;font-size:.85rem;padding:4px 8px}
-    .btn-medical{background:var(--primary);color:#fff;font-weight:bold;width:100%;padding:12px;border:none;border-radius:8px}
-    .btn-visit{background:#17a2b8;color:#fff;font-weight:bold}
-    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;justify-content:center;align-items:center}
-    .modal-box{background:#fff;border-radius:16px;padding:30px 20px;max-width:500px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.4);animation:pop .3s ease;max-height:90vh;overflow-y:auto;}
-    @keyframes pop{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
-    .page{display:none}.page.active{display:block}
-    .loading{opacity:0.6;pointer-events:none}
-    .patient-card{font-size:0.8rem;margin-bottom:15px;}
-    .patient-card th{background:#f8f9fa;width:40%;font-weight:600}
-    .patient-card td{background:#fff}
-    .empty-field{color:#adb5bd;font-style:italic}
-    .visit-history{border-left:3px solid #17a2b8;padding-left:10px;margin:10px 0}
-    .input-error{border:2px solid #dc3545!important}
-    .error-msg{color:#dc3545;font-size:0.7rem;display:none}
-    .chart-container{position:relative;height:22vh;width:100%;margin-bottom:15px;}
-    .clickable-tab{cursor:pointer;padding:10px;background-color:#e9ecef;border-radius:5px;border-left:5px solid var(--primary);transition:0.2s;}
-    .clickable-tab:hover{background-color:#dee2e6;}
-    #pdfContainer{position:fixed;top:0;left:0;width:100%;min-height:100%;overflow:auto;z-index:99998;background:#fff;display:none;}
-    #pdfContainer.active{display:block;}
-    .btn-logout{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;font-size:0.75rem;padding:5px 12px;border-radius:20px;cursor:pointer;transition:all 0.2s;}
-    .btn-logout:hover{background:rgba(255,255,255,0.25);}
-    .user-badge{font-size:0.7rem;color:rgba(255,255,255,0.7);margin-bottom:4px;}
+        /* ===== MAIN APP ===== */
+        .clinic-header{background:linear-gradient(135deg,var(--primary),#b30000);color:#fff;padding:25px 0;border-radius:0 0 15px 15px;position:relative}
+        .card{border:none;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.05);margin-bottom:20px}
+        .section-title{color:var(--primary);font-weight:bold;border-bottom:2px solid #e9ecef;padding-bottom:5px;margin-top:20px;margin-bottom:12px}
+        .visit-section{background:#fff;border-left:4px solid var(--primary);padding:15px;margin-bottom:15px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+        label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom:2px}
+        .form-control,.form-select{border-radius:6px;font-size:.85rem;padding:4px 8px}
+        .btn-medical{background:var(--primary);color:#fff;font-weight:bold;width:100%;padding:12px;border:none;border-radius:8px}
+        .btn-visit{background:#17a2b8;color:#fff;font-weight:bold}
+        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;justify-content:center;align-items:center}
+        .modal-box{background:#fff;border-radius:16px;padding:30px 20px;max-width:500px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.4);animation:pop .3s ease;max-height:90vh;overflow-y:auto;}
+        @keyframes pop{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+        .page{display:none}.page.active{display:block}
+        .loading{opacity:0.6;pointer-events:none}
+        .patient-card{font-size:0.8rem;margin-bottom:15px;}
+        .patient-card th{background:#f8f9fa;width:40%;font-weight:600}
+        .patient-card td{background:#fff}
+        .empty-field{color:#adb5bd;font-style:italic}
+        .visit-history{border-left:3px solid #17a2b8;padding-left:10px;margin:10px 0}
+        .input-error{border:2px solid #dc3545!important}
+        .error-msg{color:#dc3545;font-size:0.7rem;display:none}
+        .chart-container{position:relative;height:22vh;width:100%;margin-bottom:15px;}
+        .clickable-tab{cursor:pointer;padding:10px;background-color:#e9ecef;border-radius:5px;border-left:5px solid var(--primary);transition:0.2s;}
+        .clickable-tab:hover{background-color:#dee2e6;}
+        #pdfContainer{position:fixed;top:0;left:0;width:100%;min-height:100%;overflow:auto;z-index:99998;background:#fff;display:none;}
+        #pdfContainer.active{display:block;}
+        .btn-logout{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;font-size:0.75rem;padding:5px 12px;border-radius:20px;cursor:pointer;transition:all 0.2s;}
+        .btn-logout:hover{background:rgba(255,255,255,0.25);}
+        .user-badge{font-size:0.7rem;color:rgba(255,255,255,0.7);margin-bottom:4px;}
 
-    /* ===== ANALYTICS PAGE ===== */
-    #pageAnalytics { display:none; }
-    #pageAnalytics.active { display:block; }
+        /* ===== STEPPER WIZARD ===== */
+        .stepper-nav { display:flex; justify-content:space-between; overflow-x:auto; padding-bottom:10px; margin-bottom:20px; border-bottom:2px solid #eee; scrollbar-width: none; }
+        .stepper-nav::-webkit-scrollbar { display: none; }
+        .step-btn { background:none; border:none; color:#adb5bd; font-weight:600; font-size:0.8rem; padding:8px 12px; cursor:pointer; white-space:nowrap; border-bottom:3px solid transparent; transition:0.3s; }
+        .step-btn.active { color:var(--primary); border-bottom-color:var(--primary); }
+        .form-step { display:none; animation: fadeIn 0.4s; }
+        .form-step.active { display:block; }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
+        .step-controls { display:flex; justify-content:space-between; margin-top:20px; padding-top:15px; border-top:1px solid #eee; }
 
-    .analytics-header {
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-        color: #fff;
-        padding: 22px 0 18px;
-        border-radius: 0 0 15px 15px;
-        position: relative;
-    }
-    .analytics-header h2 { font-family: 'Crimson Pro', serif; letter-spacing: 0.03em; }
+        /* ===== STICKY FOOTER ===== */
+        .sticky-action-bar { position:fixed; bottom:0; left:0; width:100%; background:#fff; padding:12px 20px; box-shadow:0 -4px 15px rgba(0,0,0,0.1); display:flex; justify-content:center; z-index:1000; display:none; }
+        .sticky-action-bar.active { display:flex; }
+        .sticky-action-bar .btn-medical { max-width: 400px; margin: 0 auto; }
 
-    .stat-kpi {
-        background: #fff;
-        border-radius: 12px;
-        padding: 16px 14px;
-        box-shadow: 0 2px 12px rgba(0,0,0,0.07);
-        border-top: 4px solid var(--primary);
-        margin-bottom: 14px;
-        text-align: center;
-        transition: transform 0.2s;
-    }
-    .stat-kpi:hover { transform: translateY(-2px); }
-    .stat-kpi .kpi-num {
-        font-family: 'Crimson Pro', serif;
-        font-size: 2.2rem;
-        font-weight: 700;
-        color: var(--primary);
-        line-height: 1;
-    }
-    .stat-kpi .kpi-label { font-size: 0.72rem; color: #6c757d; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px; }
-    .stat-kpi .kpi-sub { font-size: 0.7rem; color: #adb5bd; margin-top: 2px; }
+        /* ===== COMORBIDITY PILLS ===== */
+        .pill-grid { display:flex; flex-wrap:wrap; gap:8px; }
+        .pill-btn { background:#fff; border:1px solid #ced4da; color:#495057; padding:6px 14px; border-radius:20px; font-size:0.8rem; font-weight:600; cursor:pointer; transition:0.2s; user-select:none; }
+        .pill-btn.active-yes { background:#28a745; border-color:#28a745; color:#fff; }
+        
+        /* ===== CLINICAL ALERTS & MED DETAILS ===== */
+        .clinical-alert { display:none; background:#fff3cd; border-left:4px solid #ffc107; padding:10px; border-radius:4px; font-size:0.8rem; margin-top:8px; margin-bottom:8px; color:#856404; animation:fadeIn 0.3s;}
+        .med-details { display:none; background:#f8f9fa; border:1px solid #e9ecef; border-radius:6px; padding:10px; margin-top:5px; animation:fadeIn 0.2s;}
 
-    .analytics-card {
-        background: #fff;
-        border-radius: 12px;
-        padding: 16px;
-        box-shadow: 0 2px 12px rgba(0,0,0,0.07);
-        margin-bottom: 16px;
-    }
-    .analytics-card-title {
-        font-size: 0.8rem;
-        font-weight: 700;
-        color: #1a1a2e;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        border-bottom: 2px solid #f0f0f0;
-        padding-bottom: 8px;
-        margin-bottom: 14px;
-        display: flex;
-        align-items: center;
-        gap: 7px;
-    }
-    .analytics-card-title i { color: var(--primary); }
-
-    .analytics-chart-wrap { position: relative; height: 200px; width: 100%; }
-    .analytics-chart-wrap-sm { position: relative; height: 160px; width: 100%; }
-    .analytics-chart-wrap-lg { position: relative; height: 240px; width: 100%; }
-
-    .comorbidity-bar-row {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 7px;
-        font-size: 0.78rem;
-    }
-    .comorbidity-bar-row .cb-label { width: 70px; font-weight: 600; color: #495057; flex-shrink: 0; }
-    .comorbidity-bar-row .cb-bar-wrap { flex: 1; background: #f0f0f0; border-radius: 4px; height: 16px; overflow: hidden; }
-    .comorbidity-bar-row .cb-bar { height: 100%; border-radius: 4px; transition: width 0.8s ease; background: linear-gradient(90deg, #8b0000, #c0392b); }
-    .comorbidity-bar-row .cb-pct { width: 38px; text-align: right; font-weight: 700; color: var(--primary); flex-shrink: 0; }
-
-    .gdmt-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 6px 10px;
-        border-radius: 8px;
-        margin-bottom: 5px;
-        font-size: 0.8rem;
-        background: #f8f9fa;
-    }
-    .gdmt-row .gdmt-name { font-weight: 600; color: #333; }
-    .gdmt-row .gdmt-pill {
-        font-weight: 700;
-        font-size: 0.75rem;
-        padding: 3px 10px;
-        border-radius: 20px;
-        color: #fff;
-    }
-    .gdmt-pill-high { background: #28a745; }
-    .gdmt-pill-mid { background: #ffc107; color: #333 !important; }
-    .gdmt-pill-low { background: #dc3545; }
-
-    .risk-badge {
-        display: inline-block;
-        padding: 3px 9px;
-        border-radius: 20px;
-        font-size: 0.7rem;
-        font-weight: 700;
-    }
-    .risk-low { background: #d4edda; color: #155724; }
-    .risk-mid { background: #fff3cd; color: #856404; }
-    .risk-high { background: #f8d7da; color: #721c24; }
-
-    .analytics-section-divider {
-        font-size: 0.7rem;
-        font-weight: 700;
-        color: #adb5bd;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        margin: 8px 0 12px;
-        border-bottom: 1px solid #e9ecef;
-        padding-bottom: 4px;
-    }
-
-    .high-risk-item {
-        background: #fff5f5;
-        border-left: 3px solid #dc3545;
-        border-radius: 6px;
-        padding: 8px 10px;
-        margin-bottom: 6px;
-        font-size: 0.78rem;
-    }
-    .high-risk-item .hr-name { font-weight: 700; color: #333; }
-    .high-risk-item .hr-detail { color: #6c757d; }
-
-    .btn-analytics-export {
-        border: none;
-        border-radius: 8px;
-        padding: 9px 16px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-    }
-    .btn-analytics-export:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-    .btn-export-pdf { background: linear-gradient(135deg, #8b0000, #c0392b); color: #fff; }
-    .btn-export-excel { background: linear-gradient(135deg, #1d6f42, #2ecc71); color: #fff; }
-
-    .analytics-tabs {
-        display: flex;
-        gap: 6px;
-        flex-wrap: wrap;
-        margin-bottom: 16px;
-    }
-    .analytics-tab-btn {
-        padding: 6px 13px;
-        border-radius: 20px;
-        border: 2px solid #e9ecef;
-        background: #fff;
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: #6c757d;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-    .analytics-tab-btn.active {
-        background: var(--primary);
-        border-color: var(--primary);
-        color: #fff;
-    }
-    .analytics-panel { display: none; }
-    .analytics-panel.active { display: block; }
-
-    .spinner-overlay {
-        text-align: center;
-        padding: 40px 20px;
-        color: #6c757d;
-    }
-    .spinner-overlay i { font-size: 2rem; color: var(--primary); margin-bottom: 10px; animation: spin 1s linear infinite; display: block; }
-    @keyframes spin { 100% { transform: rotate(360deg); } }
-
-    /* Nav buttons in header */
-    .header-nav-btns { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: 10px; }
-    .header-nav-btn {
-        background: rgba(255,255,255,0.15);
-        border: 1px solid rgba(255,255,255,0.3);
-        color: #fff;
-        font-size: 0.75rem;
-        padding: 5px 14px;
-        border-radius: 20px;
-        cursor: pointer;
-        transition: all 0.2s;
-        font-weight: 600;
-    }
-    .header-nav-btn:hover, .header-nav-btn.active-nav { background: rgba(255,255,255,0.3); }
-</style>
-```
-
+        /* ===== ANALYTICS PAGE ===== */
+        .analytics-header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); color: #fff; padding: 22px 0 18px; border-radius: 0 0 15px 15px; position: relative; }
+        .stat-kpi { background: #fff; border-radius: 12px; padding: 16px 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); border-top: 4px solid var(--primary); margin-bottom: 14px; text-align: center; }
+        .stat-kpi .kpi-num { font-family: 'Crimson Pro', serif; font-size: 2.2rem; font-weight: 700; color: var(--primary); line-height: 1; }
+        .stat-kpi .kpi-label { font-size: 0.72rem; color: #6c757d; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px; }
+        .stat-kpi .kpi-sub { font-size: 0.7rem; color: #adb5bd; margin-top: 2px; }
+        .analytics-card { background: #fff; border-radius: 12px; padding: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-bottom: 16px; }
+        .analytics-card-title { font-size: 0.8rem; font-weight: 700; color: #1a1a2e; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 2px solid #f0f0f0; padding-bottom: 8px; margin-bottom: 14px; display: flex; align-items: center; gap: 7px; }
+        .analytics-chart-wrap { position: relative; height: 200px; width: 100%; }
+        .analytics-chart-wrap-sm { position: relative; height: 160px; width: 100%; }
+        .analytics-chart-wrap-lg { position: relative; height: 240px; width: 100%; }
+        .comorbidity-bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; font-size: 0.78rem; }
+        .comorbidity-bar-row .cb-label { width: 70px; font-weight: 600; color: #495057; flex-shrink: 0; }
+        .comorbidity-bar-row .cb-bar-wrap { flex: 1; background: #f0f0f0; border-radius: 4px; height: 16px; overflow: hidden; }
+        .comorbidity-bar-row .cb-bar { height: 100%; border-radius: 4px; transition: width 0.8s ease; background: linear-gradient(90deg, #8b0000, #c0392b); }
+        .comorbidity-bar-row .cb-pct { width: 38px; text-align: right; font-weight: 700; color: var(--primary); flex-shrink: 0; }
+        .gdmt-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; border-radius: 8px; margin-bottom: 5px; font-size: 0.8rem; background: #f8f9fa; }
+        .gdmt-row .gdmt-name { font-weight: 600; color: #333; }
+        .gdmt-row .gdmt-pill { font-weight: 700; font-size: 0.75rem; padding: 3px 10px; border-radius: 20px; color: #fff; }
+        .gdmt-pill-high { background: #28a745; } .gdmt-pill-mid { background: #ffc107; color: #333 !important; } .gdmt-pill-low { background: #dc3545; }
+        .risk-badge { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; }
+        .risk-low { background: #d4edda; color: #155724; } .risk-mid { background: #fff3cd; color: #856404; } .risk-high { background: #f8d7da; color: #721c24; }
+        .high-risk-item { background: #fff5f5; border-left: 3px solid #dc3545; border-radius: 6px; padding: 8px 10px; margin-bottom: 6px; font-size: 0.78rem; }
+        .high-risk-item .hr-name { font-weight: 700; color: #333; }
+        .high-risk-item .hr-detail { color: #6c757d; }
+        .btn-analytics-export { border: none; border-radius: 8px; padding: 9px 16px; font-size: 0.8rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-export-pdf { background: linear-gradient(135deg, #8b0000, #c0392b); color: #fff; }
+        .btn-export-excel { background: linear-gradient(135deg, #1d6f42, #2ecc71); color: #fff; }
+        .analytics-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+        .analytics-tab-btn { padding: 6px 13px; border-radius: 20px; border: 2px solid #e9ecef; background: #fff; font-size: 0.75rem; font-weight: 600; color: #6c757d; cursor: pointer; }
+        .analytics-tab-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+        .analytics-panel { display: none; } .analytics-panel.active { display: block; }
+        .spinner-overlay { text-align: center; padding: 40px 20px; color: #6c757d; }
+        .header-nav-btns { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: 10px; }
+        .header-nav-btn { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: #fff; font-size: 0.75rem; padding: 5px 14px; border-radius: 20px; cursor: pointer; font-weight: 600; }
+        .header-nav-btn:hover, .header-nav-btn.active-nav { background: rgba(255,255,255,0.3); }
+    </style>
 </head>
 <body>
-
-<!-- LOADING SCREEN -->
 
 <div id="pageLoading">
     <div class="loading-heart">❤️</div>
     <div class="loading-text">Loading Registry...</div>
 </div>
-
-<!-- LOGIN PAGE -->
 
 <div id="pageLogin">
     <div class="login-container">
@@ -306,30 +160,14 @@
         <div class="login-card">
             <h2>Secure Access</h2>
             <p class="subtitle">Authorized personnel only</p>
-            <div class="login-field">
-                <label>Email Address</label>
-                <div class="input-wrap">
-                    <i class="fa fa-envelope"></i>
-                    <input type="email" id="loginEmail" placeholder="your@email.com" autocomplete="email">
-                </div>
-            </div>
-            <div class="login-field">
-                <label>Password</label>
-                <div class="input-wrap">
-                    <i class="fa fa-lock"></i>
-                    <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter') doLogin()">
-                </div>
-            </div>
-            <button class="btn-login" id="loginBtn" onclick="doLogin()">
-                <i class="fa fa-sign-in-alt me-2"></i> Sign In
-            </button>
+            <div class="login-field"><label>Email Address</label><div class="input-wrap"><i class="fa fa-envelope"></i><input type="email" id="loginEmail" placeholder="your@email.com"></div></div>
+            <div class="login-field"><label>Password</label><div class="input-wrap"><i class="fa fa-lock"></i><input type="password" id="loginPassword" placeholder="••••••••" onkeydown="if(event.key==='Enter') doLogin()"></div></div>
+            <button class="btn-login" id="loginBtn" onclick="doLogin()"><i class="fa fa-sign-in-alt me-2"></i> Sign In</button>
             <div class="login-error" id="loginError"></div>
         </div>
         <div class="login-footer">Ministry of Health · Kuwait · Cardiology Department</div>
     </div>
 </div>
-
-<!-- MAIN PAGE -->
 
 <div id="pageMain" class="page">
     <div class="clinic-header text-center">
@@ -347,263 +185,298 @@
         </div>
     </div>
 
-```
-<div class="container mt-3 mb-5">
-    <div class="card p-3 border-top border-4 border-danger shadow">
-        <h6 class="text-secondary fw-bold mb-2">Search Patient</h6>
-        <div class="input-group">
-            <input type="text" id="searchInput" class="form-control" placeholder="Name, Civil ID, or File No">
-            <button class="btn btn-primary px-4" onclick="searchPatient()">Search</button>
+    <div class="container mt-3 mb-4">
+        <div class="card p-3 border-top border-4 border-danger shadow">
+            <h6 class="text-secondary fw-bold mb-2">Search Patient</h6>
+            <div class="input-group">
+                <input type="text" id="searchInput" class="form-control" placeholder="Name, Civil ID, or File No">
+                <button class="btn btn-primary px-4" onclick="searchPatient()">Search</button>
+            </div>
+            <div id="searchResults" class="mt-3"></div>
         </div>
-        <div id="searchResults" class="mt-3"></div>
-    </div>
 
-    <div class="card p-3 border-top border-4 border-danger">
-        <h4 class="mb-3 text-dark fw-bold" id="formTitle">New Patient Entry</h4>
-        <div id="hfForm">
-            <h6 class="section-title">1. Demographics & Entry Info</h6>
-            <div class="row g-2">
-                <div class="col-6 col-md-3"><label class="text-primary fw-bold">Entered By *</label><select class="form-select border-primary" id="Doctor_Name"><option value="">Select...</option><option>Dr Farouk</option><option>Dr Badawy</option><option>Dr Ali</option><option>Dr Hamza</option><option>Dr Ahmed</option></select></div>
-                <div class="col-6 col-md-3"><label>Name *</label><input type="text" class="form-control" id="Patient_Name"></div>
-                <div class="col-6 col-md-3"><label>Civil ID * (12 digits)</label><input type="text" class="form-control" id="Civil_ID" inputmode="numeric" pattern="[0-9]*" maxlength="12" oninput="validateCivilID(this)" onkeypress="return isNumberKey(event)"><small class="error-msg" id="civilError">Must be exactly 12 digits</small></div>
-                <div class="col-6 col-md-3"><label>File No * (6 digits)</label><input type="text" class="form-control" id="File_No" inputmode="numeric" pattern="[0-9]*" maxlength="6" oninput="validateFileNo(this)" onkeypress="return isNumberKey(event)"><small class="error-msg" id="fileError">Must be exactly 6 digits</small></div>
-                <div class="col-4 col-md-2"><label>Age</label><input type="number" class="form-control" id="Age" inputmode="numeric" oninput="calcBaselineEGFR(); calcMAGGIC(); calcEGFR();"></div>
-                <div class="col-4 col-md-2"><label>Gender</label><select class="form-select" id="Gender" onchange="calcBaselineEGFR(); calcMAGGIC(); calcEGFR();"><option value="">Select...</option><option>Male</option><option>Female</option></select></div>
-                <div class="col-4 col-md-4"><label>Nationality</label><input type="text" class="form-control" id="Nationality"></div>
-                <div class="col-12 col-md-4"><label>Mobile</label><input type="tel" class="form-control" id="Mobile" inputmode="tel"></div>
+        <div class="card p-3 border-top border-4 border-danger">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="text-dark fw-bold m-0" id="formTitle">New Patient Entry</h4>
+                <button type="button" class="btn btn-outline-secondary btn-sm d-none" id="cancelEditBtn" onclick="resetForm()">Cancel Edit</button>
             </div>
 
-            <h6 class="section-title">2. HF Diagnosis & Status</h6>
-            <div class="row g-2">
-                <div class="col-6 col-md-3"><label>Type of HF</label><select class="form-select" id="HF_Type"><option value="">Select...</option><option>HFrEF</option><option>HFmrEF</option><option>HFpEF</option></select></div>
-                <div class="col-6 col-md-2"><label>EF at Diagnosis (%)</label><input type="number" class="form-control" id="EF_Diagnosis" inputmode="numeric" oninput="calcMAGGIC()"></div>
-                <div class="col-6 col-md-2"><label>Advanced HF</label><select class="form-select" id="Advanced_HF"><option>No</option><option>Yes</option></select></div>
-                <div class="col-6 col-md-5"><label>Other Cardiomyopathies</label><input type="text" class="form-control" id="Other_Cardio"></div>
-                <div class="col-6 col-md-3"><label>Valvular Disease</label><select class="form-select" id="Valvular_Disease"><option>No</option><option>Yes</option></select></div>
-                <div class="col-6 col-md-3"><label>Admissions Last Yr</label><input type="number" class="form-control" id="Admissions" inputmode="numeric"></div>
-                <div class="col-6 col-md-3"><label>Last Admission Date</label><input type="date" class="form-control" id="Last_Admission"></div>
-                <div class="col-6 col-md-3"><label>Length of Stay (Days)</label><input type="number" class="form-control" id="LOS" inputmode="numeric"></div>
+            <div class="stepper-nav" id="stepperNav">
+                <button class="step-btn active" onclick="goToStep(1)" id="nav-step-1">1. Demographics</button>
+                <button class="step-btn" onclick="goToStep(2)" id="nav-step-2">2. Clinical Status</button>
+                <button class="step-btn" onclick="goToStep(3)" id="nav-step-3">3. Comorbid & Labs</button>
+                <button class="step-btn" onclick="goToStep(4)" id="nav-step-4">4. Medications</button>
+                <button class="step-btn" onclick="goToStep(5)" id="nav-step-5">5. Outcomes & Visits</button>
             </div>
 
-            <h6 class="section-title">3. Symptoms & Signs</h6>
-            <div class="row g-2">
-                <div class="col-4 col-md-2"><label class="text-primary">Height (cm)</label><input type="number" class="form-control border-primary" id="Height" oninput="calcBMI()" inputmode="numeric"></div>
-                <div class="col-4 col-md-2"><label class="text-primary">Weight (kg)</label><input type="number" class="form-control border-primary" id="Weight" oninput="calcBMI()" inputmode="numeric"></div>
-                <div class="col-4 col-md-2"><label class="text-success fw-bold">BMI (Auto)</label><input type="text" class="form-control bg-light text-success fw-bold" id="BMI" readonly></div>
-                <div class="col-4 col-md-2"><label>Dry Weight (kg)</label><input type="number" class="form-control" id="Dry_Weight" inputmode="numeric"></div>
-                <div class="col-4 col-md-2"><label>NYHA Visit</label><select class="form-select" id="NYHA" onchange="calcMAGGIC()"><option value="">Select...</option><option>I</option><option>II</option><option>III</option><option>IV</option></select></div>
-                <div class="col-4 col-md-2"><label>Fatigue</label><select class="form-select" id="Fatigue"><option>No</option><option>Yes</option></select></div>
-                <div class="col-4 col-md-2"><label>Pulse</label><input type="text" class="form-control" id="Pulse" inputmode="numeric"></div>
-                <div class="col-4 col-md-2"><label>BP</label><input type="text" class="form-control" id="BP" placeholder="120/80" oninput="calcMAGGIC()"></div>
-                <div class="col-4 col-md-2"><label>SpO2 (%)</label><input type="number" class="form-control" id="SpO2" inputmode="numeric"></div>
-                <div class="col-4 col-md-2"><label>Edema</label><select class="form-select" id="Edema"><option>No</option><option>Yes</option></select></div>
-                <div class="col-4 col-md-2"><label>JVP</label><select class="form-select" id="JVP"><option>Normal</option><option>Raised</option></select></div>
-                <div class="col-4 col-md-2"><label>Rales</label><select class="form-select" id="Rales"><option>No</option><option>Yes</option></select></div>
-                <div class="col-4 col-md-3"><label>S3 Gallop</label><select class="form-select" id="S3"><option>No</option><option>Yes</option></select></div>
-                <div class="col-8 col-md-3"><label>Murmur</label><input type="text" class="form-control" id="Murmur"></div>
-            </div>
-
-            <h6 class="section-title">4. Investigations & Procedures</h6>
-            <div class="row g-2">
-                <div class="col-12 col-md-6"><label>ECG (LBBB/QRS/Arrhythmia)</label><input type="text" class="form-control" id="ECG"></div>
-                <div class="col-12 col-md-6"><label>ECHO Details</label><input type="text" class="form-control" id="ECHO"></div>
-                <div class="col-12 col-md-6"><label>CMR/CT Angio</label><input type="text" class="form-control" id="CMR_CT"></div>
-                <div class="col-6 col-md-3"><label>6 Min Walk Test</label><input type="text" class="form-control" id="Walk_Test"></div>
-                <div class="col-6 col-md-3"><label>Device (ICD/CRT)/Date</label><input type="text" class="form-control" id="Device_Info"></div>
-                <div class="col-12 col-md-6"><label>Right Side Cath</label><input type="text" class="form-control" id="Cath"></div>
-            </div>
-
-            <h6 class="section-title">5. Comorbidities</h6>
-            <div class="row g-2">
-                <div class="col-4 col-md-2"><label>DM</label><select class="form-select" id="DM" onchange="calcMAGGIC()"><option>No</option><option>Yes</option></select></div>
-                <div class="col-4 col-md-2"><label>HTN</label><select class="form-select" id="HTN"><option>No</option><option>Yes</option></select></div>
-                <div class="col-4 col-md-2"><label>AF</label><select class="form-select" id="AF"><option>No</option><option>Yes</option></select></div>
-                <div class="col-4 col-md-2"><label>IHD</label><select class="form-select" id="IHD"><option>No</option><option>STEMI</option><option>NSTEMI</option></select></div>
-                <div class="col-4 col-md-2"><label>PCI/CABG</label><select class="form-select" id="PCI_CABG"><option>No</option><option>PCI</option><option>CABG</option></select></div>
-                <div class="col-4 col-md-2"><label>CKD</label><select class="form-select" id="CKD"><option>No</option><option>Yes</option></select></div>
-                <div class="col-4 col-md-2"><label>CVA</label><select class="form-select" id="CVA"><option>No</option><option>Yes</option></select></div>
-                <div class="col-4 col-md-2"><label>PVD</label><select class="form-select" id="PVD"><option>No</option><option>Yes</option></select></div>
-                <div class="col-4 col-md-2"><label>Smoker</label><select class="form-select" id="Smoker" onchange="calcMAGGIC()"><option>Never</option><option>Current</option><option>Former</option></select></div>
-                <div class="col-4 col-md-2"><label>Obese/OSA</label><select class="form-select" id="Obese_OSA"><option>No</option><option>Yes</option></select></div>
-                <div class="col-6 col-md-3"><label>Chronic Lung Disease</label><select class="form-select" id="Lung_Dz" onchange="calcMAGGIC()"><option>No</option><option>Yes</option></select></div>
-                <div class="col-6 col-md-3"><label>Liver Disease</label><select class="form-select" id="Liver_Dz"><option>No</option><option>Yes</option></select></div>
-                <div class="col-12 col-md-6"><label>F.H. Cardio/Genetics</label><input type="text" class="form-control" id="FH_Genetics"></div>
-            </div>
-
-            <h6 class="section-title">6. Lab Results (Baseline)</h6>
-            <div class="row g-2">
-                <div class="col-4 col-md-2"><label>HbA1c</label><input type="text" class="form-control" id="Lab_HbA1c"></div>
-                <div class="col-4 col-md-2"><label>Gluc</label><input type="text" class="form-control" id="Lab_Gluc"></div>
-                <div class="col-4 col-md-2"><label>Urea/Creat</label><input type="text" class="form-control" id="Lab_UreaCreat" oninput="calcBaselineEGFR(); calcMAGGIC();" placeholder="e.g. 5/80"></div>
-                <div class="col-4 col-md-2"><label class="text-success fw-bold">eGFR (Auto)</label><input type="text" class="form-control bg-light text-success fw-bold" id="Lab_eGFR" readonly></div>
-                <div class="col-4 col-md-2"><label>Na/K</label><input type="text" class="form-control" id="Lab_NaK"></div>
-                <div class="col-4 col-md-2"><label>NT-proBNP</label><input type="text" class="form-control" id="Lab_BNP"></div>
-                <div class="col-4 col-md-2"><label>Iron/Ferritin</label><input type="text" class="form-control" id="Lab_IronFerritin"></div>
-                <div class="col-4 col-md-2"><label>Tr Sats</label><input type="text" class="form-control" id="Lab_TrSats"></div>
-                <div class="col-4 col-md-2"><label>Hb/WBC/Plt</label><input type="text" class="form-control" id="Lab_CBC"></div>
-                <div class="col-4 col-md-2"><label>TSH/Free T4</label><input type="text" class="form-control" id="Lab_Thyroid"></div>
-                <div class="col-4 col-md-2"><label>LDL/HDL/TG</label><input type="text" class="form-control" id="Lab_Lipids"></div>
-                <div class="col-4 col-md-2"><label>Alb/Creat Ratio</label><input type="text" class="form-control" id="Lab_AlbCreat"></div>
-            </div>
-
-            <h6 class="section-title">7. Medications</h6>
-            <div class="row g-2">
-                <div class="col-6 col-md-3"><label>ARNI (Entresto)</label><select class="form-select" id="Med_ARNI" onchange="calcMAGGIC()"><option>No</option><option>Yes</option></select></div>
-                <div class="col-6 col-md-3"><label>SGLT2i</label><select class="form-select" id="Med_SGLT2i"><option>None</option><option>Forxiga</option><option>Jardiance</option></select></div>
-                <div class="col-6 col-md-3"><label>GLP1 Agonist</label><select class="form-select" id="Med_GLP1"><option>None</option><option>Mounjaro</option><option>Ozempic</option></select></div>
-                <div class="col-6 col-md-3"><label>B-Blockers</label><select class="form-select" id="Med_BB" onchange="calcMAGGIC()"><option>None</option><option>Concor</option><option>Dilatrend</option><option>Betaloc</option><option>Lopressor</option></select></div>
-                <div class="col-6 col-md-3"><label>MRA</label><select class="form-select" id="Med_MRA"><option>None</option><option>Aldactone</option><option>Eplerenone</option><option>Finerenone</option><option>Inspra</option></select></div>
-                <div class="col-6 col-md-3"><label>ACEi/ARB</label><select class="form-select" id="Med_ACEiARB" onchange="calcMAGGIC()"><option>None</option><option>Zestril</option><option>Tritace</option><option>Capoten</option><option>Diovan</option><option>Atacand</option></select></div>
-                <div class="col-6 col-md-3"><label>Vasodilators</label><select class="form-select" id="Med_Vasodilator"><option>None</option><option>Hydralazine</option><option>Nitrates</option><option>Both</option></select></div>
-                <div class="col-6 col-md-3"><label>Diuretics</label><select class="form-select" id="Med_Diuretic"><option>None</option><option>Furosemide</option><option>Metolazone</option></select></div>
-                <div class="col-6 col-md-3"><label>Lipid Lowering</label><select class="form-select" id="Med_Lipid"><option>None</option><option>Zocor</option><option>Lipitor</option><option>Crestor</option><option>Ezetrol</option><option>Repatha</option><option>Praluent</option><option>Atozet</option><option>Zympass</option><option>Fibrates</option><option>Omacor</option></select></div>
-                <div class="col-6 col-md-3"><label>Antiplatelets</label><select class="form-select" id="Med_Antiplat"><option>None</option><option>ASA</option><option>Plavix</option><option>Brilinta</option></select></div>
-                <div class="col-6 col-md-3"><label>OAC</label><select class="form-select" id="Med_OAC"><option>None</option><option>Warfarin</option><option>Eliquis</option><option>Xarelto</option></select></div>
-                <div class="col-6 col-md-3"><label>Anti-arrhythmics</label><select class="form-select" id="Med_Arrhythmia"><option>None</option><option>Cordarone</option><option>Flecainide</option><option>Sotalol</option><option>Propafenone</option></select></div>
-                <div class="col-6 col-md-3"><label>Procorolan/CCB</label><select class="form-select" id="Med_Misc"><option>No</option><option>Yes</option></select></div>
-                <div class="col-6 col-md-3"><label>K Chelators</label><select class="form-select" id="Med_K_Chelator"><option>None</option><option>Veltassa</option><option>Lokelma</option></select></div>
-            </div>
-
-            <h6 class="section-title">8. Outcomes & Management</h6>
-            <div class="row g-2">
-                <div class="col-6 col-md-3"><label>Quadruple GDMT?</label><select class="form-select" id="Quad_GDMT"><option>No</option><option>Yes</option></select></div>
-                <div class="col-6 col-md-3"><label>Compliance</label><select class="form-select" id="Compliance"><option>Yes</option><option>No</option></select></div>
-                <div class="col-6 col-md-3"><label>Mortality</label><select class="form-select" id="Mortality"><option>Alive</option><option>In-hospital</option><option>Out-of-hospital</option></select></div>
-                <div class="col-6 col-md-3"><label>Cardiac Rehab</label><select class="form-select" id="Rehab"><option>No</option><option>Yes</option></select></div>
-                <div class="col-12"><hr class="my-2"></div>
-                <h6 class="col-12 text-secondary m-0"><i class="fa fa-calculator"></i> MAGGIC Risk Calculator</h6>
-                <div class="col-6 col-md-3"><label>HF Duration > 18 mo</label><select class="form-select" id="HF_Dur" onchange="calcMAGGIC()"><option>No</option><option>Yes</option></select></div>
-                <div class="col-6 col-md-3"><label class="text-success fw-bold">MAGGIC Points</label><input type="text" class="form-control bg-light text-success fw-bold" id="MAGGIC_Score" readonly></div>
-                <div class="col-12 col-md-6"><label class="text-danger fw-bold">Est. Mortality (1yr | 3yr)</label><input type="text" class="form-control bg-light text-danger fw-bold" id="MAGGIC_Risk" readonly></div>
-                <div class="col-12"><hr class="my-2"></div>
-                <div class="col-12 col-md-12"><label>Management Plan / Notes</label><textarea class="form-control" id="Notes" rows="2"></textarea></div>
-            </div>
-
-            <h6 class="section-title clickable-tab text-primary mt-4" onclick="toggleVisits()">
-                <i id="visitToggleIcon" class="fa fa-plus-circle me-1"></i> 9. Visits & Follow-ups <span class="text-muted fw-normal" style="font-size:0.75rem;">(Click to expand)</span>
-            </h6>
-            <div id="visitsContainer" style="display:none;">
-                <div id="visitHistory" class="mb-3"></div>
-                <div class="visit-section">
-                    <h6 class="text-primary mb-3">Add New Visit</h6>
+            <div id="hfForm">
+                <div class="form-step active" id="step-1">
                     <div class="row g-2">
-                        <div class="col-6 col-md-3"><label>Visit Date *</label><input type="date" class="form-control" id="Visit_Date"></div>
-                        <div class="col-6 col-md-3"><label>Visit Type</label><select class="form-select" id="Visit_Type"><option>Routine</option><option>Urgent</option><option>Post-Discharge</option><option>Telemedicine</option></select></div>
-                        <div class="col-12"><hr class="my-2"></div>
-                        <h6 class="col-12 text-secondary">Symptoms</h6>
-                        <div class="col-4 col-md-2"><label>Fatigue</label><select class="form-select" id="V_Fatigue"><option>N</option><option>Y</option></select></div>
-                        <div class="col-4 col-md-2"><label>NYHA Class</label><select class="form-select" id="V_NYHA"><option value="">Select</option><option>I</option><option>II</option><option>III</option><option>IV</option></select></div>
-                        <div class="col-4 col-md-3"><label>Edema</label><select class="form-select" id="V_Edema"><option>No</option><option>Mild feet</option><option>Moderate</option><option>Severe</option></select></div>
-                        <div class="col-12"><hr class="my-2"></div>
-                        <h6 class="col-12 text-secondary">Signs / Vitals</h6>
-                        <div class="col-4 col-md-2"><label>Pulse</label><input type="text" class="form-control" id="V_Pulse" inputmode="numeric"></div>
-                        <div class="col-4 col-md-2"><label>BP</label><input type="text" class="form-control" id="V_BP" placeholder="120/80"></div>
-                        <div class="col-4 col-md-2"><label>SpO2 %</label><input type="number" class="form-control" id="V_SpO2" inputmode="numeric"></div>
-                        <div class="col-4 col-md-2"><label>Weight (kg)</label><input type="number" class="form-control" id="V_Weight" inputmode="numeric"></div>
-                        <div class="col-4 col-md-2"><label>JVP</label><select class="form-select" id="V_JVP"><option>N</option><option>Raised</option></select></div>
-                        <div class="col-4 col-md-2"><label>Pulm. Rales</label><select class="form-select" id="V_Rales"><option>N</option><option>Y</option></select></div>
-                        <div class="col-4 col-md-2"><label>S3</label><select class="form-select" id="V_S3"><option>N</option><option>Y</option></select></div>
-                        <div class="col-12"><hr class="my-2"></div>
-                        <h6 class="col-12 text-secondary">ECG</h6>
-                        <div class="col-4 col-md-3"><label>LBBB</label><select class="form-select" id="V_LBBB"><option>No</option><option>Yes</option></select></div>
-                        <div class="col-4 col-md-3"><label>QRS Width (ms)</label><input type="text" class="form-control" id="V_QRS" inputmode="numeric"></div>
-                        <div class="col-4 col-md-3"><label>Arrhythmia</label><input type="text" class="form-control" id="V_Arrhythmia"></div>
-                        <div class="col-12"><hr class="my-2"></div>
-                        <h6 class="col-12 text-secondary">Echo</h6>
-                        <div class="col-6 col-md-4"><label>Change in EF</label><input type="text" class="form-control" id="V_EF_Change" placeholder="e.g., Recovered 60%"></div>
-                        <div class="col-6 col-md-4"><label>Other Echo Findings</label><input type="text" class="form-control" id="V_Echo_Other"></div>
-                        <div class="col-12"><hr class="my-2"></div>
-                        <h6 class="col-12 text-secondary">Labs (Auto eGFR)</h6>
-                        <div class="col-3 col-md-2"><label>HbA1c</label><input type="text" class="form-control" id="V_HbA1c" inputmode="decimal"></div>
-                        <div class="col-3 col-md-2"><label>Gluc</label><input type="text" class="form-control" id="V_Gluc" inputmode="decimal"></div>
-                        <div class="col-3 col-md-2"><label>Urea</label><input type="text" class="form-control" id="V_Urea" inputmode="decimal"></div>
-                        <div class="col-3 col-md-2"><label>Creat (µmol/L)</label><input type="text" class="form-control" id="V_Creat" inputmode="decimal" oninput="calcEGFR()" placeholder="e.g. 80"></div>
-                        <div class="col-3 col-md-2"><label class="text-success fw-bold">eGFR (Auto)</label><input type="text" class="form-control bg-light text-success fw-bold" id="V_eGFR" readonly></div>
-                        <div class="col-3 col-md-2"><label>Na</label><input type="text" class="form-control" id="V_Na" inputmode="decimal"></div>
-                        <div class="col-3 col-md-2"><label>K</label><input type="text" class="form-control" id="V_K" inputmode="decimal"></div>
-                        <div class="col-3 col-md-2"><label>BNP</label><input type="text" class="form-control" id="V_BNP" inputmode="decimal"></div>
-                        <div class="col-3 col-md-2"><label>NT-pro BNP</label><input type="text" class="form-control" id="V_NTproBNP" inputmode="decimal"></div>
-                        <div class="col-3 col-md-2"><label>INR</label><input type="text" class="form-control" id="V_INR" inputmode="decimal"></div>
-                        <div class="col-3 col-md-2"><label>Iron</label><input type="text" class="form-control" id="V_Iron" inputmode="decimal"></div>
-                        <div class="col-3 col-md-2"><label>Transferrin</label><input type="text" class="form-control" id="V_Transferrin" inputmode="decimal"></div>
-                        <div class="col-3 col-md-2"><label>Ferritin</label><input type="text" class="form-control" id="V_Ferritin" inputmode="decimal"></div>
-                        <div class="col-3 col-md-2"><label>WBC</label><input type="text" class="form-control" id="V_WBC" inputmode="decimal"></div>
-                        <div class="col-3 col-md-2"><label>Hb</label><input type="text" class="form-control" id="V_Hb" inputmode="decimal"></div>
-                        <div class="col-3 col-md-2"><label>Plt</label><input type="text" class="form-control" id="V_Plt" inputmode="decimal"></div>
-                        <div class="col-3 col-md-2"><label>TSH</label><input type="text" class="form-control" id="V_TSH" inputmode="decimal"></div>
-                        <div class="col-3 col-md-2"><label>Free T4</label><input type="text" class="form-control" id="V_FreeT4" inputmode="decimal"></div>
-                        <div class="col-12"><hr class="my-2"></div>
-                        <h6 class="col-12 text-secondary">Medications (Doses)</h6>
-                        <div class="col-6 col-md-3"><label>Concor</label><input type="text" class="form-control" id="V_Concor" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Betaloc</label><input type="text" class="form-control" id="V_Betaloc" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Dilatrend</label><input type="text" class="form-control" id="V_Dilatrend" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Lopressor</label><input type="text" class="form-control" id="V_Lopressor" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Zestril</label><input type="text" class="form-control" id="V_Zestril" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Tritace</label><input type="text" class="form-control" id="V_Tritace" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Capoten</label><input type="text" class="form-control" id="V_Capoten" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Diovan</label><input type="text" class="form-control" id="V_Diovan" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Atacand</label><input type="text" class="form-control" id="V_Atacand" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Entresto</label><input type="text" class="form-control" id="V_Entresto" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Aldactone</label><input type="text" class="form-control" id="V_Aldactone" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Eplerenone</label><input type="text" class="form-control" id="V_Eplerenone" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Finerenone</label><input type="text" class="form-control" id="V_Finerenone" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Forxiga</label><input type="text" class="form-control" id="V_Forxiga" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Jardiance</label><input type="text" class="form-control" id="V_Jardiance" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Hydralazine</label><input type="text" class="form-control" id="V_Hydralazine" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Nitrates</label><input type="text" class="form-control" id="V_Nitrates" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Furosemide</label><input type="text" class="form-control" id="V_Furosemide" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Metolazone</label><input type="text" class="form-control" id="V_Metolazone" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Mounjaro</label><input type="text" class="form-control" id="V_Mounjaro" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Ozempic</label><input type="text" class="form-control" id="V_Ozempic" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Warfarin</label><input type="text" class="form-control" id="V_Warfarin" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Xarelto</label><input type="text" class="form-control" id="V_Xarelto" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Eliquis</label><input type="text" class="form-control" id="V_Eliquis" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Zocor</label><input type="text" class="form-control" id="V_Zocor" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Lipitor</label><input type="text" class="form-control" id="V_Lipitor" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Crestor</label><input type="text" class="form-control" id="V_Crestor" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Ezetrol</label><input type="text" class="form-control" id="V_Ezetrol" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Repatha</label><input type="text" class="form-control" id="V_Repatha" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Praluent</label><input type="text" class="form-control" id="V_Praluent" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Atozet</label><input type="text" class="form-control" id="V_Atozet" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Vytorin</label><input type="text" class="form-control" id="V_Vytorin" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Zympass</label><input type="text" class="form-control" id="V_Zympass" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Fibrates</label><input type="text" class="form-control" id="V_Fibrates" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Omacor</label><input type="text" class="form-control" id="V_Omacor" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Veltassa</label><input type="text" class="form-control" id="V_Veltassa" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Lokelma</label><input type="text" class="form-control" id="V_Lokelma" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Cordarone</label><input type="text" class="form-control" id="V_Cordarone" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Flecainide</label><input type="text" class="form-control" id="V_Flecainide" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Sotalol</label><input type="text" class="form-control" id="V_Sotalol" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Propafenone</label><input type="text" class="form-control" id="V_Propafenone" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-6 col-md-3"><label>Procorolan</label><input type="text" class="form-control" id="V_Procorolan" placeholder="mg" inputmode="numeric"></div>
-                        <div class="col-12"><hr class="my-2"></div>
-                        <h6 class="col-12 text-secondary">Assessment & Plan</h6>
-                        <div class="col-12 col-md-6"><label>Adverse Effects / Complaints</label><textarea class="form-control" id="V_Adverse" rows="2"></textarea></div>
-                        <div class="col-12 col-md-6"><label>Plan / Recommendations</label><textarea class="form-control" id="V_Plan" rows="2"></textarea></div>
-                        <div class="col-12"><label>Other Notes</label><textarea class="form-control" id="V_Others" rows="2"></textarea></div>
-                        <div class="col-12 col-md-4 mt-2">
-                            <label class="text-danger fw-bold"><i class="fa fa-calendar-alt"></i> Next Appointment</label>
-                            <input type="date" class="form-control border-danger" id="Next_Appt">
+                        <div class="col-6 col-md-3"><label class="text-primary fw-bold">Entered By *</label><select class="form-select border-primary" id="Doctor_Name"><option value="">Select...</option><option>Dr Farouk</option><option>Dr Badawy</option><option>Dr Ali</option><option>Dr Hamza</option><option>Dr Ahmed</option></select></div>
+                        <div class="col-6 col-md-3"><label>Name *</label><input type="text" class="form-control" id="Patient_Name"></div>
+                        <div class="col-6 col-md-3"><label>Civil ID * (12 digits)</label><input type="text" class="form-control" id="Civil_ID" inputmode="numeric" pattern="[0-9]*" maxlength="12" oninput="validateCivilID(this)"><small class="error-msg" id="civilError">Must be exactly 12 digits</small></div>
+                        <div class="col-6 col-md-3"><label>File No * (6 digits)</label><input type="text" class="form-control" id="File_No" inputmode="numeric" pattern="[0-9]*" maxlength="6" oninput="validateFileNo(this)"><small class="error-msg" id="fileError">Must be exactly 6 digits</small></div>
+                        <div class="col-4 col-md-2"><label>Age</label><input type="number" class="form-control" id="Age" oninput="runCalculators()"></div>
+                        <div class="col-4 col-md-2"><label>Gender</label><select class="form-select" id="Gender" onchange="runCalculators()"><option value="">Select...</option><option>Male</option><option>Female</option></select></div>
+                        <div class="col-4 col-md-4"><label>Nationality</label><input type="text" class="form-control" id="Nationality"></div>
+                        <div class="col-12 col-md-4"><label>Mobile</label><input type="tel" class="form-control" id="Mobile" inputmode="tel"></div>
+                    </div>
+                </div>
+
+                <div class="form-step" id="step-2">
+                    <h6 class="section-title">HF Diagnosis & Hospitalizations</h6>
+                    <div class="row g-2">
+                        <div class="col-6 col-md-3"><label>Type of HF</label><select class="form-select" id="HF_Type" onchange="runClinicalAlerts()"><option value="">Select...</option><option>HFrEF</option><option>HFmrEF</option><option>HFpEF</option></select></div>
+                        <div class="col-6 col-md-2"><label>EF at Diagnosis (%)</label><input type="number" class="form-control" id="EF_Diagnosis" oninput="runCalculators(); runClinicalAlerts();"></div>
+                        <div class="col-6 col-md-2"><label>Advanced HF</label><select class="form-select" id="Advanced_HF"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-6 col-md-5"><label>Other Cardiomyopathies</label><input type="text" class="form-control" id="Other_Cardio"></div>
+                        <div class="col-6 col-md-3"><label>Valvular Disease</label><select class="form-select" id="Valvular_Disease"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-6 col-md-3"><label>Admissions Last Yr</label><input type="number" class="form-control" id="Admissions"></div>
+                        <div class="col-6 col-md-3"><label>Last Admission Date</label><input type="date" class="form-control" id="Last_Admission"></div>
+                        <div class="col-6 col-md-3"><label>Length of Stay (Days)</label><input type="number" class="form-control" id="LOS"></div>
+                    </div>
+                    
+                    <h6 class="section-title mt-3">Symptoms & Signs</h6>
+                    <div class="row g-2">
+                        <div class="col-4 col-md-2"><label>Height (cm)</label><input type="number" class="form-control" id="Height" oninput="runCalculators()"></div>
+                        <div class="col-4 col-md-2"><label>Weight (kg)</label><input type="number" class="form-control" id="Weight" oninput="runCalculators()"></div>
+                        <div class="col-4 col-md-2"><label class="text-success"><i class="fa fa-lock"></i> BMI</label><input type="text" class="form-control bg-light text-success fw-bold" id="BMI" readonly></div>
+                        <div class="col-4 col-md-2"><label>Dry Weight (kg)</label><input type="number" class="form-control" id="Dry_Weight"></div>
+                        <div class="col-4 col-md-2"><label>NYHA Visit</label><select class="form-select" id="NYHA" onchange="runCalculators()"><option value="">Select...</option><option>I</option><option>II</option><option>III</option><option>IV</option></select></div>
+                        <div class="col-4 col-md-2"><label>Fatigue</label><select class="form-select" id="Fatigue"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-4 col-md-2"><label>Pulse</label><input type="text" class="form-control" id="Pulse"></div>
+                        <div class="col-4 col-md-2"><label>BP</label><input type="text" class="form-control" id="BP" placeholder="120/80" oninput="runCalculators()"></div>
+                        <div class="col-4 col-md-2"><label>SpO2 (%)</label><input type="number" class="form-control" id="SpO2"></div>
+                        <div class="col-4 col-md-2"><label>Edema</label><select class="form-select" id="Edema"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-4 col-md-2"><label>JVP</label><select class="form-select" id="JVP"><option>Normal</option><option>Raised</option></select></div>
+                        <div class="col-4 col-md-2"><label>Rales</label><select class="form-select" id="Rales"><option>No</option><option>Yes</option></select></div>
+                    </div>
+
+                    <h6 class="section-title mt-3">Investigations</h6>
+                    <div class="row g-2">
+                        <div class="col-12 col-md-6"><label>ECG (LBBB/QRS/Arrhythmia)</label><input type="text" class="form-control" id="ECG" placeholder="e.g. LBBB, 160ms" oninput="runClinicalAlerts()"></div>
+                        <div class="col-12 col-md-6"><label>ECHO Details</label><input type="text" class="form-control" id="ECHO"></div>
+                        <div id="alertCRT" class="clinical-alert col-12"><i class="fa fa-exclamation-circle"></i> <b>Device Alert:</b> Patient has EF ≤ 35% with LBBB or Wide QRS. Consider CRT.</div>
+                        <div class="col-12 col-md-4"><label>CMR/CT Angio</label><input type="text" class="form-control" id="CMR_CT"></div>
+                        <div class="col-6 col-md-4"><label>6 Min Walk Test</label><input type="text" class="form-control" id="Walk_Test"></div>
+                        <div class="col-6 col-md-4"><label>Device (ICD/CRT)/Date</label><input type="text" class="form-control" id="Device_Info"></div>
+                    </div>
+                </div>
+
+                <div class="form-step" id="step-3">
+                    <h6 class="section-title">Comorbidities (Click to Toggle)</h6>
+                    <div class="pill-grid mb-3">
+                        <input type="hidden" id="DM" value="No"><button class="pill-btn" onclick="togglePill('DM', this); runCalculators();">DM</button>
+                        <input type="hidden" id="HTN" value="No"><button class="pill-btn" onclick="togglePill('HTN', this)">HTN</button>
+                        <input type="hidden" id="AF" value="No"><button class="pill-btn" onclick="togglePill('AF', this)">AF</button>
+                        <input type="hidden" id="CKD" value="No"><button class="pill-btn" onclick="togglePill('CKD', this)">CKD</button>
+                        <input type="hidden" id="CVA" value="No"><button class="pill-btn" onclick="togglePill('CVA', this)">CVA</button>
+                        <input type="hidden" id="PVD" value="No"><button class="pill-btn" onclick="togglePill('PVD', this)">PVD</button>
+                        <input type="hidden" id="Obese_OSA" value="No"><button class="pill-btn" onclick="togglePill('Obese_OSA', this)">Obese/OSA</button>
+                        <input type="hidden" id="Lung_Dz" value="No"><button class="pill-btn" onclick="togglePill('Lung_Dz', this); runCalculators();">Lung Dz</button>
+                        <input type="hidden" id="Liver_Dz" value="No"><button class="pill-btn" onclick="togglePill('Liver_Dz', this)">Liver Dz</button>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-4 col-md-3"><label>Smoker</label><select class="form-select" id="Smoker" onchange="runCalculators()"><option>Never</option><option>Current</option><option>Former</option></select></div>
+                        <div class="col-4 col-md-3"><label>IHD</label><select class="form-select" id="IHD"><option>No</option><option>STEMI</option><option>NSTEMI</option></select></div>
+                        <div class="col-4 col-md-3"><label>PCI/CABG</label><select class="form-select" id="PCI_CABG"><option>No</option><option>PCI</option><option>CABG</option></select></div>
+                        <div class="col-12 col-md-3"><label>F.H. Cardio/Genetics</label><input type="text" class="form-control" id="FH_Genetics"></div>
+                    </div>
+
+                    <h6 class="section-title">Lab Results (Baseline)</h6>
+                    <div class="row g-2">
+                        <div class="col-4 col-md-2"><label>HbA1c</label><input type="text" class="form-control" id="Lab_HbA1c"></div>
+                        <div class="col-4 col-md-2"><label>Gluc</label><input type="text" class="form-control" id="Lab_Gluc"></div>
+                        <div class="col-4 col-md-2"><label>Urea/Creat</label><input type="text" class="form-control" id="Lab_UreaCreat" placeholder="e.g. 5/80" oninput="runCalculators()"></div>
+                        <div class="col-4 col-md-2"><label class="text-success"><i class="fa fa-lock"></i> eGFR</label><input type="text" class="form-control bg-light text-success fw-bold" id="Lab_eGFR" readonly></div>
+                        <div class="col-4 col-md-2"><label>Na/K</label><input type="text" class="form-control" id="Lab_NaK" placeholder="135/4.5" oninput="runClinicalAlerts()"></div>
+                        <div class="col-4 col-md-2"><label>NT-proBNP</label><input type="text" class="form-control" id="Lab_BNP"></div>
+                        <div class="col-4 col-md-2"><label>Iron/Ferritin</label><input type="text" class="form-control" id="Lab_IronFerritin"></div>
+                        <div class="col-4 col-md-2"><label>Tr Sats</label><input type="text" class="form-control" id="Lab_TrSats"></div>
+                        <div class="col-4 col-md-2"><label>Hb/WBC/Plt</label><input type="text" class="form-control" id="Lab_CBC"></div>
+                        <div class="col-4 col-md-2"><label>TSH/Free T4</label><input type="text" class="form-control" id="Lab_Thyroid"></div>
+                        <div class="col-4 col-md-2"><label>LDL/HDL/TG</label><input type="text" class="form-control" id="Lab_Lipids"></div>
+                        <div class="col-4 col-md-2"><label>Alb/Creat Ratio</label><input type="text" class="form-control" id="Lab_AlbCreat"></div>
+                    </div>
+                </div>
+
+                <div class="form-step" id="step-4">
+                    <h6 class="section-title">Current Medications (Select to add dose/date)</h6>
+                    
+                    <div id="alertK" class="clinical-alert"><i class="fa fa-exclamation-triangle"></i> <b>Caution:</b> Hyperkalemia risk. Potassium > 5.0 detected while selecting MRA or ARNI.</div>
+                    <div id="alertRenal" class="clinical-alert"><i class="fa fa-exclamation-triangle"></i> <b>Caution:</b> Low eGFR (< 30) detected. Review ARNI/SGLT2i/MRA dosing.</div>
+
+                    <div class="row g-2 mt-2">
+                        <div class="col-12 col-md-6 border-bottom pb-2">
+                            <label>ARNI / ACEi / ARB</label>
+                            <select class="form-select" id="Med_ARNI_Type" onchange="toggleMed('ARNI'); runCalculators(); runClinicalAlerts();">
+                                <option value="None">None</option>
+                                <option value="Entresto">Entresto (ARNI)</option>
+                                <option value="Zestril">Zestril (ACEi)</option>
+                                <option value="Tritace">Tritace (ACEi)</option>
+                                <option value="Capoten">Capoten (ACEi)</option>
+                                <option value="Diovan">Diovan (ARB)</option>
+                                <option value="Atacand">Atacand (ARB)</option>
+                            </select>
+                            <div id="Med_ARNI_Details" class="med-details row g-2">
+                                <div class="col-6"><label>Dose</label><input type="text" class="form-control form-control-sm" id="Med_ARNI_Dose" placeholder="e.g. 24/26mg BID"></div>
+                                <div class="col-6"><label>Start Date</label><input type="date" class="form-control form-control-sm" id="Med_ARNI_Date"></div>
+                            </div>
                         </div>
-                        <div class="col-12 mt-3">
-                            <button type="button" class="btn btn-visit w-100" onclick="saveVisit()">
-                                <i class="fa fa-plus-circle"></i> ADD VISIT TO PATIENT RECORD
-                            </button>
+                        
+                        <div class="col-12 col-md-6 border-bottom pb-2">
+                            <label>Beta-Blocker</label>
+                            <select class="form-select" id="Med_BB_Type" onchange="toggleMed('BB'); runCalculators();">
+                                <option value="None">None</option>
+                                <option value="Concor">Concor</option>
+                                <option value="Dilatrend">Dilatrend</option>
+                                <option value="Betaloc">Betaloc</option>
+                                <option value="Lopressor">Lopressor</option>
+                            </select>
+                            <div id="Med_BB_Details" class="med-details row g-2">
+                                <div class="col-6"><label>Dose</label><input type="text" class="form-control form-control-sm" id="Med_BB_Dose"></div>
+                                <div class="col-6"><label>Start Date</label><input type="date" class="form-control form-control-sm" id="Med_BB_Date"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 border-bottom pb-2">
+                            <label>MRA</label>
+                            <select class="form-select" id="Med_MRA_Type" onchange="toggleMed('MRA'); runClinicalAlerts();">
+                                <option value="None">None</option>
+                                <option value="Aldactone">Aldactone</option>
+                                <option value="Eplerenone">Eplerenone</option>
+                                <option value="Finerenone">Finerenone</option>
+                            </select>
+                            <div id="Med_MRA_Details" class="med-details row g-2">
+                                <div class="col-6"><label>Dose</label><input type="text" class="form-control form-control-sm" id="Med_MRA_Dose"></div>
+                                <div class="col-6"><label>Start Date</label><input type="date" class="form-control form-control-sm" id="Med_MRA_Date"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 border-bottom pb-2">
+                            <label>SGLT2i</label>
+                            <select class="form-select" id="Med_SGLT2i_Type" onchange="toggleMed('SGLT2i'); runClinicalAlerts();">
+                                <option value="None">None</option>
+                                <option value="Forxiga">Forxiga</option>
+                                <option value="Jardiance">Jardiance</option>
+                            </select>
+                            <div id="Med_SGLT2i_Details" class="med-details row g-2">
+                                <div class="col-6"><label>Dose</label><input type="text" class="form-control form-control-sm" id="Med_SGLT2i_Dose"></div>
+                                <div class="col-6"><label>Start Date</label><input type="date" class="form-control form-control-sm" id="Med_SGLT2i_Date"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 border-bottom pb-2">
+                            <label>GLP1 Agonist</label>
+                            <select class="form-select" id="Med_GLP1_Type" onchange="toggleMed('GLP1');">
+                                <option value="None">None</option><option value="Mounjaro">Mounjaro</option><option value="Ozempic">Ozempic</option>
+                            </select>
+                            <div id="Med_GLP1_Details" class="med-details row g-2">
+                                <div class="col-6"><label>Dose</label><input type="text" class="form-control form-control-sm" id="Med_GLP1_Dose"></div>
+                                <div class="col-6"><label>Start Date</label><input type="date" class="form-control form-control-sm" id="Med_GLP1_Date"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 border-bottom pb-2">
+                            <label>Diuretic</label>
+                            <select class="form-select" id="Med_Diuretic_Type" onchange="toggleMed('Diuretic');">
+                                <option value="None">None</option><option value="Furosemide">Furosemide</option><option value="Metolazone">Metolazone</option>
+                            </select>
+                            <div id="Med_Diuretic_Details" class="med-details row g-2">
+                                <div class="col-6"><label>Dose</label><input type="text" class="form-control form-control-sm" id="Med_Diuretic_Dose"></div>
+                                <div class="col-6"><label>Start Date</label><input type="date" class="form-control form-control-sm" id="Med_Diuretic_Date"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 border-bottom pb-2">
+                            <label>Antiplatelets / OAC</label>
+                            <select class="form-select" id="Med_Blood_Type" onchange="toggleMed('Blood');">
+                                <option value="None">None</option><option value="ASA">ASA</option><option value="Plavix">Plavix</option><option value="Brilinta">Brilinta</option><option value="Warfarin">Warfarin</option><option value="Eliquis">Eliquis</option><option value="Xarelto">Xarelto</option>
+                            </select>
+                            <div id="Med_Blood_Details" class="med-details row g-2">
+                                <div class="col-6"><label>Dose</label><input type="text" class="form-control form-control-sm" id="Med_Blood_Dose"></div>
+                                <div class="col-6"><label>Start Date</label><input type="date" class="form-control form-control-sm" id="Med_Blood_Date"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-step" id="step-5">
+                    <h6 class="section-title">Outcomes & Management</h6>
+                    <div class="row g-2">
+                        <div class="col-6 col-md-3"><label>Quadruple GDMT?</label><select class="form-select" id="Quad_GDMT" onchange="runClinicalAlerts()"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-12" id="Missing_GDMT_Div" style="display:none;">
+                            <div class="alert alert-warning p-2 m-0" style="font-size:0.8rem;">
+                                <label>Rationale for Missing GDMT (HFrEF):</label>
+                                <select class="form-select form-select-sm mt-1" id="GDMT_Rationale">
+                                    <option value="">Select Reason...</option><option value="Intolerance / Hypotension">Intolerance / Hypotension</option><option value="Renal Impairment">Renal Impairment</option><option value="Cost / Insurance">Cost / Insurance</option><option value="Patient Refusal">Patient Refusal</option><option value="Pending Titration">Pending Titration</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3"><label>Compliance</label><select class="form-select" id="Compliance"><option>Yes</option><option>No</option></select></div>
+                        <div class="col-6 col-md-3"><label>Mortality</label><select class="form-select" id="Mortality"><option>Alive</option><option>In-hospital</option><option>Out-of-hospital</option></select></div>
+                        <div class="col-6 col-md-3"><label>Cardiac Rehab</label><select class="form-select" id="Rehab"><option>No</option><option>Yes</option></select></div>
+                        
+                        <div class="col-12"><hr class="my-2"></div>
+                        <h6 class="col-12 text-secondary m-0"><i class="fa fa-calculator"></i> MAGGIC Risk Calculator</h6>
+                        <div class="col-6 col-md-3"><label>HF Duration > 18 mo</label><select class="form-select" id="HF_Dur" onchange="runCalculators()"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-6 col-md-3"><label class="text-success"><i class="fa fa-lock"></i> Points</label><input type="text" class="form-control bg-light text-success fw-bold" id="MAGGIC_Score" readonly></div>
+                        <div class="col-12 col-md-6"><label class="text-danger"><i class="fa fa-lock"></i> Est. Mortality (1yr | 3yr)</label><input type="text" class="form-control bg-light text-danger fw-bold" id="MAGGIC_Risk" readonly></div>
+                        
+                        <div class="col-12"><hr class="my-2"></div>
+                        <div class="col-12 col-md-12"><label>Management Plan / Notes</label><textarea class="form-control" id="Notes" rows="2"></textarea></div>
+                    </div>
+
+                    <h6 class="section-title clickable-tab text-primary mt-4" onclick="toggleVisits()">
+                        <i id="visitToggleIcon" class="fa fa-plus-circle me-1"></i> Follow-ups & Visits <span class="text-muted fw-normal" style="font-size:0.75rem;">(Click to expand)</span>
+                    </h6>
+                    <div id="visitsContainer" style="display:none;">
+                        <div id="visitHistory" class="mb-3"></div>
+                        <div class="visit-section">
+                            <h6 class="text-primary mb-3">Add New Visit</h6>
+                            <div class="row g-2">
+                                <div class="col-6 col-md-3"><label>Visit Date *</label><input type="date" class="form-control" id="Visit_Date"></div>
+                                <div class="col-6 col-md-3"><label>Visit Type</label><select class="form-select" id="Visit_Type"><option>Routine</option><option>Urgent</option><option>Post-Discharge</option><option>Telemedicine</option></select></div>
+                                <div class="col-4 col-md-2"><label>NYHA Class</label><select class="form-select" id="V_NYHA"><option value="">Select</option><option>I</option><option>II</option><option>III</option><option>IV</option></select></div>
+                                <div class="col-4 col-md-2"><label>Weight (kg)</label><input type="number" class="form-control" id="V_Weight" inputmode="numeric"></div>
+                                <div class="col-4 col-md-2"><label>BP</label><input type="text" class="form-control" id="V_BP" placeholder="120/80"></div>
+                                <div class="col-12 col-md-6 mt-2">
+                                    <label class="text-danger fw-bold"><i class="fa fa-calendar-alt"></i> Next Appointment</label>
+                                    <input type="date" class="form-control border-danger" id="Next_Appt">
+                                </div>
+                                <div class="col-12 mt-3">
+                                    <button type="button" class="btn btn-visit w-100" onclick="saveVisit()">
+                                        <i class="fa fa-plus-circle"></i> ADD VISIT TO PATIENT RECORD
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <hr class="mt-4 border-danger">
-            <button type="button" class="btn btn-medical shadow" id="submitBtn" onclick="savePatient()">SAVE PATIENT DATA</button>
-            <button type="button" class="btn btn-secondary w-100 mt-2 d-none" id="cancelEditBtn" onclick="resetForm()">Cancel Edit</button>
+
+            <div class="step-controls" id="stepControls">
+                <button class="btn btn-outline-secondary" onclick="changeStep(-1)" id="btnPrev" disabled>Previous</button>
+                <button class="btn btn-primary" onclick="changeStep(1)" id="btnNext">Next</button>
+            </div>
         </div>
     </div>
 </div>
-```
 
+<div class="sticky-action-bar" id="stickyActionBar">
+    <button type="button" class="btn btn-medical shadow w-100" id="submitBtn" onclick="savePatient()">SAVE PATIENT DATA</button>
 </div>
 
-<!-- ADMIN PAGE -->
+<div id="chartModal" class="modal-overlay d-none">
+    <div class="modal-box" style="text-align:left;max-width:600px;">
+        <div class="d-flex justify-content-between align-items-center mb-2 border-bottom pb-2">
+            <h5 class="m-0 text-primary fw-bold"><i class="fa fa-chart-line"></i> Patient Trends</h5>
+            <button class="btn-close" onclick="document.getElementById('chartModal').classList.add('d-none')"></button>
+        </div>
+        <div class="chart-container"><canvas id="weightChart"></canvas></div>
+    </div>
+</div>
+<div id="pdfContainer"></div>
 
 <div id="pageAdmin" class="page">
     <div class="clinic-header text-center">
@@ -633,8 +506,6 @@
     </div>
 </div>
 
-<!-- ANALYTICS PAGE -->
-
 <div id="pageAnalytics" class="page">
     <div class="analytics-header text-center">
         <button class="btn btn-light btn-sm position-absolute top-0 start-0 m-2" onclick="goToMain()"><i class="fa fa-arrow-left me-1"></i>Back</button>
@@ -650,222 +521,67 @@
         </div>
     </div>
 
-```
-<div class="container mt-3 mb-5" id="analyticsContent">
-    <div class="spinner-overlay" id="analyticsSpinner">
-        <i class="fa fa-circle-notch"></i>
-        <div>Loading analytics data...</div>
+    <div class="container mt-3 mb-5" id="analyticsContent">
+        <div class="spinner-overlay" id="analyticsSpinner">
+            <i class="fa fa-circle-notch"></i>
+            <div>Loading analytics data...</div>
+        </div>
+        <div id="analyticsBody" style="display:none;">
+            <div class="row g-2 mb-2" id="kpiRow"></div>
+
+            <div class="d-flex gap-2 mb-3 flex-wrap">
+                <button class="btn-analytics-export btn-export-pdf" onclick="exportAnalyticsPDF()">
+                    <i class="fa fa-file-pdf"></i> Export Report PDF
+                </button>
+                <button class="btn-analytics-export btn-export-excel" onclick="exportAnalyticsExcel()">
+                    <i class="fa fa-file-excel"></i> Export Full Excel
+                </button>
+                <button class="btn-analytics-export" style="background:linear-gradient(135deg,#0f3460,#16213e);color:#fff;" onclick="loadAnalytics()">
+                    <i class="fa fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+
+            <div class="analytics-tabs" id="analyticsTabs">
+                <button class="analytics-tab-btn active" onclick="switchAnalyticsTab('overview')">Overview</button>
+                <button class="analytics-tab-btn" onclick="switchAnalyticsTab('gdmt')">GDMT</button>
+                <button class="analytics-tab-btn" onclick="switchAnalyticsTab('risk')">Risk Scores</button>
+                <button class="analytics-tab-btn" onclick="switchAnalyticsTab('demographics')">Demographics</button>
+            </div>
+
+            <div class="analytics-panel active" id="tab-overview">
+                <div class="row g-3">
+                    <div class="col-12 col-md-6"><div class="analytics-card"><div class="analytics-card-title"><i class="fa fa-heart"></i> HF Type Distribution</div><div class="analytics-chart-wrap"><canvas id="chartHFType"></canvas></div></div></div>
+                    <div class="col-12 col-md-6"><div class="analytics-card"><div class="analytics-card-title"><i class="fa fa-user-group"></i> NYHA Class Distribution</div><div class="analytics-chart-wrap"><canvas id="chartNYHA"></canvas></div></div></div>
+                </div>
+            </div>
+
+            <div class="analytics-panel" id="tab-gdmt">
+                <div class="analytics-card mb-3"><div class="analytics-card-title"><i class="fa fa-pills"></i> GDMT Component Uptake</div><div id="gdmtBars"></div></div>
+                <div class="row g-3">
+                    <div class="col-12 col-md-6"><div class="analytics-card"><div class="analytics-card-title"><i class="fa fa-check-circle"></i> Quadruple Therapy Rate</div><div class="analytics-chart-wrap-sm"><canvas id="chartQuad"></canvas></div></div></div>
+                    <div class="col-12 col-md-6"><div class="analytics-card"><div class="analytics-card-title"><i class="fa fa-hand-holding-medical"></i> Treatment Compliance</div><div class="analytics-chart-wrap-sm"><canvas id="chartCompliance"></canvas></div></div></div>
+                </div>
+            </div>
+
+            <div class="analytics-panel" id="tab-risk">
+                <div class="row g-3">
+                    <div class="col-12"><div class="analytics-card"><div class="analytics-card-title"><i class="fa fa-chart-bar"></i> MAGGIC Risk Score Distribution</div><div class="analytics-chart-wrap-lg"><canvas id="chartMAGGIC"></canvas></div></div></div>
+                    <div class="col-12 col-md-5"><div class="analytics-card"><div class="analytics-card-title"><i class="fa fa-exclamation-triangle"></i> Risk Stratification</div><div class="analytics-chart-wrap-sm"><canvas id="chartRiskStrat"></canvas></div></div></div>
+                    <div class="col-12 col-md-7"><div class="analytics-card"><div class="analytics-card-title"><i class="fa fa-fire"></i> High-Risk Patients <span class="badge bg-danger ms-1" id="highRiskCount">0</span></div><div id="highRiskList" style="max-height:220px;overflow-y:auto;"></div></div></div>
+                </div>
+            </div>
+
+            <div class="analytics-panel" id="tab-demographics">
+                <div class="row g-3">
+                    <div class="col-12 col-md-6"><div class="analytics-card"><div class="analytics-card-title"><i class="fa fa-globe"></i> Nationality Breakdown</div><div id="nationalityBars"></div></div></div>
+                    <div class="col-12 col-md-6"><div class="analytics-card"><div class="analytics-card-title"><i class="fa fa-user-md"></i> Cases by Physician</div><div class="analytics-chart-wrap"><canvas id="chartDoctors"></canvas></div></div></div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div id="analyticsBody" style="display:none;">
-
-        <!-- KPI Row -->
-        <div class="row g-2 mb-2" id="kpiRow"></div>
-
-        <!-- Export Buttons -->
-        <div class="d-flex gap-2 mb-3 flex-wrap">
-            <button class="btn-analytics-export btn-export-pdf" onclick="exportAnalyticsPDF()">
-                <i class="fa fa-file-pdf"></i> Export Report PDF
-            </button>
-            <button class="btn-analytics-export btn-export-excel" onclick="exportAnalyticsExcel()">
-                <i class="fa fa-file-excel"></i> Export Full Excel
-            </button>
-            <button class="btn-analytics-export" style="background:linear-gradient(135deg,#0f3460,#16213e);color:#fff;" onclick="loadAnalytics()">
-                <i class="fa fa-sync-alt"></i> Refresh
-            </button>
-        </div>
-
-        <!-- Tab Nav -->
-        <div class="analytics-tabs" id="analyticsTabs">
-            <button class="analytics-tab-btn active" onclick="switchAnalyticsTab('overview')">Overview</button>
-            <button class="analytics-tab-btn" onclick="switchAnalyticsTab('gdmt')">GDMT</button>
-            <button class="analytics-tab-btn" onclick="switchAnalyticsTab('risk')">Risk Scores</button>
-            <button class="analytics-tab-btn" onclick="switchAnalyticsTab('demographics')">Demographics</button>
-            <button class="analytics-tab-btn" onclick="switchAnalyticsTab('comorbidities')">Comorbidities</button>
-            <button class="analytics-tab-btn" onclick="switchAnalyticsTab('outcomes')">Outcomes</button>
-        </div>
-
-        <!-- OVERVIEW TAB -->
-        <div class="analytics-panel active" id="tab-overview">
-            <div class="row g-3">
-                <div class="col-12 col-md-6">
-                    <div class="analytics-card">
-                        <div class="analytics-card-title"><i class="fa fa-heart"></i> HF Type Distribution</div>
-                        <div class="analytics-chart-wrap"><canvas id="chartHFType"></canvas></div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-6">
-                    <div class="analytics-card">
-                        <div class="analytics-card-title"><i class="fa fa-user-group"></i> NYHA Class Distribution</div>
-                        <div class="analytics-chart-wrap"><canvas id="chartNYHA"></canvas></div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-6">
-                    <div class="analytics-card">
-                        <div class="analytics-card-title"><i class="fa fa-venus-mars"></i> Gender Distribution</div>
-                        <div class="analytics-chart-wrap-sm"><canvas id="chartGender"></canvas></div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-6">
-                    <div class="analytics-card">
-                        <div class="analytics-card-title"><i class="fa fa-users"></i> Age Group Distribution</div>
-                        <div class="analytics-chart-wrap-sm"><canvas id="chartAge"></canvas></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- GDMT TAB -->
-        <div class="analytics-panel" id="tab-gdmt">
-            <div class="analytics-card mb-3">
-                <div class="analytics-card-title"><i class="fa fa-pills"></i> GDMT Component Uptake</div>
-                <div id="gdmtBars"></div>
-            </div>
-            <div class="row g-3">
-                <div class="col-12 col-md-6">
-                    <div class="analytics-card">
-                        <div class="analytics-card-title"><i class="fa fa-check-circle"></i> Quadruple Therapy Rate</div>
-                        <div class="analytics-chart-wrap-sm"><canvas id="chartQuad"></canvas></div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-6">
-                    <div class="analytics-card">
-                        <div class="analytics-card-title"><i class="fa fa-hand-holding-medical"></i> Treatment Compliance</div>
-                        <div class="analytics-chart-wrap-sm"><canvas id="chartCompliance"></canvas></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- RISK TAB -->
-        <div class="analytics-panel" id="tab-risk">
-            <div class="row g-3">
-                <div class="col-12">
-                    <div class="analytics-card">
-                        <div class="analytics-card-title"><i class="fa fa-chart-bar"></i> MAGGIC Risk Score Distribution</div>
-                        <div class="analytics-chart-wrap-lg"><canvas id="chartMAGGIC"></canvas></div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-5">
-                    <div class="analytics-card">
-                        <div class="analytics-card-title"><i class="fa fa-exclamation-triangle"></i> Risk Stratification</div>
-                        <div class="analytics-chart-wrap-sm"><canvas id="chartRiskStrat"></canvas></div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-7">
-                    <div class="analytics-card">
-                        <div class="analytics-card-title"><i class="fa fa-fire"></i> High-Risk Patients <span class="badge bg-danger ms-1" id="highRiskCount">0</span></div>
-                        <div id="highRiskList" style="max-height:220px;overflow-y:auto;"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- DEMOGRAPHICS TAB -->
-        <div class="analytics-panel" id="tab-demographics">
-            <div class="row g-3">
-                <div class="col-12 col-md-6">
-                    <div class="analytics-card">
-                        <div class="analytics-card-title"><i class="fa fa-globe"></i> Nationality Breakdown</div>
-                        <div id="nationalityBars"></div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-6">
-                    <div class="analytics-card">
-                        <div class="analytics-card-title"><i class="fa fa-user-md"></i> Cases by Physician</div>
-                        <div class="analytics-chart-wrap"><canvas id="chartDoctors"></canvas></div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-6">
-                    <div class="analytics-card">
-                        <div class="analytics-card-title"><i class="fa fa-medkit"></i> Device Therapy</div>
-                        <div id="deviceStats"></div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-6">
-                    <div class="analytics-card">
-                        <div class="analytics-card-title"><i class="fa fa-heartbeat"></i> EF Distribution</div>
-                        <div class="analytics-chart-wrap"><canvas id="chartEF"></canvas></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- COMORBIDITIES TAB -->
-        <div class="analytics-panel" id="tab-comorbidities">
-            <div class="analytics-card">
-                <div class="analytics-card-title"><i class="fa fa-stethoscope"></i> Comorbidity Prevalence</div>
-                <div id="comorbiditiesBars"></div>
-            </div>
-            <div class="row g-3">
-                <div class="col-12 col-md-6">
-                    <div class="analytics-card">
-                        <div class="analytics-card-title"><i class="fa fa-smoking"></i> Smoking Status</div>
-                        <div class="analytics-chart-wrap-sm"><canvas id="chartSmoking"></canvas></div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-6">
-                    <div class="analytics-card">
-                        <div class="analytics-card-title"><i class="fa fa-heart-broken"></i> Advanced HF & Valvular</div>
-                        <div id="advancedStats"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- OUTCOMES TAB -->
-        <div class="analytics-panel" id="tab-outcomes">
-            <div class="row g-3">
-                <div class="col-12 col-md-6">
-                    <div class="analytics-card">
-                        <div class="analytics-card-title"><i class="fa fa-skull-crossbones"></i> Mortality Overview</div>
-                        <div class="analytics-chart-wrap"><canvas id="chartMortality"></canvas></div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-6">
-                    <div class="analytics-card">
-                        <div class="analytics-card-title"><i class="fa fa-hospital"></i> Admission Frequency</div>
-                        <div class="analytics-chart-wrap"><canvas id="chartAdmissions"></canvas></div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-6">
-                    <div class="analytics-card">
-                        <div class="analytics-card-title"><i class="fa fa-running"></i> Cardiac Rehab Enrollment</div>
-                        <div class="analytics-chart-wrap-sm"><canvas id="chartRehab"></canvas></div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-6">
-                    <div class="analytics-card">
-                        <div class="analytics-card-title"><i class="fa fa-calendar-check"></i> Avg Length of Stay</div>
-                        <div id="losStats" style="padding:10px 0;"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </div><!-- /analyticsBody -->
-</div>
-```
-
-</div>
-
-<!-- CHART MODAL (patient trends) -->
-
-<div id="chartModal" class="modal-overlay d-none">
-    <div class="modal-box" style="text-align:left;max-width:600px;">
-        <div class="d-flex justify-content-between align-items-center mb-2 border-bottom pb-2">
-            <h5 class="m-0 text-primary fw-bold"><i class="fa fa-chart-line"></i> Patient Trends</h5>
-            <button class="btn-close" onclick="document.getElementById('chartModal').classList.add('d-none')"></button>
-        </div>
-        <div class="chart-container"><canvas id="weightChart"></canvas></div>
-        <div class="chart-container"><canvas id="ntproChart"></canvas></div>
-        <div class="chart-container"><canvas id="bnpChart"></canvas></div>
-    </div>
-</div>
-
-<div id="pdfContainer"></div>
-
-<script>
+</div><script>
 // ===== FIREBASE INIT =====
+// Replace with your actual Firebase config if deploying
 firebase.initializeApp({
     apiKey:"AIzaSyAQ8wAh0gLV7-_lVEXXdIzZ7LmkMnshOiE",
     authDomain:"hf-clinic-registry.firebaseapp.com",
@@ -877,7 +593,7 @@ firebase.initializeApp({
 var db = firebase.firestore();
 var auth = firebase.auth();
 var editingDocId = null, currentPatientId = null, PC = {}, visits = [];
-var weightChartInst = null, bnpChartInst = null, ntproChartInst = null;
+var weightChartInst = null;
 var analyticsCharts = {};
 var allPatientsData = [];
 
@@ -887,18 +603,18 @@ auth.onAuthStateChanged(function(user) {
     if (user) {
         document.getElementById('pageLogin').style.display = 'none';
         document.getElementById('pageMain').classList.add('active');
-        var email = user.email || '';
-        document.getElementById('userBadge').textContent = email.split('@')[0];
+        document.getElementById('stickyActionBar').classList.add('active');
+        document.getElementById('userBadge').textContent = (user.email||'User').split('@')[0];
     } else {
         document.getElementById('pageLogin').style.display = 'flex';
         document.body.classList.add('login-active');
         document.getElementById('pageMain').classList.remove('active');
         document.getElementById('pageAdmin').classList.remove('active');
         document.getElementById('pageAnalytics').classList.remove('active');
+        document.getElementById('stickyActionBar').classList.remove('active');
     }
 });
 
-// ===== LOGIN / LOGOUT =====
 function doLogin() {
     var email = document.getElementById('loginEmail').value.trim();
     var password = document.getElementById('loginPassword').value;
@@ -907,85 +623,361 @@ function doLogin() {
     if (!email || !password) { errDiv.textContent='Please enter your email and password.'; errDiv.style.display='block'; return; }
     btn.disabled=true; btn.innerHTML='<i class="fa fa-spinner fa-spin me-2"></i> Signing in...'; errDiv.style.display='none';
     auth.signInWithEmailAndPassword(email, password).catch(function() {
-        errDiv.textContent='Invalid email or password. Please try again.'; errDiv.style.display='block';
+        errDiv.textContent='Invalid email or password.'; errDiv.style.display='block';
         btn.disabled=false; btn.innerHTML='<i class="fa fa-sign-in-alt me-2"></i> Sign In';
     });
 }
-
-function doLogout() {
-    if (confirm('Sign out of HF Registry?')) { auth.signOut(); }
-}
+function doLogout() { if (confirm('Sign out of HF Registry?')) auth.signOut(); }
 
 // ===== NAVIGATION =====
 function goToMain() {
     ['pageAdmin','pageAnalytics'].forEach(p=>document.getElementById(p).classList.remove('active'));
     document.getElementById('pageMain').classList.add('active');
+    document.getElementById('stickyActionBar').classList.add('active');
 }
 function goToAdmin() {
     ['pageMain','pageAnalytics'].forEach(p=>document.getElementById(p).classList.remove('active'));
     document.getElementById('pageAdmin').classList.add('active');
+    document.getElementById('stickyActionBar').classList.remove('active');
     loadAdmin();
 }
 function goToAnalytics() {
     ['pageMain','pageAdmin'].forEach(p=>document.getElementById(p).classList.remove('active'));
     document.getElementById('pageAnalytics').classList.add('active');
+    document.getElementById('stickyActionBar').classList.remove('active');
     loadAnalytics();
 }
-function showAdminLogin() {
-    if(prompt("Admin PIN:")==="1234"){ goToAdmin(); } else alert("Wrong PIN");
+function showAdminLogin() { if(prompt("Admin PIN:")==="1234"){ goToAdmin(); } else alert("Wrong PIN"); }
+function showAnalyticsLogin() { if(prompt("Analytics PIN:")==="1234"){ goToAnalytics(); } else alert("Wrong PIN"); }
+
+// ===== UI: STEPPER LOGIC =====
+let currentStep = 1; const totalSteps = 5;
+function goToStep(step) {
+    document.querySelectorAll('.form-step').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.step-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById('step-' + step).classList.add('active');
+    document.getElementById('nav-step-' + step).classList.add('active');
+    currentStep = step;
+    document.getElementById('btnPrev').disabled = (step === 1);
+    document.getElementById('btnNext').disabled = (step === totalSteps);
+    
+    // Auto-scroll stepper into view on mobile
+    document.getElementById('stepperNav').scrollIntoView({behavior: 'smooth', block: 'nearest'});
 }
-function showAnalyticsLogin() {
-    if(prompt("Analytics PIN (same as Admin):")==="1234"){ goToAnalytics(); } else alert("Wrong PIN");
+function changeStep(dir) { let newStep = currentStep + dir; if(newStep >= 1 && newStep <= totalSteps) goToStep(newStep); }
+
+// ===== UI: PILLS & MED TOGGLES =====
+function togglePill(id, btn) {
+    var input = document.getElementById(id);
+    if(input.value === 'No' || input.value === '') { input.value = 'Yes'; btn.classList.add('active-yes'); } 
+    else { input.value = 'No'; btn.classList.remove('active-yes'); }
 }
 
-// ===== FORM HELPERS =====
-function isNumberKey(evt){ var c=(evt.which)?evt.which:evt.keyCode; if(c>31&&(c<48||c>57))return false; return true; }
+function toggleMed(medPrefix) {
+    var sel = document.getElementById('Med_' + medPrefix + '_Type').value;
+    var detailsDiv = document.getElementById('Med_' + medPrefix + '_Details');
+    if(sel && sel !== 'None') { 
+        detailsDiv.style.display = 'flex'; 
+    } else { 
+        detailsDiv.style.display = 'none'; 
+        document.getElementById('Med_' + medPrefix + '_Dose').value = ''; 
+        document.getElementById('Med_' + medPrefix + '_Date').value = ''; 
+    }
+}
+
+// Validation
 function validateCivilID(input){ var e=document.getElementById('civilError'); if(input.value.length!==12&&input.value.length>0){input.classList.add('input-error');e.style.display='block';}else{input.classList.remove('input-error');e.style.display='none';} }
 function validateFileNo(input){ var e=document.getElementById('fileError'); if(input.value.length!==6&&input.value.length>0){input.classList.add('input-error');e.style.display='block';}else{input.classList.remove('input-error');e.style.display='none';} }
-function calcBMI(){ var w=parseFloat(document.getElementById("Weight").value),h=parseFloat(document.getElementById("Height").value); document.getElementById("BMI").value=(w&&h)?(w/((h/100)**2)).toFixed(1):""; calcMAGGIC(); }
-function calcBaselineEGFR(){ var age=parseFloat(document.getElementById("Age").value); var gender=document.getElementById("Gender").value; var input=document.getElementById("Lab_UreaCreat").value||""; var creatStr=input.includes('/')?input.split('/')[1]:input; var creat=parseFloat(creatStr); var f=document.getElementById("Lab_eGFR"); if(!age||!gender||!creat||isNaN(creat)){f.value="";return;} var cr=creat/88.4,k=gender==="Female"?0.7:0.9,a=gender==="Female"?-0.244:-0.302; if(cr>k)a=-1.200; f.value=Math.round(142*Math.pow(cr/k,a)*Math.pow(0.9938,age)*(gender==="Female"?1.012:1)); }
-function calcEGFR(){ var age=parseFloat(document.getElementById("Age").value),gender=document.getElementById("Gender").value,creat=parseFloat(document.getElementById("V_Creat").value),f=document.getElementById("V_eGFR"); if(!age||!gender||!creat||isNaN(creat)){f.value="";return;} var cr=creat/88.4,k=gender==="Female"?0.7:0.9,a=gender==="Female"?-0.244:-0.302; if(cr>k)a=-1.200; f.value=Math.round(142*Math.pow(cr/k,a)*Math.pow(0.9938,age)*(gender==="Female"?1.012:1)); }
-function calcMAGGIC(){ var pts=0; var age=parseInt(document.getElementById('Age').value)||0; if(age>=85)pts+=7;else if(age>=80)pts+=6;else if(age>=75)pts+=5;else if(age>=70)pts+=4;else if(age>=65)pts+=3;else if(age>=60)pts+=2;else if(age>=55)pts+=1; var ef=parseInt(document.getElementById('EF_Diagnosis').value)||0; if(ef>0){if(ef<20)pts+=7;else if(ef<25)pts+=6;else if(ef<30)pts+=5;else if(ef<35)pts+=3;else if(ef<40)pts+=2;} var bpStr=document.getElementById('BP').value||""; var sysBP=parseInt(bpStr.split('/')[0])||0; if(sysBP>0){if(sysBP<110)pts+=5;else if(sysBP<120)pts+=4;else if(sysBP<130)pts+=3;else if(sysBP<140)pts+=2;else if(sysBP<150)pts+=1;} var bmi=parseFloat(document.getElementById('BMI').value)||0; if(bmi>0){if(bmi<15)pts+=6;else if(bmi<20)pts+=5;else if(bmi<25)pts+=3;else if(bmi<30)pts+=2;} var crStr=document.getElementById('Lab_UreaCreat').value||""; var creat=parseFloat(crStr.includes('/')?crStr.split('/')[1]:crStr)||0; var cm=creat/88.4; if(cm>=2.8)pts+=8;else if(cm>=2.4)pts+=6;else if(cm>=2.0)pts+=5;else if(cm>=1.7)pts+=4;else if(cm>=1.5)pts+=3;else if(cm>=1.3)pts+=2;else if(cm>=1.0)pts+=1; var nyha=document.getElementById('NYHA').value; if(nyha==='II')pts+=2;else if(nyha==='III')pts+=6;else if(nyha==='IV')pts+=8; if(document.getElementById('Gender').value==='Male')pts+=1; if(document.getElementById('Smoker').value==='Current')pts+=1; if(document.getElementById('DM').value==='Yes')pts+=3; if(document.getElementById('Lung_Dz').value==='Yes')pts+=2; if(document.getElementById('HF_Dur').value==='Yes')pts+=2; var bb=document.getElementById('Med_BB').value; if(bb==='None'||bb==='')pts+=3; var ace=document.getElementById('Med_ACEiARB').value,arni=document.getElementById('Med_ARNI').value; if((ace==='None'||ace==='')&&(arni==='No'||arni===''))pts+=1; var r1="<5%",r3="<10%"; if(pts>35){r1=">40%";r3=">70%";}else if(pts>30){r1="~30%";r3="~60%";}else if(pts>25){r1="~20%";r3="~45%";}else if(pts>20){r1="~10%";r3="~25%";}else if(pts>15){r1="~6%";r3="~15%";} document.getElementById('MAGGIC_Score').value=pts; document.getElementById('MAGGIC_Risk').value=r1+" | "+r3; }
+
+// ===== SMART CLINICAL ALERTS & CALCS =====
+function runCalculators() {
+    // 1. BMI
+    var w = parseFloat(document.getElementById("Weight").value), h = parseFloat(document.getElementById("Height").value);
+    document.getElementById("BMI").value = (w && h) ? (w / ((h / 100) ** 2)).toFixed(1) : "";
+    
+    // 2. eGFR (Simplified MDRD)
+    var age = parseFloat(document.getElementById("Age").value), gender = document.getElementById("Gender").value;
+    var creatStr = (document.getElementById("Lab_UreaCreat").value || "").split('/')[1], creat = parseFloat(creatStr);
+    var egfrField = document.getElementById("Lab_eGFR");
+    if(age && gender && creat && !isNaN(creat)) {
+        var cr = creat/88.4, k = gender==="Female"?0.7:0.9, a = gender==="Female"?-0.244:-0.302;
+        if(cr>k) a=-1.200;
+        egfrField.value = Math.round(142*Math.pow(cr/k,a)*Math.pow(0.9938,age)*(gender==="Female"?1.012:1));
+    } else { egfrField.value = ""; }
+
+    // 3. MAGGIC Risk Score Engine
+    var pts = 0;
+    if(age>=85)pts+=7;else if(age>=80)pts+=6;else if(age>=75)pts+=5;else if(age>=70)pts+=4;else if(age>=65)pts+=3;else if(age>=60)pts+=2;else if(age>=55)pts+=1;
+    var ef = parseInt(document.getElementById('EF_Diagnosis').value)||0;
+    if(ef>0){if(ef<20)pts+=7;else if(ef<25)pts+=6;else if(ef<30)pts+=5;else if(ef<35)pts+=3;else if(ef<40)pts+=2;}
+    var bpStr=document.getElementById('BP').value||""; var sysBP=parseInt(bpStr.split('/')[0])||0;
+    if(sysBP>0){if(sysBP<110)pts+=5;else if(sysBP<120)pts+=4;else if(sysBP<130)pts+=3;else if(sysBP<140)pts+=2;else if(sysBP<150)pts+=1;}
+    var bmi=parseFloat(document.getElementById('BMI').value)||0;
+    if(bmi>0){if(bmi<15)pts+=6;else if(bmi<20)pts+=5;else if(bmi<25)pts+=3;else if(bmi<30)pts+=2;}
+    var cm=creat/88.4;
+    if(cm>=2.8)pts+=8;else if(cm>=2.4)pts+=6;else if(cm>=2.0)pts+=5;else if(cm>=1.7)pts+=4;else if(cm>=1.5)pts+=3;else if(cm>=1.3)pts+=2;else if(cm>=1.0)pts+=1;
+    var nyha=document.getElementById('NYHA').value;
+    if(nyha==='II')pts+=2;else if(nyha==='III')pts+=6;else if(nyha==='IV')pts+=8;
+    if(gender==='Male')pts+=1;
+    if(document.getElementById('Smoker').value==='Current')pts+=1;
+    if(document.getElementById('DM').value==='Yes')pts+=3;
+    if(document.getElementById('Lung_Dz').value==='Yes')pts+=2;
+    if(document.getElementById('HF_Dur').value==='Yes')pts+=2;
+    var bb=document.getElementById('Med_BB_Type').value; if(bb==='None'||bb==='')pts+=3;
+    var arni=document.getElementById('Med_ARNI_Type').value; if(arni==='None'||arni==='')pts+=1;
+
+    var r1="<5%",r3="<10%";
+    if(pts>35){r1=">40%";r3=">70%";}else if(pts>30){r1="~30%";r3="~60%";}else if(pts>25){r1="~20%";r3="~45%";}else if(pts>20){r1="~10%";r3="~25%";}else if(pts>15){r1="~6%";r3="~15%";}
+    document.getElementById('MAGGIC_Score').value=pts;
+    document.getElementById('MAGGIC_Risk').value=r1+" | "+r3;
+
+    runClinicalAlerts();
+}
+
+function runClinicalAlerts() {
+    var kStr = (document.getElementById("Lab_NaK").value || "").split('/')[1], k = parseFloat(kStr);
+    var eGFR = parseFloat(document.getElementById("Lab_eGFR").value);
+    
+    var arni = document.getElementById("Med_ARNI_Type").value !== 'None';
+    var mra = document.getElementById("Med_MRA_Type").value !== 'None';
+    var sglt = document.getElementById("Med_SGLT2i_Type").value !== 'None';
+
+    // Alerts
+    document.getElementById("alertK").style.display = (k > 5.0 && (mra || arni)) ? 'block' : 'none';
+    document.getElementById("alertRenal").style.display = (!isNaN(eGFR) && eGFR < 30 && (arni || sglt || mra)) ? 'block' : 'none';
+
+    var ef = parseFloat(document.getElementById("EF_Diagnosis").value), ecg = (document.getElementById("ECG").value || "").toLowerCase();
+    document.getElementById("alertCRT").style.display = (ef <= 35 && ecg.includes("lbbb") && ecg.includes("150")) ? 'block' : 'none';
+
+    var hfType = document.getElementById("HF_Type").value, quad = document.getElementById("Quad_GDMT").value;
+    document.getElementById("Missing_GDMT_Div").style.display = (hfType === 'HFrEF' && quad === 'No') ? 'block' : 'none';
+}
 
 function toggleVisits(){ var c=document.getElementById("visitsContainer"),i=document.getElementById("visitToggleIcon"); if(c.style.display==="none"||c.style.display===""){c.style.display="block";i.className="fa fa-minus-circle me-1";}else{c.style.display="none";i.className="fa fa-plus-circle me-1";} }
-function clearSearchResults(){ document.getElementById("searchInput").value=""; document.getElementById("searchResults").innerHTML=""; }
 
-function showPopup(type,title,msg){ var old=document.getElementById("popOv");if(old)old.remove(); var color=type==="success"?"#28a745":type==="delete"?"#dc3545":"#ffc107",icon=type==="success"?"fa-check-circle":type==="delete"?"fa-trash-alt":"fa-exclamation-triangle"; var ov=document.createElement("div");ov.id="popOv";ov.className="modal-overlay"; ov.innerHTML="<div class='modal-box'><div class='modal-icon' style='background:"+color+"'><i class='fa-solid "+icon+"'></i></div><h4 style='color:"+color+"'>"+title+"</h4><p class='text-muted'>"+msg+"</p><button class='btn btn-dark w-100' onclick='this.parentElement.parentElement.remove()'>OK</button></div>"; document.body.appendChild(ov); }
+// ===== DATA OPERATIONS (SAVE, EDIT, SEARCH) =====
+function savePatient(){
+    var civilID=document.getElementById("Civil_ID").value, fileNo=document.getElementById("File_No").value;
+    if(civilID.length!==12){alert("Civil ID must be exactly 12 digits");return;}
+    if(fileNo.length!==6){alert("File Number must be exactly 6 digits");return;}
+    
+    var data={};
+    document.querySelectorAll('#hfForm input, #hfForm select, #hfForm textarea').forEach(el=>{ 
+        if(el.id && !el.id.startsWith('V_') && el.id!=='Next_Appt') data[el.id]=el.value; 
+    });
+    if(!data.Doctor_Name||!data.Patient_Name) { alert("Please fill Patient Name and Doctor Name."); return; }
+    
+    var btn=document.getElementById("submitBtn"); btn.disabled=true; btn.innerHTML='<i class="fa fa-spinner fa-spin"></i> Saving...';
+    
+    if(editingDocId){
+        db.collection("patients").doc(editingDocId).update(data).then(()=>{
+            alert("Patient record updated!");
+            resetForm();
+        }).catch(e=>{alert(e.message);btn.disabled=false;btn.innerText="SAVE PATIENT DATA";});
+    } else {
+        data.timestamp=new Date().toISOString();
+        db.collection("patients").add(data).then(()=>{
+            alert("New patient saved!");
+            resetForm();
+        }).catch(e=>{alert(e.message);btn.disabled=false;btn.innerText="SAVE PATIENT DATA";});
+    }
+}
 
-function savePatient(){ var civilID=document.getElementById("Civil_ID").value,fileNo=document.getElementById("File_No").value; if(civilID.length!==12){showPopup("error","Invalid Civil ID","Civil ID must be exactly 12 digits");return;} if(fileNo.length!==6){showPopup("error","Invalid File No","File Number must be exactly 6 digits");return;} var data={}; document.querySelectorAll('#hfForm input, #hfForm select, #hfForm textarea').forEach(el=>{if(el.id&&!el.id.startsWith('V_')&&el.id!=='Next_Appt')data[el.id]=el.value;}); if(!data.Doctor_Name||!data.Patient_Name){showPopup("error","Missing Fields","Please fill Name, Doctor Name, Civil ID and File No.");return;} var btn=document.getElementById("submitBtn"); btn.disabled=true;btn.innerText="Saving...";btn.classList.add("loading"); if(editingDocId){db.collection("patients").doc(editingDocId).update(data).then(()=>{showPopup("success","Updated!","Patient record updated successfully.");resetForm();window.scrollTo({top:0,behavior:"smooth"});}).catch((e)=>{showPopup("error","Error",e.message);btn.disabled=false;btn.innerText="Update Patient";btn.classList.remove("loading");});}else{data.timestamp=new Date().toISOString();db.collection("patients").add(data).then(()=>{showPopup("success","Saved!","New patient added successfully.");resetForm();window.scrollTo({top:0,behavior:"smooth"});}).catch((e)=>{showPopup("error","Error Saving",e.message);btn.disabled=false;btn.innerText="SAVE PATIENT DATA";btn.classList.remove("loading");});} }
+function resetForm(){
+    document.querySelectorAll('#hfForm input, #hfForm select, #hfForm textarea').forEach(el=>el.value="");
+    document.querySelectorAll('.pill-btn').forEach(el=>el.classList.remove('active-yes'));
+    document.querySelectorAll('.med-details, .clinical-alert, #Missing_GDMT_Div').forEach(el=>el.style.display='none');
+    
+    // Reset hidden pill values
+    ['DM','HTN','AF','CKD','CVA','PVD','Obese_OSA','Lung_Dz','Liver_Dz'].forEach(id => document.getElementById(id).value = 'No');
+    
+    document.getElementById("searchInput").value=""; document.getElementById("searchResults").innerHTML="";
+    editingDocId=null; currentPatientId=null; visits=[];
+    document.getElementById("visitHistory").innerHTML=""; document.getElementById("visitsContainer").style.display="none";
+    document.getElementById("submitBtn").disabled=false; document.getElementById("submitBtn").innerText="SAVE PATIENT DATA";
+    document.getElementById("cancelEditBtn").classList.add("d-none"); document.getElementById("formTitle").innerText="New Patient Entry";
+    goToStep(1); window.scrollTo({top:0,behavior:"smooth"});
+}
 
-function saveVisit(){ if(!currentPatientId&&!editingDocId){showPopup("error","Error","Please save patient data first before adding visits.");return;} var patientId=currentPatientId||editingDocId,visitData={},visitDate=document.getElementById("Visit_Date").value,nextAppt=document.getElementById("Next_Appt").value; if(!visitDate){showPopup("error","Error","Please enter visit date.");return;} document.querySelectorAll('[id^="V_"]').forEach(el=>{if(el.id)visitData[el.id]=el.value;}); visitData.visitDate=visitDate;visitData.visitType=document.getElementById("Visit_Type").value;visitData.timestamp=new Date().toISOString(); db.collection("patients").doc(patientId).collection("visits").add(visitData).then(()=>{if(nextAppt)db.collection("patients").doc(patientId).update({Next_Appt:nextAppt});showPopup("success","Visit Added!","Follow-up visit saved successfully.");clearVisitForm();loadVisits(patientId);}).catch(e=>{showPopup("error","Error",e.message);}); }
+function saveVisit(){
+    var patientId = currentPatientId || editingDocId;
+    if(!patientId){alert("Save patient first before adding visits.");return;}
+    var visitData={}, visitDate=document.getElementById("Visit_Date").value, nextAppt=document.getElementById("Next_Appt").value;
+    if(!visitDate){alert("Enter visit date.");return;}
+    
+    document.querySelectorAll('[id^="V_"]').forEach(el=>{if(el.id)visitData[el.id]=el.value;});
+    visitData.visitDate=visitDate; visitData.visitType=document.getElementById("Visit_Type").value; visitData.timestamp=new Date().toISOString();
+    
+    db.collection("patients").doc(patientId).collection("visits").add(visitData).then(()=>{
+        if(nextAppt) db.collection("patients").doc(patientId).update({Next_Appt:nextAppt});
+        alert("Visit Added!"); 
+        document.querySelectorAll('[id^="V_"], #Visit_Date, #Next_Appt').forEach(el=>el.value="");
+        loadVisits(patientId);
+    });
+}
 
-function clearVisitForm(){ document.querySelectorAll('[id^="V_"]').forEach(el=>{el.value="";}); document.getElementById("Visit_Date").value=""; document.getElementById("Next_Appt").value=""; document.getElementById("Visit_Type").value="Routine"; }
+function loadVisits(patientId){
+    currentPatientId = patientId;
+    db.collection("patients").doc(patientId).collection("visits").orderBy("visitDate","desc").get().then(snapshot=>{
+        visits=[]; var html="";
+        if(snapshot.size>0){
+            html="<div class='alert alert-info'><h6>Previous Visits:</h6>";
+            snapshot.forEach(doc=>{ 
+                var v=doc.data(); visits.push({id:doc.id,...v}); 
+                html+="<div class='visit-history'><strong>"+v.visitDate+"</strong> ("+v.visitType+")<br><small>NYHA: "+(v.V_NYHA||'-')+", BP: "+(v.V_BP||'-')+", Weight: "+(v.V_Weight||'-')+"kg</small></div>"; 
+            });
+            html+="</div>";
+        }
+        document.getElementById("visitHistory").innerHTML=html;
+    });
+}
 
-function loadVisits(patientId){ if(!patientId)return; currentPatientId=patientId; db.collection("patients").doc(patientId).collection("visits").orderBy("visitDate","desc").get().then(snapshot=>{visits=[];var html=""; if(snapshot.size>0){html="<div class='alert alert-info'><h6>Previous Visits:</h6>"; snapshot.forEach(doc=>{var v=doc.data();visits.push({id:doc.id,...v}); html+="<div class='visit-history'><strong>"+v.visitDate+"</strong> ("+v.visitType+")<br><small>NYHA: "+(v.V_NYHA||'-')+", BP: "+(v.V_BP||'-')+", Weight: "+(v.V_Weight||'-')+"kg</small></div>";}); html+="</div>";} document.getElementById("visitHistory").innerHTML=html;}); }
+function searchPatient(){
+    var val=document.getElementById("searchInput").value.trim().toLowerCase(), res=document.getElementById("searchResults");
+    if(!val){res.innerHTML="";return;}
+    res.innerHTML="<i class='fa fa-spinner fa-spin'></i> Searching...";
+    db.collection("patients").get().then(s=>{
+        res.innerHTML="<button class='btn btn-sm btn-outline-dark mb-2' onclick='document.getElementById(\"searchResults\").innerHTML=\"\"'>Back</button>";
+        var found=0;
+        s.forEach(d=>{
+            var data=d.data(), name=(data.Patient_Name||"").toLowerCase();
+            if(data.Civil_ID===val || data.File_No===val || name.includes(val)){
+                found++; PC[d.id]=data;
+                res.innerHTML+="<div class='card p-3 border-primary shadow-sm mb-2'><h5>"+data.Patient_Name+"</h5><p class='mb-1'>File: "+data.File_No+"</p><div class='d-flex gap-2'><button class='btn btn-sm btn-primary' onclick='editPt(\""+d.id+"\")'>Edit</button><button class='btn btn-sm btn-danger' onclick='pdfFromAdmin(\""+d.id+"\")'>PDF</button><button class='btn btn-sm btn-success' onclick='exportPatientExcel(\""+d.id+"\")'>Excel</button></div></div>";
+            }
+        });
+        if(found===0) res.innerHTML="<div class='alert alert-warning'>No patient found.</div>";
+    });
+}
 
-function resetForm(){ document.querySelectorAll('#hfForm input, #hfForm select, #hfForm textarea').forEach(el=>{el.value="";}); document.getElementById("searchInput").value=""; document.getElementById("searchResults").innerHTML=""; editingDocId=null;currentPatientId=null;visits=[]; document.getElementById("visitHistory").innerHTML=""; document.getElementById("visitsContainer").style.display="none"; document.getElementById("visitToggleIcon").className="fa fa-plus-circle me-1"; document.getElementById("submitBtn").disabled=false; document.getElementById("submitBtn").innerText="SAVE PATIENT DATA"; document.getElementById("submitBtn").classList.remove("loading"); document.getElementById("cancelEditBtn").classList.add("d-none"); document.getElementById("formTitle").innerText="New Patient Entry"; document.getElementById("Civil_ID").classList.remove('input-error'); document.getElementById("File_No").classList.remove('input-error'); document.querySelectorAll('.error-msg').forEach(el=>el.style.display='none'); }
+function editPt(id){
+    var d=PC[id]; editingDocId=id; currentPatientId=id;
+    
+    Object.keys(d).forEach(k=>{ 
+        var el=document.getElementById(k); 
+        if(el){
+            el.value=d[k];
+            // If it's a comorbidity pill, trigger the visual toggle
+            if(el.type==='hidden' && document.querySelector(`button[onclick*="'${k}'"]`)) {
+                if(d[k]==='Yes') document.querySelector(`button[onclick*="'${k}'"]`).classList.add('active-yes');
+            }
+            // If it's a med select, trigger the detail expansion
+            if(k.includes('_Type')) toggleMed(k.replace('Med_','').replace('_Type',''));
+        }
+    });
+    
+    runCalculators();
+    document.getElementById("formTitle").innerText="Editing: "+d.Patient_Name;
+    document.getElementById("cancelEditBtn").classList.remove("d-none");
+    document.getElementById("submitBtn").innerText="Update Patient";
+    loadVisits(id); document.getElementById("visitsContainer").style.display="block";
+    goToStep(1); window.scrollTo({top:0,behavior:"smooth"});
+}
 
-function generateCardHTML(data,id){ var allFields=[['Patient_Name','Civil_ID','File_No','Age','Gender','Nationality','Mobile','Doctor_Name'],['HF_Type','EF_Diagnosis','Advanced_HF','Other_Cardio','Valvular_Disease','Admissions','Last_Admission','LOS'],['Height','Weight','BMI','Dry_Weight','NYHA','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur'],['ECG','ECHO','CMR_CT','Walk_Test','Device_Info','Cath'],['DM','HTN','AF','IHD','PCI_CABG','CKD','CVA','PVD','Smoker','Obese_OSA','Lung_Dz','Liver_Dz','FH_Genetics'],['Lab_HbA1c','Lab_Gluc','Lab_UreaCreat','Lab_eGFR','Lab_NaK','Lab_BNP','Lab_IronFerritin','Lab_TrSats','Lab_CBC','Lab_Thyroid','Lab_Lipids','Lab_AlbCreat'],['Med_ARNI','Med_SGLT2i','Med_GLP1','Med_BB','Med_MRA','Med_ACEiARB','Med_Vasodilator','Med_Diuretic','Med_Lipid','Med_Antiplat','Med_OAC','Med_Arrhythmia','Med_Misc','Med_K_Chelator'],['Quad_GDMT','Compliance','Mortality','Rehab','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt']]; var sn=['Demographics','HF Diagnosis','Symptoms & Signs','Investigations','Comorbidities','Baseline Labs','Medications','Outcomes & Management']; var html="<div class='card p-3 border-primary shadow-sm patient-card' id='pdf-"+id+"'><h4 class='text-primary mb-3'>"+(data.Patient_Name||'Unknown')+"</h4><div class='row'>"; allFields.forEach((s,idx)=>{html+="<div class='col-12 mb-3'><h6 class='text-secondary border-bottom pb-1'>"+sn[idx]+"</h6><table class='table table-sm table-bordered'>"; s.forEach(f=>{var val=data[f],dv=(val&&val!=='')?val:'<span class="empty-field">-</span>',l=f.replace(/_/g," ").replace(/Lab /g,"").replace(/Med /g,""); html+="<tr><th>"+l+"</th><td>"+dv+"</td></tr>";}); html+="</table></div>";}); html+="</div><div class='d-flex flex-wrap gap-2 mt-2'>"; html+="<button class='btn btn-sm btn-primary' onclick='editPt(\""+id+"\")'>Edit</button>"; html+="<button class='btn btn-sm btn-info text-white' onclick='showTrends(\""+id+"\")'><i class='fa fa-chart-line'></i> Trends</button>"; html+="<button class='btn btn-sm btn-danger' onclick='pdfFromAdmin(\""+id+"\")'>PDF</button>"; html+="<button class='btn btn-sm btn-success' onclick='exportPatientExcel(\""+id+"\")'>Excel</button>"; html+="</div></div>"; return html; }
-
-function searchPatient(){ var val=document.getElementById("searchInput").value.trim().toLowerCase(),res=document.getElementById("searchResults"); if(!val){res.innerHTML="";return;} res.innerHTML="<div class='text-center'><i class='fa fa-spinner fa-spin'></i> Searching...</div>"; db.collection("patients").get().then(s=>{res.innerHTML="<div class='mb-2'><button class='btn btn-sm btn-outline-dark fw-bold' onclick='clearSearchResults()'><i class='fa fa-arrow-left'></i> Back</button></div>"; var found=0; s.forEach(d=>{var data=d.data(),name=(data.Patient_Name||"").toLowerCase(),civil=data.Civil_ID||"",fno=data.File_No||""; if(civil===val||fno===val||name.includes(val)){found++;PC[d.id]=data;res.innerHTML+=generateCardHTML(data,d.id);}}); if(found===0){res.innerHTML="<div class='alert alert-warning'>No patient found. <button class='btn btn-sm btn-outline-dark ms-2' onclick='clearSearchResults()'>Back</button></div>";}}).catch(e=>{res.innerHTML="<div class='alert alert-danger'>Error: "+e.message+"</div>";}); }
-
-function showTrends(patientId){ document.getElementById("chartModal").classList.remove("d-none"); db.collection("patients").doc(patientId).collection("visits").orderBy("visitDate","asc").get().then(snapshot=>{ var dates=[],weights=[],bnps=[],ntpros=[]; snapshot.forEach(doc=>{var v=doc.data();dates.push(v.visitDate);weights.push(parseFloat(v.V_Weight)||null);bnps.push(parseFloat(v.V_BNP)||null);ntpros.push(parseFloat(v.V_NTproBNP)||null);}); if(dates.length===0){document.getElementById('chartModal').classList.add('d-none');showPopup("warning","No Data","No visits recorded yet.");return;} if(weightChartInst)weightChartInst.destroy(); if(ntproChartInst)ntproChartInst.destroy(); if(bnpChartInst)bnpChartInst.destroy(); var co={responsive:true,maintainAspectRatio:false,scales:{x:{ticks:{font:{size:10}}}}}; weightChartInst=new Chart(document.getElementById('weightChart').getContext('2d'),{type:'line',data:{labels:dates,datasets:[{label:'Weight (kg)',data:weights,borderColor:'#17a2b8',backgroundColor:'#17a2b8',tension:0.3,spanGaps:true}]},options:co}); ntproChartInst=new Chart(document.getElementById('ntproChart').getContext('2d'),{type:'line',data:{labels:dates,datasets:[{label:'NT-proBNP',data:ntpros,borderColor:'#dc3545',backgroundColor:'#dc3545',tension:0.3,spanGaps:true}]},options:co}); bnpChartInst=new Chart(document.getElementById('bnpChart').getContext('2d'),{type:'line',data:{labels:dates,datasets:[{label:'BNP',data:bnps,borderColor:'#ffc107',backgroundColor:'#ffc107',tension:0.3,spanGaps:true}]},options:co});}); }
-
-function loadAdmin(){ var tb=document.getElementById("adminTableBody"); tb.innerHTML="<tr><td colspan='4' class='text-center'><i class='fa fa-spinner fa-spin'></i> Loading...</td></tr>"; var today=new Date().toISOString().split('T')[0],upcomingHTML=""; db.collection("patients").orderBy("timestamp","desc").get().then(snap=>{ tb.innerHTML=""; document.getElementById("totalPatients").innerText=snap.size; if(snap.size===0){tb.innerHTML="<tr><td colspan='4'>No patients yet</td></tr>";return;} snap.forEach(docSnap=>{ var d=docSnap.data(),id=docSnap.id;PC[id]=d; if(d.Next_Appt&&d.Next_Appt>=today){ var da=Math.floor((new Date(d.Next_Appt)-new Date(today))/(1000*60*60*24)); if(da<=14){ var color=da<=3?"danger":(da<=7?"warning":"info"); upcomingHTML+="<div class='alert alert-"+color+" py-1 px-2 mb-1 d-flex justify-content-between' style='font-size:0.85rem;'><span><b>"+(d.Patient_Name||'Unknown')+"</b> ("+(d.File_No||'')+")</span><span><i class='fa fa-calendar'></i> "+d.Next_Appt+" (in "+da+" days)</span></div>";}} tb.innerHTML+="<tr><td>"+(d.File_No||'')+"</td><td>"+(d.Patient_Name||'')+"</td><td>"+(d.Doctor_Name||'')+"</td><td><button class='btn btn-sm btn-primary me-1' onclick='editFromAdmin(\""+id+"\")'>Edit</button><button class='btn btn-sm btn-info text-white me-1' onclick='pdfFromAdmin(\""+id+"\")'>PDF</button><button class='btn btn-sm btn-success me-1' onclick='exportPatientExcel(\""+id+"\")'>Excel</button><button class='btn btn-sm btn-danger' onclick='delPt(\""+id+"\")'>Del</button></td></tr>";}); document.getElementById("upcomingAppts").innerHTML=upcomingHTML||"<p class='text-muted small mb-0'>No appointments in the next 14 days.</p>";}).catch(e=>{tb.innerHTML="<tr><td colspan='4' class='text-danger'>Error loading data</td></tr>";}); }
-
-function exportPatientExcel(id){ var data=PC[id]; if(!data){showPopup("error","Error","Patient data not found");return;} db.collection("patients").doc(id).collection("visits").orderBy("visitDate","desc").get().then(vs=>{var vd=[];vs.forEach(doc=>{vd.push(doc.data());});generateExcel(data,vd,id);}).catch(()=>{generateExcel(data,[],id);}); }
-
-function generateExcel(data,visitsData,id){ var wb=XLSX.utils.book_new(); var pr=[]; pr.push(["MUBARAK AL-KABEER HOSPITAL - HEART FAILURE REGISTRY"]); pr.push(["Patient Name:",data.Patient_Name||'']);pr.push(["Civil ID:",data.Civil_ID||'']);pr.push(["File No:",data.File_No||'']);pr.push(["Age:",data.Age||'']);pr.push(["Gender:",data.Gender||'']);pr.push(["Nationality:",data.Nationality||'']);pr.push(["Mobile:",data.Mobile||'']);pr.push(["Doctor:",data.Doctor_Name||'']);pr.push([]); var sections=[{name:'HF DIAGNOSIS',fields:['HF_Type','EF_Diagnosis','Advanced_HF','Other_Cardio','Valvular_Disease','Admissions','Last_Admission','LOS']},{name:'SYMPTOMS & SIGNS',fields:['Height','Weight','BMI','Dry_Weight','NYHA','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur']},{name:'INVESTIGATIONS',fields:['ECG','ECHO','CMR_CT','Walk_Test','Device_Info','Cath']},{name:'COMORBIDITIES',fields:['DM','HTN','AF','IHD','PCI_CABG','CKD','CVA','PVD','Smoker','Obese_OSA','Lung_Dz','Liver_Dz','FH_Genetics']},{name:'LABORATORY (BASELINE)',fields:['Lab_HbA1c','Lab_Gluc','Lab_UreaCreat','Lab_eGFR','Lab_NaK','Lab_BNP','Lab_IronFerritin','Lab_TrSats','Lab_CBC','Lab_Thyroid','Lab_Lipids','Lab_AlbCreat']},{name:'MEDICATIONS',fields:['Med_ARNI','Med_SGLT2i','Med_GLP1','Med_BB','Med_MRA','Med_ACEiARB','Med_Vasodilator','Med_Diuretic','Med_Lipid','Med_Antiplat','Med_OAC','Med_Arrhythmia','Med_Misc','Med_K_Chelator']},{name:'OUTCOMES & FOLLOW-UP',fields:['Quad_GDMT','Compliance','Mortality','Rehab','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt']}]; sections.forEach(sec=>{pr.push([sec.name]);sec.fields.forEach(f=>{pr.push([f.replace(/_/g," ").replace(/Lab /g,"").replace(/Med /g,""),data[f]||'-']);});pr.push([]);}); var ws1=XLSX.utils.aoa_to_sheet(pr);XLSX.utils.book_append_sheet(wb,ws1,"Patient Info"); if(visitsData.length>0){var vr=[];vr.push(["VISIT HISTORY"]);vr.push([]); visitsData.forEach((visit,idx)=>{vr.push(["Visit #"+(visitsData.length-idx),"Date: "+visit.visitDate,"Type: "+visit.visitType]); ['Fatigue','NYHA','Edema','Pulse','BP','SpO2','Weight','JVP','Rales','S3','LBBB','QRS','Arrhythmia','EF_Change','Echo_Other','HbA1c','Gluc','Urea','Creat','eGFR','Na','K','BNP','NTproBNP','INR','Iron','Transferrin','Ferritin','WBC','Hb','Plt','TSH','FreeT4','Adverse','Plan','Others'].forEach(f=>{var val=visit['V_'+f];if(val&&val.trim&&val.trim()!=='')vr.push([f.replace(/_/g,' '),val]);});vr.push([]);}); var ws2=XLSX.utils.aoa_to_sheet(vr);XLSX.utils.book_append_sheet(wb,ws2,"Visits");} XLSX.writeFile(wb,"HF_Registry_"+(data.File_No||'unknown')+"_"+(data.Patient_Name||'patient')+".xlsx"); showPopup("success","Excel Exported!","File downloaded successfully."); }
-
-function pdfFromAdmin(id){ var data=PC[id]; if(!data){showPopup("error","Error","Patient data not found");return;} db.collection("patients").doc(id).collection("visits").orderBy("visitDate","desc").get().then(vs=>{var vd=[];vs.forEach(doc=>{vd.push(doc.data());});generatePDF(data,vd,id);}).catch(()=>{generatePDF(data,[],id);}); }
-
-function generatePDF(data,visitsData,id){ var container=document.getElementById('pdfContainer');container.innerHTML='';container.classList.add('active');container.scrollTop=0; var html="<div id='pdfContent' style='width:750px;margin:0 auto;background:#fff;padding:20px;font-family:Arial,Helvetica,sans-serif;color:#000;'>"; html+="<div style='text-align:center;border-bottom:3px solid #8b0000;padding-bottom:10px;margin-bottom:20px;'><h2 style='color:#8b0000;margin:0;'>Mubarak Al-Kabeer Hospital</h2><h3 style='margin:5px 0;color:#333;'>Heart Failure Clinic Registry</h3></div>"; html+="<h3 style='color:#333;'>Patient: "+(data.Patient_Name||'Unknown')+" | File: "+(data.File_No||'N/A')+"</h3>"; var sections=[{name:'Demographics',fields:['Patient_Name','Civil_ID','File_No','Age','Gender','Nationality','Mobile','Doctor_Name']},{name:'HF Diagnosis',fields:['HF_Type','EF_Diagnosis','Advanced_HF','Other_Cardio','Valvular_Disease','Admissions','Last_Admission','LOS']},{name:'Symptoms & Signs',fields:['Height','Weight','BMI','Dry_Weight','NYHA','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur']},{name:'Investigations',fields:['ECG','ECHO','CMR_CT','Walk_Test','Device_Info','Cath']},{name:'Comorbidities',fields:['DM','HTN','AF','IHD','PCI_CABG','CKD','CVA','PVD','Smoker','Obese_OSA','Lung_Dz','Liver_Dz','FH_Genetics']},{name:'Laboratory (Baseline)',fields:['Lab_HbA1c','Lab_Gluc','Lab_UreaCreat','Lab_eGFR','Lab_NaK','Lab_BNP','Lab_IronFerritin','Lab_TrSats','Lab_CBC','Lab_Thyroid','Lab_Lipids','Lab_AlbCreat']},{name:'Medications',fields:['Med_ARNI','Med_SGLT2i','Med_GLP1','Med_BB','Med_MRA','Med_ACEiARB','Med_Vasodilator','Med_Diuretic','Med_Lipid','Med_Antiplat','Med_OAC','Med_Arrhythmia','Med_Misc','Med_K_Chelator']},{name:'Outcomes & Follow-up',fields:['Quad_GDMT','Compliance','Mortality','Rehab','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt']}]; sections.forEach(function(sec){html+="<h4 style='background:#f0f0f0;padding:8px;margin-top:15px;color:#8b0000;'>"+sec.name+"</h4><table style='width:100%;border-collapse:collapse;font-size:12px;'>"; sec.fields.forEach(function(f){var val=data[f]||'-',label=f.replace(/_/g," ").replace(/Lab /g,"").replace(/Med /g,""); html+="<tr style='border-bottom:1px solid #ddd;'><td style='width:40%;padding:6px;background:#fafafa;font-weight:bold;'>"+label+"</td><td style='padding:6px;'>"+val+"</td></tr>";}); html+="</table>";}); if(visitsData.length>0){html+="<div style='page-break-before:always;'></div><h3 style='color:#8b0000;margin-top:20px;'>Visit History & Follow-ups</h3>"; var mf=['V_Concor','V_Betaloc','V_Dilatrend','V_Lopressor','V_Zestril','V_Tritace','V_Capoten','V_Diovan','V_Atacand','V_Entresto','V_Aldactone','V_Eplerenone','V_Finerenone','V_Forxiga','V_Jardiance','V_Hydralazine','V_Nitrates','V_Furosemide','V_Metolazone','V_Mounjaro','V_Ozempic','V_Warfarin','V_Xarelto','V_Eliquis','V_Zocor','V_Lipitor','V_Crestor','V_Ezetrol','V_Repatha','V_Praluent','V_Atozet','V_Vytorin','V_Zympass','V_Fibrates','V_Omacor','V_Veltassa','V_Lokelma','V_Cordarone','V_Flecainide','V_Sotalol','V_Propafenone','V_Procorolan']; visitsData.forEach(function(visit,idx){html+="<div style='border:2px solid #17a2b8;margin:15px 0;padding:15px;border-radius:8px;'><h4 style='color:#17a2b8;margin-top:0;'>Visit #"+(visitsData.length-idx)+": "+visit.visitDate+" ("+visit.visitType+")</h4>"; var vs=[{name:'Symptoms',fields:['V_Fatigue','V_NYHA','V_Edema']},{name:'Signs/Vitals',fields:['V_Pulse','V_BP','V_SpO2','V_Weight','V_JVP','V_Rales','V_S3']},{name:'ECG',fields:['V_LBBB','V_QRS','V_Arrhythmia']},{name:'Echo',fields:['V_EF_Change','V_Echo_Other']},{name:'Labs',fields:['V_HbA1c','V_Gluc','V_Urea','V_Creat','V_eGFR','V_Na','V_K','V_BNP','V_NTproBNP','V_INR','V_Iron','V_Transferrin','V_Ferritin','V_WBC','V_Hb','V_Plt','V_TSH','V_FreeT4']},{name:'Medications (Doses)',fields:mf},{name:'Plan',fields:['V_Adverse','V_Plan','V_Others']}]; vs.forEach(function(vsec){var hd=false;vsec.fields.forEach(function(vf){if(visit[vf]&&visit[vf].trim&&visit[vf].trim()!=='')hd=true;else if(visit[vf])hd=true;});if(!hd)return; html+="<h5 style='margin:10px 0 5px 0;color:#555;'>"+vsec.name+"</h5><table style='width:100%;border-collapse:collapse;font-size:11px;margin-bottom:10px;'>"; vsec.fields.forEach(function(vf){var val=visit[vf];if(val&&((typeof val==='string'&&val.trim()!=='')||(typeof val!=='string'))){html+="<tr style='border-bottom:1px solid #eee;'><td style='width:40%;padding:4px;background:#f5f5f5;'>"+vf.replace('V_','').replace(/_/g,' ')+"</td><td style='padding:4px;'>"+val+"</td></tr>";}}); html+="</table>";}); html+="</div>";});} html+="<div style='margin-top:30px;text-align:center;font-size:11px;color:#666;'>Generated: "+new Date().toLocaleString()+"</div></div>"; container.innerHTML=html; var element=document.getElementById('pdfContent'); setTimeout(function(){html2pdf().from(element).set({margin:[0.4,0.4,0.4,0.4],filename:"HF_Report_"+(data.File_No||'unknown')+"_"+(data.Patient_Name||'patient')+".pdf",html2canvas:{scale:2,useCORS:true,scrollY:0,scrollX:0,windowWidth:800},jsPDF:{unit:'in',format:'letter',orientation:'portrait'},pagebreak:{mode:['css','legacy']}}).save().then(function(){container.innerHTML='';container.classList.remove('active');}).catch(function(){container.innerHTML='';container.classList.remove('active');});},500); }
-
-function editPt(id){ var d=PC[id];editingDocId=id;currentPatientId=id; Object.keys(d).forEach(k=>{var el=document.getElementById(k);if(el)el.value=d[k]||"";}); document.getElementById("formTitle").innerText="Editing: "+d.Patient_Name; document.getElementById("cancelEditBtn").classList.remove("d-none"); document.getElementById("submitBtn").innerText="Update Patient"; loadVisits(id); document.getElementById("visitsContainer").style.display="block"; document.getElementById("visitToggleIcon").className="fa fa-minus-circle me-1"; window.scrollTo({top:0,behavior:"smooth"}); }
-
+// ===== ADMIN PANEL =====
+function loadAdmin(){
+    var tb=document.getElementById("adminTableBody"); tb.innerHTML="<tr><td colspan='4'><i class='fa fa-spinner fa-spin'></i> Loading...</td></tr>";
+    var today=new Date().toISOString().split('T')[0], upcomingHTML="";
+    db.collection("patients").orderBy("timestamp","desc").get().then(snap=>{
+        tb.innerHTML=""; document.getElementById("totalPatients").innerText=snap.size;
+        snap.forEach(docSnap=>{
+            var d=docSnap.data(), id=docSnap.id; PC[id]=d;
+            if(d.Next_Appt && d.Next_Appt>=today){
+                var da=Math.floor((new Date(d.Next_Appt)-new Date(today))/(1000*60*60*24));
+                if(da<=14) {
+                    var color = da<=3 ? "danger" : (da<=7 ? "warning" : "info");
+                    upcomingHTML+="<div class='alert alert-"+color+" py-1 px-2 mb-1 d-flex justify-content-between'><span><b>"+(d.Patient_Name||'Unknown')+"</b></span><span>"+d.Next_Appt+" (in "+da+" days)</span></div>";
+                }
+            }
+            tb.innerHTML+="<tr><td>"+(d.File_No||'')+"</td><td>"+(d.Patient_Name||'')+"</td><td>"+(d.Doctor_Name||'')+"</td><td><button class='btn btn-sm btn-primary me-1 mb-1' onclick='editFromAdmin(\""+id+"\")'>Edit</button><button class='btn btn-sm btn-danger me-1 mb-1' onclick='pdfFromAdmin(\""+id+"\")'>PDF</button><button class='btn btn-sm btn-success mb-1' onclick='exportPatientExcel(\""+id+"\")'>Excel</button></td></tr>";
+        });
+        document.getElementById("upcomingAppts").innerHTML=upcomingHTML||"<p class='text-muted small mb-0'>No appointments in the next 14 days.</p>";
+    });
+}
 function editFromAdmin(id){ editPt(id); goToMain(); }
 
-function delPt(id){ if(confirm("Permanently delete this patient record?")){db.collection("patients").doc(id).delete().then(()=>{loadAdmin();});} }
+
+// ===== EXPORTS (SINGLE PATIENT) =====
+
+function exportPatientExcel(id){
+    var data=PC[id]; if(!data) return;
+    db.collection("patients").doc(id).collection("visits").orderBy("visitDate","desc").get().then(vs=>{
+        var vd=[]; vs.forEach(doc=>vd.push(doc.data()));
+        var wb=XLSX.utils.book_new();
+        
+        var pr=[["MUBARAK AL-KABEER HOSPITAL - HEART FAILURE REGISTRY"],[]];
+        pr.push(["Patient Name:",data.Patient_Name],["Civil ID:",data.Civil_ID],["File No:",data.File_No],["Age:",data.Age],["Gender:",data.Gender],["Doctor:",data.Doctor_Name],[]);
+        
+        var sections=[
+            {name:'HF DIAGNOSIS',fields:['HF_Type','EF_Diagnosis','Advanced_HF','Other_Cardio','Valvular_Disease','Admissions','Last_Admission','LOS']},
+            {name:'SYMPTOMS & SIGNS',fields:['Height','Weight','BMI','Dry_Weight','NYHA','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales']},
+            {name:'INVESTIGATIONS',fields:['ECG','ECHO','CMR_CT','Walk_Test','Device_Info']},
+            {name:'COMORBIDITIES',fields:['DM','HTN','AF','IHD','PCI_CABG','CKD','CVA','PVD','Smoker','Obese_OSA','Lung_Dz','Liver_Dz','FH_Genetics']},
+            {name:'LABORATORY (BASELINE)',fields:['Lab_HbA1c','Lab_Gluc','Lab_UreaCreat','Lab_eGFR','Lab_NaK','Lab_BNP','Lab_IronFerritin','Lab_TrSats','Lab_CBC','Lab_Thyroid','Lab_Lipids','Lab_AlbCreat']},
+            {name:'MEDICATIONS',fields:['Med_ARNI_Type','Med_ARNI_Dose','Med_BB_Type','Med_BB_Dose','Med_MRA_Type','Med_MRA_Dose','Med_SGLT2i_Type','Med_SGLT2i_Dose','Med_GLP1_Type','Med_GLP1_Dose','Med_Diuretic_Type','Med_Diuretic_Dose','Med_Blood_Type','Med_Blood_Dose']},
+            {name:'OUTCOMES & FOLLOW-UP',fields:['Quad_GDMT','GDMT_Rationale','Compliance','Mortality','Rehab','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt']}
+        ];
+        
+        sections.forEach(sec=>{
+            pr.push([sec.name]);
+            sec.fields.forEach(f=>{ pr.push([f.replace(/_/g," ").replace(/Lab /g,"").replace(/Med /g,""), data[f]||'-']); });
+            pr.push([]);
+        });
+        XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(pr),"Patient Info");
+        
+        if(vd.length>0){
+            var vr=[["VISIT HISTORY"],[]];
+            vd.forEach((visit,idx)=>{
+                vr.push(["Visit #"+(vd.length-idx), "Date: "+visit.visitDate, "Type: "+visit.visitType]);
+                ['V_Fatigue','V_NYHA','V_Weight','V_BP'].forEach(f=>{ if(visit[f]) vr.push([f.replace('V_',''), visit[f]]); });
+                vr.push([]);
+            });
+            XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(vr),"Visits");
+        }
+        
+        XLSX.writeFile(wb,"HF_Registry_"+data.File_No+".xlsx");
+    });
+}
+
+function pdfFromAdmin(id){
+    var data=PC[id]; if(!data) return;
+    var container=document.getElementById('pdfContainer'); 
+    
+    var html="<div id='pdfContent' style='width:750px;margin:0 auto;background:#fff;padding:20px;font-family:Arial,sans-serif;color:#000;'>";
+    html+="<div style='text-align:center;border-bottom:3px solid #8b0000;padding-bottom:10px;margin-bottom:20px;'><h2 style='color:#8b0000;margin:0;'>Mubarak Al-Kabeer Hospital</h2><h3 style='margin:5px 0;color:#333;'>Heart Failure Clinic Registry</h3></div>";
+    html+="<h3 style='color:#333;'>Patient: "+(data.Patient_Name||'Unknown')+" | File: "+(data.File_No||'N/A')+"</h3>";
+    
+    var sections=[
+        {name:'Demographics',fields:['Patient_Name','Civil_ID','File_No','Age','Gender','Doctor_Name']},
+        {name:'Clinical & Diagnosis',fields:['HF_Type','EF_Diagnosis','NYHA','BMI','BP','ECG','ECHO']},
+        {name:'Comorbidities',fields:['DM','HTN','AF','IHD','CKD','CVA','Smoker','Lung_Dz']},
+        {name:'Medications',fields:['Med_ARNI_Type','Med_ARNI_Dose','Med_BB_Type','Med_BB_Dose','Med_MRA_Type','Med_MRA_Dose','Med_SGLT2i_Type','Med_SGLT2i_Dose']},
+        {name:'Outcomes & Risk',fields:['Quad_GDMT','MAGGIC_Score','MAGGIC_Risk','Mortality','Notes']}
+    ];
+    
+    sections.forEach(function(sec){
+        html+="<h4 style='background:#f0f0f0;padding:8px;margin-top:15px;color:#8b0000;'>"+sec.name+"</h4><table style='width:100%;border-collapse:collapse;font-size:12px;'>";
+        sec.fields.forEach(function(f){
+            var val=data[f]||'-', label=f.replace(/_/g," ").replace(/Lab /g,"").replace(/Med /g,"");
+            html+="<tr style='border-bottom:1px solid #ddd;'><td style='width:40%;padding:6px;background:#fafafa;font-weight:bold;'>"+label+"</td><td style='padding:6px;'>"+val+"</td></tr>";
+        });
+        html+="</table>";
+    });
+    
+    html+="</div>";
+    container.innerHTML=html; container.classList.add('active');
+    
+    setTimeout(()=>{
+        html2pdf().from(document.getElementById('pdfContent')).set({
+            margin:[0.4,0.4,0.4,0.4], 
+            filename:"HF_Report_"+data.File_No+".pdf", 
+            jsPDF:{unit:'in',format:'letter',orientation:'portrait'}
+        }).save().then(()=>{ container.innerHTML=''; container.classList.remove('active'); });
+    }, 500);
+}
+
 
 // ===== ANALYTICS ENGINE =====
-
 function switchAnalyticsTab(tab) {
     document.querySelectorAll('.analytics-panel').forEach(p=>p.classList.remove('active'));
     document.querySelectorAll('.analytics-tab-btn').forEach(b=>b.classList.remove('active'));
@@ -993,427 +985,163 @@ function switchAnalyticsTab(tab) {
     event.target.classList.add('active');
 }
 
-function destroyChart(id) {
-    if (analyticsCharts[id]) { analyticsCharts[id].destroy(); delete analyticsCharts[id]; }
-}
-
 function makeChart(id, type, labels, datasets, options) {
-    destroyChart(id);
-    var ctx = document.getElementById(id);
-    if (!ctx) return;
-    analyticsCharts[id] = new Chart(ctx.getContext('2d'), {
-        type: type,
-        data: { labels: labels, datasets: datasets },
-        options: Object.assign({
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { position: 'bottom', labels: { font: { size: 10 }, padding: 8 } } }
-        }, options || {})
+    if(analyticsCharts[id]) analyticsCharts[id].destroy();
+    var ctx=document.getElementById(id); if(!ctx) return;
+    analyticsCharts[id]=new Chart(ctx.getContext('2d'), {
+        type:type, data:{labels:labels, datasets:datasets}, 
+        options:Object.assign({responsive:true, maintainAspectRatio:false}, options||{})
     });
 }
-
-var PIE_COLORS = ['#8b0000','#c0392b','#e74c3c','#f39c12','#f1c40f','#27ae60','#2980b9','#8e44ad','#16a085','#e67e22'];
-
-function pct(n, total) { return total > 0 ? Math.round((n/total)*100) : 0; }
-function pctStr(n, total) { return pct(n,total)+'%'; }
 
 function loadAnalytics() {
-    document.getElementById('analyticsSpinner').style.display='block';
+    document.getElementById('analyticsSpinner').style.display='block'; 
     document.getElementById('analyticsBody').style.display='none';
-    document.getElementById('analyticsUpdateTime').textContent='';
-
-    db.collection("patients").get().then(function(snap) {
-        allPatientsData = [];
-        snap.forEach(function(doc) { allPatientsData.push({id: doc.id, ...doc.data()}); });
-
-        var d = allPatientsData;
-        var n = d.length;
-
-        document.getElementById('analyticsSpinner').style.display='none';
+    
+    db.collection("patients").get().then(snap => {
+        allPatientsData=[]; snap.forEach(doc => allPatientsData.push({id: doc.id, ...doc.data()}));
+        var d=allPatientsData, n=d.length;
+        
+        document.getElementById('analyticsSpinner').style.display='none'; 
         document.getElementById('analyticsBody').style.display='block';
         document.getElementById('analyticsUpdateTime').textContent='Data as of '+new Date().toLocaleString()+' · '+n+' patients';
+        
+        // --- 1. KPIs ---
+        var quad = d.filter(p=>p.Quad_GDMT==='Yes').length;
+        var hfref = d.filter(p=>p.HF_Type==='HFrEF').length;
+        var highRisk = d.filter(p=>parseInt(p.MAGGIC_Score||0)>25).length;
+        
+        document.getElementById('kpiRow').innerHTML = `
+            <div class='col-6 col-md-3'><div class='stat-kpi'><div class='kpi-num'>${n}</div><div class='kpi-label'>Patients</div></div></div>
+            <div class='col-6 col-md-3'><div class='stat-kpi'><div class='kpi-num'>${n>0?Math.round((quad/n)*100):0}%</div><div class='kpi-label'>Quad GDMT</div></div></div>
+            <div class='col-6 col-md-3'><div class='stat-kpi'><div class='kpi-num'>${hfref}</div><div class='kpi-label'>HFrEF Cases</div></div></div>
+            <div class='col-6 col-md-3'><div class='stat-kpi'><div class='kpi-num' style='color:#dc3545'>${highRisk}</div><div class='kpi-label'>High Risk</div></div></div>
+        `;
 
-        buildKPIs(d, n);
-        buildOverview(d, n);
-        buildGDMT(d, n);
-        buildRisk(d, n);
-        buildDemographics(d, n);
-        buildComorbidities(d, n);
-        buildOutcomes(d, n);
+        // --- 2. OVERVIEW CHARTS ---
+        var hfTypes={HFrEF:0, HFmrEF:0, HFpEF:0}; d.forEach(p=>{if(hfTypes[p.HF_Type]!==undefined) hfTypes[p.HF_Type]++;});
+        makeChart('chartHFType','doughnut',Object.keys(hfTypes),[{data:Object.values(hfTypes),backgroundColor:['#8b0000','#c0392b','#e74c3c']}]);
+        
+        var nyha={I:0,II:0,III:0,IV:0}; d.forEach(p=>{if(nyha[p.NYHA]!==undefined) nyha[p.NYHA]++;});
+        makeChart('chartNYHA','bar',Object.keys(nyha),[{label:'Patients',data:Object.values(nyha),backgroundColor:'#27ae60'}]);
 
-    }).catch(function(e) {
-        document.getElementById('analyticsSpinner').innerHTML='<div class="text-danger">Error loading data: '+e.message+'</div>';
+        // --- 3. GDMT CHARTS ---
+        var arniCnt = d.filter(p=>p.Med_ARNI_Type&&p.Med_ARNI_Type!=='None').length;
+        var bbCnt = d.filter(p=>p.Med_BB_Type&&p.Med_BB_Type!=='None').length;
+        var mraCnt = d.filter(p=>p.Med_MRA_Type&&p.Med_MRA_Type!=='None').length;
+        var sgltCnt = d.filter(p=>p.Med_SGLT2i_Type&&p.Med_SGLT2i_Type!=='None').length;
+        
+        document.getElementById('gdmtBars').innerHTML = `
+            <div class='gdmt-row'><span>ARNI/ACEi/ARB</span><b>${arniCnt} (${n>0?Math.round((arniCnt/n)*100):0}%)</b></div>
+            <div class='gdmt-row'><span>Beta-Blockers</span><b>${bbCnt} (${n>0?Math.round((bbCnt/n)*100):0}%)</b></div>
+            <div class='gdmt-row'><span>MRA</span><b>${mraCnt} (${n>0?Math.round((mraCnt/n)*100):0}%)</b></div>
+            <div class='gdmt-row'><span>SGLT2i</span><b>${sgltCnt} (${n>0?Math.round((sgltCnt/n)*100):0}%)</b></div>
+        `;
+
+        makeChart('chartQuad','pie',['Quad Therapy','Incomplete'],[{data:[quad,n-quad],backgroundColor:['#1d6f42','#e9ecef']}]);
+        
+        var comp = d.filter(p=>p.Compliance==='Yes').length;
+        makeChart('chartCompliance','pie',['Compliant','Non-Compliant'],[{data:[comp,n-comp],backgroundColor:['#2980b9','#e74c3c']}]);
+
+        // --- 4. RISK CHARTS ---
+        var bins={'0-10':0,'11-20':0,'21-30':0,'>30':0};
+        d.forEach(p=>{
+            var s=parseInt(p.MAGGIC_Score)||0;
+            if(s<=10)bins['0-10']++;else if(s<=20)bins['11-20']++;else if(s<=30)bins['21-30']++;else bins['>30']++;
+        });
+        makeChart('chartMAGGIC','bar',Object.keys(bins),[{label:'Patients',data:Object.values(bins),backgroundColor:'#f39c12'}]);
+
+        var low=d.filter(p=>parseInt(p.MAGGIC_Score||0)<=15).length;
+        var mid=d.filter(p=>{var s=parseInt(p.MAGGIC_Score||0);return s>15&&s<=25;}).length;
+        makeChart('chartRiskStrat','doughnut',['Low Risk','Intermediate','High Risk'],[{data:[low,mid,highRisk],backgroundColor:['#27ae60','#f39c12','#dc3545']}]);
+
+        document.getElementById('highRiskCount').textContent = highRisk;
+        var hrPts=d.filter(p=>parseInt(p.MAGGIC_Score||0)>25).sort((a,b)=>(parseInt(b.MAGGIC_Score)||0)-(parseInt(a.MAGGIC_Score)||0));
+        var hrHtml = hrPts.map(p=>`<div class='high-risk-item'><b>${p.Patient_Name||'Unknown'}</b> (File: ${p.File_No||'-'})<br>MAGGIC: ${p.MAGGIC_Score} pts</div>`).join('');
+        document.getElementById('highRiskList').innerHTML = hrHtml || '<p class="text-muted">No high-risk patients.</p>';
+
+        // --- 5. DEMOGRAPHICS ---
+        var docCount={}; d.forEach(p=>{var doc=p.Doctor_Name||'Unknown'; docCount[doc]=(docCount[doc]||0)+1;});
+        makeChart('chartDoctors','bar',Object.keys(docCount),[{label:'Patients',data:Object.values(docCount),backgroundColor:'#0f3460'}]);
+        
+        var natCount={}; d.forEach(p=>{var nat=p.Nationality||'Unknown'; natCount[nat]=(natCount[nat]||0)+1;});
+        var natHtml = Object.entries(natCount).map(([k,v])=>`<div class='gdmt-row'><span>${k}</span><b>${v}</b></div>`).join('');
+        document.getElementById('nationalityBars').innerHTML = natHtml;
     });
 }
 
-function buildKPIs(d, n) {
-    var alive = d.filter(p=>p.Mortality==='Alive'||!p.Mortality).length;
-    var quad = d.filter(p=>p.Quad_GDMT==='Yes').length;
-    var hfref = d.filter(p=>p.HF_Type==='HFrEF').length;
+// ===== FULL EXCEL ANALYTICS EXPORT =====
+function exportAnalyticsExcel() {
+    var d = allPatientsData, n = d.length;
+    if(n===0){alert("No patient data loaded.");return;}
+    var wb = XLSX.utils.book_new();
+
+    // SHEET 1: Summary
+    var s1=[["HF CLINIC REGISTRY — ANALYTICS REPORT"],["Mubarak Al-Kabeer Hospital · Generated: "+new Date().toLocaleString()],["Total Patients:",n],[]];
+    s1.push(["METRIC","COUNT","PERCENTAGE"]);
+    
+    var hfref=d.filter(p=>p.HF_Type==='HFrEF').length;
+    s1.push(["HFrEF", hfref, n>0?Math.round((hfref/n)*100)+"%":"0%"]);
+    
+    var quad=d.filter(p=>p.Quad_GDMT==='Yes').length;
+    s1.push(["Quadruple GDMT", quad, n>0?Math.round((quad/n)*100)+"%":"0%"]);
+    
     var highRisk = d.filter(p=>parseInt(p.MAGGIC_Score||0)>25).length;
-    var avgEF = 0, efCount = 0;
-    d.forEach(p=>{ var ef=parseFloat(p.EF_Diagnosis); if(!isNaN(ef)&&ef>0){avgEF+=ef;efCount++;} });
-    avgEF = efCount>0?Math.round(avgEF/efCount):0;
+    s1.push(["High Risk (MAGGIC >25)", highRisk, n>0?Math.round((highRisk/n)*100)+"%":"0%"]);
+    
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(s1),"Summary");
 
-    var kpis = [
-        { num: n, label: 'Total Patients', sub: 'Registry', color: '#8b0000' },
-        { num: pctStr(quad,n), label: 'Quad GDMT', sub: quad+' patients', color: '#1d6f42' },
-        { num: pctStr(hfref,n), label: 'HFrEF', sub: hfref+' patients', color: '#c0392b' },
-        { num: highRisk, label: 'High-Risk (MAGGIC>25)', sub: pctStr(highRisk,n)+' of registry', color: '#dc3545' },
-        { num: avgEF+(avgEF?'%':'—'), label: 'Mean EF', sub: efCount+' with data', color: '#0f3460' },
-        { num: pctStr(d.filter(p=>p.Mortality&&p.Mortality!=='Alive').length, n), label: 'Mortality', sub: d.filter(p=>p.Mortality&&p.Mortality!=='Alive').length+' deaths', color: '#6c757d' }
-    ];
-    var html = '';
-    kpis.forEach(k=>{
-        html += "<div class='col-6 col-md-2'><div class='stat-kpi' style='border-top-color:"+k.color+"'><div class='kpi-num' style='color:"+k.color+"'>"+k.num+"</div><div class='kpi-label'>"+k.label+"</div><div class='kpi-sub'>"+k.sub+"</div></div></div>";
-    });
-    document.getElementById('kpiRow').innerHTML = html;
-}
-
-function buildOverview(d, n) {
-    // HF Type pie
-    var hfTypes = {HFrEF:0, HFmrEF:0, HFpEF:0, Other:0};
-    d.forEach(p=>{ if(hfTypes[p.HF_Type]!==undefined) hfTypes[p.HF_Type]++; else if(p.HF_Type) hfTypes.Other++; });
-    makeChart('chartHFType','doughnut',Object.keys(hfTypes),
-        [{data:Object.values(hfTypes),backgroundColor:['#8b0000','#c0392b','#e74c3c','#aaa'],borderWidth:2}],
-        {plugins:{legend:{position:'bottom'}}});
-
-    // NYHA bar
-    var nyha = {I:0,II:0,III:0,IV:0,Unknown:0};
-    d.forEach(p=>{ if(nyha[p.NYHA]!==undefined)nyha[p.NYHA]++;else nyha.Unknown++; });
-    makeChart('chartNYHA','bar',Object.keys(nyha),
-        [{label:'Patients',data:Object.values(nyha),backgroundColor:['#27ae60','#f39c12','#e74c3c','#8b0000','#aaa'],borderRadius:6}],
-        {plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}});
-
-    // Gender
-    var male=d.filter(p=>p.Gender==='Male').length, female=d.filter(p=>p.Gender==='Female').length;
-    makeChart('chartGender','pie',['Male','Female','Unknown'],
-        [{data:[male,female,n-male-female],backgroundColor:['#2980b9','#e91e63','#aaa'],borderWidth:2}],{});
-
-    // Age groups
-    var ag={'<40':0,'40-49':0,'50-59':0,'60-69':0,'70-79':0,'≥80':0};
-    d.forEach(p=>{ var a=parseInt(p.Age)||0; if(a<40)ag['<40']++;else if(a<50)ag['40-49']++;else if(a<60)ag['50-59']++;else if(a<70)ag['60-69']++;else if(a<80)ag['70-79']++;else ag['≥80']++; });
-    makeChart('chartAge','bar',Object.keys(ag),
-        [{label:'Patients',data:Object.values(ag),backgroundColor:'#0f3460',borderRadius:6}],
-        {plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}});
-}
-
-function buildGDMT(d, n) {
-    var gdmtItems = [
-        {label:'Any ARNI (Entresto)', fn: p=>p.Med_ARNI==='Yes'},
-        {label:'Any SGLT2i', fn: p=>p.Med_SGLT2i&&p.Med_SGLT2i!=='None'&&p.Med_SGLT2i!==''},
-        {label:'Any Beta-Blocker', fn: p=>p.Med_BB&&p.Med_BB!=='None'&&p.Med_BB!==''},
-        {label:'Any MRA', fn: p=>p.Med_MRA&&p.Med_MRA!=='None'&&p.Med_MRA!==''},
-        {label:'ACEi/ARB/ARNI', fn: p=>(p.Med_ACEiARB&&p.Med_ACEiARB!=='None'&&p.Med_ACEiARB!=='')||p.Med_ARNI==='Yes'},
-        {label:'Diuretics', fn: p=>p.Med_Diuretic&&p.Med_Diuretic!=='None'&&p.Med_Diuretic!==''},
-        {label:'OAC', fn: p=>p.Med_OAC&&p.Med_OAC!=='None'&&p.Med_OAC!==''},
-    ];
-    var html = '';
-    gdmtItems.forEach(item=>{
-        var cnt = d.filter(item.fn).length;
-        var p = pct(cnt,n);
-        var cls = p>=70?'gdmt-pill-high':(p>=40?'gdmt-pill-mid':'gdmt-pill-low');
-        html += "<div class='gdmt-row'><span class='gdmt-name'>"+item.label+"</span><div style='flex:1;margin:0 12px;'><div style='background:#f0f0f0;border-radius:4px;height:10px;overflow:hidden;'><div style='width:"+p+"%;height:100%;background:linear-gradient(90deg,#8b0000,#c0392b);border-radius:4px;transition:width 0.8s;'></div></div></div><span class='gdmt-pill "+cls+"'>"+p+"%</span></div>";
-    });
-    document.getElementById('gdmtBars').innerHTML = html;
-
-    // Quad pie
-    var qy=d.filter(p=>p.Quad_GDMT==='Yes').length, qn=n-qy;
-    makeChart('chartQuad','doughnut',['Quadruple GDMT','Incomplete'],
-        [{data:[qy,qn],backgroundColor:['#1d6f42','#f0f0f0'],borderWidth:2}],{});
-
-    // Compliance
-    var cy=d.filter(p=>p.Compliance==='Yes').length;
-    makeChart('chartCompliance','doughnut',['Compliant','Non-compliant'],
-        [{data:[cy,n-cy],backgroundColor:['#2980b9','#e74c3c'],borderWidth:2}],{});
-}
-
-function buildRisk(d, n) {
-    // MAGGIC score histogram bins
-    var bins={'0-5':0,'6-10':0,'11-15':0,'16-20':0,'21-25':0,'26-30':0,'31-35':0,'>35':0};
+    // SHEET 2: All Patients
+    var headers=["File No","Name","Age","Gender","Nationality","HF Type","EF (%)","NYHA","MAGGIC Score","Quad GDMT","DM","HTN","CKD","ARNI","SGLT2i","BB","MRA","Doctor"];
+    var rows=[headers];
     d.forEach(p=>{
-        var s=parseInt(p.MAGGIC_Score)||0;
-        if(s<=5)bins['0-5']++;else if(s<=10)bins['6-10']++;else if(s<=15)bins['11-15']++;
-        else if(s<=20)bins['16-20']++;else if(s<=25)bins['21-25']++;else if(s<=30)bins['26-30']++;
-        else if(s<=35)bins['31-35']++;else bins['>35']++;
+        rows.push([p.File_No||'',p.Patient_Name||'',p.Age||'',p.Gender||'',p.Nationality||'',p.HF_Type||'',p.EF_Diagnosis||'',p.NYHA||'',p.MAGGIC_Score||'',p.Quad_GDMT||'',p.DM||'',p.HTN||'',p.CKD||'',p.Med_ARNI_Type||'',p.Med_SGLT2i_Type||'',p.Med_BB_Type||'',p.Med_MRA_Type||'',p.Doctor_Name||'']);
     });
-    makeChart('chartMAGGIC','bar',Object.keys(bins),
-        [{label:'Patients',data:Object.values(bins),backgroundColor:['#27ae60','#27ae60','#f39c12','#f39c12','#e67e22','#e74c3c','#c0392b','#8b0000'],borderRadius:6}],
-        {plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}});
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),"All Patients");
 
-    // Stratification
-    var low=d.filter(p=>parseInt(p.MAGGIC_Score||0)<=15).length;
-    var mid=d.filter(p=>{var s=parseInt(p.MAGGIC_Score||0);return s>15&&s<=25;}).length;
-    var high=d.filter(p=>parseInt(p.MAGGIC_Score||0)>25).length;
-    makeChart('chartRiskStrat','doughnut',['Low Risk (≤15)','Intermediate (16-25)','High Risk (>25)'],
-        [{data:[low,mid,high],backgroundColor:['#27ae60','#f39c12','#dc3545'],borderWidth:2}],{});
+    // SHEET 3: High Risk
+    var hrPts=d.filter(p=>parseInt(p.MAGGIC_Score||0)>25).sort((a,b)=>(parseInt(b.MAGGIC_Score)||0)-(parseInt(a.MAGGIC_Score)||0));
+    var hrRows=[["HIGH-RISK PATIENTS (MAGGIC > 25)"],["File No","Name","MAGGIC Score","HF Type","NYHA","Doctor","Next Appt"]];
+    hrPts.forEach(p=>{hrRows.push([p.File_No||'',p.Patient_Name||'',p.MAGGIC_Score||'',p.HF_Type||'',p.NYHA||'',p.Doctor_Name||'',p.Next_Appt||'']);});
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(hrRows),"High Risk");
 
-    // High risk list
-    document.getElementById('highRiskCount').textContent = high;
-    var hiPts = d.filter(p=>parseInt(p.MAGGIC_Score||0)>25).sort((a,b)=>(parseInt(b.MAGGIC_Score)||0)-(parseInt(a.MAGGIC_Score)||0));
-    var html='';
-    if(hiPts.length===0) html='<p class="text-muted small">No high-risk patients currently.</p>';
-    hiPts.forEach(p=>{
-        html+="<div class='high-risk-item'><span class='hr-name'>"+(p.Patient_Name||'Unknown')+" <small style='font-weight:400;color:#888;'>File: "+(p.File_No||'-')+"</small></span><div class='hr-detail'>MAGGIC: <b>"+p.MAGGIC_Score+"</b> pts · HF: "+(p.HF_Type||'?')+" · NYHA: "+(p.NYHA||'?')+" · <span class='risk-badge risk-high'>"+p.MAGGIC_Risk+"</span></div></div>";
-    });
-    document.getElementById('highRiskList').innerHTML = html;
+    XLSX.writeFile(wb,"HF_Analytics_Full_"+new Date().toISOString().split('T')[0]+".xlsx");
 }
 
-function buildDemographics(d, n) {
-    // Nationality
-    var natCount = {};
-    d.forEach(p=>{ var nat=(p.Nationality||'Unknown').trim(); natCount[nat]=(natCount[nat]||0)+1; });
-    var sorted = Object.entries(natCount).sort((a,b)=>b[1]-a[1]).slice(0,8);
-    var nbHtml='';
-    sorted.forEach(([nat,cnt])=>{
-        var p=pct(cnt,n);
-        nbHtml+="<div class='comorbidity-bar-row'><span class='cb-label' style='width:90px;'>"+nat+"</span><div class='cb-bar-wrap'><div class='cb-bar' style='width:"+p+"%;background:linear-gradient(90deg,#0f3460,#2980b9);'></div></div><span class='cb-pct' style='color:#0f3460;'>"+cnt+"</span></div>";
-    });
-    document.getElementById('nationalityBars').innerHTML = nbHtml||'<p class="text-muted small">No nationality data.</p>';
-
-    // Doctor distribution
-    var docCount={};
-    d.forEach(p=>{var doc=p.Doctor_Name||'Unknown';docCount[doc]=(docCount[doc]||0)+1;});
-    makeChart('chartDoctors','bar',Object.keys(docCount),
-        [{label:'Patients',data:Object.values(docCount),backgroundColor:PIE_COLORS,borderRadius:6}],
-        {plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}});
-
-    // Device therapy
-    var icd=d.filter(p=>p.Device_Info&&p.Device_Info.toLowerCase().includes('icd')).length;
-    var crt=d.filter(p=>p.Device_Info&&p.Device_Info.toLowerCase().includes('crt')).length;
-    var none=d.filter(p=>!p.Device_Info||p.Device_Info.trim()==='').length;
-    var dHtml="<div class='gdmt-row'><span class='gdmt-name'>ICD</span><span class='gdmt-pill gdmt-pill-high'>"+icd+" ("+pctStr(icd,n)+")</span></div>";
-    dHtml+="<div class='gdmt-row'><span class='gdmt-name'>CRT</span><span class='gdmt-pill gdmt-pill-mid'>"+crt+" ("+pctStr(crt,n)+")</span></div>";
-    dHtml+="<div class='gdmt-row'><span class='gdmt-name'>No Device</span><span class='gdmt-pill gdmt-pill-low'>"+none+" ("+pctStr(none,n)+")</span></div>";
-    document.getElementById('deviceStats').innerHTML = dHtml;
-
-    // EF distribution
-    var efBins={'<20':0,'20-29':0,'30-39':0,'40-49':0,'50-59':0,'≥60':0,'N/A':0};
-    d.forEach(p=>{
-        var ef=parseFloat(p.EF_Diagnosis);
-        if(isNaN(ef)||ef<=0)efBins['N/A']++;
-        else if(ef<20)efBins['<20']++;else if(ef<30)efBins['20-29']++;else if(ef<40)efBins['30-39']++;
-        else if(ef<50)efBins['40-49']++;else if(ef<60)efBins['50-59']++;else efBins['≥60']++;
-    });
-    makeChart('chartEF','bar',Object.keys(efBins),
-        [{label:'Patients',data:Object.values(efBins),backgroundColor:['#c0392b','#e74c3c','#e67e22','#f39c12','#27ae60','#1d6f42','#aaa'],borderRadius:6}],
-        {plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}});
-}
-
-function buildComorbidities(d, n) {
-    var comorbItems = [
-        {label:'HTN', fn:p=>p.HTN==='Yes'},
-        {label:'DM', fn:p=>p.DM==='Yes'},
-        {label:'IHD', fn:p=>p.IHD&&p.IHD!=='No'&&p.IHD!==''},
-        {label:'AF', fn:p=>p.AF==='Yes'},
-        {label:'CKD', fn:p=>p.CKD==='Yes'},
-        {label:'Obese/OSA', fn:p=>p.Obese_OSA==='Yes'},
-        {label:'PCI/CABG', fn:p=>p.PCI_CABG&&p.PCI_CABG!=='No'&&p.PCI_CABG!==''},
-        {label:'CVA', fn:p=>p.CVA==='Yes'},
-        {label:'Lung Dz', fn:p=>p.Lung_Dz==='Yes'},
-        {label:'PVD', fn:p=>p.PVD==='Yes'},
-        {label:'Liver Dz', fn:p=>p.Liver_Dz==='Yes'},
-    ];
-    var sorted = comorbItems.map(item=>({...item, cnt:d.filter(item.fn).length})).sort((a,b)=>b.cnt-a.cnt);
-    var html='';
-    sorted.forEach(item=>{
-        var p=pct(item.cnt,n);
-        html+="<div class='comorbidity-bar-row'><span class='cb-label'>"+item.label+"</span><div class='cb-bar-wrap'><div class='cb-bar' style='width:"+p+"%;'></div></div><span class='cb-pct'>"+item.cnt+" ("+p+"%)</span></div>";
-    });
-    document.getElementById('comorbiditiesBars').innerHTML = html;
-
-    // Smoking
-    var snv=d.filter(p=>p.Smoker==='Never'||!p.Smoker).length;
-    var sc=d.filter(p=>p.Smoker==='Current').length;
-    var sf=d.filter(p=>p.Smoker==='Former').length;
-    makeChart('chartSmoking','pie',['Never','Current','Former'],
-        [{data:[snv,sc,sf],backgroundColor:['#27ae60','#e74c3c','#f39c12'],borderWidth:2}],{});
-
-    // Advanced HF & valvular
-    var adv=d.filter(p=>p.Advanced_HF==='Yes').length;
-    var val=d.filter(p=>p.Valvular_Disease==='Yes').length;
-    var both=d.filter(p=>p.Advanced_HF==='Yes'&&p.Valvular_Disease==='Yes').length;
-    var aHtml="<div class='gdmt-row'><span class='gdmt-name'>Advanced HF</span><span class='gdmt-pill gdmt-pill-low'>"+adv+" ("+pctStr(adv,n)+")</span></div>";
-    aHtml+="<div class='gdmt-row'><span class='gdmt-name'>Valvular Disease</span><span class='gdmt-pill gdmt-pill-mid'>"+val+" ("+pctStr(val,n)+")</span></div>";
-    aHtml+="<div class='gdmt-row'><span class='gdmt-name'>Both</span><span class='gdmt-pill gdmt-pill-low'>"+both+" ("+pctStr(both,n)+")</span></div>";
-    document.getElementById('advancedStats').innerHTML = aHtml;
-}
-
-function buildOutcomes(d, n) {
-    // Mortality
-    var alive=d.filter(p=>p.Mortality==='Alive'||!p.Mortality).length;
-    var inh=d.filter(p=>p.Mortality==='In-hospital').length;
-    var outh=d.filter(p=>p.Mortality==='Out-of-hospital').length;
-    makeChart('chartMortality','doughnut',['Alive','In-hospital Death','Out-of-hospital Death'],
-        [{data:[alive,inh,outh],backgroundColor:['#27ae60','#e74c3c','#8b0000'],borderWidth:2}],{});
-
-    // Admissions distribution
-    var admBins={'0':0,'1':0,'2':0,'3':0,'4+':0};
-    d.forEach(p=>{ var a=parseInt(p.Admissions)||0; if(a===0)admBins['0']++;else if(a===1)admBins['1']++;else if(a===2)admBins['2']++;else if(a===3)admBins['3']++;else admBins['4+']++; });
-    makeChart('chartAdmissions','bar',Object.keys(admBins).map(k=>k+' admission'+(k==='1'?'':'s')),
-        [{label:'Patients',data:Object.values(admBins),backgroundColor:'#c0392b',borderRadius:6}],
-        {plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}});
-
-    // Rehab
-    var ry=d.filter(p=>p.Rehab==='Yes').length;
-    makeChart('chartRehab','doughnut',['Enrolled','Not Enrolled'],
-        [{data:[ry,n-ry],backgroundColor:['#2980b9','#e9ecef'],borderWidth:2}],{});
-
-    // LOS stats
-    var losVals=d.map(p=>parseFloat(p.LOS)).filter(v=>!isNaN(v)&&v>0);
-    var avgLOS=losVals.length>0?(losVals.reduce((a,b)=>a+b,0)/losVals.length).toFixed(1):'—';
-    var maxLOS=losVals.length>0?Math.max(...losVals):'—';
-    var losHtml="<div class='row text-center g-2'>";
-    losHtml+="<div class='col-4'><div style='font-size:1.8rem;font-weight:700;color:#8b0000;font-family:Crimson Pro,serif;'>"+avgLOS+"</div><div style='font-size:0.7rem;color:#666;text-transform:uppercase;letter-spacing:0.05em;'>Avg Days</div></div>";
-    losHtml+="<div class='col-4'><div style='font-size:1.8rem;font-weight:700;color:#c0392b;font-family:Crimson Pro,serif;'>"+maxLOS+"</div><div style='font-size:0.7rem;color:#666;text-transform:uppercase;letter-spacing:0.05em;'>Max Days</div></div>";
-    losHtml+="<div class='col-4'><div style='font-size:1.8rem;font-weight:700;color:#0f3460;font-family:Crimson Pro,serif;'>"+losVals.length+"</div><div style='font-size:0.7rem;color:#666;text-transform:uppercase;letter-spacing:0.05em;'>With Data</div></div>";
-    losHtml+="</div>";
-    document.getElementById('losStats').innerHTML = losHtml;
-}
-
-// ===== ANALYTICS EXPORT: PDF =====
+// ===== FULL PDF ANALYTICS EXPORT =====
 function exportAnalyticsPDF() {
     var container = document.getElementById('pdfContainer');
-    container.innerHTML = ''; container.classList.add('active');
     var d = allPatientsData, n = d.length;
 
-    var html = "<div id='pdfContent' style='width:750px;margin:0 auto;background:#fff;padding:20px;font-family:Arial,Helvetica,sans-serif;color:#000;'>";
-    html += "<div style='text-align:center;border-bottom:3px solid #8b0000;padding-bottom:10px;margin-bottom:20px;'><h2 style='color:#8b0000;margin:0;'>Mubarak Al-Kabeer Hospital</h2><h3 style='margin:5px 0;color:#333;'>HF Clinic Registry — Analytics Report</h3><p style='margin:0;font-size:11px;color:#666;'>Generated: "+new Date().toLocaleString()+" · Total: "+n+" patients</p></div>";
+    var html = "<div id='pdfContent' style='width:750px;margin:0 auto;background:#fff;padding:20px;font-family:Arial,sans-serif;color:#000;'>";
+    html += "<div style='text-align:center;border-bottom:3px solid #8b0000;padding-bottom:10px;margin-bottom:20px;'><h2 style='color:#8b0000;margin:0;'>Mubarak Al-Kabeer Hospital</h2><h3 style='margin:5px 0;color:#333;'>HF Clinic Registry — Analytics Report</h3><p style='margin:0;font-size:11px;color:#666;'>Total: "+n+" patients</p></div>";
 
-    function section(title) { return "<h4 style='background:#f0f0f0;padding:8px 12px;margin:18px 0 10px;color:#8b0000;border-left:4px solid #8b0000;'>"+title+"</h4>"; }
-    function row(label, value) { return "<tr style='border-bottom:1px solid #eee;'><td style='padding:5px 10px;background:#fafafa;font-weight:bold;width:45%;font-size:12px;'>"+label+"</td><td style='padding:5px 10px;font-size:12px;'>"+value+"</td></tr>"; }
-    function tbl(rows) { return "<table style='width:100%;border-collapse:collapse;'>"+rows+"</table>"; }
+    html += "<h4 style='background:#f0f0f0;padding:8px;color:#8b0000;'>Key Performance Indicators</h4><table style='width:100%;border-collapse:collapse;font-size:12px;'>";
+    html += "<tr><td style='padding:5px;font-weight:bold;'>HFrEF Patients</td><td style='padding:5px;'>"+d.filter(p=>p.HF_Type==='HFrEF').length+"</td></tr>";
+    html += "<tr><td style='padding:5px;font-weight:bold;'>Quadruple GDMT</td><td style='padding:5px;'>"+d.filter(p=>p.Quad_GDMT==='Yes').length+"</td></tr>";
+    html += "<tr><td style='padding:5px;font-weight:bold;'>High Risk (MAGGIC >25)</td><td style='padding:5px;'>"+d.filter(p=>parseInt(p.MAGGIC_Score||0)>25).length+"</td></tr>";
+    html += "</table>";
 
-    var hfTypes = {HFrEF:0,HFmrEF:0,HFpEF:0};
-    d.forEach(p=>{if(hfTypes[p.HF_Type]!==undefined)hfTypes[p.HF_Type]++;});
-    var nyha={I:0,II:0,III:0,IV:0};
-    d.forEach(p=>{if(nyha[p.NYHA]!==undefined)nyha[p.NYHA]++;});
-    var quad=d.filter(p=>p.Quad_GDMT==='Yes').length;
-    var male=d.filter(p=>p.Gender==='Male').length;
-    var avgEF=0,efC=0; d.forEach(p=>{var e=parseFloat(p.EF_Diagnosis);if(!isNaN(e)&&e>0){avgEF+=e;efC++;}});
-    var alive=d.filter(p=>p.Mortality==='Alive'||!p.Mortality).length;
-    var inh=d.filter(p=>p.Mortality==='In-hospital').length;
-    var outh=d.filter(p=>p.Mortality==='Out-of-hospital').length;
-    var low=d.filter(p=>parseInt(p.MAGGIC_Score||0)<=15).length;
-    var mid=d.filter(p=>{var s=parseInt(p.MAGGIC_Score||0);return s>15&&s<=25;}).length;
-    var high=d.filter(p=>parseInt(p.MAGGIC_Score||0)>25).length;
+    html += "<h4 style='background:#f0f0f0;padding:8px;color:#8b0000;margin-top:20px;'>High Risk Roster</h4><table style='width:100%;border-collapse:collapse;font-size:11px;' border='1'>";
+    html += "<tr style='background:#8b0000;color:#fff;'><th>Name</th><th>File No</th><th>MAGGIC</th><th>NYHA</th></tr>";
+    
+    var hrPts=d.filter(p=>parseInt(p.MAGGIC_Score||0)>25);
+    hrPts.forEach(p=>{
+        html += `<tr><td style='padding:4px'>${p.Patient_Name||''}</td><td style='padding:4px'>${p.File_No||''}</td><td style='padding:4px'>${p.MAGGIC_Score||''}</td><td style='padding:4px'>${p.NYHA||''}</td></tr>`;
+    });
+    html += "</table></div>";
 
-    html += section("1. Registry Summary");
-    html += tbl(row("Total Patients",n)+row("Male / Female",male+" / "+(n-male)+" ("+pctStr(male,n)+" male)")+row("Mean EF",efC>0?Math.round(avgEF/efC)+"%":"—"));
-
-    html += section("2. HF Type Distribution");
-    html += tbl(row("HFrEF",hfTypes.HFrEF+" ("+pctStr(hfTypes.HFrEF,n)+")")+row("HFmrEF",hfTypes.HFmrEF+" ("+pctStr(hfTypes.HFmrEF,n)+")")+row("HFpEF",hfTypes.HFpEF+" ("+pctStr(hfTypes.HFpEF,n)+")"));
-
-    html += section("3. NYHA Class Distribution");
-    html += tbl(row("NYHA I",nyha.I+" ("+pctStr(nyha.I,n)+")")+row("NYHA II",nyha.II+" ("+pctStr(nyha.II,n)+")")+row("NYHA III",nyha.III+" ("+pctStr(nyha.III,n)+")")+row("NYHA IV",nyha.IV+" ("+pctStr(nyha.IV,n)+")"));
-
-    html += section("4. GDMT Compliance");
-    var gdmtPdfItems=[
-        {label:'Quadruple GDMT',cnt:quad},
-        {label:'ARNI (Entresto)',cnt:d.filter(p=>p.Med_ARNI==='Yes').length},
-        {label:'SGLT2i',cnt:d.filter(p=>p.Med_SGLT2i&&p.Med_SGLT2i!=='None'&&p.Med_SGLT2i!=='').length},
-        {label:'Beta-Blocker',cnt:d.filter(p=>p.Med_BB&&p.Med_BB!=='None'&&p.Med_BB!=='').length},
-        {label:'MRA',cnt:d.filter(p=>p.Med_MRA&&p.Med_MRA!=='None'&&p.Med_MRA!=='').length},
-        {label:'ACEi/ARB',cnt:d.filter(p=>p.Med_ACEiARB&&p.Med_ACEiARB!=='None'&&p.Med_ACEiARB!=='').length},
-    ];
-    html += tbl(gdmtPdfItems.map(i=>row(i.label,i.cnt+" ("+pctStr(i.cnt,n)+")")).join(''));
-
-    html += section("5. MAGGIC Risk Stratification");
-    html += tbl(row("Low Risk (≤15 pts)",low+" ("+pctStr(low,n)+")")+row("Intermediate (16-25 pts)",mid+" ("+pctStr(mid,n)+")")+row("High Risk (>25 pts)",high+" ("+pctStr(high,n)+")"));
-
-    html += section("6. Comorbidities");
-    var cPdf=[['HTN',d.filter(p=>p.HTN==='Yes').length],['DM',d.filter(p=>p.DM==='Yes').length],['IHD',d.filter(p=>p.IHD&&p.IHD!=='No').length],['AF',d.filter(p=>p.AF==='Yes').length],['CKD',d.filter(p=>p.CKD==='Yes').length],['Obese/OSA',d.filter(p=>p.Obese_OSA==='Yes').length],['CVA',d.filter(p=>p.CVA==='Yes').length],['Lung Disease',d.filter(p=>p.Lung_Dz==='Yes').length],['PVD',d.filter(p=>p.PVD==='Yes').length]];
-    html += tbl(cPdf.map(([l,c])=>row(l,c+" ("+pctStr(c,n)+")")).join(''));
-
-    html += section("7. Outcomes");
-    html += tbl(row("Alive",alive+" ("+pctStr(alive,n)+")")+row("In-hospital Mortality",inh+" ("+pctStr(inh,n)+")")+row("Out-of-hospital Mortality",outh+" ("+pctStr(outh,n)+")")+row("Cardiac Rehab Enrolled",d.filter(p=>p.Rehab==='Yes').length+" ("+pctStr(d.filter(p=>p.Rehab==='Yes').length,n)+")"));
-
-    html += section("8. High-Risk Patient List (MAGGIC > 25)");
-    var hrPts=d.filter(p=>parseInt(p.MAGGIC_Score||0)>25).sort((a,b)=>(parseInt(b.MAGGIC_Score)||0)-(parseInt(a.MAGGIC_Score)||0));
-    if(hrPts.length>0){
-        html+="<table style='width:100%;border-collapse:collapse;font-size:11px;'><thead><tr style='background:#8b0000;color:#fff;'><th style='padding:6px;'>Name</th><th style='padding:6px;'>File</th><th style='padding:6px;'>MAGGIC</th><th style='padding:6px;'>HF Type</th><th style='padding:6px;'>NYHA</th><th style='padding:6px;'>Est. Mortality</th></tr></thead><tbody>";
-        hrPts.forEach(p=>{html+="<tr style='border-bottom:1px solid #eee;'><td style='padding:5px;'>"+(p.Patient_Name||'?')+"</td><td style='padding:5px;'>"+(p.File_No||'?')+"</td><td style='padding:5px;font-weight:bold;color:#8b0000;'>"+(p.MAGGIC_Score||'?')+"</td><td style='padding:5px;'>"+(p.HF_Type||'?')+"</td><td style='padding:5px;'>"+(p.NYHA||'?')+"</td><td style='padding:5px;'>"+(p.MAGGIC_Risk||'?')+"</td></tr>";});
-        html+="</tbody></table>";
-    } else html+="<p style='color:#666;font-size:12px;'>No high-risk patients.</p>";
-
-    html += "</div>";
-    container.innerHTML = html;
+    container.innerHTML = html; container.classList.add('active');
 
     setTimeout(function(){
         html2pdf().from(document.getElementById('pdfContent')).set({
             margin:[0.4,0.4,0.4,0.4],
             filename:"HF_Analytics_Report_"+new Date().toISOString().split('T')[0]+".pdf",
-            html2canvas:{scale:2,useCORS:true,scrollY:0,scrollX:0,windowWidth:800},
-            jsPDF:{unit:'in',format:'letter',orientation:'portrait'},
-            pagebreak:{mode:['css','legacy']}
-        }).save().then(function(){container.innerHTML='';container.classList.remove('active');}).catch(function(){container.innerHTML='';container.classList.remove('active');});
+            jsPDF:{unit:'in',format:'letter',orientation:'portrait'}
+        }).save().then(function(){container.innerHTML='';container.classList.remove('active');});
     },500);
 }
 
-// ===== ANALYTICS EXPORT: EXCEL (multi-sheet) =====
-function exportAnalyticsExcel() {
-    var d = allPatientsData, n = d.length;
-    if(n===0){showPopup("error","No Data","No patient data loaded.");return;}
-    var wb = XLSX.utils.book_new();
-
-    // ---- SHEET 1: Summary ----
-    var s1=[["HF CLINIC REGISTRY — ANALYTICS REPORT"],["Mubarak Al-Kabeer Hospital · Generated: "+new Date().toLocaleString()],["Total Patients:",n],[]];
-    s1.push(["METRIC","COUNT","PERCENTAGE"]);
-    var hfTypes={HFrEF:0,HFmrEF:0,HFpEF:0};
-    d.forEach(p=>{if(hfTypes[p.HF_Type]!==undefined)hfTypes[p.HF_Type]++;});
-    s1.push(["HFrEF",hfTypes.HFrEF,pctStr(hfTypes.HFrEF,n)]);
-    s1.push(["HFmrEF",hfTypes.HFmrEF,pctStr(hfTypes.HFmrEF,n)]);
-    s1.push(["HFpEF",hfTypes.HFpEF,pctStr(hfTypes.HFpEF,n)]);
-    s1.push([]);
-    s1.push(["Quadruple GDMT",d.filter(p=>p.Quad_GDMT==='Yes').length,pctStr(d.filter(p=>p.Quad_GDMT==='Yes').length,n)]);
-    s1.push(["ARNI",d.filter(p=>p.Med_ARNI==='Yes').length,pctStr(d.filter(p=>p.Med_ARNI==='Yes').length,n)]);
-    s1.push(["SGLT2i",d.filter(p=>p.Med_SGLT2i&&p.Med_SGLT2i!=='None'&&p.Med_SGLT2i!=='').length,pctStr(d.filter(p=>p.Med_SGLT2i&&p.Med_SGLT2i!=='None'&&p.Med_SGLT2i!=='').length,n)]);
-    s1.push(["Beta-Blocker",d.filter(p=>p.Med_BB&&p.Med_BB!=='None'&&p.Med_BB!=='').length,pctStr(d.filter(p=>p.Med_BB&&p.Med_BB!=='None'&&p.Med_BB!=='').length,n)]);
-    s1.push(["MRA",d.filter(p=>p.Med_MRA&&p.Med_MRA!=='None'&&p.Med_MRA!=='').length,pctStr(d.filter(p=>p.Med_MRA&&p.Med_MRA!=='None'&&p.Med_MRA!=='').length,n)]);
-    s1.push([]);
-    s1.push(["MAGGIC Low Risk (≤15)",d.filter(p=>parseInt(p.MAGGIC_Score||0)<=15).length,pctStr(d.filter(p=>parseInt(p.MAGGIC_Score||0)<=15).length,n)]);
-    s1.push(["MAGGIC Intermediate (16-25)",d.filter(p=>{var s=parseInt(p.MAGGIC_Score||0);return s>15&&s<=25;}).length,pctStr(d.filter(p=>{var s=parseInt(p.MAGGIC_Score||0);return s>15&&s<=25;}).length,n)]);
-    s1.push(["MAGGIC High Risk (>25)",d.filter(p=>parseInt(p.MAGGIC_Score||0)>25).length,pctStr(d.filter(p=>parseInt(p.MAGGIC_Score||0)>25).length,n)]);
-    s1.push([]);
-    s1.push(["Alive",d.filter(p=>p.Mortality==='Alive'||!p.Mortality).length,pctStr(d.filter(p=>p.Mortality==='Alive'||!p.Mortality).length,n)]);
-    s1.push(["In-hospital Mortality",d.filter(p=>p.Mortality==='In-hospital').length,pctStr(d.filter(p=>p.Mortality==='In-hospital').length,n)]);
-    s1.push(["Out-of-hospital Mortality",d.filter(p=>p.Mortality==='Out-of-hospital').length,pctStr(d.filter(p=>p.Mortality==='Out-of-hospital').length,n)]);
-    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(s1),"Summary");
-
-    // ---- SHEET 2: All Patients ----
-    var headers=["File No","Name","Age","Gender","Nationality","HF Type","EF (%)","NYHA","MAGGIC Score","MAGGIC Risk","Quad GDMT","Compliance","Mortality","DM","HTN","AF","IHD","CKD","ARNI","SGLT2i","BB","MRA","ACEi/ARB","Rehab","Next Appt","Doctor"];
-    var rows=[headers];
-    d.forEach(p=>{rows.push([p.File_No||'',p.Patient_Name||'',p.Age||'',p.Gender||'',p.Nationality||'',p.HF_Type||'',p.EF_Diagnosis||'',p.NYHA||'',p.MAGGIC_Score||'',p.MAGGIC_Risk||'',p.Quad_GDMT||'',p.Compliance||'',p.Mortality||'',p.DM||'',p.HTN||'',p.AF||'',p.IHD||'',p.CKD||'',p.Med_ARNI||'',p.Med_SGLT2i||'',p.Med_BB||'',p.Med_MRA||'',p.Med_ACEiARB||'',p.Rehab||'',p.Next_Appt||'',p.Doctor_Name||'']);});
-    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),"All Patients");
-
-    // ---- SHEET 3: High Risk Patients ----
-    var hrPts=d.filter(p=>parseInt(p.MAGGIC_Score||0)>25).sort((a,b)=>(parseInt(b.MAGGIC_Score)||0)-(parseInt(a.MAGGIC_Score)||0));
-    var hrRows=[["HIGH-RISK PATIENTS (MAGGIC > 25)"],["File No","Name","Age","MAGGIC Score","Est. Mortality","HF Type","NYHA","EF%","Doctor","Next Appt"]];
-    hrPts.forEach(p=>{hrRows.push([p.File_No||'',p.Patient_Name||'',p.Age||'',p.MAGGIC_Score||'',p.MAGGIC_Risk||'',p.HF_Type||'',p.NYHA||'',p.EF_Diagnosis||'',p.Doctor_Name||'',p.Next_Appt||'']);});
-    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(hrRows),"High Risk Patients");
-
-    // ---- SHEET 4: GDMT Analysis ----
-    var gdmtRows=[["GDMT ANALYSIS"],["Component","Count","Percentage","Target"]];
-    gdmtRows.push(["Quadruple GDMT",d.filter(p=>p.Quad_GDMT==='Yes').length,pctStr(d.filter(p=>p.Quad_GDMT==='Yes').length,n),"100%"]);
-    gdmtRows.push(["ARNI (Entresto)",d.filter(p=>p.Med_ARNI==='Yes').length,pctStr(d.filter(p=>p.Med_ARNI==='Yes').length,n),"≥80% HFrEF"]);
-    gdmtRows.push(["SGLT2i",d.filter(p=>p.Med_SGLT2i&&p.Med_SGLT2i!=='None'&&p.Med_SGLT2i!=='').length,pctStr(d.filter(p=>p.Med_SGLT2i&&p.Med_SGLT2i!=='None'&&p.Med_SGLT2i!=='').length,n),"≥80% HFrEF"]);
-    gdmtRows.push(["Beta-Blocker",d.filter(p=>p.Med_BB&&p.Med_BB!=='None'&&p.Med_BB!=='').length,pctStr(d.filter(p=>p.Med_BB&&p.Med_BB!=='None'&&p.Med_BB!=='').length,n),"≥80% HFrEF"]);
-    gdmtRows.push(["MRA",d.filter(p=>p.Med_MRA&&p.Med_MRA!=='None'&&p.Med_MRA!=='').length,pctStr(d.filter(p=>p.Med_MRA&&p.Med_MRA!=='None'&&p.Med_MRA!=='').length,n),"≥70% HFrEF"]);
-    gdmtRows.push(["ACEi/ARB",d.filter(p=>p.Med_ACEiARB&&p.Med_ACEiARB!=='None'&&p.Med_ACEiARB!=='').length,pctStr(d.filter(p=>p.Med_ACEiARB&&p.Med_ACEiARB!=='None'&&p.Med_ACEiARB!=='').length,n),"—"]);
-    gdmtRows.push(["Compliant Patients",d.filter(p=>p.Compliance==='Yes').length,pctStr(d.filter(p=>p.Compliance==='Yes').length,n),"100%"]);
-    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(gdmtRows),"GDMT Analysis");
-
-    // ---- SHEET 5: Comorbidities ----
-    var cRows=[["COMORBIDITY PREVALENCE"],["Condition","Count","Percentage"]];
-    var cItems=[['HTN',d.filter(p=>p.HTN==='Yes').length],['DM',d.filter(p=>p.DM==='Yes').length],['IHD (any)',d.filter(p=>p.IHD&&p.IHD!=='No').length],['AF',d.filter(p=>p.AF==='Yes').length],['CKD',d.filter(p=>p.CKD==='Yes').length],['Obese/OSA',d.filter(p=>p.Obese_OSA==='Yes').length],['PCI/CABG history',d.filter(p=>p.PCI_CABG&&p.PCI_CABG!=='No').length],['CVA',d.filter(p=>p.CVA==='Yes').length],['Chronic Lung Dz',d.filter(p=>p.Lung_Dz==='Yes').length],['Liver Disease',d.filter(p=>p.Liver_Dz==='Yes').length],['PVD',d.filter(p=>p.PVD==='Yes').length],['Current Smoker',d.filter(p=>p.Smoker==='Current').length],['Former Smoker',d.filter(p=>p.Smoker==='Former').length],['Advanced HF',d.filter(p=>p.Advanced_HF==='Yes').length],['Valvular Disease',d.filter(p=>p.Valvular_Disease==='Yes').length]];
-    cItems.forEach(([l,c])=>cRows.push([l,c,pctStr(c,n)]));
-    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(cRows),"Comorbidities");
-
-    XLSX.writeFile(wb,"HF_Analytics_MKH_"+new Date().toISOString().split('T')[0]+".xlsx");
-    showPopup("success","Excel Exported!","Analytics workbook downloaded successfully (5 sheets).");
-}
-
 </script>
-
 </body>
 </html>
