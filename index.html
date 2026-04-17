@@ -305,7 +305,10 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 ```
 <div class="container mt-3 mb-5" style="padding-bottom:80px;">
     <div class="card p-3 border-top border-4 border-danger shadow">
-        <h6 class="text-secondary fw-bold mb-2">Search Patient</h6>
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="text-secondary fw-bold mb-0">Search Patient</h6>
+            <button class="btn btn-sm btn-outline-success" onclick="openImportModal()" title="Bulk import patients from Excel/CSV"><i class="fa fa-file-import me-1"></i>Bulk Import</button>
+        </div>
         <div class="input-group">
             <input type="text" id="searchInput" class="form-control" placeholder="Name, Civil ID, or File No">
             <button class="btn btn-primary px-4" onclick="searchPatient()">Search</button>
@@ -1474,6 +1477,319 @@ function exportClinicDayPDF(){var today=new Date().toISOString().split('T')[0];v
 function exportAnalyticsPDF(){var container=document.getElementById('pdfContainer');container.innerHTML='';container.classList.add('active');var d=allPatientsData,n=d.length;var html="<div id='pdfContent' style='width:750px;margin:0 auto;background:#fff;padding:20px;font-family:Arial,Helvetica,sans-serif;color:#000;'>";html+="<div style='text-align:center;border-bottom:3px solid #8b0000;padding-bottom:10px;margin-bottom:20px;'><h2 style='color:#8b0000;margin:0;'>Mubarak Al-Kabeer Hospital</h2><h3 style='margin:5px 0;color:#333;'>HF Clinic Registry — Analytics Report</h3><p style='margin:0;font-size:11px;color:#666;'>Generated: "+new Date().toLocaleString()+" · Total: "+n+" patients</p></div>";function section(t){return"<h4 style='background:#f0f0f0;padding:8px 12px;margin:18px 0 10px;color:#8b0000;border-left:4px solid #8b0000;'>"+t+"</h4>";}function row(l,v){return"<tr style='border-bottom:1px solid #eee;'><td style='padding:5px 10px;background:#fafafa;font-weight:bold;width:45%;font-size:12px;'>"+l+"</td><td style='padding:5px 10px;font-size:12px;'>"+v+"</td></tr>";}function tbl(r){return"<table style='width:100%;border-collapse:collapse;'>"+r+"</table>";}var hfTypes={HFrEF:0,HFmrEF:0,HFpEF:0};d.forEach(function(p){if(hfTypes[p.HF_Type]!==undefined)hfTypes[p.HF_Type]++;});var nyha={I:0,II:0,III:0,IV:0};d.forEach(function(p){if(nyha[p.NYHA]!==undefined)nyha[p.NYHA]++;});var quad=d.filter(function(p){return p.Quad_GDMT==='Yes';}).length;var male=d.filter(function(p){return p.Gender==='Male';}).length;var avgEF=0,efC=0;d.forEach(function(p){var e=parseFloat(p.EF_Diagnosis);if(!isNaN(e)&&e>0){avgEF+=e;efC++;}});var alive=d.filter(function(p){return p.Mortality==='Alive'||!p.Mortality;}).length;var inh=d.filter(function(p){return p.Mortality==='In-hospital';}).length;var outh=d.filter(function(p){return p.Mortality==='Out-of-hospital';}).length;var low=d.filter(function(p){return parseInt(p.MAGGIC_Score||0)<=15;}).length;var mid=d.filter(function(p){var s=parseInt(p.MAGGIC_Score||0);return s>15&&s<=25;}).length;var high=d.filter(function(p){return parseInt(p.MAGGIC_Score||0)>25;}).length;html+=section("1. Registry Summary");html+=tbl(row("Total Patients",n)+row("Male / Female",male+" / "+(n-male))+row("Mean EF",efC>0?Math.round(avgEF/efC)+"%":"—"));html+=section("2. HF Type Distribution");html+=tbl(row("HFrEF",hfTypes.HFrEF+" ("+pctStr(hfTypes.HFrEF,n)+")")+row("HFmrEF",hfTypes.HFmrEF+" ("+pctStr(hfTypes.HFmrEF,n)+")")+row("HFpEF",hfTypes.HFpEF+" ("+pctStr(hfTypes.HFpEF,n)+")"));html+=section("3. NYHA Class Distribution");html+=tbl(row("NYHA I",nyha.I+" ("+pctStr(nyha.I,n)+")")+row("NYHA II",nyha.II+" ("+pctStr(nyha.II,n)+")")+row("NYHA III",nyha.III+" ("+pctStr(nyha.III,n)+")")+row("NYHA IV",nyha.IV+" ("+pctStr(nyha.IV,n)+")"));html+=section("4. GDMT Compliance");html+=tbl(row("Quadruple GDMT",quad+" ("+pctStr(quad,n)+")")+row("ARNI",d.filter(function(p){return p.Med_ARNI==='Yes';}).length+" ("+pctStr(d.filter(function(p){return p.Med_ARNI==='Yes';}).length,n)+")")+row("SGLT2i",d.filter(function(p){return p.Med_SGLT2i&&p.Med_SGLT2i!=='None';}).length+" ("+pctStr(d.filter(function(p){return p.Med_SGLT2i&&p.Med_SGLT2i!=='None';}).length,n)+")")+row("BB",d.filter(function(p){return p.Med_BB&&p.Med_BB!=='None';}).length+" ("+pctStr(d.filter(function(p){return p.Med_BB&&p.Med_BB!=='None';}).length,n)+")")+row("MRA",d.filter(function(p){return p.Med_MRA&&p.Med_MRA!=='None';}).length+" ("+pctStr(d.filter(function(p){return p.Med_MRA&&p.Med_MRA!=='None';}).length,n)+")"));html+=section("5. MAGGIC Risk Stratification");html+=tbl(row("Low Risk (≤15 pts)",low+" ("+pctStr(low,n)+")")+row("Intermediate (16-25 pts)",mid+" ("+pctStr(mid,n)+")")+row("High Risk (>25 pts)",high+" ("+pctStr(high,n)+")"));html+=section("6. Outcomes");html+=tbl(row("Alive",alive+" ("+pctStr(alive,n)+")")+row("In-hospital Mortality",inh+" ("+pctStr(inh,n)+")")+row("Out-of-hospital Mortality",outh+" ("+pctStr(outh,n)+")"));html+=section("7. High-Risk Patients (MAGGIC > 25)");var hrPts=d.filter(function(p){return parseInt(p.MAGGIC_Score||0)>25;}).sort(function(a,b){return(parseInt(b.MAGGIC_Score)||0)-(parseInt(a.MAGGIC_Score)||0);});if(hrPts.length>0){html+="<table style='width:100%;border-collapse:collapse;font-size:11px;'><thead><tr style='background:#8b0000;color:#fff;'><th style='padding:6px;'>Name</th><th style='padding:6px;'>File</th><th style='padding:6px;'>MAGGIC</th><th style='padding:6px;'>HF</th><th style='padding:6px;'>NYHA</th></tr></thead><tbody>";hrPts.forEach(function(p){html+="<tr style='border-bottom:1px solid #eee;'><td style='padding:5px;'>"+(p.Patient_Name||'?')+"</td><td style='padding:5px;'>"+(p.File_No||'?')+"</td><td style='padding:5px;font-weight:bold;color:#8b0000;'>"+(p.MAGGIC_Score||'?')+"</td><td style='padding:5px;'>"+(p.HF_Type||'?')+"</td><td style='padding:5px;'>"+(p.NYHA||'?')+"</td></tr>";});html+="</tbody></table>";}else html+="<p style='color:#666;'>None.</p>";html+="</div>";container.innerHTML=html;setTimeout(function(){html2pdf().from(document.getElementById('pdfContent')).set({margin:[0.4,0.4,0.4,0.4],filename:"HF_Analytics_"+new Date().toISOString().split('T')[0]+".pdf",html2canvas:{scale:2,useCORS:true,scrollY:0,scrollX:0,windowWidth:800},jsPDF:{unit:'in',format:'letter',orientation:'portrait'},pagebreak:{mode:['css','legacy']}}).save().then(function(){container.innerHTML='';container.classList.remove('active');}).catch(function(){container.innerHTML='';container.classList.remove('active');});},500);}
 
 function exportAnalyticsExcel(){var d=allPatientsData,n=d.length;if(n===0){showPopup("error","No Data","No patient data.");return;}var wb=XLSX.utils.book_new();var s1=[["HF CLINIC REGISTRY — ANALYTICS REPORT"],["MKH · Generated: "+new Date().toLocaleString()],["Total Patients:",n],[]];s1.push(["METRIC","COUNT","PERCENTAGE"]);var hfTypes={HFrEF:0,HFmrEF:0,HFpEF:0};d.forEach(function(p){if(hfTypes[p.HF_Type]!==undefined)hfTypes[p.HF_Type]++;});s1.push(["HFrEF",hfTypes.HFrEF,pctStr(hfTypes.HFrEF,n)]);s1.push(["HFmrEF",hfTypes.HFmrEF,pctStr(hfTypes.HFmrEF,n)]);s1.push(["HFpEF",hfTypes.HFpEF,pctStr(hfTypes.HFpEF,n)]);s1.push([]);s1.push(["Quadruple GDMT",d.filter(function(p){return p.Quad_GDMT==='Yes';}).length,pctStr(d.filter(function(p){return p.Quad_GDMT==='Yes';}).length,n)]);XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(s1),"Summary");var headers=["File No","Name","Age","Gender","Nationality","HF Type","EF (%)","NYHA","MAGGIC Score","MAGGIC Risk","Quad GDMT","Compliance","Mortality","DM","HTN","AF","IHD","CKD","ARNI","ARNI Dose","SGLT2i","SGLT2i Dose","BB","BB Dose","MRA","MRA Dose","ACEi/ARB","Procorolan","CCB","Rehab","Next Appt","Doctor"];var rows=[headers];d.forEach(function(p){rows.push([p.File_No||'',p.Patient_Name||'',p.Age||'',p.Gender||'',p.Nationality||'',p.HF_Type||'',p.EF_Diagnosis||'',p.NYHA||'',p.MAGGIC_Score||'',p.MAGGIC_Risk||'',p.Quad_GDMT||'',p.Compliance||'',p.Mortality||'',p.DM||'',p.HTN||'',p.AF||'',p.IHD||'',p.CKD||'',p.Med_ARNI||'',p.Med_ARNI_Dose||'',p.Med_SGLT2i||'',p.Med_SGLT2i_Dose||'',p.Med_BB||'',p.Med_BB_Dose||'',p.Med_MRA||'',p.Med_MRA_Dose||'',p.Med_ACEiARB||'',p.Med_Procorolan||'',p.Med_CCB||'',p.Rehab||'',p.Next_Appt||'',p.Doctor_Name||'']);});XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),"All Patients");var hrPts=d.filter(function(p){return parseInt(p.MAGGIC_Score||0)>25;}).sort(function(a,b){return(parseInt(b.MAGGIC_Score)||0)-(parseInt(a.MAGGIC_Score)||0);});var hrRows=[["HIGH-RISK PATIENTS (MAGGIC > 25)"],["File","Name","Age","MAGGIC","Est. Mortality","HF Type","NYHA","EF%","Doctor"]];hrPts.forEach(function(p){hrRows.push([p.File_No||'',p.Patient_Name||'',p.Age||'',p.MAGGIC_Score||'',p.MAGGIC_Risk||'',p.HF_Type||'',p.NYHA||'',p.EF_Diagnosis||'',p.Doctor_Name||'']);});XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(hrRows),"High Risk");var gapRows=[["GDMT GAP ANALYSIS (HFrEF)"],["File","Name","ARNI","SGLT2i","BB","MRA","Gaps"]];d.filter(function(p){return p.HF_Type==='HFrEF';}).forEach(function(p){var arni=p.Med_ARNI==='Yes',sglt=p.Med_SGLT2i&&p.Med_SGLT2i!=='None',bb=p.Med_BB&&p.Med_BB!=='None',mra=p.Med_MRA&&p.Med_MRA!=='None';var gaps=4-[arni,sglt,bb,mra].filter(Boolean).length;if(gaps>0)gapRows.push([p.File_No||'',p.Patient_Name||'',arni?'Yes':'NO',sglt?'Yes':'NO',bb?'Yes':'NO',mra?'Yes':'NO',gaps]);});XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(gapRows),"GDMT Gaps");XLSX.writeFile(wb,"HF_Analytics_MKH_"+new Date().toISOString().split('T')[0]+".xlsx");showPopup("success","Excel Exported!","Analytics workbook downloaded (4 sheets).");}
+
+
+/* ===== BULK IMPORT FROM EXCEL / CSV ===== */
+function openImportModal(){
+    var pin = prompt("Admin PIN required for bulk import:");
+    if(pin !== "1234"){ if(pin !== null) alert("Wrong PIN"); return; }
+    var existing = document.getElementById("importModal");
+    if(existing) existing.remove();
+    var modal = document.createElement("div");
+    modal.id = "importModal";
+    modal.className = "modal-overlay";
+    modal.style.cssText = "position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;";
+    modal.innerHTML =
+        "<div style='background:#fff;border-radius:14px;width:100%;max-width:780px;margin:20px auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);'>"+
+            "<div style='background:linear-gradient(135deg,#8b0000,#5c0000);color:#fff;padding:18px 22px;border-radius:14px 14px 0 0;display:flex;justify-content:space-between;align-items:center;'>"+
+                "<div><h5 style='margin:0;font-weight:700;'><i class='fa fa-file-import me-2'></i>Bulk Import Patients</h5>"+
+                "<small style='opacity:0.85;'>Import previous patient data from Excel or CSV</small></div>"+
+                "<button onclick='document.getElementById(\"importModal\").remove()' style='background:transparent;border:none;color:#fff;font-size:1.5rem;cursor:pointer;line-height:1;'>&times;</button>"+
+            "</div>"+
+            "<div style='padding:22px;'>"+
+                "<div style='background:#fff8e1;border-left:4px solid #ffc107;padding:12px 14px;border-radius:6px;margin-bottom:18px;font-size:0.85rem;'>"+
+                    "<b><i class='fa fa-info-circle me-1'></i>How it works:</b>"+
+                    "<ol style='margin:6px 0 0 0;padding-left:20px;'>"+
+                        "<li>Download the template below — it has all the correct column headers.</li>"+
+                        "<li>Fill in your patient data (or paste from your existing Excel / Google Sheet).</li>"+
+                        "<li>Save as <b>.xlsx</b> or <b>.csv</b> and upload here.</li>"+
+                        "<li>Preview the data, then click Import. Duplicates (by Civil ID or File No) will be skipped.</li>"+
+                    "</ol>"+
+                    "<small class='text-muted d-block mt-2'><b>Google Sheets users:</b> File &rarr; Download &rarr; Microsoft Excel (.xlsx), then upload that file here.</small>"+
+                "</div>"+
+                "<div class='row g-2 mb-3'>"+
+                    "<div class='col-12 col-md-6'>"+
+                        "<button class='btn btn-outline-primary w-100' onclick='downloadImportTemplate()'>"+
+                            "<i class='fa fa-download me-1'></i> Step 1: Download Template"+
+                        "</button>"+
+                    "</div>"+
+                    "<div class='col-12 col-md-6'>"+
+                        "<label class='btn btn-success w-100' style='cursor:pointer;margin-bottom:0;'>"+
+                            "<i class='fa fa-upload me-1'></i> Step 2: Choose File (.xlsx / .csv)"+
+                            "<input type='file' id='importFileInput' accept='.xlsx,.xls,.csv' style='display:none;' onchange='handleImportFile(event)'>"+
+                        "</label>"+
+                    "</div>"+
+                "</div>"+
+                "<div id='importPreviewArea'></div>"+
+                "<div id='importProgressArea'></div>"+
+                "<div id='importResultsArea'></div>"+
+            "</div>"+
+            "<div style='padding:14px 22px;border-top:1px solid #e0e0e0;background:#f9f9f9;border-radius:0 0 14px 14px;text-align:right;'>"+
+                "<button class='btn btn-secondary me-2' onclick='document.getElementById(\"importModal\").remove()'>Close</button>"+
+                "<button class='btn btn-danger' id='importStartBtn' onclick='startImport()' disabled><i class='fa fa-cloud-upload-alt me-1'></i> Import to Registry</button>"+
+            "</div>"+
+        "</div>";
+    document.body.appendChild(modal);
+}
+
+// Master list of all field IDs the form uses
+var IMPORT_FIELDS = [
+    'Doctor_Name','Patient_Name','Civil_ID','File_No','Age','Gender','Nationality','Mobile',
+    'HF_Type','EF_Diagnosis','Advanced_HF','Other_Cardio','Valvular_Disease','Admissions','Last_Admission','LOS',
+    'Height','Weight','BMI','Dry_Weight','NYHA','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur',
+    'ECG','ECHO','CMR_CT','Walk_Test','Device_Info','Cath',
+    'DM','HTN','AF','IHD','PCI_CABG','CKD','CVA','PVD','Smoker','Obese_OSA','Lung_Dz','Liver_Dz','FH_Genetics',
+    'Lab_HbA1c','Lab_Gluc','Lab_UreaCreat','Lab_eGFR','Lab_NaK','Lab_BNP','Lab_IronFerritin','Lab_TrSats','Lab_CBC','Lab_Thyroid','Lab_Lipids','Lab_AlbCreat',
+    'Med_ARNI','Med_ARNI_Dose','Med_SGLT2i','Med_SGLT2i_Dose','Med_GLP1','Med_GLP1_Dose',
+    'Med_BB','Med_BB_Dose','Med_MRA','Med_MRA_Dose','Med_ACEiARB','Med_ACEiARB_Dose',
+    'Med_Vasodilator','Med_Vasodilator_Dose','Med_Procorolan','Med_Procorolan_Dose','Med_CCB','Med_CCB_Dose',
+    'Med_Diuretic','Med_Diuretic_Dose','Med_Lipid','Med_Lipid_Dose','Med_Antiplat','Med_Antiplat_Dose',
+    'Med_OAC','Med_OAC_Dose','Med_Arrhythmia','Med_Arrhythmia_Dose','Med_K_Chelator','Med_K_Chelator_Dose',
+    'Quad_GDMT','Compliance','Mortality','Rehab','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt'
+];
+
+var importParsedRows = [];
+
+function downloadImportTemplate(){
+    try{
+        var headers = IMPORT_FIELDS.slice();
+        var sample = {};
+        IMPORT_FIELDS.forEach(function(f){ sample[f] = ''; });
+        sample.Doctor_Name = 'Dr Farouk';
+        sample.Patient_Name = 'Example Patient (delete this row)';
+        sample.Civil_ID = '123456789012';
+        sample.File_No = '100001';
+        sample.Age = '65';
+        sample.Gender = 'Male';
+        sample.Nationality = 'Kuwaiti';
+        sample.HF_Type = 'HFrEF';
+        sample.EF_Diagnosis = '30';
+        sample.NYHA = 'II';
+        sample.HTN = 'Yes';
+        sample.DM = 'No';
+        sample.Med_ARNI = 'Yes';
+        sample.Med_ARNI_Dose = '49/51 mg BID';
+        sample.Med_SGLT2i = 'Jardiance';
+        sample.Med_SGLT2i_Dose = '10 mg OD';
+        sample.Med_BB = 'Concor';
+        sample.Med_BB_Dose = '5 mg OD';
+        sample.Med_MRA = 'Aldactone';
+        sample.Med_MRA_Dose = '25 mg OD';
+        sample.Quad_GDMT = 'Yes';
+        sample.Mortality = 'Alive';
+        var sampleRow = headers.map(function(h){ return sample[h] || ''; });
+        var rows = [headers, sampleRow];
+        var ws = XLSX.utils.aoa_to_sheet(rows);
+        ws['!cols'] = headers.map(function(h){ return {wch: Math.max(12, h.length+2)}; });
+        var wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Patients");
+        var instr = [
+            ["HF Registry — Import Template Instructions"],
+            [""],
+            ["1. The first row contains exact field names. DO NOT change them."],
+            ["2. The second row is a SAMPLE — delete it before saving (or overwrite it with real data)."],
+            ["3. Each row = one patient."],
+            ["4. Civil_ID must be 12 digits; File_No must be 6 digits."],
+            ["5. Required fields: Patient_Name, Civil_ID, File_No, Doctor_Name."],
+            ["6. Duplicates (same Civil_ID or File_No) are skipped automatically."],
+            [""],
+            ["FIELD","VALID VALUES (examples)"],
+            ["Gender","Male / Female"],
+            ["HF_Type","HFrEF / HFmrEF / HFpEF"],
+            ["NYHA","I / II / III / IV"],
+            ["Yes/No fields (HTN, DM, AF, etc.)","Yes / No"],
+            ["Smoker","Never / Current / Former"],
+            ["Mortality","Alive / Dead - HF / Dead - Other"],
+            ["Med_ARNI","Yes / No"],
+            ["Med_SGLT2i","None / Forxiga / Jardiance"],
+            ["Med_BB","None / Concor / Dilatrend / Betaloc / Lopressor"],
+            ["Med_MRA","None / Aldactone / Eplerenone / Finerenone / Inspra"],
+            ["Med_ACEiARB","None / Zestril / Tritace / Capoten / Diovan / Atacand"],
+            ["EF_Diagnosis","Number 0-100"],
+            ["MAGGIC_Score","Number"],
+            ["Last_Admission, Next_Appt","Date format: YYYY-MM-DD"]
+        ];
+        var ws2 = XLSX.utils.aoa_to_sheet(instr);
+        ws2['!cols'] = [{wch:35},{wch:55}];
+        XLSX.utils.book_append_sheet(wb, ws2, "Instructions");
+        XLSX.writeFile(wb, "HF_Registry_Import_Template.xlsx");
+    }catch(e){
+        alert("Error generating template: "+e.message);
+    }
+}
+
+function handleImportFile(event){
+    var file = event.target.files[0];
+    if(!file) return;
+    var preview = document.getElementById('importPreviewArea');
+    preview.innerHTML = "<div class='text-muted small'><i class='fa fa-spinner fa-spin me-1'></i>Reading file...</div>";
+    document.getElementById('importStartBtn').disabled = true;
+    document.getElementById('importResultsArea').innerHTML = '';
+    document.getElementById('importProgressArea').innerHTML = '';
+    var reader = new FileReader();
+    reader.onload = function(e){
+        try{
+            var data = new Uint8Array(e.target.result);
+            var wb = XLSX.read(data, {type:'array'});
+            var sheetName = wb.SheetNames[0];
+            if(wb.SheetNames.indexOf("Patients") !== -1) sheetName = "Patients";
+            var sheet = wb.Sheets[sheetName];
+            var rows = XLSX.utils.sheet_to_json(sheet, {defval:'', raw:false});
+            if(rows.length === 0){
+                preview.innerHTML = "<div class='alert alert-warning small mb-0'>No data rows found in sheet '"+sheetName+"'.</div>";
+                return;
+            }
+            // Drop the example row from the template
+            rows = rows.filter(function(r){ return String(r.Civil_ID||'').trim() !== '123456789012'; });
+            if(rows.length === 0){
+                preview.innerHTML = "<div class='alert alert-warning small mb-0'>Only the sample template row was found. Please add real patient data and re-upload.</div>";
+                return;
+            }
+            var validRows = [], invalidRows = [];
+            rows.forEach(function(r, idx){
+                Object.keys(r).forEach(function(k){ if(typeof r[k]==='string') r[k]=r[k].trim(); });
+                var civil = String(r.Civil_ID||'').trim();
+                var fileNo = String(r.File_No||'').trim();
+                var name = String(r.Patient_Name||'').trim();
+                var doctor = String(r.Doctor_Name||'').trim();
+                var problems = [];
+                if(!name) problems.push('missing Patient_Name');
+                if(!doctor) problems.push('missing Doctor_Name');
+                if(!civil) problems.push('missing Civil_ID');
+                else if(!/^\d{12}$/.test(civil)) problems.push('Civil_ID not 12 digits');
+                if(!fileNo) problems.push('missing File_No');
+                else if(!/^\d{6}$/.test(fileNo)) problems.push('File_No not 6 digits');
+                r.Civil_ID = civil; r.File_No = fileNo;
+                if(problems.length > 0){
+                    invalidRows.push({row: idx+2, name: name||'(no name)', problems: problems});
+                }else{
+                    validRows.push(r);
+                }
+            });
+            importParsedRows = validRows;
+            var html = "<div class='alert alert-info small mb-2'><b>File parsed:</b> "+rows.length+" data rows in '"+sheetName+"'. ";
+            html += "<span class='text-success fw-bold'>"+validRows.length+" valid</span>";
+            if(invalidRows.length > 0) html += " · <span class='text-danger fw-bold'>"+invalidRows.length+" with issues</span>";
+            html += "</div>";
+            if(invalidRows.length > 0){
+                html += "<details class='mb-2'><summary class='text-danger small fw-bold' style='cursor:pointer;'><i class='fa fa-exclamation-triangle me-1'></i>"+invalidRows.length+" rows will be skipped (click to view)</summary>";
+                html += "<div style='max-height:140px;overflow-y:auto;background:#fff5f5;padding:8px;border-radius:6px;font-size:0.78rem;margin-top:6px;'>";
+                invalidRows.slice(0,30).forEach(function(p){
+                    html += "<div>Row "+p.row+" — "+p.name+": <span class='text-danger'>"+p.problems.join(', ')+"</span></div>";
+                });
+                if(invalidRows.length > 30) html += "<div class='text-muted'>... and "+(invalidRows.length-30)+" more</div>";
+                html += "</div></details>";
+            }
+            if(validRows.length > 0){
+                html += "<div class='small fw-bold mb-1'>Preview (first 5 valid rows):</div>";
+                html += "<div style='overflow-x:auto;border:1px solid #ddd;border-radius:6px;'>";
+                html += "<table class='table table-sm table-bordered table-striped mb-0' style='font-size:0.75rem;'><thead class='table-dark'><tr>";
+                ['File_No','Patient_Name','Civil_ID','Age','Gender','HF_Type','EF_Diagnosis','NYHA','Doctor_Name'].forEach(function(c){
+                    html += "<th>"+c+"</th>";
+                });
+                html += "</tr></thead><tbody>";
+                validRows.slice(0,5).forEach(function(r){
+                    html += "<tr>";
+                    ['File_No','Patient_Name','Civil_ID','Age','Gender','HF_Type','EF_Diagnosis','NYHA','Doctor_Name'].forEach(function(c){
+                        html += "<td>"+(r[c]||'')+"</td>";
+                    });
+                    html += "</tr>";
+                });
+                html += "</tbody></table></div>";
+                document.getElementById('importStartBtn').disabled = false;
+                document.getElementById('importStartBtn').innerHTML = '<i class="fa fa-cloud-upload-alt me-1"></i> Import '+validRows.length+' Patients';
+            }
+            preview.innerHTML = html;
+        }catch(err){
+            preview.innerHTML = "<div class='alert alert-danger small mb-0'><b>Error reading file:</b> "+err.message+"</div>";
+        }
+    };
+    reader.onerror = function(){ preview.innerHTML = "<div class='alert alert-danger small mb-0'>Failed to read file.</div>"; };
+    reader.readAsArrayBuffer(file);
+}
+
+function startImport(){
+    if(importParsedRows.length === 0){ alert("No valid rows to import."); return; }
+    if(!confirm("Import "+importParsedRows.length+" patient records to the registry?\n\nDuplicates (same Civil ID or File No) will be skipped.")) return;
+    var btn = document.getElementById('importStartBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa fa-spinner fa-spin me-1"></i> Importing...';
+    var progress = document.getElementById('importProgressArea');
+    progress.innerHTML = "<div class='mt-3'><div class='small mb-1'>Importing... <span id='impCounter'>0</span> / "+importParsedRows.length+"</div>"+
+        "<div style='background:#eee;border-radius:8px;height:14px;overflow:hidden;'><div id='impBar' style='width:0%;height:100%;background:linear-gradient(90deg,#8b0000,#c0392b);transition:width 0.3s;'></div></div></div>";
+    var added = 0, skipped = 0, errors = 0;
+    var skippedDetails = [], errorDetails = [];
+    var idx = 0;
+    function updateProgress(){
+        document.getElementById('impCounter').textContent = idx;
+        document.getElementById('impBar').style.width = (idx/importParsedRows.length*100)+"%";
+    }
+    function processNext(){
+        if(idx >= importParsedRows.length){
+            var html = "<div class='mt-3 p-3' style='background:#f0f8f0;border-left:4px solid #28a745;border-radius:6px;'>"+
+                "<h6 class='mb-2 text-success'><i class='fa fa-check-circle me-1'></i>Import Complete</h6>"+
+                "<div class='small'><b>"+added+"</b> patients added · <b>"+skipped+"</b> skipped (duplicates) · <b>"+errors+"</b> errors</div>";
+            if(skippedDetails.length > 0){
+                html += "<details class='mt-2'><summary class='small text-warning fw-bold' style='cursor:pointer;'>Skipped duplicates ("+skippedDetails.length+")</summary>"+
+                    "<div style='max-height:120px;overflow-y:auto;font-size:0.75rem;background:#fff;padding:6px;border-radius:4px;margin-top:4px;'>";
+                skippedDetails.slice(0,50).forEach(function(s){ html += "<div>"+s+"</div>"; });
+                html += "</div></details>";
+            }
+            if(errorDetails.length > 0){
+                html += "<details class='mt-2'><summary class='small text-danger fw-bold' style='cursor:pointer;'>Errors ("+errorDetails.length+")</summary>"+
+                    "<div style='max-height:120px;overflow-y:auto;font-size:0.75rem;background:#fff;padding:6px;border-radius:4px;margin-top:4px;'>";
+                errorDetails.slice(0,50).forEach(function(s){ html += "<div>"+s+"</div>"; });
+                html += "</div></details>";
+            }
+            html += "</div>";
+            document.getElementById('importResultsArea').innerHTML = html;
+            btn.innerHTML = '<i class="fa fa-check me-1"></i> Done';
+            // Refresh totals if function exists
+            if(typeof loadTotalCount === 'function') loadTotalCount();
+            return;
+        }
+        var r = importParsedRows[idx];
+        var record = {};
+        IMPORT_FIELDS.forEach(function(f){
+            if(r[f] !== undefined && r[f] !== null && r[f] !== '') record[f] = String(r[f]);
+        });
+        record.timestamp = new Date().toISOString();
+        record.imported = true;
+        record.importedAt = new Date().toISOString();
+        var civilID = record.Civil_ID, fileNo = record.File_No;
+        db.collection("patients").where("Civil_ID","==",civilID).limit(1).get().then(function(snap){
+            if(!snap.empty){
+                skipped++;
+                skippedDetails.push("Row "+(idx+2)+": "+record.Patient_Name+" — Civil ID "+civilID+" already exists");
+                idx++; updateProgress(); processNext();
+                return null;
+            }
+            return db.collection("patients").where("File_No","==",fileNo).limit(1).get();
+        }).then(function(snap2){
+            if(snap2 === null) return;
+            if(!snap2.empty){
+                skipped++;
+                skippedDetails.push("Row "+(idx+2)+": "+record.Patient_Name+" — File No "+fileNo+" already exists");
+                idx++; updateProgress(); processNext();
+                return;
+            }
+            db.collection("patients").add(record).then(function(){
+                added++;
+                idx++; updateProgress(); processNext();
+            }).catch(function(e){
+                errors++;
+                errorDetails.push("Row "+(idx+2)+": "+record.Patient_Name+" — "+e.message);
+                idx++; updateProgress(); processNext();
+            });
+        }).catch(function(e){
+            errors++;
+            errorDetails.push("Row "+(idx+2)+": "+record.Patient_Name+" — "+e.message);
+            idx++; updateProgress(); processNext();
+        });
+    }
+    processNext();
+}
+
 </script>
 
 </body>
