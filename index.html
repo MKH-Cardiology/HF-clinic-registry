@@ -1490,22 +1490,50 @@ function openImportModal(){
     modal.className = "modal-overlay";
     modal.style.cssText = "position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;";
     modal.innerHTML =
-        "<div style='background:#fff;border-radius:14px;width:100%;max-width:780px;margin:20px auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);'>"+
+        "<div style='background:#fff;border-radius:14px;width:100%;max-width:820px;margin:20px auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);'>"+
             "<div style='background:linear-gradient(135deg,#8b0000,#5c0000);color:#fff;padding:18px 22px;border-radius:14px 14px 0 0;display:flex;justify-content:space-between;align-items:center;'>"+
                 "<div><h5 style='margin:0;font-weight:700;'><i class='fa fa-file-import me-2'></i>Bulk Import Patients</h5>"+
-                "<small style='opacity:0.85;'>Import previous patient data from Excel or CSV</small></div>"+
+                "<small style='opacity:0.85;'>Import previous patient data into the registry</small></div>"+
                 "<button onclick='document.getElementById(\"importModal\").remove()' style='background:transparent;border:none;color:#fff;font-size:1.5rem;cursor:pointer;line-height:1;'>&times;</button>"+
             "</div>"+
-            "<div style='padding:22px;'>"+
+            // Tabs
+            "<div style='display:flex;border-bottom:2px solid #e0e0e0;background:#f9f9f9;'>"+
+                "<button id='tabPerPatient' class='import-tab active' onclick='switchImportTab(\"perpatient\")' style='flex:1;padding:14px;border:none;background:#fff;border-bottom:3px solid #8b0000;font-weight:600;color:#8b0000;cursor:pointer;'>"+
+                    "<i class='fa fa-folder-open me-1'></i> Per-Patient Files <small class='d-block text-muted' style='font-weight:400;font-size:0.7rem;'>Your existing format (one .xlsx per patient)</small>"+
+                "</button>"+
+                "<button id='tabBulkTable' class='import-tab' onclick='switchImportTab(\"bulktable\")' style='flex:1;padding:14px;border:none;background:transparent;border-bottom:3px solid transparent;font-weight:600;color:#666;cursor:pointer;'>"+
+                    "<i class='fa fa-table me-1'></i> Bulk Table <small class='d-block text-muted' style='font-weight:400;font-size:0.7rem;'>One row = one patient</small>"+
+                "</button>"+
+            "</div>"+
+            // Per-Patient pane
+            "<div id='paneperpatient' class='import-pane' style='padding:22px;'>"+
+                "<div style='background:#e8f4fd;border-left:4px solid #17a2b8;padding:12px 14px;border-radius:6px;margin-bottom:16px;font-size:0.85rem;'>"+
+                    "<b><i class='fa fa-info-circle me-1'></i>For your existing patient files (Patient Info + Progress Notes sheets):</b>"+
+                    "<ol style='margin:6px 0 0 0;padding-left:20px;'>"+
+                        "<li>Select <b>one or more</b> patient files at once (e.g. all files in your folder).</li>"+
+                        "<li>Each file = one patient. The 'Patient Info' sheet becomes the patient record; each visit column in 'Progress Notes' becomes a visit.</li>"+
+                        "<li>Preview parsed data, then click Import.</li>"+
+                    "</ol>"+
+                    "<small class='text-muted d-block mt-2'>If File No is empty, a temporary one will be auto-generated &mdash; you can edit it later.</small>"+
+                "</div>"+
+                "<label class='btn btn-success w-100 mb-2' style='cursor:pointer;'>"+
+                    "<i class='fa fa-upload me-1'></i> Choose Patient Files (multiple .xlsx allowed)"+
+                    "<input type='file' id='ppFileInput' accept='.xlsx,.xls' multiple style='display:none;' onchange='handlePerPatientFiles(event)'>"+
+                "</label>"+
+                "<div id='ppPreviewArea'></div>"+
+                "<div id='ppProgressArea'></div>"+
+                "<div id='ppResultsArea'></div>"+
+            "</div>"+
+            // Bulk Table pane
+            "<div id='panebulktable' class='import-pane' style='padding:22px;display:none;'>"+
                 "<div style='background:#fff8e1;border-left:4px solid #ffc107;padding:12px 14px;border-radius:6px;margin-bottom:18px;font-size:0.85rem;'>"+
                     "<b><i class='fa fa-info-circle me-1'></i>How it works:</b>"+
                     "<ol style='margin:6px 0 0 0;padding-left:20px;'>"+
-                        "<li>Download the template below — it has all the correct column headers.</li>"+
+                        "<li>Download the template below &mdash; it has all the correct column headers.</li>"+
                         "<li>Fill in your patient data (or paste from your existing Excel / Google Sheet).</li>"+
                         "<li>Save as <b>.xlsx</b> or <b>.csv</b> and upload here.</li>"+
                         "<li>Preview the data, then click Import. Duplicates (by Civil ID or File No) will be skipped.</li>"+
                     "</ol>"+
-                    "<small class='text-muted d-block mt-2'><b>Google Sheets users:</b> File &rarr; Download &rarr; Microsoft Excel (.xlsx), then upload that file here.</small>"+
                 "</div>"+
                 "<div class='row g-2 mb-3'>"+
                     "<div class='col-12 col-md-6'>"+
@@ -1524,12 +1552,36 @@ function openImportModal(){
                 "<div id='importProgressArea'></div>"+
                 "<div id='importResultsArea'></div>"+
             "</div>"+
+            // Footer
             "<div style='padding:14px 22px;border-top:1px solid #e0e0e0;background:#f9f9f9;border-radius:0 0 14px 14px;text-align:right;'>"+
                 "<button class='btn btn-secondary me-2' onclick='document.getElementById(\"importModal\").remove()'>Close</button>"+
-                "<button class='btn btn-danger' id='importStartBtn' onclick='startImport()' disabled><i class='fa fa-cloud-upload-alt me-1'></i> Import to Registry</button>"+
+                "<button class='btn btn-danger' id='ppStartBtn' onclick='startPerPatientImport()' disabled><i class='fa fa-cloud-upload-alt me-1'></i> Import Patients</button>"+
+                "<button class='btn btn-danger' id='importStartBtn' onclick='startImport()' disabled style='display:none;'><i class='fa fa-cloud-upload-alt me-1'></i> Import to Registry</button>"+
             "</div>"+
         "</div>";
     document.body.appendChild(modal);
+}
+
+function switchImportTab(which){
+    var tabs = ['perpatient','bulktable'];
+    tabs.forEach(function(t){
+        var pane = document.getElementById('pane'+t);
+        var tab = document.getElementById('tab'+(t==='perpatient'?'PerPatient':'BulkTable'));
+        if(t === which){
+            pane.style.display = 'block';
+            tab.style.background = '#fff';
+            tab.style.borderBottom = '3px solid #8b0000';
+            tab.style.color = '#8b0000';
+        }else{
+            pane.style.display = 'none';
+            tab.style.background = 'transparent';
+            tab.style.borderBottom = '3px solid transparent';
+            tab.style.color = '#666';
+        }
+    });
+    // Toggle which import button is shown in the footer
+    document.getElementById('ppStartBtn').style.display = (which==='perpatient')?'inline-block':'none';
+    document.getElementById('importStartBtn').style.display = (which==='bulktable')?'inline-block':'none';
 }
 
 // Master list of all field IDs the form uses
@@ -1784,6 +1836,535 @@ function startImport(){
         }).catch(function(e){
             errors++;
             errorDetails.push("Row "+(idx+2)+": "+record.Patient_Name+" — "+e.message);
+            idx++; updateProgress(); processNext();
+        });
+    }
+    processNext();
+}
+
+/* ===== PER-PATIENT FILE IMPORT (handles Patient Info + Progress Notes format) ===== */
+
+// Maps lowercased label text from the Patient Info sheet to registry field IDs
+var PP_LABEL_MAP = {
+    'name':'Patient_Name',
+    'patient name':'Patient_Name',
+    'age':'Age', 'age/dob':'Age', 'dob':'Age',
+    'gender':'Gender', 'sex':'Gender',
+    'nationality':'Nationality',
+    'civil id':'Civil_ID', 'civilid':'Civil_ID', 'civil_id':'Civil_ID',
+    'file no':'File_No', 'file number':'File_No', 'fileno':'File_No', 'file_no':'File_No',
+    'mobile number':'Mobile', 'mobile':'Mobile', 'phone':'Mobile',
+    'last ef':'EF_Diagnosis', 'ef':'EF_Diagnosis', 'ef%':'EF_Diagnosis',
+    'nyha symptoms on booking visit':'NYHA', 'nyha':'NYHA',
+    'device':'Device_Info',
+    'advanced hf':'Advanced_HF',
+    'no. of admissions last year':'Admissions', 'admissions':'Admissions',
+    'last admissions in hospital':'Last_Admission', 'last admission':'Last_Admission',
+    'dm':'DM', 'diabetes':'DM',
+    'htn':'HTN', 'hypertension':'HTN',
+    'ihd (stemi or nstemi)':'IHD', 'ihd':'IHD',
+    'pci':'PCI_CABG_pci', 'cabg':'PCI_CABG_cabg', // combined below
+    'dyslipidemia':'_dyslipidemia', // not a direct field; collected to notes
+    'smoker':'Smoker',
+    'ckd':'CKD',
+    'af':'AF',
+    'cvs':'CVA', 'cva':'CVA',
+    'obese':'Obese_OSA_obese', 'osa':'Obese_OSA_osa', // combined below
+    'family history':'FH_Genetics', 'fh':'FH_Genetics',
+    'others':'_others', // collected to notes
+    'notes':'Notes'
+};
+
+// Med name -> registry medication field
+var PP_MED_MAP = {
+    'concor':{f:'Med_BB', v:'Concor'}, 'betaloc':{f:'Med_BB', v:'Betaloc'},
+    'dilatrend':{f:'Med_BB', v:'Dilatrend'}, 'lopressor':{f:'Med_BB', v:'Lopressor'},
+    'zestril':{f:'Med_ACEiARB', v:'Zestril'}, 'tritace':{f:'Med_ACEiARB', v:'Tritace'},
+    'capoten':{f:'Med_ACEiARB', v:'Capoten'}, 'diovan':{f:'Med_ACEiARB', v:'Diovan'},
+    'atacand':{f:'Med_ACEiARB', v:'Atacand'},
+    'entresto':{f:'Med_ARNI', v:'Yes'},
+    'aldactone':{f:'Med_MRA', v:'Aldactone'}, 'elprenone':{f:'Med_MRA', v:'Eplerenone'},
+    'eplerenone':{f:'Med_MRA', v:'Eplerenone'}, 'finerenone':{f:'Med_MRA', v:'Finerenone'},
+    'inspra':{f:'Med_MRA', v:'Inspra'},
+    'forxiga':{f:'Med_SGLT2i', v:'Forxiga'}, 'jardiance':{f:'Med_SGLT2i', v:'Jardiance'},
+    'maunjaro':{f:'Med_GLP1', v:'Mounjaro'}, 'mounjaro':{f:'Med_GLP1', v:'Mounjaro'},
+    'ozempic':{f:'Med_GLP1', v:'Ozempic'},
+    'hydralazine':{f:'Med_Vasodilator', v:'Hydralazine'}, 'nitrates':{f:'Med_Vasodilator', v:'Nitrates'},
+    'furosemide':{f:'Med_Diuretic', v:'Furosemide'}, 'metolazone':{f:'Med_Diuretic', v:'Metolazone'},
+    'warfarin':{f:'Med_OAC', v:'Warfarin'}, 'xarelto':{f:'Med_OAC', v:'Xarelto'}, 'eliquis':{f:'Med_OAC', v:'Eliquis'},
+    'zocor':{f:'Med_Lipid', v:'Zocor'}, 'lipitor':{f:'Med_Lipid', v:'Lipitor'},
+    'crestor':{f:'Med_Lipid', v:'Crestor'}, 'ezetrol':{f:'Med_Lipid', v:'Ezetrol'}, 'ezetrol 10':{f:'Med_Lipid', v:'Ezetrol'},
+    'repatha':{f:'Med_Lipid', v:'Repatha'}, 'praluent':{f:'Med_Lipid', v:'Praluent'},
+    'atozet':{f:'Med_Lipid', v:'Atozet'}, 'zympass':{f:'Med_Lipid', v:'Zympass'},
+    'fibrates':{f:'Med_Lipid', v:'Fibrates'}, 'omacor':{f:'Med_Lipid', v:'Omacor'},
+    'veltassa':{f:'Med_K_Chelator', v:'Veltassa'}, 'lokelma':{f:'Med_K_Chelator', v:'Lokelma'},
+    'cordarone':{f:'Med_Arrhythmia', v:'Cordarone'}, 'flecainide':{f:'Med_Arrhythmia', v:'Flecainide'},
+    'sotalol':{f:'Med_Arrhythmia', v:'Sotalol'}, 'propafenone':{f:'Med_Arrhythmia', v:'Propafenone'},
+    'procorolan':{f:'Med_Procorolan', v:'Procorolan'}
+};
+
+// Visit-row labels -> visit field IDs (with V_ prefix)
+var PP_VISIT_LABEL_MAP = {
+    'fatigue':'V_Fatigue',
+    'nyha class of sob':'V_NYHA', 'nyha':'V_NYHA',
+    'edema':'V_Edema',
+    'pulse':'V_Pulse',
+    'bp':'V_BP', 'blood pressure':'V_BP',
+    'spo2':'V_SpO2',
+    'weight':'V_Weight',
+    'height':'V_Height',
+    'bmi':'V_BMI',
+    'jvp':'V_JVP',
+    'pulmonary rales':'V_Rales', 'rales':'V_Rales',
+    's3':'V_S3',
+    'lbbb':'V_LBBB',
+    'qrs width':'V_QRS', 'qrs':'V_QRS',
+    'arrhythmia':'V_Arrhythmia',
+    'change in ef':'V_EF_Change', 'ef change':'V_EF_Change',
+    'hba1c':'V_HbA1c',
+    'gluc':'V_Gluc', 'glucose':'V_Gluc',
+    'urea':'V_Urea',
+    'creat':'V_Creat', 'creatinine':'V_Creat',
+    'egfr':'V_eGFR',
+    'na':'V_Na', 'sodium':'V_Na',
+    'k':'V_K', 'potassium':'V_K',
+    'bnp':'V_BNP',
+    'nt-pro bnp':'V_NTproBNP', 'nt-probnp':'V_NTproBNP', 'ntprobnp':'V_NTproBNP', 'nt pro bnp':'V_NTproBNP',
+    'inr':'V_INR',
+    'iron':'V_Iron',
+    'transferrin sats':'V_Transferrin', 'transferrin':'V_Transferrin',
+    'ferritin':'V_Ferritin',
+    'wbc':'V_WBC',
+    'hb':'V_Hb', 'hgb':'V_Hb', 'hemoglobin':'V_Hb',
+    'plt':'V_Plt', 'platelets':'V_Plt',
+    'tsh':'V_TSH',
+    'free t4':'V_FreeT4', 't4':'V_FreeT4',
+    'adverse effect of any medication':'V_Adverse', 'adverse':'V_Adverse',
+    'plan':'V_Plan', 'plan:':'V_Plan',
+    'others':'V_Others', 'others:':'V_Others'
+};
+
+var ppParsedPatients = [];
+
+function normalizeYN(v){
+    if(v === null || v === undefined) return '';
+    var s = String(v).trim().toLowerCase();
+    if(s === '' || s === '-') return '';
+    if(s === 'y' || s === 'yes' || s === 'true' || s === '1') return 'Yes';
+    if(s === 'n' || s === 'no' || s === 'false' || s === '0' || s === 'never') return 'No';
+    // Anything else (e.g. "? Yes", "Flutter") -> keep original trimmed value
+    return String(v).trim();
+}
+function normalizeGender(v){
+    if(!v) return '';
+    var s = String(v).trim().toLowerCase();
+    if(s === 'm' || s === 'male') return 'Male';
+    if(s === 'f' || s === 'female') return 'Female';
+    return String(v).trim();
+}
+function cleanCivilID(v){
+    if(v === null || v === undefined) return '';
+    // Excel may have stored as number: 279080508357 -> "279080508357"
+    var s = String(v).replace(/\D/g,'');
+    return s;
+}
+function cleanFileNo(v){
+    if(v === null || v === undefined || v === '') return '';
+    var s = String(v).replace(/\D/g,'');
+    return s;
+}
+function generatePlaceholderFileNo(){
+    // 6-digit placeholder based on timestamp + random
+    var n = Math.floor(100000 + Math.random()*899999);
+    return String(n);
+}
+function formatDateCell(v){
+    if(v === null || v === undefined || v === '') return '';
+    if(v instanceof Date){
+        var y = v.getFullYear(), m = String(v.getMonth()+1).padStart(2,'0'), d = String(v.getDate()).padStart(2,'0');
+        return y+'-'+m+'-'+d;
+    }
+    var s = String(v).trim();
+    // Try common formats: "24/4/2025", "4/24/2025", "2025-04-24"
+    var m1 = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+    if(m1){
+        var a = parseInt(m1[1],10), b = parseInt(m1[2],10), y = parseInt(m1[3],10);
+        if(y < 100) y += 2000;
+        // Ambiguous: assume D/M/Y (the example file uses this)
+        var day = a, mon = b;
+        if(day > 31 || mon > 12){ day = b; mon = a; }
+        return y+'-'+String(mon).padStart(2,'0')+'-'+String(day).padStart(2,'0');
+    }
+    var m2 = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if(m2) return m2[1]+'-'+m2[2].padStart(2,'0')+'-'+m2[3].padStart(2,'0');
+    return s; // give up, store as-is
+}
+
+function handlePerPatientFiles(event){
+    var files = Array.from(event.target.files || []);
+    if(files.length === 0) return;
+    var preview = document.getElementById('ppPreviewArea');
+    preview.innerHTML = "<div class='text-muted small'><i class='fa fa-spinner fa-spin me-1'></i>Reading "+files.length+" file(s)...</div>";
+    document.getElementById('ppStartBtn').disabled = true;
+    document.getElementById('ppResultsArea').innerHTML = '';
+    document.getElementById('ppProgressArea').innerHTML = '';
+    ppParsedPatients = [];
+    var done = 0;
+    files.forEach(function(file){
+        var reader = new FileReader();
+        reader.onload = function(e){
+            try{
+                var data = new Uint8Array(e.target.result);
+                var wb = XLSX.read(data, {type:'array', cellDates:true});
+                var parsed = parsePerPatientWorkbook(wb, file.name);
+                ppParsedPatients.push(parsed);
+            }catch(err){
+                ppParsedPatients.push({fileName:file.name, error:err.message, record:null, visits:[]});
+            }
+            done++;
+            if(done === files.length) renderPerPatientPreview();
+        };
+        reader.onerror = function(){
+            ppParsedPatients.push({fileName:file.name, error:'Failed to read file', record:null, visits:[]});
+            done++;
+            if(done === files.length) renderPerPatientPreview();
+        };
+        reader.readAsArrayBuffer(file);
+    });
+}
+
+function parsePerPatientWorkbook(wb, fileName){
+    var result = {fileName:fileName, error:null, record:{}, visits:[], warnings:[], notesExtra:[]};
+    // === PARSE PATIENT INFO SHEET ===
+    var infoSheetName = wb.SheetNames.filter(function(n){ return n.toLowerCase().indexOf('patient info')!==-1 || n.toLowerCase().indexOf('info')!==-1; })[0] || wb.SheetNames[0];
+    var infoSheet = wb.Sheets[infoSheetName];
+    if(!infoSheet){ result.error = "No 'Patient Info' sheet found"; return result; }
+    var infoRows = XLSX.utils.sheet_to_json(infoSheet, {header:1, defval:'', raw:true});
+    var hfTypeFlags = {};
+    var ynFields = {DM:1,HTN:1,IHD:1,CKD:1,AF:1,CVA:1,Smoker:1,Advanced_HF:1,FH_Genetics:1};
+    var pciVal='', cabgVal='', obeseVal='', osaVal='';
+    infoRows.forEach(function(row){
+        var label = (row[0]||'').toString().trim().toLowerCase().replace(/\s+/g,' ');
+        var value = row[1];
+        if(!label) return;
+        // HF Type rows: HFrEF/HFmrEF/HFpEF/Other cardiomyopathies — value present means it's that type
+        if(label === 'hfref'){ if(value && String(value).trim()!=='') { hfTypeFlags.HFrEF = true; result.notesExtra.push('HFrEF: '+value); } return; }
+        if(label === 'hfmref'){ if(value && String(value).trim()!=='') { hfTypeFlags.HFmrEF = true; result.notesExtra.push('HFmrEF: '+value); } return; }
+        if(label === 'hfpef'){ if(value && String(value).trim()!=='') { hfTypeFlags.HFpEF = true; result.notesExtra.push('HFpEF: '+value); } return; }
+        if(label === 'other cardiomyopathies'){ if(value && String(value).trim()!=='') { result.record.Other_Cardio = String(value).trim(); } return; }
+        if(label === 'type of hf:' || label === 'type of hf') return;
+        if(label === 'risk factors & comordities:' || label === 'risk factors & comorbidities' || label === 'risk factors & comorbidities:') return;
+        var mapped = PP_LABEL_MAP[label];
+        if(!mapped){
+            // unknown label — push to notes if value
+            if(value && String(value).trim()!=='') result.notesExtra.push((row[0]||'')+': '+value);
+            return;
+        }
+        var v = (value === null || value === undefined) ? '' : String(value).trim();
+        if(v === '') return;
+        // Special-case combined fields
+        if(mapped === 'PCI_CABG_pci'){ pciVal = normalizeYN(v); return; }
+        if(mapped === 'PCI_CABG_cabg'){ cabgVal = normalizeYN(v); return; }
+        if(mapped === 'Obese_OSA_obese'){ obeseVal = normalizeYN(v); return; }
+        if(mapped === 'Obese_OSA_osa'){ osaVal = normalizeYN(v); return; }
+        if(mapped === '_dyslipidemia'){ if(normalizeYN(v)==='Yes') result.notesExtra.push('Dyslipidemia: Yes'); return; }
+        if(mapped === '_others'){ result.notesExtra.push('Other: '+v); return; }
+        // Type-specific normalization
+        if(mapped === 'Civil_ID'){ result.record.Civil_ID = cleanCivilID(v); return; }
+        if(mapped === 'File_No'){ result.record.File_No = cleanFileNo(v); return; }
+        if(mapped === 'Gender'){ result.record.Gender = normalizeGender(v); return; }
+        if(mapped === 'Mobile'){ result.record.Mobile = String(v).replace(/[^\d+]/g,''); return; }
+        if(mapped === 'Age'){
+            var n = parseFloat(v);
+            if(!isNaN(n)) result.record.Age = String(Math.round(n));
+            else result.record.Age = v;
+            return;
+        }
+        if(mapped === 'EF_Diagnosis'){
+            // Could be a number ("30") or text ("improved")
+            var ef = parseFloat(v);
+            if(!isNaN(ef)) result.record.EF_Diagnosis = String(ef);
+            else result.notesExtra.push('Last EF note: '+v);
+            return;
+        }
+        if(mapped === 'NYHA'){
+            // Normalize "I"/"II"/"III"/"IV" or numeric
+            var nv = v.toUpperCase().replace(/[^IV1234]/g,'');
+            if(['I','II','III','IV'].indexOf(nv)!==-1) result.record.NYHA = nv;
+            else if(['1','2','3','4'].indexOf(nv)!==-1) result.record.NYHA = ['','I','II','III','IV'][parseInt(nv)];
+            else result.record.NYHA = v;
+            return;
+        }
+        if(mapped === 'Smoker'){
+            var sv = v.toLowerCase();
+            if(sv==='y'||sv==='yes'||sv==='current') result.record.Smoker = 'Current';
+            else if(sv==='n'||sv==='no'||sv==='never') result.record.Smoker = 'Never';
+            else if(sv==='former'||sv==='ex') result.record.Smoker = 'Former';
+            else result.record.Smoker = v;
+            return;
+        }
+        if(mapped === 'AF'){
+            // Could be Y/N or "Flutter" etc.
+            var av = normalizeYN(v);
+            result.record.AF = (av==='Yes'||av==='No') ? av : (av || v);
+            // Keep narrative if non-binary
+            if(av !== 'Yes' && av !== 'No') result.notesExtra.push('AF detail: '+v);
+            return;
+        }
+        if(ynFields[mapped]){ result.record[mapped] = normalizeYN(v); return; }
+        if(mapped === 'Last_Admission'){ result.record.Last_Admission = formatDateCell(value); return; }
+        if(mapped === 'Admissions'){
+            var an = parseFloat(v);
+            result.record.Admissions = isNaN(an) ? v : String(Math.round(an));
+            return;
+        }
+        if(mapped === 'Device_Info'){ result.record.Device_Info = v; return; }
+        // Default
+        result.record[mapped] = v;
+    });
+    // Combine PCI/CABG into PCI_CABG field
+    if(pciVal === 'Yes' && cabgVal === 'Yes') result.record.PCI_CABG = 'Both';
+    else if(pciVal === 'Yes') result.record.PCI_CABG = 'PCI';
+    else if(cabgVal === 'Yes') result.record.PCI_CABG = 'CABG';
+    else if(pciVal || cabgVal) result.record.PCI_CABG = 'No';
+    // Combine Obese/OSA
+    if(obeseVal === 'Yes' || osaVal === 'Yes') result.record.Obese_OSA = 'Yes';
+    else if(obeseVal === 'No' && osaVal === 'No') result.record.Obese_OSA = 'No';
+    // Decide HF_Type
+    if(hfTypeFlags.HFrEF) result.record.HF_Type = 'HFrEF';
+    else if(hfTypeFlags.HFmrEF) result.record.HF_Type = 'HFmrEF';
+    else if(hfTypeFlags.HFpEF) result.record.HF_Type = 'HFpEF';
+    // Default doctor (will be reviewable in preview)
+    if(!result.record.Doctor_Name) result.record.Doctor_Name = 'Dr Farouk';
+    // === PARSE PROGRESS NOTES SHEET (visits) ===
+    var visitSheetName = wb.SheetNames.filter(function(n){ return n.toLowerCase().indexOf('progress')!==-1 || n.toLowerCase().indexOf('visit')!==-1 || n.toLowerCase().indexOf('note')!==-1; })[0];
+    if(visitSheetName){
+        var visitSheet = wb.Sheets[visitSheetName];
+        var vRows = XLSX.utils.sheet_to_json(visitSheet, {header:1, defval:'', raw:true});
+        if(vRows.length > 1){
+            // Visit dates are in row 1, columns C onward (index 2+)
+            var headerRow = vRows[0] || [];
+            var visitCols = []; // [{colIdx, date}]
+            for(var c = 2; c < headerRow.length; c++){
+                var dt = headerRow[c];
+                if(dt !== null && dt !== undefined && String(dt).trim() !== ''){
+                    visitCols.push({colIdx: c, date: formatDateCell(dt)});
+                }
+            }
+            // For each visit column, build a visit object
+            visitCols.forEach(function(vc){
+                var visit = {visitDate: vc.date, visitType:'Routine', timestamp: new Date().toISOString(), imported:true};
+                var hasData = false;
+                // Track meds for this visit
+                var visitMeds = {};
+                var inMedSection = false;
+                vRows.forEach(function(row, rowIdx){
+                    if(rowIdx === 0) return;
+                    var sectionLabel = (row[0]||'').toString().trim().toLowerCase();
+                    var rowLabelRaw = (row[1]||'').toString().trim();
+                    var rowLabel = rowLabelRaw.toLowerCase().replace(/[:;]/g,'').trim();
+                    var cellVal = row[vc.colIdx];
+                    if(sectionLabel === 'medications') inMedSection = true;
+                    if(sectionLabel === 'adverse effect of any medication' || sectionLabel === 'plan:' || sectionLabel === 'plan' || sectionLabel === 'others:' || sectionLabel === 'others'){
+                        inMedSection = false;
+                        // These are full-row narrative fields keyed off column A
+                        if(cellVal !== null && cellVal !== undefined && String(cellVal).trim() !== ''){
+                            var fld = sectionLabel.indexOf('adverse')!==-1 ? 'V_Adverse' :
+                                      sectionLabel.indexOf('plan')!==-1 ? 'V_Plan' : 'V_Others';
+                            visit[fld] = (visit[fld]?visit[fld]+' | ':'') + String(cellVal).trim();
+                            hasData = true;
+                        }
+                        return;
+                    }
+                    if(cellVal === null || cellVal === undefined || String(cellVal).trim() === '') return;
+                    var valStr = String(cellVal).trim();
+                    // Check if this is a medication row
+                    if(inMedSection && PP_MED_MAP[rowLabel]){
+                        var mm = PP_MED_MAP[rowLabel];
+                        // Set the medication selection
+                        if(!visitMeds[mm.f]){
+                            visitMeds[mm.f] = mm.v;
+                            // Try to parse dose
+                            var doseStr = valStr;
+                            var dn = parseFloat(doseStr);
+                            if(!isNaN(dn) && /^\d+(\.\d+)?$/.test(doseStr)){
+                                var clean = (dn === Math.floor(dn)) ? String(Math.round(dn)) : String(dn);
+                                doseStr = clean + ' mg';
+                            }
+                            visitMeds[mm.f+'_Dose'] = doseStr;
+                        }
+                        return;
+                    }
+                    // Header-only med rows like "B-blocker:", "ACEi:" — skip (no value expected, drug rows below carry data)
+                    if(inMedSection && /:$/.test(rowLabelRaw)) return;
+                    // Visit field mapping
+                    var vField = PP_VISIT_LABEL_MAP[rowLabel];
+                    if(vField){
+                        // Numeric normalization for known number fields
+                        var numericFields = {V_Pulse:1,V_SpO2:1,V_Weight:1,V_Height:1,V_BMI:1,V_HbA1c:1,V_Gluc:1,V_Urea:1,V_Creat:1,V_eGFR:1,V_Na:1,V_K:1,V_BNP:1,V_NTproBNP:1,V_INR:1,V_Iron:1,V_Transferrin:1,V_Ferritin:1,V_WBC:1,V_Hb:1,V_Plt:1,V_TSH:1,V_FreeT4:1,V_QRS:1};
+                        if(numericFields[vField]){
+                            var nm = parseFloat(valStr);
+                            if(!isNaN(nm)){
+                                // Drop trailing .0 for integer values
+                                valStr = (nm === Math.floor(nm)) ? String(Math.round(nm)) : String(nm);
+                            }
+                        }
+                        if(vField === 'V_NYHA'){
+                            var u = valStr.toUpperCase().replace(/[^IV1234]/g,'');
+                            if(['I','II','III','IV'].indexOf(u)!==-1) valStr = u;
+                            else if(['1','2','3','4'].indexOf(u)!==-1) valStr = ['','I','II','III','IV'][parseInt(u)];
+                        }
+                        if(vField === 'V_Fatigue' || vField === 'V_JVP' || vField === 'V_Rales' || vField === 'V_S3' || vField === 'V_LBBB'){
+                            valStr = normalizeYN(valStr);
+                        }
+                        visit[vField] = valStr;
+                        hasData = true;
+                    }
+                });
+                // Apply collected meds to the visit
+                Object.keys(visitMeds).forEach(function(k){ visit[k] = visitMeds[k]; hasData = true; });
+                if(hasData) result.visits.push(visit);
+            });
+        }
+    }
+    // Append unknown-field notes to record.Notes
+    if(result.notesExtra.length > 0){
+        result.record.Notes = (result.record.Notes ? result.record.Notes + '\n' : '') + result.notesExtra.join('\n');
+    }
+    // Validation
+    if(!result.record.Patient_Name) result.warnings.push('Missing Patient_Name');
+    if(!result.record.Civil_ID || !/^\d{12}$/.test(result.record.Civil_ID)){
+        result.warnings.push('Civil_ID is not 12 digits ("'+(result.record.Civil_ID||'empty')+'")');
+    }
+    if(!result.record.File_No){
+        result.record.File_No = generatePlaceholderFileNo();
+        result.warnings.push('File_No was empty &mdash; auto-generated '+result.record.File_No);
+    }else if(!/^\d{6}$/.test(result.record.File_No)){
+        var pad = result.record.File_No.padStart(6,'0').slice(-6);
+        result.warnings.push('File_No "'+result.record.File_No+'" not 6 digits &mdash; padded to '+pad);
+        result.record.File_No = pad;
+    }
+    return result;
+}
+
+function renderPerPatientPreview(){
+    var preview = document.getElementById('ppPreviewArea');
+    var ok = ppParsedPatients.filter(function(p){ return !p.error && p.record && p.record.Patient_Name && p.record.Civil_ID && /^\d{12}$/.test(p.record.Civil_ID); });
+    var bad = ppParsedPatients.filter(function(p){ return p.error || !p.record || !p.record.Patient_Name || !p.record.Civil_ID || !/^\d{12}$/.test(p.record.Civil_ID); });
+    var html = "<div class='alert alert-info small mb-2'><b>Parsed:</b> "+ppParsedPatients.length+" file(s) &middot; "+
+        "<span class='text-success fw-bold'>"+ok.length+" ready to import</span>";
+    if(bad.length > 0) html += " &middot; <span class='text-danger fw-bold'>"+bad.length+" with issues</span>";
+    html += "</div>";
+    if(bad.length > 0){
+        html += "<details class='mb-2' open><summary class='text-danger small fw-bold' style='cursor:pointer;'><i class='fa fa-exclamation-triangle me-1'></i>"+bad.length+" file(s) with problems</summary>";
+        html += "<div style='max-height:160px;overflow-y:auto;background:#fff5f5;padding:8px;border-radius:6px;font-size:0.78rem;margin-top:6px;'>";
+        bad.forEach(function(p){
+            html += "<div><b>"+p.fileName+"</b>: ";
+            if(p.error) html += "<span class='text-danger'>"+p.error+"</span>";
+            else if(!p.record.Patient_Name) html += "<span class='text-danger'>missing Patient_Name</span>";
+            else if(!/^\d{12}$/.test(p.record.Civil_ID||'')) html += "<span class='text-danger'>Civil_ID not 12 digits ("+(p.record.Civil_ID||'empty')+")</span>";
+            html += "</div>";
+        });
+        html += "</div></details>";
+    }
+    if(ok.length > 0){
+        html += "<div class='small fw-bold mb-1'>Ready to import:</div>";
+        html += "<div style='max-height:280px;overflow-y:auto;border:1px solid #ddd;border-radius:6px;'>";
+        html += "<table class='table table-sm table-bordered table-striped mb-0' style='font-size:0.75rem;'><thead class='table-dark' style='position:sticky;top:0;'><tr>"+
+            "<th>File</th><th>Name</th><th>Civil ID</th><th>File No</th><th>Age</th><th>HF Type</th><th>EF</th><th>NYHA</th><th>Visits</th><th>Notes</th></tr></thead><tbody>";
+        ok.forEach(function(p){
+            var r = p.record;
+            var warn = p.warnings.length>0 ? "<i class='fa fa-exclamation-triangle text-warning ms-1' title='"+p.warnings.join(' | ').replace(/'/g,'&apos;')+"'></i>" : '';
+            html += "<tr>"+
+                "<td style='max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;' title='"+p.fileName+"'>"+p.fileName+"</td>"+
+                "<td>"+(r.Patient_Name||'')+"</td>"+
+                "<td>"+(r.Civil_ID||'')+"</td>"+
+                "<td>"+(r.File_No||'')+warn+"</td>"+
+                "<td>"+(r.Age||'')+"</td>"+
+                "<td>"+(r.HF_Type||'')+"</td>"+
+                "<td>"+(r.EF_Diagnosis||'')+"</td>"+
+                "<td>"+(r.NYHA||'')+"</td>"+
+                "<td><span class='badge bg-info'>"+p.visits.length+"</span></td>"+
+                "<td style='max-width:160px;font-size:0.7rem;color:#666;'>"+(p.warnings.join('; ')||'')+"</td>"+
+                "</tr>";
+        });
+        html += "</tbody></table></div>";
+        html += "<div class='small text-muted mt-2'><i class='fa fa-info-circle me-1'></i>Default doctor is set to <b>Dr Farouk</b> &mdash; you can edit each record after import if needed.</div>";
+        document.getElementById('ppStartBtn').disabled = false;
+        document.getElementById('ppStartBtn').innerHTML = '<i class="fa fa-cloud-upload-alt me-1"></i> Import '+ok.length+' Patient(s)';
+    }
+    preview.innerHTML = html;
+}
+
+function startPerPatientImport(){
+    var queue = ppParsedPatients.filter(function(p){ return !p.error && p.record && p.record.Patient_Name && p.record.Civil_ID && /^\d{12}$/.test(p.record.Civil_ID); });
+    if(queue.length === 0){ alert("No valid patients to import."); return; }
+    if(!confirm("Import "+queue.length+" patient record(s) plus their visit history?\n\nDuplicates (same Civil ID) will be skipped.")) return;
+    var btn = document.getElementById('ppStartBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa fa-spinner fa-spin me-1"></i> Importing...';
+    var progress = document.getElementById('ppProgressArea');
+    progress.innerHTML = "<div class='mt-3'><div class='small mb-1'>Importing... <span id='ppCounter'>0</span> / "+queue.length+" patient(s)</div>"+
+        "<div style='background:#eee;border-radius:8px;height:14px;overflow:hidden;'><div id='ppBar' style='width:0%;height:100%;background:linear-gradient(90deg,#8b0000,#c0392b);transition:width 0.3s;'></div></div></div>";
+    var added = 0, skipped = 0, errors = 0, totalVisits = 0;
+    var skippedDetails = [], errorDetails = [];
+    var idx = 0;
+    function updateProgress(){
+        document.getElementById('ppCounter').textContent = idx;
+        document.getElementById('ppBar').style.width = (idx/queue.length*100)+"%";
+    }
+    function processNext(){
+        if(idx >= queue.length){
+            var html = "<div class='mt-3 p-3' style='background:#f0f8f0;border-left:4px solid #28a745;border-radius:6px;'>"+
+                "<h6 class='mb-2 text-success'><i class='fa fa-check-circle me-1'></i>Import Complete</h6>"+
+                "<div class='small'><b>"+added+"</b> patient(s) added with <b>"+totalVisits+"</b> visit(s) &middot; <b>"+skipped+"</b> skipped &middot; <b>"+errors+"</b> error(s)</div>";
+            if(skippedDetails.length){
+                html += "<details class='mt-2'><summary class='small text-warning fw-bold' style='cursor:pointer;'>Skipped duplicates ("+skippedDetails.length+")</summary>"+
+                    "<div style='max-height:120px;overflow-y:auto;font-size:0.75rem;background:#fff;padding:6px;border-radius:4px;margin-top:4px;'>";
+                skippedDetails.forEach(function(s){ html += "<div>"+s+"</div>"; });
+                html += "</div></details>";
+            }
+            if(errorDetails.length){
+                html += "<details class='mt-2'><summary class='small text-danger fw-bold' style='cursor:pointer;'>Errors ("+errorDetails.length+")</summary>"+
+                    "<div style='max-height:120px;overflow-y:auto;font-size:0.75rem;background:#fff;padding:6px;border-radius:4px;margin-top:4px;'>";
+                errorDetails.forEach(function(s){ html += "<div>"+s+"</div>"; });
+                html += "</div></details>";
+            }
+            html += "</div>";
+            document.getElementById('ppResultsArea').innerHTML = html;
+            btn.innerHTML = '<i class="fa fa-check me-1"></i> Done';
+            return;
+        }
+        var p = queue[idx];
+        var record = Object.assign({}, p.record);
+        record.timestamp = new Date().toISOString();
+        record.imported = true;
+        record.importedAt = new Date().toISOString();
+        record.importedFrom = p.fileName;
+        // Duplicate check
+        db.collection("patients").where("Civil_ID","==",record.Civil_ID).limit(1).get().then(function(snap){
+            if(!snap.empty){
+                skipped++;
+                skippedDetails.push(record.Patient_Name+" ("+p.fileName+") &mdash; Civil ID exists");
+                idx++; updateProgress(); processNext();
+                return null;
+            }
+            return db.collection("patients").add(record);
+        }).then(function(docRef){
+            if(!docRef) return;
+            // Add visits in subcollection
+            var patientId = docRef.id;
+            var visitPromises = p.visits.map(function(v){
+                return db.collection("patients").doc(patientId).collection("visits").add(v);
+            });
+            return Promise.all(visitPromises).then(function(){
+                added++;
+                totalVisits += p.visits.length;
+                idx++; updateProgress(); processNext();
+            });
+        }).catch(function(e){
+            errors++;
+            errorDetails.push((p.record.Patient_Name||p.fileName)+": "+e.message);
             idx++; updateProgress(); processNext();
         });
     }
