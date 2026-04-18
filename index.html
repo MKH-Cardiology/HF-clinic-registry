@@ -26,7 +26,6 @@
         body{background:#f4f6f9;font-family:'DM Sans',sans-serif;font-size:0.85rem}
         body.login-active{background:#8b0000!important;}
 
-```
 /* ===== LOGIN SCREEN ===== */
 #pageLogin{display:none;position:fixed;top:0;left:0;right:0;bottom:0;min-height:100vh;width:100%;z-index:9999;background:linear-gradient(160deg,#1a0000 0%,#3d0000 40%,#8b0000 100%);overflow:hidden;}
 #pageLogin::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at center,rgba(139,0,0,0.15) 0%,transparent 60%);animation:pulse-bg 4s ease-in-out infinite;}
@@ -237,7 +236,6 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 /* visit history old style kept for inline rendering */
 .visit-history{border-left:3px solid #17a2b8;padding-left:10px;margin:10px 0}
 </style>
-```
 
 </head>
 <body>
@@ -302,7 +300,7 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
         </div>
     </div>
 
-```
+
 <div class="container mt-3 mb-5" style="padding-bottom:80px;">
     <div class="card p-3 border-top border-4 border-danger shadow">
         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -579,7 +577,7 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
     <button type="button" class="btn btn-danger" id="submitBtn" onclick="savePatient()"><i class="fa fa-save me-1"></i> SAVE PATIENT</button>
     <button type="button" class="btn btn-outline-secondary d-none" id="cancelEditBtn" onclick="resetForm()"><i class="fa fa-times me-1"></i> Cancel</button>
 </div>
-```
+
 
 </div>
 
@@ -598,6 +596,26 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
         </div>
     </div>
     <div class="container mt-3">
+        <!-- ADMIN ACTION TOOLBAR -->
+        <div class="card p-2 mb-3 shadow-sm">
+            <div class="d-flex flex-wrap gap-2 justify-content-center">
+                <button class="btn btn-sm btn-success" onclick="exportAllPatientsExcel()" title="Download every patient + visits as one Excel workbook">
+                    <i class="fa fa-file-excel me-1"></i>Export All (Excel)
+                </button>
+                <button class="btn btn-sm btn-primary" onclick="exportAllPatientsSPSS()" title="Download all patients as SPSS-ready CSV (one row per patient)">
+                    <i class="fa fa-file-csv me-1"></i>Export All (SPSS / CSV)
+                </button>
+                <button class="btn btn-sm btn-warning" onclick="findDuplicates()" title="Find likely duplicate records and merge them">
+                    <i class="fa fa-user-friends me-1"></i>Find &amp; Merge Duplicates
+                </button>
+                <button class="btn btn-sm btn-info text-white" onclick="showRecentActivity()" title="Recent edits across the registry">
+                    <i class="fa fa-history me-1"></i>Recent Activity
+                </button>
+                <button class="btn btn-sm btn-dark" onclick="showDeletedRecords()" title="Tombstones of permanently deleted patients">
+                    <i class="fa fa-trash-restore me-1"></i>Deleted Records
+                </button>
+            </div>
+        </div>
         <div class="card p-3 border-top border-4 border-warning shadow-sm mb-3">
             <h6 class="text-warning fw-bold mb-2"><i class="fa fa-clock"></i> Upcoming Follow-ups (Next 14 Days)</h6>
             <div id="upcomingAppts" style="max-height:150px;overflow-y:auto;"></div>
@@ -900,6 +918,77 @@ auth.onAuthStateChanged(function(user) {
     }
 });
 
+// ===== AUDIT LOG =====
+// Each patient has a subcollection "audit" with entries shaped like:
+//   { ts: ISO, user: email, doctor: selected doctor name, action: create|update|visit_add|delete|import|merge, changes: [{field,from,to}], note: string }
+// We also stamp lastEdit fields on the patient doc for fast display.
+
+function _currentAuditUser(){
+    try { return (auth.currentUser && auth.currentUser.email) || 'unknown'; }
+    catch(e){ return 'unknown'; }
+}
+function _currentDoctorSelection(){
+    var el = document.getElementById('Doctor_Name');
+    return (el && el.value) || '';
+}
+
+// Fields we don't log diffs for (they're bookkeeping, not clinical data)
+var AUDIT_IGNORE_FIELDS = {
+    timestamp:1, lastEditAt:1, lastEditBy:1, lastEditDoctor:1,
+    mergedAt:1, mergedFrom:1, importedAt:1, imported:1, importedFrom:1
+};
+
+function computeFieldDiff(oldData, newData){
+    oldData = oldData || {};
+    newData = newData || {};
+    var changes = [];
+    var allKeys = {};
+    Object.keys(oldData).forEach(function(k){ allKeys[k]=1; });
+    Object.keys(newData).forEach(function(k){ allKeys[k]=1; });
+    Object.keys(allKeys).forEach(function(k){
+        if(AUDIT_IGNORE_FIELDS[k]) return;
+        var a = oldData[k], b = newData[k];
+        var aEmpty = (a === undefined || a === null || a === '');
+        var bEmpty = (b === undefined || b === null || b === '');
+        if(aEmpty && bEmpty) return;
+        // Compare as strings (all form values are strings anyway)
+        if(String(a === undefined ? '' : a) !== String(b === undefined ? '' : b)){
+            changes.push({field:k, from: aEmpty?'':String(a), to: bEmpty?'':String(b)});
+        }
+    });
+    return changes;
+}
+
+function writeAuditEntry(patientId, entry){
+    if(!patientId) return Promise.resolve();
+    var e = Object.assign({
+        ts: new Date().toISOString(),
+        user: _currentAuditUser(),
+        doctor: _currentDoctorSelection()
+    }, entry);
+    return db.collection("patients").doc(patientId).collection("audit").add(e)
+        .catch(function(err){ console.warn('Audit write failed:', err); });
+}
+
+// Wrap an update to include lastEdit stamps. Diff, write audit, then update.
+function updatePatientWithAudit(patientId, newData, oldData, extra){
+    extra = extra || {};
+    var changes = computeFieldDiff(oldData, newData);
+    var stamped = Object.assign({}, newData, {
+        lastEditAt: new Date().toISOString(),
+        lastEditBy: _currentAuditUser(),
+        lastEditDoctor: _currentDoctorSelection() || (newData.Doctor_Name || '')
+    });
+    return db.collection("patients").doc(patientId).update(stamped).then(function(){
+        if(changes.length === 0 && !extra.forceLog) return; // nothing meaningful changed
+        return writeAuditEntry(patientId, {
+            action: extra.action || 'update',
+            changes: changes,
+            note: extra.note || ''
+        });
+    });
+}
+
 function doLogin() {
     var email=document.getElementById('loginEmail').value.trim(),password=document.getElementById('loginPassword').value;
     var btn=document.getElementById('loginBtn'),errDiv=document.getElementById('loginError');
@@ -1059,14 +1148,7 @@ function applyPhenotypeEmphasis(){
     var alertEl=document.getElementById('alertPhenotype');
     var textEl=document.getElementById('alertPhenotypeText');
     document.querySelectorAll('#medSection7 .phenotype-dim').forEach(function(el){el.classList.remove('phenotype-dim');});
-    if(hfType==='HFpEF'){
-        alertEl.classList.add('visible');
-        textEl.innerHTML='<strong>HFpEF selected:</strong> ARNI, BB, MRA, ACEi/ARB are dimmed (limited mortality benefit in HFpEF). SGLT2i remains primary.';
-        ['Med_ARNI','Med_BB','Med_MRA','Med_ACEiARB'].forEach(function(id){
-            var wrap=document.getElementById('medWrap_'+id);
-            if(wrap)wrap.classList.add('phenotype-dim');
-        });
-    }else if(hfType==='HFrEF'){
+    if(hfType==='HFrEF'){
         alertEl.classList.add('visible');
         textEl.innerHTML='<strong>HFrEF selected:</strong> All four GDMT pillars (ARNI/ACEi, BB, MRA, SGLT2i) are Class I indicated.';
     }else if(hfType==='HFmrEF'){
@@ -1172,14 +1254,19 @@ function savePatient(){
     var btn=document.getElementById("submitBtn");
     btn.disabled=true;btn.innerHTML='<i class="fa fa-spinner fa-spin me-1"></i> Saving...';
     if(editingDocId){
-        db.collection("patients").doc(editingDocId).update(data).then(function(){showPopup("success","Updated!","Patient record updated successfully.");resetForm();window.scrollTo({top:0,behavior:"smooth"});}).catch(function(e){showPopup("error","Error",e.message);btn.disabled=false;btn.innerHTML='<i class="fa fa-save me-1"></i> SAVE PATIENT';});
+        var oldData = PC[editingDocId] || {};
+        updatePatientWithAudit(editingDocId, data, oldData, {action:'update'}).then(function(){
+            showPopup("success","Updated!","Patient record updated successfully.");resetForm();window.scrollTo({top:0,behavior:"smooth"});
+        }).catch(function(e){showPopup("error","Error",e.message);btn.disabled=false;btn.innerHTML='<i class="fa fa-save me-1"></i> SAVE PATIENT';});
     }else{
         db.collection("patients").where("Civil_ID","==",civilID).get().then(function(snap){
             if(!snap.empty){
                 var existing=snap.docs[0].data();
                 if(confirm("A patient with this Civil ID already exists:\n"+existing.Patient_Name+" (File: "+existing.File_No+")\n\nDo you want to EDIT the existing record instead?")){
                     editingDocId=snap.docs[0].id;currentPatientId=snap.docs[0].id;
-                    db.collection("patients").doc(editingDocId).update(data).then(function(){showPopup("success","Updated!","Existing patient record updated.");resetForm();}).catch(function(e){showPopup("error","Error",e.message);});
+                    updatePatientWithAudit(editingDocId, data, existing, {action:'update', note:'Edit via duplicate-Civil-ID prompt'}).then(function(){
+                        showPopup("success","Updated!","Existing patient record updated.");resetForm();
+                    }).catch(function(e){showPopup("error","Error",e.message);});
                 }else{btn.disabled=false;btn.innerHTML='<i class="fa fa-save me-1"></i> SAVE PATIENT';}
                 return;
             }
@@ -1190,12 +1277,22 @@ function savePatient(){
                 var existing=snap2.docs[0].data();
                 if(confirm("A patient with File No "+fileNo+" already exists:\n"+existing.Patient_Name+"\n\nDo you want to EDIT the existing record instead?")){
                     editingDocId=snap2.docs[0].id;
-                    db.collection("patients").doc(editingDocId).update(data).then(function(){showPopup("success","Updated!","Existing patient record updated.");resetForm();});
+                    updatePatientWithAudit(editingDocId, data, existing, {action:'update', note:'Edit via duplicate-File-No prompt'}).then(function(){
+                        showPopup("success","Updated!","Existing patient record updated.");resetForm();
+                    });
                 }else{btn.disabled=false;btn.innerHTML='<i class="fa fa-save me-1"></i> SAVE PATIENT';}
                 return;
             }
             data.timestamp=new Date().toISOString();
-            db.collection("patients").add(data).then(function(){showPopup("success","Saved!","New patient added successfully.");resetForm();window.scrollTo({top:0,behavior:"smooth"});}).catch(function(e){showPopup("error","Error",e.message);btn.disabled=false;btn.innerHTML='<i class="fa fa-save me-1"></i> SAVE PATIENT';});
+            data.createdBy = _currentAuditUser();
+            data.createdDoctor = data.Doctor_Name || '';
+            data.lastEditAt = data.timestamp;
+            data.lastEditBy = data.createdBy;
+            data.lastEditDoctor = data.createdDoctor;
+            db.collection("patients").add(data).then(function(ref){
+                writeAuditEntry(ref.id, {action:'create', changes:[], note:'Patient created'});
+                showPopup("success","Saved!","New patient added successfully.");resetForm();window.scrollTo({top:0,behavior:"smooth"});
+            }).catch(function(e){showPopup("error","Error",e.message);btn.disabled=false;btn.innerHTML='<i class="fa fa-save me-1"></i> SAVE PATIENT';});
         }).catch(function(e){showPopup("error","Error",e.message);btn.disabled=false;btn.innerHTML='<i class="fa fa-save me-1"></i> SAVE PATIENT';});
     }
 }
@@ -1206,8 +1303,11 @@ function saveVisit(){
     if(!visitDate){showPopup("error","Error","Please enter visit date.");return;}
     document.querySelectorAll('[id^="V_"]').forEach(function(el){if(el.id)visitData[el.id]=el.value;});
     visitData.visitDate=visitDate;visitData.visitType=document.getElementById("Visit_Type").value;visitData.timestamp=new Date().toISOString();
+    visitData.addedBy = _currentAuditUser();
+    visitData.addedDoctor = _currentDoctorSelection();
     db.collection("patients").doc(patientId).collection("visits").add(visitData).then(function(){
-        if(nextAppt)db.collection("patients").doc(patientId).update({Next_Appt:nextAppt});
+        if(nextAppt)db.collection("patients").doc(patientId).update({Next_Appt:nextAppt,lastEditAt:new Date().toISOString(),lastEditBy:_currentAuditUser(),lastEditDoctor:_currentDoctorSelection()});
+        writeAuditEntry(patientId, {action:'visit_add', changes:[], note:'Visit added on '+visitDate+' ('+visitData.visitType+')'});
         showPopup("success","Visit Added!","Follow-up visit saved successfully.");
         clearVisitForm();loadVisits(patientId);
     }).catch(function(e){showPopup("error","Error",e.message);});
@@ -1313,15 +1413,40 @@ function resetForm(){
 function generateCardHTML(data,id){
     var allFields=[['Patient_Name','Civil_ID','File_No','Age','Gender','Nationality','Mobile','Doctor_Name'],['HF_Type','EF_Diagnosis','Advanced_HF','Other_Cardio','Valvular_Disease','Admissions','Last_Admission','LOS'],['Height','Weight','BMI','Dry_Weight','NYHA','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur'],['ECG','ECHO','CMR_CT','Walk_Test','Device_Info','Cath'],['DM','HTN','AF','IHD','PCI_CABG','CKD','CVA','PVD','Smoker','Obese_OSA','Lung_Dz','Liver_Dz','FH_Genetics'],['Lab_HbA1c','Lab_Gluc','Lab_UreaCreat','Lab_eGFR','Lab_NaK','Lab_BNP','Lab_IronFerritin','Lab_TrSats','Lab_CBC','Lab_Thyroid','Lab_Lipids','Lab_AlbCreat'],['Med_ARNI','Med_ARNI_Dose','Med_SGLT2i','Med_SGLT2i_Dose','Med_GLP1','Med_BB','Med_BB_Dose','Med_MRA','Med_MRA_Dose','Med_ACEiARB','Med_ACEiARB_Dose','Med_Vasodilator','Med_Procorolan','Med_Procorolan_Dose','Med_CCB','Med_CCB_Dose','Med_Diuretic','Med_Lipid','Med_Antiplat','Med_OAC','Med_Arrhythmia','Med_K_Chelator'],['Quad_GDMT','Compliance','Mortality','Rehab','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt']];
     var sn=['Demographics','HF Diagnosis','Symptoms & Signs','Investigations','Comorbidities','Baseline Labs','Medications','Outcomes & Management'];
+    // Helper: a field is "empty" if null/undefined/empty-string, "None", "No", "-", or just whitespace
+    function isEmptyField(val){
+        if(val === null || val === undefined) return true;
+        var s = String(val).trim();
+        if(s === '' || s === '-') return true;
+        if(s.toLowerCase() === 'none') return true;
+        return false;
+    }
     var html="<div class='card p-3 border-primary shadow-sm patient-card' id='pdf-"+id+"'><h4 class='text-primary mb-3'>"+(data.Patient_Name||'Unknown')+"</h4><div class='row'>";
-    allFields.forEach(function(s,idx){html+="<div class='col-12 mb-3'><h6 class='text-secondary border-bottom pb-1'>"+sn[idx]+"</h6><table class='table table-sm table-bordered'>";
-    s.forEach(function(f){var val=data[f],dv=(val&&val!=='')?val:'<span class="empty-field">-</span>',l=f.replace(/_/g," ").replace(/Lab /g,"").replace(/Med /g,"");
-    html+="<tr><th>"+l+"</th><td>"+dv+"</td></tr>";});html+="</table></div>";});
+    var totalFilled = 0;
+    allFields.forEach(function(s,idx){
+        // Build rows for fields that actually have data
+        var rows = '';
+        var filledInSection = 0;
+        s.forEach(function(f){
+            var val = data[f];
+            if(isEmptyField(val)) return;
+            filledInSection++;
+            var l = f.replace(/_/g," ").replace(/Lab /g,"").replace(/Med /g,"");
+            rows += "<tr><th>"+l+"</th><td>"+val+"</td></tr>";
+        });
+        if(filledInSection === 0) return; // Skip entire section if nothing to show
+        totalFilled += filledInSection;
+        html += "<div class='col-12 mb-3'><h6 class='text-secondary border-bottom pb-1'>"+sn[idx]+" <small class='text-muted fw-normal'>("+filledInSection+" field"+(filledInSection>1?'s':'')+")</small></h6><table class='table table-sm table-bordered mb-0'>"+rows+"</table></div>";
+    });
+    if(totalFilled === 0){
+        html += "<div class='col-12'><div class='alert alert-light border text-center text-muted mb-0'>This record has no data entered yet.</div></div>";
+    }
     html+="</div><div class='d-flex flex-wrap gap-2 mt-2'>";
-    html+="<button class='btn btn-sm btn-primary' onclick='editPt(\""+id+"\")'>Edit</button>";
-    html+="<button class='btn btn-sm btn-info text-white' onclick='showTrends(\""+id+"\")'><i class='fa fa-chart-line'></i> Trends</button>";
-    html+="<button class='btn btn-sm btn-danger' onclick='pdfFromAdmin(\""+id+"\")'>PDF</button>";
-    html+="<button class='btn btn-sm btn-success' onclick='exportPatientExcel(\""+id+"\")'>Excel</button>";
+    html+="<button class='btn btn-sm btn-primary' onclick='editPt(\""+id+"\")'><i class='fa fa-edit me-1'></i>Edit</button>";
+    html+="<button class='btn btn-sm btn-info text-white' onclick='showTrends(\""+id+"\")'><i class='fa fa-chart-line me-1'></i>Trends</button>";
+    html+="<button class='btn btn-sm btn-secondary text-white' onclick='showPatientHistory(\""+id+"\",\""+(data.Patient_Name||'').replace(/\"/g,'')+"\")'><i class='fa fa-history me-1'></i>History</button>";
+    html+="<button class='btn btn-sm btn-danger' onclick='pdfFromAdmin(\""+id+"\")'><i class='fa fa-file-pdf me-1'></i>PDF</button>";
+    html+="<button class='btn btn-sm btn-success' onclick='exportPatientExcel(\""+id+"\")'><i class='fa fa-file-excel me-1'></i>Excel</button>";
     html+="</div></div>";return html;
 }
 
@@ -1386,7 +1511,40 @@ function editPt(id){
 }
 
 function editFromAdmin(id){editPt(id);goToMain();}
-function delPt(id){if(confirm("Permanently delete this patient record?")){db.collection("patients").doc(id).delete().then(function(){loadAdmin();});}}
+function delPt(id){
+    if(!confirm("Permanently delete this patient record?\n\nA tombstone audit entry will be kept for compliance.")) return;
+    var snapshot = PC[id] ? Object.assign({}, PC[id]) : {};
+    // Save tombstone first so we have a record even if deletion fails or succeeds
+    var tombstone = {
+        patientId: id,
+        Patient_Name: snapshot.Patient_Name || '',
+        Civil_ID: snapshot.Civil_ID || '',
+        File_No: snapshot.File_No || '',
+        Doctor_Name: snapshot.Doctor_Name || '',
+        deletedAt: new Date().toISOString(),
+        deletedBy: _currentAuditUser(),
+        deletedByDoctor: _currentDoctorSelection(),
+        snapshot: snapshot
+    };
+    db.collection("deletedPatients").add(tombstone).catch(function(err){ console.warn('Tombstone write failed:',err); });
+    // Delete visits and audit subcollections first, then the doc
+    Promise.all([
+        db.collection("patients").doc(id).collection("visits").get(),
+        db.collection("patients").doc(id).collection("audit").get()
+    ]).then(function(results){
+        var dels = [];
+        results[0].forEach(function(v){ dels.push(v.ref.delete()); });
+        results[1].forEach(function(a){ dels.push(a.ref.delete()); });
+        return Promise.all(dels);
+    }).then(function(){
+        return db.collection("patients").doc(id).delete();
+    }).then(function(){
+        showPopup("success","Deleted","Patient record removed. Tombstone recorded in audit log.");
+        loadAdmin();
+    }).catch(function(e){
+        showPopup("error","Error",e.message);
+    });
+}
 
 function loadAdmin(){
     var tb=document.getElementById("adminTableBody");
@@ -1400,7 +1558,7 @@ function loadAdmin(){
             if(d.Next_Appt&&d.Next_Appt>=today){var da=Math.floor((new Date(d.Next_Appt)-new Date(today))/(1000*60*60*24));
             if(da<=14){var color=da<=3?"danger":(da<=7?"warning":"info");
             upcomingHTML+="<div class='alert alert-"+color+" py-1 px-2 mb-1 d-flex justify-content-between' style='font-size:0.85rem;'><span><b>"+(d.Patient_Name||'Unknown')+"</b> ("+(d.File_No||'')+")</span><span><i class='fa fa-calendar'></i> "+d.Next_Appt+" (in "+da+" days)</span></div>";}}
-            tb.innerHTML+="<tr><td>"+(d.File_No||'')+"</td><td>"+(d.Patient_Name||'')+"</td><td>"+(d.Doctor_Name||'')+"</td><td><button class='btn btn-sm btn-primary me-1' onclick='editFromAdmin(\""+id+"\")'>Edit</button><button class='btn btn-sm btn-info text-white me-1' onclick='pdfFromAdmin(\""+id+"\")'>PDF</button><button class='btn btn-sm btn-success me-1' onclick='exportPatientExcel(\""+id+"\")'>Excel</button><button class='btn btn-sm btn-danger' onclick='delPt(\""+id+"\")'>Del</button></td></tr>";
+            tb.innerHTML+="<tr><td>"+(d.File_No||'')+"</td><td>"+(d.Patient_Name||'')+(d.lastEditBy?"<br><small class='text-muted' style='font-size:0.7rem;'>last edit: "+(d.lastEditBy||'').split('@')[0]+" &middot; "+(d.lastEditAt?new Date(d.lastEditAt).toLocaleDateString():'')+"</small>":"")+"</td><td>"+(d.Doctor_Name||'')+"</td><td><button class='btn btn-sm btn-primary me-1' onclick='editFromAdmin(\""+id+"\")' title='Edit'><i class='fa fa-edit'></i></button><button class='btn btn-sm btn-info text-white me-1' onclick='showPatientHistory(\""+id+"\",\""+(d.Patient_Name||'').replace(/\"/g,'')+"\")' title='History'><i class='fa fa-history'></i></button><button class='btn btn-sm btn-secondary me-1' onclick='pdfFromAdmin(\""+id+"\")' title='PDF'><i class='fa fa-file-pdf'></i></button><button class='btn btn-sm btn-success me-1' onclick='exportPatientExcel(\""+id+"\")' title='Excel'><i class='fa fa-file-excel'></i></button><button class='btn btn-sm btn-danger' onclick='delPt(\""+id+"\")' title='Delete'><i class='fa fa-trash'></i></button></td></tr>";
         });
         document.getElementById("upcomingAppts").innerHTML=upcomingHTML||"<p class='text-muted small mb-0'>No appointments in the next 14 days.</p>";
     }).catch(function(){tb.innerHTML="<tr><td colspan='4' class='text-danger'>Error loading data</td></tr>";});
@@ -1476,13 +1634,807 @@ function exportClinicDayPDF(){var today=new Date().toISOString().split('T')[0];v
 
 function exportAnalyticsPDF(){var container=document.getElementById('pdfContainer');container.innerHTML='';container.classList.add('active');var d=allPatientsData,n=d.length;var html="<div id='pdfContent' style='width:750px;margin:0 auto;background:#fff;padding:20px;font-family:Arial,Helvetica,sans-serif;color:#000;'>";html+="<div style='text-align:center;border-bottom:3px solid #8b0000;padding-bottom:10px;margin-bottom:20px;'><h2 style='color:#8b0000;margin:0;'>Mubarak Al-Kabeer Hospital</h2><h3 style='margin:5px 0;color:#333;'>HF Clinic Registry — Analytics Report</h3><p style='margin:0;font-size:11px;color:#666;'>Generated: "+new Date().toLocaleString()+" · Total: "+n+" patients</p></div>";function section(t){return"<h4 style='background:#f0f0f0;padding:8px 12px;margin:18px 0 10px;color:#8b0000;border-left:4px solid #8b0000;'>"+t+"</h4>";}function row(l,v){return"<tr style='border-bottom:1px solid #eee;'><td style='padding:5px 10px;background:#fafafa;font-weight:bold;width:45%;font-size:12px;'>"+l+"</td><td style='padding:5px 10px;font-size:12px;'>"+v+"</td></tr>";}function tbl(r){return"<table style='width:100%;border-collapse:collapse;'>"+r+"</table>";}var hfTypes={HFrEF:0,HFmrEF:0,HFpEF:0};d.forEach(function(p){if(hfTypes[p.HF_Type]!==undefined)hfTypes[p.HF_Type]++;});var nyha={I:0,II:0,III:0,IV:0};d.forEach(function(p){if(nyha[p.NYHA]!==undefined)nyha[p.NYHA]++;});var quad=d.filter(function(p){return p.Quad_GDMT==='Yes';}).length;var male=d.filter(function(p){return p.Gender==='Male';}).length;var avgEF=0,efC=0;d.forEach(function(p){var e=parseFloat(p.EF_Diagnosis);if(!isNaN(e)&&e>0){avgEF+=e;efC++;}});var alive=d.filter(function(p){return p.Mortality==='Alive'||!p.Mortality;}).length;var inh=d.filter(function(p){return p.Mortality==='In-hospital';}).length;var outh=d.filter(function(p){return p.Mortality==='Out-of-hospital';}).length;var low=d.filter(function(p){return parseInt(p.MAGGIC_Score||0)<=15;}).length;var mid=d.filter(function(p){var s=parseInt(p.MAGGIC_Score||0);return s>15&&s<=25;}).length;var high=d.filter(function(p){return parseInt(p.MAGGIC_Score||0)>25;}).length;html+=section("1. Registry Summary");html+=tbl(row("Total Patients",n)+row("Male / Female",male+" / "+(n-male))+row("Mean EF",efC>0?Math.round(avgEF/efC)+"%":"—"));html+=section("2. HF Type Distribution");html+=tbl(row("HFrEF",hfTypes.HFrEF+" ("+pctStr(hfTypes.HFrEF,n)+")")+row("HFmrEF",hfTypes.HFmrEF+" ("+pctStr(hfTypes.HFmrEF,n)+")")+row("HFpEF",hfTypes.HFpEF+" ("+pctStr(hfTypes.HFpEF,n)+")"));html+=section("3. NYHA Class Distribution");html+=tbl(row("NYHA I",nyha.I+" ("+pctStr(nyha.I,n)+")")+row("NYHA II",nyha.II+" ("+pctStr(nyha.II,n)+")")+row("NYHA III",nyha.III+" ("+pctStr(nyha.III,n)+")")+row("NYHA IV",nyha.IV+" ("+pctStr(nyha.IV,n)+")"));html+=section("4. GDMT Compliance");html+=tbl(row("Quadruple GDMT",quad+" ("+pctStr(quad,n)+")")+row("ARNI",d.filter(function(p){return p.Med_ARNI==='Yes';}).length+" ("+pctStr(d.filter(function(p){return p.Med_ARNI==='Yes';}).length,n)+")")+row("SGLT2i",d.filter(function(p){return p.Med_SGLT2i&&p.Med_SGLT2i!=='None';}).length+" ("+pctStr(d.filter(function(p){return p.Med_SGLT2i&&p.Med_SGLT2i!=='None';}).length,n)+")")+row("BB",d.filter(function(p){return p.Med_BB&&p.Med_BB!=='None';}).length+" ("+pctStr(d.filter(function(p){return p.Med_BB&&p.Med_BB!=='None';}).length,n)+")")+row("MRA",d.filter(function(p){return p.Med_MRA&&p.Med_MRA!=='None';}).length+" ("+pctStr(d.filter(function(p){return p.Med_MRA&&p.Med_MRA!=='None';}).length,n)+")"));html+=section("5. MAGGIC Risk Stratification");html+=tbl(row("Low Risk (≤15 pts)",low+" ("+pctStr(low,n)+")")+row("Intermediate (16-25 pts)",mid+" ("+pctStr(mid,n)+")")+row("High Risk (>25 pts)",high+" ("+pctStr(high,n)+")"));html+=section("6. Outcomes");html+=tbl(row("Alive",alive+" ("+pctStr(alive,n)+")")+row("In-hospital Mortality",inh+" ("+pctStr(inh,n)+")")+row("Out-of-hospital Mortality",outh+" ("+pctStr(outh,n)+")"));html+=section("7. High-Risk Patients (MAGGIC > 25)");var hrPts=d.filter(function(p){return parseInt(p.MAGGIC_Score||0)>25;}).sort(function(a,b){return(parseInt(b.MAGGIC_Score)||0)-(parseInt(a.MAGGIC_Score)||0);});if(hrPts.length>0){html+="<table style='width:100%;border-collapse:collapse;font-size:11px;'><thead><tr style='background:#8b0000;color:#fff;'><th style='padding:6px;'>Name</th><th style='padding:6px;'>File</th><th style='padding:6px;'>MAGGIC</th><th style='padding:6px;'>HF</th><th style='padding:6px;'>NYHA</th></tr></thead><tbody>";hrPts.forEach(function(p){html+="<tr style='border-bottom:1px solid #eee;'><td style='padding:5px;'>"+(p.Patient_Name||'?')+"</td><td style='padding:5px;'>"+(p.File_No||'?')+"</td><td style='padding:5px;font-weight:bold;color:#8b0000;'>"+(p.MAGGIC_Score||'?')+"</td><td style='padding:5px;'>"+(p.HF_Type||'?')+"</td><td style='padding:5px;'>"+(p.NYHA||'?')+"</td></tr>";});html+="</tbody></table>";}else html+="<p style='color:#666;'>None.</p>";html+="</div>";container.innerHTML=html;setTimeout(function(){html2pdf().from(document.getElementById('pdfContent')).set({margin:[0.4,0.4,0.4,0.4],filename:"HF_Analytics_"+new Date().toISOString().split('T')[0]+".pdf",html2canvas:{scale:2,useCORS:true,scrollY:0,scrollX:0,windowWidth:800},jsPDF:{unit:'in',format:'letter',orientation:'portrait'},pagebreak:{mode:['css','legacy']}}).save().then(function(){container.innerHTML='';container.classList.remove('active');}).catch(function(){container.innerHTML='';container.classList.remove('active');});},500);}
 
+/* ===== ADMIN: EXPORT ALL + MERGE DUPLICATES ===== */
+
+// Shared list of all fields for full exports
+var ALL_PATIENT_FIELDS = [
+    'Patient_Name','Civil_ID','File_No','Age','Gender','Nationality','Mobile','Doctor_Name',
+    'HF_Type','EF_Diagnosis','Advanced_HF','Other_Cardio','Valvular_Disease','Admissions','Last_Admission','LOS',
+    'Height','Weight','BMI','Dry_Weight','NYHA','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur',
+    'ECG','ECHO','CMR_CT','Walk_Test','Device_Info','Cath',
+    'DM','HTN','AF','IHD','PCI_CABG','CKD','CVA','PVD','Smoker','Obese_OSA','Lung_Dz','Liver_Dz','FH_Genetics',
+    'Lab_HbA1c','Lab_Gluc','Lab_UreaCreat','Lab_eGFR','Lab_NaK','Lab_BNP','Lab_IronFerritin','Lab_TrSats','Lab_CBC','Lab_Thyroid','Lab_Lipids','Lab_AlbCreat',
+    'Med_ARNI','Med_ARNI_Dose','Med_SGLT2i','Med_SGLT2i_Dose','Med_GLP1','Med_GLP1_Dose',
+    'Med_BB','Med_BB_Dose','Med_MRA','Med_MRA_Dose','Med_ACEiARB','Med_ACEiARB_Dose',
+    'Med_Vasodilator','Med_Vasodilator_Dose','Med_Procorolan','Med_Procorolan_Dose','Med_CCB','Med_CCB_Dose',
+    'Med_Diuretic','Med_Diuretic_Dose','Med_Lipid','Med_Lipid_Dose','Med_Antiplat','Med_Antiplat_Dose',
+    'Med_OAC','Med_OAC_Dose','Med_Arrhythmia','Med_Arrhythmia_Dose','Med_K_Chelator','Med_K_Chelator_Dose',
+    'Quad_GDMT','Compliance','Mortality','Rehab','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt'
+];
+
+function exportAllPatientsExcel(){
+    showPopup("warning","Preparing Export","Loading all patient records and visits...");
+    db.collection("patients").get().then(function(snap){
+        if(snap.size === 0){
+            document.getElementById("popOv") && document.getElementById("popOv").remove();
+            showPopup("error","No Data","Registry is empty.");
+            return;
+        }
+        var patients = [];
+        snap.forEach(function(d){ patients.push({id:d.id, data:d.data()}); });
+        // Fetch visits for every patient in parallel
+        var visitPromises = patients.map(function(p){
+            return db.collection("patients").doc(p.id).collection("visits").orderBy("visitDate","desc").get()
+                .then(function(vs){ var arr=[]; vs.forEach(function(v){ arr.push(v.data()); }); return arr; })
+                .catch(function(){ return []; });
+        });
+        Promise.all(visitPromises).then(function(allVisits){
+            var wb = XLSX.utils.book_new();
+            // --- Sheet 1: All Patients (one row per patient, all fields) ---
+            var headers = ['_PatientID','_Imported','_VisitCount'].concat(ALL_PATIENT_FIELDS);
+            var rows = [headers];
+            patients.forEach(function(p, i){
+                var row = [p.id, p.data.imported ? 'Yes' : '', allVisits[i].length];
+                ALL_PATIENT_FIELDS.forEach(function(f){ row.push(p.data[f] !== undefined ? p.data[f] : ''); });
+                rows.push(row);
+            });
+            var ws1 = XLSX.utils.aoa_to_sheet(rows);
+            ws1['!cols'] = headers.map(function(h){ return {wch: Math.max(10, Math.min(24, h.length+2))}; });
+            XLSX.utils.book_append_sheet(wb, ws1, "Patients");
+            // --- Sheet 2: All Visits (one row per visit, with patient ID + File No + Name for joining) ---
+            var visitFieldSet = {};
+            allVisits.forEach(function(vs){ vs.forEach(function(v){ Object.keys(v).forEach(function(k){ visitFieldSet[k]=true; }); }); });
+            var visitFields = Object.keys(visitFieldSet).sort(function(a,b){
+                // visitDate first, then V_ fields, then the rest
+                if(a === 'visitDate') return -1; if(b === 'visitDate') return 1;
+                if(a === 'visitType') return -1; if(b === 'visitType') return 1;
+                return a.localeCompare(b);
+            });
+            var vHeaders = ['_PatientID','File_No','Patient_Name'].concat(visitFields);
+            var vRows = [vHeaders];
+            patients.forEach(function(p, i){
+                allVisits[i].forEach(function(v){
+                    var row = [p.id, p.data.File_No||'', p.data.Patient_Name||''];
+                    visitFields.forEach(function(f){ row.push(v[f] !== undefined ? v[f] : ''); });
+                    vRows.push(row);
+                });
+            });
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(vRows), "Visits");
+            // --- Sheet 3: Summary ---
+            var totalVisits = allVisits.reduce(function(a,b){ return a+b.length; }, 0);
+            var summary = [
+                ["HF REGISTRY — FULL EXPORT"],
+                ["Generated", new Date().toLocaleString()],
+                ["Total Patients", patients.length],
+                ["Total Visits", totalVisits],
+                [],
+                ["NOTES"],
+                ["Sheet 'Patients' = one row per patient, all fields."],
+                ["Sheet 'Visits' = one row per follow-up visit; join to Patients via _PatientID or File_No."]
+            ];
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(summary), "Summary");
+            XLSX.writeFile(wb, "HF_Registry_Full_Export_"+new Date().toISOString().split('T')[0]+".xlsx");
+            document.getElementById("popOv") && document.getElementById("popOv").remove();
+            showPopup("success","Exported!",patients.length+" patients and "+totalVisits+" visits downloaded.");
+        });
+    }).catch(function(e){
+        document.getElementById("popOv") && document.getElementById("popOv").remove();
+        showPopup("error","Export Failed",e.message);
+    });
+}
+
+function exportAllPatientsSPSS(){
+    // Produces a clean CSV with:
+    //   - one row per patient
+    //   - numeric fields kept numeric (Age, EF_Diagnosis, MAGGIC_Score, labs)
+    //   - Yes/No -> 1/0 for binary comorbidities & GDMT flags
+    //   - Other categorical fields kept as text (SPSS will read and auto-code on import)
+    // UTF-8 BOM so SPSS handles non-ASCII names correctly
+    showPopup("warning","Preparing Export","Building SPSS-ready CSV...");
+    db.collection("patients").get().then(function(snap){
+        if(snap.size === 0){
+            document.getElementById("popOv") && document.getElementById("popOv").remove();
+            showPopup("error","No Data","Registry is empty.");
+            return;
+        }
+        // Fields to treat as binary 1/0 (Yes/No)
+        var BINARY_FIELDS = {
+            DM:1,HTN:1,AF:1,CKD:1,CVA:1,PVD:1,Obese_OSA:1,Lung_Dz:1,Liver_Dz:1,FH_Genetics:1,
+            Advanced_HF:1,Valvular_Disease:1,
+            Med_ARNI:1,Quad_GDMT:1,Compliance:1,Rehab:1
+        };
+        // Fields to treat as numeric (empty -> blank, else parseFloat)
+        var NUMERIC_FIELDS = {
+            Age:1,EF_Diagnosis:1,Admissions:1,LOS:1,Height:1,Weight:1,BMI:1,Dry_Weight:1,
+            Pulse:1,SpO2:1,MAGGIC_Score:1,HF_Dur:1
+        };
+        // Fields with embedded categoricals — keep as text (Mobile, File_No, Civil_ID stored as text to preserve leading zeros)
+        var TEXT_ID_FIELDS = {Civil_ID:1,File_No:1,Mobile:1};
+
+        function toBin(v){
+            if(v === undefined || v === null || v === '') return '';
+            var s = String(v).trim().toLowerCase();
+            if(s === 'yes' || s === 'y' || s === '1' || s === 'true') return '1';
+            if(s === 'no' || s === 'n' || s === '0' || s === 'false') return '0';
+            return ''; // unknown / blank / freeform
+        }
+        function toNum(v){
+            if(v === undefined || v === null || v === '') return '';
+            var n = parseFloat(String(v).replace(/[^\d.\-]/g,''));
+            return isNaN(n) ? '' : n;
+        }
+        function csvEscape(v){
+            if(v === null || v === undefined) return '';
+            var s = String(v);
+            if(s.indexOf(',')!==-1 || s.indexOf('"')!==-1 || s.indexOf('\n')!==-1){
+                return '"' + s.replace(/"/g,'""') + '"';
+            }
+            return s;
+        }
+
+        var headers = ['_PatientID'].concat(ALL_PATIENT_FIELDS);
+        var lines = [headers.join(',')];
+        snap.forEach(function(doc){
+            var d = doc.data();
+            var row = [doc.id];
+            ALL_PATIENT_FIELDS.forEach(function(f){
+                var v = d[f];
+                if(BINARY_FIELDS[f]) row.push(toBin(v));
+                else if(NUMERIC_FIELDS[f]) row.push(toNum(v));
+                else if(TEXT_ID_FIELDS[f]) row.push(csvEscape(v!==undefined ? "'"+v : ''));  // leading quote forces SPSS/Excel to keep as text
+                else row.push(csvEscape(v!==undefined ? v : ''));
+            });
+            lines.push(row.join(','));
+        });
+        // UTF-8 BOM + CSV
+        var csv = '\uFEFF' + lines.join('\r\n');
+        var blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+        var link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = "HF_Registry_SPSS_"+new Date().toISOString().split('T')[0]+".csv";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        // Also generate a small codebook so the stats team knows what is what
+        var codebook = [
+            ['Variable','Type','Notes'],
+            ['_PatientID','string','Firestore document ID'],
+            ['Patient_Name','string',''],
+            ['Civil_ID','string','Stored with leading quote to preserve leading zeros'],
+            ['File_No','string','Stored with leading quote'],
+            ['Mobile','string','Stored with leading quote'],
+            ['Age','numeric','Years'],
+            ['EF_Diagnosis','numeric','%'],
+            ['HF_Type','categorical','HFrEF / HFmrEF / HFpEF'],
+            ['NYHA','categorical','I / II / III / IV'],
+            ['MAGGIC_Score','numeric','Points'],
+            ['DM, HTN, AF, CKD, CVA, PVD, Obese_OSA, Lung_Dz, Liver_Dz, FH_Genetics','binary','1 = Yes, 0 = No, blank = unknown'],
+            ['Advanced_HF, Valvular_Disease','binary','1 = Yes, 0 = No'],
+            ['Med_ARNI','binary','1 = Yes, 0 = No'],
+            ['Med_SGLT2i, Med_BB, Med_MRA, Med_ACEiARB, Med_Diuretic, Med_OAC, etc.','categorical','Drug name or "None"'],
+            ['*_Dose','string','Free-text dose (parse if needed)'],
+            ['Quad_GDMT, Compliance, Rehab','binary','1 = Yes, 0 = No'],
+            ['Mortality','categorical','Alive / Dead-HF / Dead-Other'],
+            ['Next_Appt, Last_Admission','date','YYYY-MM-DD']
+        ];
+        var cbLines = codebook.map(function(r){ return r.map(csvEscape).join(','); });
+        var cbBlob = new Blob(['\uFEFF'+cbLines.join('\r\n')], {type:'text/csv;charset=utf-8;'});
+        var cbLink = document.createElement('a');
+        cbLink.href = URL.createObjectURL(cbBlob);
+        cbLink.download = "HF_Registry_SPSS_Codebook_"+new Date().toISOString().split('T')[0]+".csv";
+        document.body.appendChild(cbLink); cbLink.click(); document.body.removeChild(cbLink);
+        document.getElementById("popOv") && document.getElementById("popOv").remove();
+        showPopup("success","SPSS Export Ready",snap.size+" patient rows + codebook downloaded. Import CSV into SPSS: File &rarr; Open Data &rarr; select CSV &rarr; UTF-8 encoding.");
+    }).catch(function(e){
+        document.getElementById("popOv") && document.getElementById("popOv").remove();
+        showPopup("error","Export Failed",e.message);
+    });
+}
+
+/* ===== MERGE DUPLICATES ===== */
+function findDuplicates(){
+    showPopup("warning","Scanning...","Looking for likely duplicates across the registry...");
+    db.collection("patients").get().then(function(snap){
+        if(snap.size < 2){
+            document.getElementById("popOv") && document.getElementById("popOv").remove();
+            showPopup("warning","Not Enough Data","Need at least 2 patients to look for duplicates.");
+            return;
+        }
+        var patients = [];
+        snap.forEach(function(d){ patients.push({id:d.id, data:d.data()}); });
+        // Strategies:
+        //  1. Exact Civil_ID match (highest confidence)
+        //  2. Exact File_No match
+        //  3. Normalized name match + similar age (+/- 2 years)
+        function normName(n){ return (n||'').toLowerCase().replace(/\s+/g,' ').replace(/[^a-z ]/g,'').trim(); }
+        var pairs = [];
+        var seenPairs = {};
+        function addPair(a, b, reason, confidence){
+            var key = [a.id, b.id].sort().join('__');
+            if(seenPairs[key]){
+                // upgrade reason if higher confidence
+                if(confidence > seenPairs[key].confidence){
+                    seenPairs[key].reason = reason;
+                    seenPairs[key].confidence = confidence;
+                }
+                return;
+            }
+            seenPairs[key] = {a:a, b:b, reason:reason, confidence:confidence};
+            pairs.push(seenPairs[key]);
+        }
+        for(var i=0; i<patients.length; i++){
+            for(var j=i+1; j<patients.length; j++){
+                var a = patients[i], b = patients[j];
+                var ad = a.data, bd = b.data;
+                // Civil_ID
+                if(ad.Civil_ID && bd.Civil_ID && String(ad.Civil_ID).trim() === String(bd.Civil_ID).trim()){
+                    addPair(a, b, 'Same Civil ID ('+ad.Civil_ID+')', 3);
+                    continue;
+                }
+                // File_No
+                if(ad.File_No && bd.File_No && String(ad.File_No).trim() === String(bd.File_No).trim()){
+                    addPair(a, b, 'Same File No ('+ad.File_No+')', 2);
+                    continue;
+                }
+                // Name + age
+                var an = normName(ad.Patient_Name), bn = normName(bd.Patient_Name);
+                if(an && bn && an === bn){
+                    var aAge = parseInt(ad.Age)||0, bAge = parseInt(bd.Age)||0;
+                    if(aAge && bAge && Math.abs(aAge-bAge) <= 2){
+                        addPair(a, b, 'Same name + similar age ('+aAge+' vs '+bAge+')', 1);
+                    }else if(!aAge || !bAge){
+                        addPair(a, b, 'Same name (age data missing on one record)', 1);
+                    }
+                }
+            }
+        }
+        document.getElementById("popOv") && document.getElementById("popOv").remove();
+        // Sort by confidence desc
+        pairs.sort(function(a,b){ return b.confidence - a.confidence; });
+        renderDuplicateModal(pairs);
+    }).catch(function(e){
+        document.getElementById("popOv") && document.getElementById("popOv").remove();
+        showPopup("error","Scan Failed",e.message);
+    });
+}
+
+function renderDuplicateModal(pairs){
+    var modal = document.getElementById('dupModal');
+    if(modal) modal.remove();
+    modal = document.createElement('div');
+    modal.id = 'dupModal';
+    modal.style.cssText = "position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;";
+    var html = "<div style='background:#fff;border-radius:14px;width:100%;max-width:900px;margin:20px auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);'>"+
+        "<div style='background:linear-gradient(135deg,#ffc107,#e0a800);color:#333;padding:18px 22px;border-radius:14px 14px 0 0;display:flex;justify-content:space-between;align-items:center;'>"+
+            "<div><h5 style='margin:0;font-weight:700;'><i class='fa fa-user-friends me-2'></i>Duplicate Detection</h5>"+
+            "<small>Review likely duplicate records</small></div>"+
+            "<button onclick='document.getElementById(\"dupModal\").remove()' style='background:transparent;border:none;color:#333;font-size:1.5rem;cursor:pointer;line-height:1;'>&times;</button>"+
+        "</div>"+
+        "<div style='padding:22px;'>";
+    if(pairs.length === 0){
+        html += "<div class='alert alert-success'><i class='fa fa-check-circle me-1'></i>No likely duplicates found. Registry looks clean.</div>";
+    }else{
+        html += "<div class='alert alert-info small mb-3'><b>"+pairs.length+" suspected duplicate pair(s)</b> found. Confidence: "+
+            "<span class='badge bg-danger'>High</span> = same Civil ID, "+
+            "<span class='badge bg-warning text-dark'>Medium</span> = same File No, "+
+            "<span class='badge bg-secondary'>Low</span> = same name + similar age.</div>";
+        pairs.forEach(function(pair, idx){
+            var confLabel = pair.confidence===3?'<span class="badge bg-danger">High</span>':
+                            pair.confidence===2?'<span class="badge bg-warning text-dark">Medium</span>':
+                            '<span class="badge bg-secondary">Low</span>';
+            var a = pair.a.data, b = pair.b.data;
+            html += "<div class='card mb-3' style='border-left:4px solid #ffc107;'>"+
+                "<div class='card-body p-3'>"+
+                    "<div class='d-flex justify-content-between align-items-center mb-2'>"+
+                        "<div><b>Pair #"+(idx+1)+"</b> &middot; "+confLabel+" &middot; <span class='text-muted small'>"+pair.reason+"</span></div>"+
+                    "</div>"+
+                    "<table class='table table-sm table-bordered mb-2' style='font-size:0.82rem;'>"+
+                        "<thead class='table-light'><tr><th style='width:30%;'>Field</th><th style='width:35%;'>Record A</th><th style='width:35%;'>Record B</th></tr></thead>"+
+                        "<tbody>"+
+                            dupRow('Name',a.Patient_Name,b.Patient_Name)+
+                            dupRow('Civil ID',a.Civil_ID,b.Civil_ID)+
+                            dupRow('File No',a.File_No,b.File_No)+
+                            dupRow('Age',a.Age,b.Age)+
+                            dupRow('Gender',a.Gender,b.Gender)+
+                            dupRow('Mobile',a.Mobile,b.Mobile)+
+                            dupRow('HF Type',a.HF_Type,b.HF_Type)+
+                            dupRow('NYHA',a.NYHA,b.NYHA)+
+                            dupRow('Doctor',a.Doctor_Name,b.Doctor_Name)+
+                        "</tbody>"+
+                    "</table>"+
+                    "<div class='d-flex gap-2 flex-wrap'>"+
+                        "<button class='btn btn-sm btn-outline-primary' onclick='openMergeView(\""+pair.a.id+"\",\""+pair.b.id+"\")'><i class='fa fa-code-branch me-1'></i>Review &amp; Merge</button>"+
+                        "<button class='btn btn-sm btn-outline-danger' onclick='quickDeleteDup(\""+pair.b.id+"\",\""+pair.a.id+"\")'><i class='fa fa-trash me-1'></i>Delete Record B (keep A)</button>"+
+                        "<button class='btn btn-sm btn-outline-danger' onclick='quickDeleteDup(\""+pair.a.id+"\",\""+pair.b.id+"\")'><i class='fa fa-trash me-1'></i>Delete Record A (keep B)</button>"+
+                        "<button class='btn btn-sm btn-outline-secondary' onclick='this.closest(\".card\").style.display=\"none\"'><i class='fa fa-check me-1'></i>Not a duplicate</button>"+
+                    "</div>"+
+                "</div>"+
+            "</div>";
+        });
+    }
+    html += "<div class='text-end'><button class='btn btn-secondary' onclick='document.getElementById(\"dupModal\").remove()'>Close</button></div>"+
+        "</div></div>";
+    modal.innerHTML = html;
+    document.body.appendChild(modal);
+}
+
+function dupRow(label, va, vb){
+    var av = (va === undefined || va === null || va === '') ? '<span class="text-muted">—</span>' : va;
+    var bv = (vb === undefined || vb === null || vb === '') ? '<span class="text-muted">—</span>' : vb;
+    var match = (String(va||'').trim().toLowerCase() === String(vb||'').trim().toLowerCase()) && va && vb;
+    var style = match ? "background:#d1ecf1;" : "";
+    return "<tr><th>"+label+"</th><td style='"+style+"'>"+av+"</td><td style='"+style+"'>"+bv+"</td></tr>";
+}
+
+function quickDeleteDup(deleteId, keepId){
+    if(!confirm("Delete this record?\n\nThis will permanently remove the patient and all their visits. The other record will be kept.\n\nThis action cannot be undone.")) return;
+    // Delete visits first (Firestore doesn't cascade)
+    db.collection("patients").doc(deleteId).collection("visits").get().then(function(vs){
+        var dels = [];
+        vs.forEach(function(v){ dels.push(v.ref.delete()); });
+        return Promise.all(dels);
+    }).then(function(){
+        return db.collection("patients").doc(deleteId).delete();
+    }).then(function(){
+        showPopup("success","Deleted","Duplicate record removed.");
+        document.getElementById("dupModal") && document.getElementById("dupModal").remove();
+        // Re-scan
+        setTimeout(findDuplicates, 600);
+    }).catch(function(e){
+        showPopup("error","Error",e.message);
+    });
+}
+
+function openMergeView(idA, idB){
+    // Fetch fresh data + visit counts for both
+    document.getElementById("dupModal") && document.getElementById("dupModal").remove();
+    showPopup("warning","Loading","Preparing merge view...");
+    Promise.all([
+        db.collection("patients").doc(idA).get(),
+        db.collection("patients").doc(idB).get(),
+        db.collection("patients").doc(idA).collection("visits").get(),
+        db.collection("patients").doc(idB).collection("visits").get()
+    ]).then(function(results){
+        document.getElementById("popOv") && document.getElementById("popOv").remove();
+        var dataA = results[0].data(), dataB = results[1].data();
+        var visitsA = results[2].size, visitsB = results[3].size;
+        renderMergeView(idA, dataA, visitsA, idB, dataB, visitsB);
+    }).catch(function(e){
+        document.getElementById("popOv") && document.getElementById("popOv").remove();
+        showPopup("error","Error",e.message);
+    });
+}
+
+function renderMergeView(idA, dataA, visitsA, idB, dataB, visitsB){
+    var modal = document.createElement('div');
+    modal.id = 'mergeModal';
+    modal.style.cssText = "position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;";
+    var html = "<div style='background:#fff;border-radius:14px;width:100%;max-width:1000px;margin:20px auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);'>"+
+        "<div style='background:linear-gradient(135deg,#8b0000,#5c0000);color:#fff;padding:18px 22px;border-radius:14px 14px 0 0;display:flex;justify-content:space-between;align-items:center;'>"+
+            "<div><h5 style='margin:0;font-weight:700;'><i class='fa fa-code-branch me-2'></i>Merge Records</h5>"+
+            "<small style='opacity:0.85;'>Pick which value to keep for each field</small></div>"+
+            "<button onclick='document.getElementById(\"mergeModal\").remove()' style='background:transparent;border:none;color:#fff;font-size:1.5rem;cursor:pointer;line-height:1;'>&times;</button>"+
+        "</div>"+
+        "<div style='padding:22px;'>"+
+            "<div class='alert alert-info small mb-3'>"+
+                "<b>How merge works:</b> Both records will become one. Select which value to keep per field using the radio buttons. "+
+                "All visits from both records will be combined into the kept record. The other record will be deleted permanently."+
+            "</div>"+
+            "<div class='row g-2 mb-3'>"+
+                "<div class='col-6'><div class='p-2 rounded' style='background:#e3f2fd;'><b>Record A</b><br><small class='text-muted'>ID: "+idA+"</small><br><span class='badge bg-info'>"+visitsA+" visit(s)</span></div></div>"+
+                "<div class='col-6'><div class='p-2 rounded' style='background:#fff3cd;'><b>Record B</b><br><small class='text-muted'>ID: "+idB+"</small><br><span class='badge bg-warning text-dark'>"+visitsB+" visit(s)</span></div></div>"+
+            "</div>"+
+            "<div class='mb-2'>"+
+                "<button class='btn btn-sm btn-outline-primary me-1' onclick='mergeAutoPick(\"A\")'>Auto-pick: prefer A</button>"+
+                "<button class='btn btn-sm btn-outline-primary me-1' onclick='mergeAutoPick(\"B\")'>Auto-pick: prefer B</button>"+
+                "<button class='btn btn-sm btn-outline-success' onclick='mergeAutoPick(\"NONEMPTY\")'>Auto-pick: prefer non-empty</button>"+
+            "</div>"+
+            "<div style='max-height:55vh;overflow-y:auto;border:1px solid #ddd;border-radius:6px;'>"+
+                "<table class='table table-sm table-bordered mb-0' id='mergeTable' style='font-size:0.8rem;'>"+
+                    "<thead class='table-dark' style='position:sticky;top:0;'><tr><th style='width:22%;'>Field</th><th style='width:32%;'>Record A</th><th style='width:32%;'>Record B</th><th style='width:14%;text-align:center;'>Keep</th></tr></thead>"+
+                    "<tbody>";
+    ALL_PATIENT_FIELDS.forEach(function(f){
+        var va = dataA[f], vb = dataB[f];
+        var empA = (va===undefined||va===null||va==='');
+        var empB = (vb===undefined||vb===null||vb==='');
+        if(empA && empB) return; // skip fields empty in both
+        var same = !empA && !empB && String(va).trim() === String(vb).trim();
+        var rowBg = same ? 'style="background:#d1ecf1;"' : '';
+        var defaultPick = empA ? 'B' : (empB ? 'A' : 'A');
+        var dispA = empA ? '<span class="text-muted">—</span>' : String(va);
+        var dispB = empB ? '<span class="text-muted">—</span>' : String(vb);
+        html += "<tr "+rowBg+" data-field='"+f+"'>"+
+            "<th>"+f.replace(/_/g,' ')+"</th>"+
+            "<td>"+dispA+"</td>"+
+            "<td>"+dispB+"</td>"+
+            "<td style='text-align:center;white-space:nowrap;'>"+
+                "<label style='margin:0 4px;'><input type='radio' name='pk_"+f+"' value='A' "+(defaultPick==='A'?'checked':'')+"> A</label>"+
+                "<label style='margin:0 4px;'><input type='radio' name='pk_"+f+"' value='B' "+(defaultPick==='B'?'checked':'')+"> B</label>"+
+            "</td>"+
+        "</tr>";
+    });
+    html += "</tbody></table></div>"+
+            "<div class='mt-3'>"+
+                "<label class='small'>Which record should receive the merge? <small class='text-muted'>(the other will be deleted)</small></label>"+
+                "<div>"+
+                    "<label class='me-3'><input type='radio' name='mergeTarget' value='A' checked> Keep <b>Record A</b> (delete B)</label>"+
+                    "<label><input type='radio' name='mergeTarget' value='B'> Keep <b>Record B</b> (delete A)</label>"+
+                "</div>"+
+            "</div>"+
+        "</div>"+
+        "<div style='padding:14px 22px;border-top:1px solid #e0e0e0;background:#f9f9f9;border-radius:0 0 14px 14px;text-align:right;'>"+
+            "<button class='btn btn-secondary me-2' onclick='document.getElementById(\"mergeModal\").remove()'>Cancel</button>"+
+            "<button class='btn btn-danger' onclick='performMerge(\""+idA+"\",\""+idB+"\")'><i class='fa fa-code-branch me-1'></i>Execute Merge</button>"+
+        "</div>"+
+        "</div>";
+    modal.innerHTML = html;
+    document.body.appendChild(modal);
+    // Stash data for later
+    window._mergeData = {idA:idA, dataA:dataA, idB:idB, dataB:dataB};
+}
+
+function mergeAutoPick(mode){
+    var d = window._mergeData;
+    if(!d) return;
+    document.querySelectorAll('#mergeTable tr[data-field]').forEach(function(tr){
+        var f = tr.getAttribute('data-field');
+        var va = d.dataA[f], vb = d.dataB[f];
+        var empA = (va===undefined||va===null||va==='');
+        var empB = (vb===undefined||vb===null||vb==='');
+        var pick = 'A';
+        if(mode === 'A') pick = empA && !empB ? 'B' : 'A';
+        else if(mode === 'B') pick = empB && !empA ? 'A' : 'B';
+        else if(mode === 'NONEMPTY') pick = empA && !empB ? 'B' : 'A';
+        var radio = tr.querySelector('input[value="'+pick+'"]');
+        if(radio) radio.checked = true;
+    });
+}
+
+function performMerge(idA, idB){
+    if(!confirm("Execute merge?\n\nThis will combine both records into one and permanently delete the other. Cannot be undone.")) return;
+    var target = (document.querySelector('input[name="mergeTarget"]:checked')||{value:'A'}).value;
+    var keepId = target === 'A' ? idA : idB;
+    var deleteId = target === 'A' ? idB : idA;
+    var d = window._mergeData;
+    // Build merged record
+    var merged = {};
+    document.querySelectorAll('#mergeTable tr[data-field]').forEach(function(tr){
+        var f = tr.getAttribute('data-field');
+        var pick = (tr.querySelector('input:checked')||{value:'A'}).value;
+        var v = pick === 'A' ? d.dataA[f] : d.dataB[f];
+        if(v !== undefined && v !== null && v !== '') merged[f] = v;
+    });
+    merged.mergedAt = new Date().toISOString();
+    merged.mergedFrom = deleteId;
+    // 1. Update kept record with merged data
+    // 2. Copy visits from deleted record to kept record's subcollection
+    // 3. Delete visits under deleted record
+    // 4. Delete deleted record
+    var btn = event && event.target;
+    if(btn){ btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin me-1"></i>Merging...'; }
+    db.collection("patients").doc(keepId).update(merged).then(function(){
+        // Log merge audit entry on the kept record
+        writeAuditEntry(keepId, {
+            action:'merge',
+            changes: computeFieldDiff(target==='A'?d.dataA:d.dataB, merged),
+            note:'Merged in record '+deleteId+' (deleted)'
+        });
+        // Fetch visits from the record being deleted
+        return db.collection("patients").doc(deleteId).collection("visits").get();
+    }).then(function(vs){
+        var copyPromises = [];
+        vs.forEach(function(v){
+            copyPromises.push(db.collection("patients").doc(keepId).collection("visits").add(v.data()));
+        });
+        return Promise.all(copyPromises).then(function(){ return vs; });
+    }).then(function(vs){
+        var delPromises = [];
+        vs.forEach(function(v){ delPromises.push(v.ref.delete()); });
+        return Promise.all(delPromises);
+    }).then(function(){
+        return db.collection("patients").doc(deleteId).delete();
+    }).then(function(){
+        document.getElementById("mergeModal") && document.getElementById("mergeModal").remove();
+        showPopup("success","Merged!","Records combined. Deleted ID: "+deleteId+" &middot; Kept ID: "+keepId);
+        if(typeof loadAdmin === 'function') loadAdmin();
+    }).catch(function(e){
+        showPopup("error","Merge Failed",e.message);
+        if(btn){ btn.disabled = false; btn.innerHTML = '<i class="fa fa-code-branch me-1"></i>Execute Merge'; }
+    });
+}
+
+/* ===== AUDIT LOG UI ===== */
+
+function _formatAuditTimestamp(ts){
+    if(!ts) return '';
+    try {
+        var d = new Date(ts);
+        return d.toLocaleString();
+    } catch(e){ return ts; }
+}
+
+function _formatAuditAction(action){
+    var map = {
+        create:   {label:'Created',     color:'#28a745', icon:'fa-plus-circle'},
+        update:   {label:'Edited',      color:'#007bff', icon:'fa-edit'},
+        visit_add:{label:'Visit Added', color:'#17a2b8', icon:'fa-calendar-plus'},
+        delete:   {label:'Deleted',     color:'#dc3545', icon:'fa-trash'},
+        import:   {label:'Imported',    color:'#6c757d', icon:'fa-file-import'},
+        merge:    {label:'Merged',      color:'#ffc107', icon:'fa-code-branch'}
+    };
+    return map[action] || {label:action||'?', color:'#888', icon:'fa-circle'};
+}
+
+function _renderChangesList(changes){
+    if(!changes || changes.length === 0) return '<span class="text-muted small">No field changes tracked</span>';
+    var html = "<table class='table table-sm table-bordered mb-0' style='font-size:0.75rem;'><thead class='table-light'><tr><th style='width:30%;'>Field</th><th style='width:35%;'>From</th><th style='width:35%;'>To</th></tr></thead><tbody>";
+    changes.forEach(function(c){
+        var fromDisplay = c.from === '' ? "<span class='text-muted fst-italic'>(empty)</span>" : _esc(c.from);
+        var toDisplay   = c.to   === '' ? "<span class='text-muted fst-italic'>(empty)</span>" : _esc(c.to);
+        html += "<tr><th>"+_esc(c.field.replace(/_/g,' '))+"</th><td style='background:#fff5f5;'>"+fromDisplay+"</td><td style='background:#f0fff4;'>"+toDisplay+"</td></tr>";
+    });
+    html += "</tbody></table>";
+    return html;
+}
+
+function _esc(s){
+    if(s === null || s === undefined) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showPatientHistory(patientId, patientName){
+    var existing = document.getElementById('historyModal');
+    if(existing) existing.remove();
+    var modal = document.createElement('div');
+    modal.id = 'historyModal';
+    modal.style.cssText = "position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;";
+    modal.innerHTML = "<div style='background:#fff;border-radius:14px;width:100%;max-width:900px;margin:20px auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);'>"+
+        "<div style='background:linear-gradient(135deg,#6c757d,#343a40);color:#fff;padding:18px 22px;border-radius:14px 14px 0 0;display:flex;justify-content:space-between;align-items:center;'>"+
+            "<div><h5 style='margin:0;font-weight:700;'><i class='fa fa-history me-2'></i>Edit History</h5>"+
+            "<small style='opacity:0.85;'>"+_esc(patientName||'Patient')+"</small></div>"+
+            "<button onclick='document.getElementById(\"historyModal\").remove()' style='background:transparent;border:none;color:#fff;font-size:1.5rem;cursor:pointer;line-height:1;'>&times;</button>"+
+        "</div>"+
+        "<div style='padding:22px;' id='historyBody'>"+
+            "<div class='text-center text-muted'><i class='fa fa-spinner fa-spin me-1'></i>Loading audit trail...</div>"+
+        "</div>"+
+        "<div style='padding:14px 22px;border-top:1px solid #e0e0e0;background:#f9f9f9;border-radius:0 0 14px 14px;text-align:right;'>"+
+            "<button class='btn btn-sm btn-outline-primary me-2' onclick='exportPatientAudit(\""+patientId+"\",\""+_esc(patientName)+"\")'><i class='fa fa-download me-1'></i>Export CSV</button>"+
+            "<button class='btn btn-secondary' onclick='document.getElementById(\"historyModal\").remove()'>Close</button>"+
+        "</div>"+
+        "</div>";
+    document.body.appendChild(modal);
+    db.collection("patients").doc(patientId).collection("audit").orderBy("ts","desc").get().then(function(snap){
+        var body = document.getElementById('historyBody');
+        if(!body) return;
+        if(snap.empty){
+            body.innerHTML = "<div class='alert alert-light border text-center'>No audit entries yet for this patient.<br><small class='text-muted'>Records created before the audit log was enabled will not show a history.</small></div>";
+            return;
+        }
+        var html = "<div class='timeline' style='position:relative;padding-left:28px;border-left:2px solid #e0e0e0;'>";
+        snap.forEach(function(doc){
+            var e = doc.data();
+            var meta = _formatAuditAction(e.action);
+            var who = (e.user||'unknown').split('@')[0];
+            var doctor = e.doctor ? ' ('+_esc(e.doctor)+')' : '';
+            html += "<div style='margin-bottom:20px;position:relative;'>"+
+                "<div style='position:absolute;left:-38px;top:2px;width:22px;height:22px;border-radius:50%;background:"+meta.color+";color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.75rem;border:3px solid #fff;box-shadow:0 0 0 2px "+meta.color+";'><i class='fa "+meta.icon+"'></i></div>"+
+                "<div class='card shadow-sm'>"+
+                    "<div class='card-body p-3'>"+
+                        "<div class='d-flex justify-content-between align-items-start flex-wrap'>"+
+                            "<div><b style='color:"+meta.color+";'>"+meta.label+"</b> by <b>"+_esc(who)+"</b>"+doctor+"</div>"+
+                            "<small class='text-muted'>"+_formatAuditTimestamp(e.ts)+"</small>"+
+                        "</div>"+
+                        (e.note ? "<div class='small text-muted mt-1'>"+_esc(e.note)+"</div>" : "")+
+                        (e.changes && e.changes.length ? "<div class='mt-2'>"+_renderChangesList(e.changes)+"</div>" : "")+
+                    "</div>"+
+                "</div>"+
+            "</div>";
+        });
+        html += "</div>";
+        body.innerHTML = html;
+    }).catch(function(err){
+        var body = document.getElementById('historyBody');
+        if(body) body.innerHTML = "<div class='alert alert-danger'>Error loading audit log: "+_esc(err.message)+"</div>";
+    });
+}
+
+function exportPatientAudit(patientId, patientName){
+    db.collection("patients").doc(patientId).collection("audit").orderBy("ts","asc").get().then(function(snap){
+        if(snap.empty){ showPopup("warning","Nothing to Export","No audit entries for this patient."); return; }
+        function csvEscape(v){
+            if(v===null||v===undefined) return '';
+            var s = String(v);
+            if(s.indexOf(',')!==-1||s.indexOf('"')!==-1||s.indexOf('\n')!==-1) return '"'+s.replace(/"/g,'""')+'"';
+            return s;
+        }
+        var lines = ['Timestamp,User,Doctor,Action,Field,From,To,Note'];
+        snap.forEach(function(doc){
+            var e = doc.data();
+            var baseCols = [e.ts||'', (e.user||'').split('@')[0], e.doctor||'', e.action||''];
+            if(e.changes && e.changes.length){
+                e.changes.forEach(function(c){
+                    lines.push(baseCols.concat([c.field||'', c.from||'', c.to||'', e.note||'']).map(csvEscape).join(','));
+                });
+            }else{
+                lines.push(baseCols.concat(['','','',e.note||'']).map(csvEscape).join(','));
+            }
+        });
+        var blob = new Blob(['\uFEFF'+lines.join('\r\n')], {type:'text/csv;charset=utf-8;'});
+        var link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = "AuditLog_"+((patientName||'patient').replace(/[^a-zA-Z0-9]/g,'_'))+"_"+new Date().toISOString().split('T')[0]+".csv";
+        document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        showPopup("success","Exported",lines.length-1+" audit entries downloaded.");
+    }).catch(function(e){ showPopup("error","Error",e.message); });
+}
+
+function showRecentActivity(){
+    var existing = document.getElementById('recentModal');
+    if(existing) existing.remove();
+    var modal = document.createElement('div');
+    modal.id = 'recentModal';
+    modal.style.cssText = "position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;";
+    modal.innerHTML = "<div style='background:#fff;border-radius:14px;width:100%;max-width:1000px;margin:20px auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);'>"+
+        "<div style='background:linear-gradient(135deg,#17a2b8,#0f6674);color:#fff;padding:18px 22px;border-radius:14px 14px 0 0;display:flex;justify-content:space-between;align-items:center;'>"+
+            "<div><h5 style='margin:0;font-weight:700;'><i class='fa fa-history me-2'></i>Recent Registry Activity</h5>"+
+            "<small style='opacity:0.85;'>Last 100 edits across all patients</small></div>"+
+            "<button onclick='document.getElementById(\"recentModal\").remove()' style='background:transparent;border:none;color:#fff;font-size:1.5rem;cursor:pointer;line-height:1;'>&times;</button>"+
+        "</div>"+
+        "<div style='padding:22px;' id='recentBody'>"+
+            "<div class='text-center text-muted'><i class='fa fa-spinner fa-spin me-1'></i>Scanning audit logs across registry...</div>"+
+        "</div>"+
+        "</div>";
+    document.body.appendChild(modal);
+    // Use a collectionGroup query to read across all audit subcollections
+    db.collectionGroup("audit").orderBy("ts","desc").limit(100).get().then(function(snap){
+        var body = document.getElementById('recentBody');
+        if(!body) return;
+        if(snap.empty){
+            body.innerHTML = "<div class='alert alert-light border text-center'>No audit entries yet. Activity will appear here as records are created and edited.</div>";
+            return;
+        }
+        var html = "<div style='overflow-x:auto;'><table class='table table-sm table-hover mb-0' style='font-size:0.82rem;'>"+
+            "<thead class='table-dark' style='position:sticky;top:0;'><tr><th>When</th><th>Action</th><th>User</th><th>Doctor</th><th>Patient</th><th>Changes</th></tr></thead><tbody>";
+        // We need patient names — batch fetch them
+        var patientIds = {};
+        snap.forEach(function(doc){
+            var parent = doc.ref.parent.parent;
+            if(parent) patientIds[parent.id] = true;
+        });
+        var ids = Object.keys(patientIds);
+        var nameMap = {};
+        var fetchPromises = ids.map(function(pid){
+            return db.collection("patients").doc(pid).get().then(function(d){
+                if(d.exists){ var dt=d.data(); nameMap[pid] = (dt.Patient_Name||'?')+" (#"+(dt.File_No||'?')+")"; }
+                else nameMap[pid] = '<span class="text-muted fst-italic">deleted</span>';
+            }).catch(function(){ nameMap[pid] = '?'; });
+        });
+        Promise.all(fetchPromises).then(function(){
+            snap.forEach(function(doc){
+                var e = doc.data();
+                var meta = _formatAuditAction(e.action);
+                var pid = doc.ref.parent.parent ? doc.ref.parent.parent.id : '';
+                var patientLabel = nameMap[pid] || '?';
+                var who = (e.user||'?').split('@')[0];
+                var changeSummary = '';
+                if(e.changes && e.changes.length){
+                    changeSummary = e.changes.length+" field"+(e.changes.length>1?'s':'')+" changed";
+                    var sample = e.changes.slice(0,3).map(function(c){ return c.field.replace(/_/g,' '); }).join(', ');
+                    if(sample) changeSummary += " <small class='text-muted'>("+sample+(e.changes.length>3?'...':'')+")</small>";
+                }else if(e.note){
+                    changeSummary = "<small class='text-muted'>"+_esc(e.note)+"</small>";
+                }
+                html += "<tr style='cursor:pointer;' onclick='"+(pid?'showPatientHistory(\"'+pid+'\",\"'+_esc(patientLabel).replace(/\"/g,'')+'\")':'')+"'>"+
+                    "<td><small>"+_formatAuditTimestamp(e.ts)+"</small></td>"+
+                    "<td><span class='badge' style='background:"+meta.color+";'><i class='fa "+meta.icon+" me-1'></i>"+meta.label+"</span></td>"+
+                    "<td>"+_esc(who)+"</td>"+
+                    "<td>"+_esc(e.doctor||'—')+"</td>"+
+                    "<td>"+patientLabel+"</td>"+
+                    "<td>"+changeSummary+"</td>"+
+                "</tr>";
+            });
+            html += "</tbody></table></div>";
+            html += "<div class='small text-muted mt-2'><i class='fa fa-info-circle me-1'></i>Click any row to see the full edit history for that patient.</div>";
+            body.innerHTML = html;
+        });
+    }).catch(function(err){
+        var body = document.getElementById('recentBody');
+        if(body){
+            // If collectionGroup fails (not indexed), show hint
+            if(String(err.message).toLowerCase().indexOf('index') !== -1){
+                body.innerHTML = "<div class='alert alert-warning'>"+
+                    "<b>Index required:</b> Firestore needs a collectionGroup index on 'audit' ordered by 'ts'. "+
+                    "Click the link in the error message in your browser console to create it (one-time setup, ~1 min).<br><br>"+
+                    "<small class='text-muted'>Error: "+_esc(err.message)+"</small></div>";
+            }else{
+                body.innerHTML = "<div class='alert alert-danger'>Error: "+_esc(err.message)+"</div>";
+            }
+        }
+    });
+}
+
+function showDeletedRecords(){
+    var existing = document.getElementById('deletedModal');
+    if(existing) existing.remove();
+    var modal = document.createElement('div');
+    modal.id = 'deletedModal';
+    modal.style.cssText = "position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;";
+    modal.innerHTML = "<div style='background:#fff;border-radius:14px;width:100%;max-width:900px;margin:20px auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);'>"+
+        "<div style='background:linear-gradient(135deg,#343a40,#000);color:#fff;padding:18px 22px;border-radius:14px 14px 0 0;display:flex;justify-content:space-between;align-items:center;'>"+
+            "<div><h5 style='margin:0;font-weight:700;'><i class='fa fa-trash-restore me-2'></i>Deleted Records</h5>"+
+            "<small style='opacity:0.85;'>Tombstones of permanently removed patients</small></div>"+
+            "<button onclick='document.getElementById(\"deletedModal\").remove()' style='background:transparent;border:none;color:#fff;font-size:1.5rem;cursor:pointer;line-height:1;'>&times;</button>"+
+        "</div>"+
+        "<div style='padding:22px;' id='deletedBody'>"+
+            "<div class='text-center text-muted'><i class='fa fa-spinner fa-spin me-1'></i>Loading deleted records...</div>"+
+        "</div>"+
+        "</div>";
+    document.body.appendChild(modal);
+    db.collection("deletedPatients").orderBy("deletedAt","desc").limit(200).get().then(function(snap){
+        var body = document.getElementById('deletedBody');
+        if(!body) return;
+        if(snap.empty){
+            body.innerHTML = "<div class='alert alert-light border text-center'>No records have been deleted yet.</div>";
+            return;
+        }
+        var html = "<div class='alert alert-info small mb-3'><b>"+snap.size+" deleted record(s).</b> These are tombstones kept for audit compliance. You can restore any record by clicking Restore.</div>";
+        html += "<div style='overflow-x:auto;'><table class='table table-sm table-hover mb-0' style='font-size:0.82rem;'>"+
+            "<thead class='table-dark'><tr><th>Deleted At</th><th>Patient</th><th>File No</th><th>Civil ID</th><th>Deleted By</th><th>Action</th></tr></thead><tbody>";
+        snap.forEach(function(doc){
+            var d = doc.data();
+            var who = (d.deletedBy||'?').split('@')[0];
+            html += "<tr>"+
+                "<td><small>"+_formatAuditTimestamp(d.deletedAt)+"</small></td>"+
+                "<td>"+_esc(d.Patient_Name||'?')+"</td>"+
+                "<td>"+_esc(d.File_No||'')+"</td>"+
+                "<td>"+_esc(d.Civil_ID||'')+"</td>"+
+                "<td>"+_esc(who)+(d.deletedByDoctor?" <small class='text-muted'>("+_esc(d.deletedByDoctor)+")</small>":'')+"</td>"+
+                "<td><button class='btn btn-sm btn-outline-success me-1' onclick='restoreDeletedRecord(\""+doc.id+"\")' title='Restore patient record'><i class='fa fa-undo me-1'></i>Restore</button>"+
+                "<button class='btn btn-sm btn-outline-danger' onclick='purgeDeletedRecord(\""+doc.id+"\")' title='Permanently remove tombstone'><i class='fa fa-times'></i></button></td>"+
+            "</tr>";
+        });
+        html += "</tbody></table></div>";
+        body.innerHTML = html;
+    }).catch(function(err){
+        var body = document.getElementById('deletedBody');
+        if(body) body.innerHTML = "<div class='alert alert-danger'>Error: "+_esc(err.message)+"</div>";
+    });
+}
+
+function restoreDeletedRecord(tombstoneId){
+    if(!confirm("Restore this patient record?\n\nIt will be re-added to the active registry with its snapshot data. Visit history is NOT restored (it was deleted with the patient).")) return;
+    db.collection("deletedPatients").doc(tombstoneId).get().then(function(doc){
+        if(!doc.exists) throw new Error('Tombstone not found');
+        var t = doc.data();
+        var record = Object.assign({}, t.snapshot || {});
+        record.restoredAt = new Date().toISOString();
+        record.restoredBy = _currentAuditUser();
+        record.restoredFromTombstone = tombstoneId;
+        return db.collection("patients").add(record).then(function(ref){
+            writeAuditEntry(ref.id, {action:'create', changes:[], note:'Restored from deleted record (tombstone '+tombstoneId+')'});
+            // Remove tombstone
+            return db.collection("deletedPatients").doc(tombstoneId).delete();
+        });
+    }).then(function(){
+        showPopup("success","Restored","Patient record restored to the registry.");
+        document.getElementById("deletedModal") && document.getElementById("deletedModal").remove();
+        loadAdmin();
+    }).catch(function(e){ showPopup("error","Restore Failed",e.message); });
+}
+
+function purgeDeletedRecord(tombstoneId){
+    if(!confirm("Permanently remove this tombstone?\n\nThe deletion record will be erased and cannot be restored. This is irreversible.")) return;
+    db.collection("deletedPatients").doc(tombstoneId).delete().then(function(){
+        showPopup("success","Purged","Tombstone permanently removed.");
+        showDeletedRecords();
+    }).catch(function(e){ showPopup("error","Error",e.message); });
+}
+
 function exportAnalyticsExcel(){var d=allPatientsData,n=d.length;if(n===0){showPopup("error","No Data","No patient data.");return;}var wb=XLSX.utils.book_new();var s1=[["HF CLINIC REGISTRY — ANALYTICS REPORT"],["MKH · Generated: "+new Date().toLocaleString()],["Total Patients:",n],[]];s1.push(["METRIC","COUNT","PERCENTAGE"]);var hfTypes={HFrEF:0,HFmrEF:0,HFpEF:0};d.forEach(function(p){if(hfTypes[p.HF_Type]!==undefined)hfTypes[p.HF_Type]++;});s1.push(["HFrEF",hfTypes.HFrEF,pctStr(hfTypes.HFrEF,n)]);s1.push(["HFmrEF",hfTypes.HFmrEF,pctStr(hfTypes.HFmrEF,n)]);s1.push(["HFpEF",hfTypes.HFpEF,pctStr(hfTypes.HFpEF,n)]);s1.push([]);s1.push(["Quadruple GDMT",d.filter(function(p){return p.Quad_GDMT==='Yes';}).length,pctStr(d.filter(function(p){return p.Quad_GDMT==='Yes';}).length,n)]);XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(s1),"Summary");var headers=["File No","Name","Age","Gender","Nationality","HF Type","EF (%)","NYHA","MAGGIC Score","MAGGIC Risk","Quad GDMT","Compliance","Mortality","DM","HTN","AF","IHD","CKD","ARNI","ARNI Dose","SGLT2i","SGLT2i Dose","BB","BB Dose","MRA","MRA Dose","ACEi/ARB","Procorolan","CCB","Rehab","Next Appt","Doctor"];var rows=[headers];d.forEach(function(p){rows.push([p.File_No||'',p.Patient_Name||'',p.Age||'',p.Gender||'',p.Nationality||'',p.HF_Type||'',p.EF_Diagnosis||'',p.NYHA||'',p.MAGGIC_Score||'',p.MAGGIC_Risk||'',p.Quad_GDMT||'',p.Compliance||'',p.Mortality||'',p.DM||'',p.HTN||'',p.AF||'',p.IHD||'',p.CKD||'',p.Med_ARNI||'',p.Med_ARNI_Dose||'',p.Med_SGLT2i||'',p.Med_SGLT2i_Dose||'',p.Med_BB||'',p.Med_BB_Dose||'',p.Med_MRA||'',p.Med_MRA_Dose||'',p.Med_ACEiARB||'',p.Med_Procorolan||'',p.Med_CCB||'',p.Rehab||'',p.Next_Appt||'',p.Doctor_Name||'']);});XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),"All Patients");var hrPts=d.filter(function(p){return parseInt(p.MAGGIC_Score||0)>25;}).sort(function(a,b){return(parseInt(b.MAGGIC_Score)||0)-(parseInt(a.MAGGIC_Score)||0);});var hrRows=[["HIGH-RISK PATIENTS (MAGGIC > 25)"],["File","Name","Age","MAGGIC","Est. Mortality","HF Type","NYHA","EF%","Doctor"]];hrPts.forEach(function(p){hrRows.push([p.File_No||'',p.Patient_Name||'',p.Age||'',p.MAGGIC_Score||'',p.MAGGIC_Risk||'',p.HF_Type||'',p.NYHA||'',p.EF_Diagnosis||'',p.Doctor_Name||'']);});XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(hrRows),"High Risk");var gapRows=[["GDMT GAP ANALYSIS (HFrEF)"],["File","Name","ARNI","SGLT2i","BB","MRA","Gaps"]];d.filter(function(p){return p.HF_Type==='HFrEF';}).forEach(function(p){var arni=p.Med_ARNI==='Yes',sglt=p.Med_SGLT2i&&p.Med_SGLT2i!=='None',bb=p.Med_BB&&p.Med_BB!=='None',mra=p.Med_MRA&&p.Med_MRA!=='None';var gaps=4-[arni,sglt,bb,mra].filter(Boolean).length;if(gaps>0)gapRows.push([p.File_No||'',p.Patient_Name||'',arni?'Yes':'NO',sglt?'Yes':'NO',bb?'Yes':'NO',mra?'Yes':'NO',gaps]);});XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(gapRows),"GDMT Gaps");XLSX.writeFile(wb,"HF_Analytics_MKH_"+new Date().toISOString().split('T')[0]+".xlsx");showPopup("success","Excel Exported!","Analytics workbook downloaded (4 sheets).");}
 
 
 /* ===== BULK IMPORT FROM EXCEL / CSV ===== */
 function openImportModal(){
-    var pin = prompt("Admin PIN required for bulk import:");
-    if(pin !== "1234"){ if(pin !== null) alert("Wrong PIN"); return; }
     var existing = document.getElementById("importModal");
     if(existing) existing.remove();
     var modal = document.createElement("div");
@@ -1825,7 +2777,8 @@ function startImport(){
                 idx++; updateProgress(); processNext();
                 return;
             }
-            db.collection("patients").add(record).then(function(){
+            db.collection("patients").add(record).then(function(ref){
+                writeAuditEntry(ref.id, {action:'import', changes:[], note:'Imported via bulk table (row '+(idx+2)+')'});
                 added++;
                 idx++; updateProgress(); processNext();
             }).catch(function(e){
@@ -2073,7 +3026,19 @@ function parsePerPatientWorkbook(wb, fileName){
         if(mapped === 'Civil_ID'){ result.record.Civil_ID = cleanCivilID(v); return; }
         if(mapped === 'File_No'){ result.record.File_No = cleanFileNo(v); return; }
         if(mapped === 'Gender'){ result.record.Gender = normalizeGender(v); return; }
-        if(mapped === 'Mobile'){ result.record.Mobile = String(v).replace(/[^\d+]/g,''); return; }
+        if(mapped === 'Mobile'){
+            var mobRaw = String(v).replace(/[^\d+]/g,'');
+            // Kuwaiti mobiles are 8 digits; if Excel stored as number it drops leading zero.
+            // Pad to 8 digits if it's 7 digits starting without a leading zero.
+            if(/^\d{7}$/.test(mobRaw)){
+                result.warnings.push('Mobile "'+mobRaw+'" was 7 digits &mdash; prefixed with 0 to restore 8-digit format (please verify)');
+                mobRaw = '0' + mobRaw;
+            }else if(/^\d{1,6}$/.test(mobRaw) && mobRaw.length > 0){
+                result.warnings.push('Mobile "'+mobRaw+'" looks incomplete (only '+mobRaw.length+' digits) &mdash; please verify after import');
+            }
+            result.record.Mobile = mobRaw;
+            return;
+        }
         if(mapped === 'Age'){
             var n = parseFloat(v);
             if(!isNaN(n)) result.record.Age = String(Math.round(n));
@@ -2354,6 +3319,7 @@ function startPerPatientImport(){
             if(!docRef) return;
             // Add visits in subcollection
             var patientId = docRef.id;
+            writeAuditEntry(patientId, {action:'import', changes:[], note:'Imported from file: '+p.fileName+' ('+p.visits.length+' visit(s))'});
             var visitPromises = p.visits.map(function(v){
                 return db.collection("patients").doc(patientId).collection("visits").add(v);
             });
