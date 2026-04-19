@@ -28,27 +28,27 @@
 
 /* ===== LOGIN SCREEN ===== */
 #pageLogin{display:none;position:fixed;top:0;left:0;right:0;bottom:0;min-height:100vh;width:100%;z-index:9999;background:linear-gradient(160deg,#1a0000 0%,#3d0000 40%,#8b0000 100%);overflow:hidden;}
-#pageLogin::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at center,rgba(139,0,0,0.15) 0%,transparent 60%);animation:pulse-bg 4s ease-in-out infinite;}
+#pageLogin::before{content:’’;position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at center,rgba(139,0,0,0.15) 0%,transparent 60%);animation:pulse-bg 4s ease-in-out infinite;}
 @keyframes pulse-bg{0%,100%{transform:scale(1);opacity:0.5}50%{transform:scale(1.1);opacity:1}}
 .login-container{position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:30px 20px;}
 .login-logo{text-align:center;margin-bottom:40px;animation:fadeDown 0.8s ease forwards;}
 @keyframes fadeDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
 .login-logo .heart-icon{font-size:3rem;color:#ff6b6b;filter:drop-shadow(0 0 20px rgba(255,107,107,0.5));animation:heartbeat 1.5s ease-in-out infinite;}
 @keyframes heartbeat{0%,100%{transform:scale(1)}15%{transform:scale(1.15)}30%{transform:scale(1)}45%{transform:scale(1.08)}}
-.login-logo h1{font-family:'Crimson Pro',serif;color:#fff;font-size:1.6rem;font-weight:700;margin:12px 0 4px;letter-spacing:0.02em;}
+.login-logo h1{font-family:‘Crimson Pro’,serif;color:#fff;font-size:1.6rem;font-weight:700;margin:12px 0 4px;letter-spacing:0.02em;}
 .login-logo p{color:rgba(255,255,255,0.6);font-size:0.8rem;font-weight:300;letter-spacing:0.08em;text-transform:uppercase;}
 .login-card{background:rgba(255,255,255,0.07);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.12);border-radius:20px;padding:35px 28px;width:100%;max-width:380px;animation:fadeUp 0.8s ease 0.2s forwards;opacity:1;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-.login-card h2{font-family:'Crimson Pro',serif;color:#fff;font-size:1.4rem;font-weight:600;margin-bottom:6px;}
+.login-card h2{font-family:‘Crimson Pro’,serif;color:#fff;font-size:1.4rem;font-weight:600;margin-bottom:6px;}
 .login-card .subtitle{color:rgba(255,255,255,0.5);font-size:0.78rem;margin-bottom:28px;}
 .login-field{margin-bottom:16px;}
 .login-field label{color:rgba(255,255,255,0.7);font-size:0.72rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;display:block;margin-bottom:6px;}
 .login-field .input-wrap{position:relative;}
 .login-field .input-wrap i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,0.4);font-size:0.85rem;}
-.login-field input{width:100%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:12px 14px 12px 38px;color:#fff;font-size:0.9rem;font-family:'DM Sans',sans-serif;transition:all 0.2s;outline:none;}
+.login-field input{width:100%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:12px 14px 12px 38px;color:#fff;font-size:0.9rem;font-family:‘DM Sans’,sans-serif;transition:all 0.2s;outline:none;}
 .login-field input:focus{border-color:rgba(255,107,107,0.6);background:rgba(255,255,255,0.12);box-shadow:0 0 0 3px rgba(255,107,107,0.15);}
 .login-field input::placeholder{color:rgba(255,255,255,0.3);}
-.btn-login{width:100%;padding:13px;background:linear-gradient(135deg,#c0392b,#8b0000);border:none;border-radius:10px;color:#fff;font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:600;letter-spacing:0.05em;cursor:pointer;transition:all 0.2s;margin-top:8px;box-shadow:0 4px 20px rgba(139,0,0,0.4);}
+.btn-login{width:100%;padding:13px;background:linear-gradient(135deg,#c0392b,#8b0000);border:none;border-radius:10px;color:#fff;font-family:‘DM Sans’,sans-serif;font-size:0.9rem;font-weight:600;letter-spacing:0.05em;cursor:pointer;transition:all 0.2s;margin-top:8px;box-shadow:0 4px 20px rgba(139,0,0,0.4);}
 .btn-login:hover{transform:translateY(-1px);box-shadow:0 6px 25px rgba(139,0,0,0.5);}
 .btn-login:active{transform:translateY(0);}
 .btn-login:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
@@ -61,13 +61,13 @@
 .loading-text{color:rgba(255,255,255,0.6);font-size:0.85rem;letter-spacing:0.06em;}
 
 /* ===== MAIN APP ===== */
-.clinic-header{background:linear-gradient(135deg,var(--primary),#b30000);color:#fff;padding:25px 0;border-radius:0 0 15px 15px;position:relative}
+.clinic-header{background:linear-gradient(135deg,var(–primary),#b30000);color:#fff;padding:25px 0;border-radius:0 0 15px 15px;position:relative}
 .card{border:none;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.05);margin-bottom:20px}
-.section-title{color:var(--primary);font-weight:bold;border-bottom:2px solid #e9ecef;padding-bottom:5px;margin-top:20px;margin-bottom:12px}
-.visit-section{background:#fff;border-left:4px solid var(--primary);padding:15px;margin-bottom:15px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+.section-title{color:var(–primary);font-weight:bold;border-bottom:2px solid #e9ecef;padding-bottom:5px;margin-top:20px;margin-bottom:12px}
+.visit-section{background:#fff;border-left:4px solid var(–primary);padding:15px;margin-bottom:15px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
 label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom:2px}
 .form-control,.form-select{border-radius:6px;font-size:.85rem;padding:4px 8px}
-.btn-medical{background:var(--primary);color:#fff;font-weight:bold;width:100%;padding:12px;border:none;border-radius:8px}
+.btn-medical{background:var(–primary);color:#fff;font-weight:bold;width:100%;padding:12px;border:none;border-radius:8px}
 .btn-visit{background:#17a2b8;color:#fff;font-weight:bold}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;justify-content:center;align-items:center}
 .modal-box{background:#fff;border-radius:16px;padding:30px 20px;max-width:500px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.4);animation:pop .3s ease;max-height:90vh;overflow-y:auto;}
@@ -81,7 +81,7 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 .input-error{border:2px solid #dc3545!important}
 .error-msg{color:#dc3545;font-size:0.7rem;display:none}
 .chart-container{position:relative;height:22vh;width:100%;margin-bottom:15px;}
-.clickable-tab{cursor:pointer;padding:10px;background-color:#e9ecef;border-radius:5px;border-left:5px solid var(--primary);transition:0.2s;}
+.clickable-tab{cursor:pointer;padding:10px;background-color:#e9ecef;border-radius:5px;border-left:5px solid var(–primary);transition:0.2s;}
 .clickable-tab:hover{background-color:#dee2e6;}
 #pdfContainer{position:fixed;top:0;left:0;width:100%;min-height:100%;overflow:auto;z-index:99998;background:#fff;display:none;}
 #pdfContainer.active{display:block;}
@@ -94,11 +94,11 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 .wizard-step{display:flex;align-items:flex-start;gap:0;}
 .wizard-step-inner{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;}
 .wizard-dot{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.6rem;font-weight:700;border:2px solid #ddd;background:#fff;color:#aaa;transition:all 0.3s;flex-shrink:0;}
-.wizard-dot.active{background:var(--primary);border-color:var(--primary);color:#fff;box-shadow:0 0 0 3px rgba(139,0,0,0.2);}
+.wizard-dot.active{background:var(–primary);border-color:var(–primary);color:#fff;box-shadow:0 0 0 3px rgba(139,0,0,0.2);}
 .wizard-dot.done{background:#1d6f42;border-color:#1d6f42;color:#fff;}
 /* label under dot */
 .wizard-label{font-size:0.52rem;font-weight:600;color:#aaa;text-align:center;line-height:1.1;max-width:32px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:0.01em;}
-.wizard-label.active{color:var(--primary);}
+.wizard-label.active{color:var(–primary);}
 .wizard-label.done{color:#1d6f42;}
 .wizard-line{width:12px;height:2px;background:#ddd;flex-shrink:0;margin-top:13px;}
 .wizard-line.done{background:#1d6f42;}
@@ -140,7 +140,7 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 
 /* ===== HFpEF DIM ===== */
 .phenotype-dim{opacity:0.45;position:relative;}
-.phenotype-dim::after{content:'Not primary for this HF phenotype';position:absolute;bottom:-14px;left:0;font-size:0.6rem;color:#999;font-style:italic;}
+.phenotype-dim::after{content:‘Not primary for this HF phenotype’;position:absolute;bottom:-14px;left:0;font-size:0.6rem;color:#999;font-style:italic;}
 
 /* ===== GDMT RATIONALE ===== */
 .gdmt-rationale{display:none;margin-top:3px;}
@@ -179,15 +179,15 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 #pageAnalytics{display:none;}
 #pageAnalytics.active{display:block;}
 .analytics-header{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);color:#fff;padding:22px 0 18px;border-radius:0 0 15px 15px;position:relative;}
-.analytics-header h2{font-family:'Crimson Pro',serif;letter-spacing:0.03em;}
-.stat-kpi{background:#fff;border-radius:12px;padding:16px 14px;box-shadow:0 2px 12px rgba(0,0,0,0.07);border-top:4px solid var(--primary);margin-bottom:14px;text-align:center;transition:transform 0.2s;}
+.analytics-header h2{font-family:‘Crimson Pro’,serif;letter-spacing:0.03em;}
+.stat-kpi{background:#fff;border-radius:12px;padding:16px 14px;box-shadow:0 2px 12px rgba(0,0,0,0.07);border-top:4px solid var(–primary);margin-bottom:14px;text-align:center;transition:transform 0.2s;}
 .stat-kpi:hover{transform:translateY(-2px);}
-.stat-kpi .kpi-num{font-family:'Crimson Pro',serif;font-size:2.2rem;font-weight:700;color:var(--primary);line-height:1;}
+.stat-kpi .kpi-num{font-family:‘Crimson Pro’,serif;font-size:2.2rem;font-weight:700;color:var(–primary);line-height:1;}
 .stat-kpi .kpi-label{font-size:0.72rem;color:#6c757d;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;}
 .stat-kpi .kpi-sub{font-size:0.7rem;color:#adb5bd;margin-top:2px;}
 .analytics-card{background:#fff;border-radius:12px;padding:16px;box-shadow:0 2px 12px rgba(0,0,0,0.07);margin-bottom:16px;}
 .analytics-card-title{font-size:0.8rem;font-weight:700;color:#1a1a2e;text-transform:uppercase;letter-spacing:0.06em;border-bottom:2px solid #f0f0f0;padding-bottom:8px;margin-bottom:14px;display:flex;align-items:center;gap:7px;}
-.analytics-card-title i{color:var(--primary);}
+.analytics-card-title i{color:var(–primary);}
 .analytics-chart-wrap{position:relative;height:200px;width:100%;}
 .analytics-chart-wrap-sm{position:relative;height:160px;width:100%;}
 .analytics-chart-wrap-lg{position:relative;height:240px;width:100%;}
@@ -195,7 +195,7 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 .comorbidity-bar-row .cb-label{width:70px;font-weight:600;color:#495057;flex-shrink:0;}
 .comorbidity-bar-row .cb-bar-wrap{flex:1;background:#f0f0f0;border-radius:4px;height:16px;overflow:hidden;}
 .comorbidity-bar-row .cb-bar{height:100%;border-radius:4px;transition:width 0.8s ease;background:linear-gradient(90deg,#8b0000,#c0392b);}
-.comorbidity-bar-row .cb-pct{width:38px;text-align:right;font-weight:700;color:var(--primary);flex-shrink:0;}
+.comorbidity-bar-row .cb-pct{width:38px;text-align:right;font-weight:700;color:var(–primary);flex-shrink:0;}
 .gdmt-row{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-radius:8px;margin-bottom:5px;font-size:0.8rem;background:#f8f9fa;}
 .gdmt-row .gdmt-name{font-weight:600;color:#333;}
 .gdmt-row .gdmt-pill{font-weight:700;font-size:0.75rem;padding:3px 10px;border-radius:20px;color:#fff;}
@@ -216,11 +216,11 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 .btn-export-excel{background:linear-gradient(135deg,#1d6f42,#2ecc71);color:#fff;}
 .analytics-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
 .analytics-tab-btn{padding:6px 13px;border-radius:20px;border:2px solid #e9ecef;background:#fff;font-size:0.75rem;font-weight:600;color:#6c757d;cursor:pointer;transition:all 0.2s;}
-.analytics-tab-btn.active{background:var(--primary);border-color:var(--primary);color:#fff;}
+.analytics-tab-btn.active{background:var(–primary);border-color:var(–primary);color:#fff;}
 .analytics-panel{display:none;}
 .analytics-panel.active{display:block;}
 .spinner-overlay{text-align:center;padding:40px 20px;color:#6c757d;}
-.spinner-overlay i{font-size:2rem;color:var(--primary);margin-bottom:10px;animation:spin 1s linear infinite;display:block;}
+.spinner-overlay i{font-size:2rem;color:var(–primary);margin-bottom:10px;animation:spin 1s linear infinite;display:block;}
 @keyframes spin{100%{transform:rotate(360deg);}}
 .header-nav-btns{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:10px;}
 .header-nav-btn{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;font-size:0.75rem;padding:5px 14px;border-radius:20px;cursor:pointer;transition:all 0.2s;font-weight:600;}
@@ -360,6 +360,7 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                     <div class="col-4 col-md-2"><label class="text-success fw-bold">BMI <span class="auto-badge"><i class="fa fa-lock"></i> Auto</span></label><input type="text" class="form-control bg-light text-success fw-bold" id="BMI" readonly></div>
                     <div class="col-4 col-md-2"><label>Dry Weight (kg)</label><input type="number" class="form-control" id="Dry_Weight" inputmode="numeric"></div>
                     <div class="col-4 col-md-2"><label>NYHA Visit</label><select class="form-select" id="NYHA" onchange="calcMAGGIC()"><option value="">Select...</option><option>I</option><option>II</option><option>III</option><option>IV</option></select></div>
+                    <div class="col-4 col-md-2"><label>KCCQ (0-100)</label><input type="number" class="form-control" id="KCCQ" min="0" max="100" inputmode="numeric" placeholder="0-100"></div>
                     <div class="col-4 col-md-2"><label>Fatigue</label><select class="form-select" id="Fatigue"><option>No</option><option>Yes</option></select></div>
                     <div class="col-4 col-md-2"><label>Pulse</label><input type="text" class="form-control" id="Pulse" inputmode="numeric"></div>
                     <div class="col-4 col-md-2"><label>BP</label><input type="text" class="form-control" id="BP" placeholder="120/80" oninput="calcMAGGIC()"></div>
@@ -492,6 +493,7 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                         <h6 class="col-12 text-secondary">Symptoms</h6>
                         <div class="col-4 col-md-2"><label>Fatigue</label><select class="form-select" id="V_Fatigue"><option>N</option><option>Y</option></select></div>
                         <div class="col-4 col-md-2"><label>NYHA Class</label><select class="form-select" id="V_NYHA"><option value="">Select</option><option>I</option><option>II</option><option>III</option><option>IV</option></select></div>
+                        <div class="col-4 col-md-2"><label>KCCQ (0-100)</label><input type="number" class="form-control" id="V_KCCQ" min="0" max="100" inputmode="numeric" placeholder="0-100"></div>
                         <div class="col-4 col-md-3"><label>Edema</label><select class="form-select" id="V_Edema"><option>No</option><option>Mild feet</option><option>Moderate</option><option>Severe</option></select></div>
                         <div class="col-12"><hr class="my-2"></div>
                         <h6 class="col-12 text-secondary">Signs / Vitals</h6>
@@ -739,7 +741,7 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
         <div id="ntproBNPTrajectory" style="margin-bottom:8px;"></div>
         <div class="chart-container"><canvas id="weightChart"></canvas></div>
         <div class="chart-container"><canvas id="ntproChart"></canvas></div>
-        <div class="chart-container"><canvas id="bnpChart"></canvas></div>
+        <div class="chart-container"><canvas id="kccqChart"></canvas></div>
     </div>
 </div>
 
@@ -758,7 +760,7 @@ firebase.initializeApp({
 var db = firebase.firestore();
 var auth = firebase.auth();
 var editingDocId = null, currentPatientId = null, PC = {}, visits = [];
-var weightChartInst = null, bnpChartInst = null, ntproChartInst = null;
+var weightChartInst = null, kccqChartInst = null, ntproChartInst = null;
 var analyticsCharts = {};
 var allPatientsData = [];
 var currentWizardStep = 1;
@@ -1333,6 +1335,7 @@ function renderCollapsibleVisits(visitsArr){
         var isExpanded=(idx<2); // Last 2 visits expanded by default
         var summaryParts=[];
         if(v.V_NYHA)summaryParts.push('NYHA '+v.V_NYHA);
+        if(v.V_KCCQ)summaryParts.push('KCCQ '+v.V_KCCQ);
         if(v.V_Weight)summaryParts.push(v.V_Weight+'kg');
         if(v.V_BP)summaryParts.push('BP '+v.V_BP);
         if(v.V_NTproBNP)summaryParts.push('NTpro '+v.V_NTproBNP);
@@ -1360,7 +1363,7 @@ function toggleVisitRow(headerEl){
 
 function buildVisitDetailHTML(v){
     var sections=[
-        {name:'Symptoms & Vitals', fields:[['NYHA','V_NYHA'],['Fatigue','V_Fatigue'],['Edema','V_Edema'],['Pulse','V_Pulse'],['BP','V_BP'],['SpO2','V_SpO2'],['Weight','V_Weight'],['JVP','V_JVP'],['Rales','V_Rales'],['S3','V_S3']]},
+        {name:'Symptoms & Vitals', fields:[['NYHA','V_NYHA'],['KCCQ','V_KCCQ'],['Fatigue','V_Fatigue'],['Edema','V_Edema'],['Pulse','V_Pulse'],['BP','V_BP'],['SpO2','V_SpO2'],['Weight','V_Weight'],['JVP','V_JVP'],['Rales','V_Rales'],['S3','V_S3']]},
         {name:'ECG / Echo',        fields:[['LBBB','V_LBBB'],['QRS','V_QRS'],['Arrhythmia','V_Arrhythmia'],['EF Change','V_EF_Change'],['Echo Other','V_Echo_Other']]},
         {name:'Labs',              fields:[['HbA1c','V_HbA1c'],['Glucose','V_Gluc'],['Urea','V_Urea'],['Creat','V_Creat'],['eGFR','V_eGFR'],['Na','V_Na'],['K','V_K'],['BNP','V_BNP'],['NT-proBNP','V_NTproBNP'],['INR','V_INR'],['Iron','V_Iron'],['Ferritin','V_Ferritin'],['Transferrin','V_Transferrin'],['Hb','V_Hb'],['WBC','V_WBC'],['Plt','V_Plt'],['TSH','V_TSH'],['FreeT4','V_FreeT4']]},
         {name:'Assessment & Plan', fields:[['Adverse Effects','V_Adverse'],['Plan','V_Plan'],['Notes','V_Others']]}
@@ -1408,7 +1411,7 @@ function resetForm(){
 }
 
 function generateCardHTML(data,id){
-    var allFields=[['Patient_Name','Civil_ID','File_No','Age','Gender','Nationality','Mobile','Doctor_Name'],['HF_Type','EF_Diagnosis','Advanced_HF','Other_Cardio','Valvular_Disease','Admissions','Last_Admission','LOS'],['Height','Weight','BMI','Dry_Weight','NYHA','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur'],['ECG','ECHO','CMR_CT','Walk_Test','Device_Info','Cath'],['DM','HTN','AF','IHD','PCI_CABG','CKD','CVA','PVD','Smoker','Obese_OSA','Lung_Dz','Liver_Dz','FH_Genetics'],['Lab_HbA1c','Lab_Gluc','Lab_UreaCreat','Lab_eGFR','Lab_NaK','Lab_BNP','Lab_IronFerritin','Lab_TrSats','Lab_CBC','Lab_Thyroid','Lab_Lipids','Lab_AlbCreat'],['Med_ARNI','Med_ARNI_Dose','Med_SGLT2i','Med_SGLT2i_Dose','Med_GLP1','Med_BB','Med_BB_Dose','Med_MRA','Med_MRA_Dose','Med_ACEiARB','Med_ACEiARB_Dose','Med_Vasodilator','Med_Procorolan','Med_Procorolan_Dose','Med_CCB','Med_CCB_Dose','Med_Diuretic','Med_Lipid','Med_Antiplat','Med_OAC','Med_Arrhythmia','Med_K_Chelator'],['Quad_GDMT','Compliance','Mortality','Rehab','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt']];
+    var allFields=[['Patient_Name','Civil_ID','File_No','Age','Gender','Nationality','Mobile','Doctor_Name'],['HF_Type','EF_Diagnosis','Advanced_HF','Other_Cardio','Valvular_Disease','Admissions','Last_Admission','LOS'],['Height','Weight','BMI','Dry_Weight','NYHA','KCCQ','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur'],['ECG','ECHO','CMR_CT','Walk_Test','Device_Info','Cath'],['DM','HTN','AF','IHD','PCI_CABG','CKD','CVA','PVD','Smoker','Obese_OSA','Lung_Dz','Liver_Dz','FH_Genetics'],['Lab_HbA1c','Lab_Gluc','Lab_UreaCreat','Lab_eGFR','Lab_NaK','Lab_BNP','Lab_IronFerritin','Lab_TrSats','Lab_CBC','Lab_Thyroid','Lab_Lipids','Lab_AlbCreat'],['Med_ARNI','Med_ARNI_Dose','Med_SGLT2i','Med_SGLT2i_Dose','Med_GLP1','Med_BB','Med_BB_Dose','Med_MRA','Med_MRA_Dose','Med_ACEiARB','Med_ACEiARB_Dose','Med_Vasodilator','Med_Procorolan','Med_Procorolan_Dose','Med_CCB','Med_CCB_Dose','Med_Diuretic','Med_Lipid','Med_Antiplat','Med_OAC','Med_Arrhythmia','Med_K_Chelator'],['Quad_GDMT','Compliance','Mortality','Rehab','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt']];
     var sn=['Demographics','HF Diagnosis','Symptoms & Signs','Investigations','Comorbidities','Baseline Labs','Medications','Outcomes & Management'];
     // Helper: a field is "empty" if null/undefined/empty-string, "None", "No", "-", or just whitespace
     function isEmptyField(val){
@@ -1463,8 +1466,8 @@ function searchPatient(){
 function showTrends(patientId){
     document.getElementById("chartModal").classList.remove("d-none");
     db.collection("patients").doc(patientId).collection("visits").orderBy("visitDate","asc").get().then(function(snapshot){
-        var dates=[],weights=[],bnps=[],ntpros=[];
-        snapshot.forEach(function(doc){var v=doc.data();dates.push(v.visitDate);weights.push(parseFloat(v.V_Weight)||null);bnps.push(parseFloat(v.V_BNP)||null);ntpros.push(parseFloat(v.V_NTproBNP)||null);});
+        var dates=[],weights=[],kccqs=[],ntpros=[];
+        snapshot.forEach(function(doc){var v=doc.data();dates.push(v.visitDate);weights.push(parseFloat(v.V_Weight)||null);kccqs.push(parseFloat(v.V_KCCQ)||null);ntpros.push(parseFloat(v.V_NTproBNP)||null);});
         if(dates.length===0){document.getElementById('chartModal').classList.add('d-none');showPopup("warning","No Data","No visits recorded yet.");return;}
         var trajDiv=document.getElementById('ntproBNPTrajectory');
         var validNTpro=ntpros.filter(function(v){return v!==null;});
@@ -1475,11 +1478,11 @@ function showTrends(patientId){
             else if(change<-10){trajDiv.innerHTML='<span class="trajectory-flag stable"><i class="fa fa-arrow-down"></i> NT-proBNP ↓'+Math.abs(Math.round(change))+'% — Improving</span>';}
             else{trajDiv.innerHTML='<span class="trajectory-flag stable"><i class="fa fa-minus"></i> NT-proBNP stable ('+Math.round(change)+'%)</span>';}
         }else{trajDiv.innerHTML='';}
-        if(weightChartInst)weightChartInst.destroy();if(ntproChartInst)ntproChartInst.destroy();if(bnpChartInst)bnpChartInst.destroy();
+        if(weightChartInst)weightChartInst.destroy();if(ntproChartInst)ntproChartInst.destroy();if(kccqChartInst)kccqChartInst.destroy();
         var co={responsive:true,maintainAspectRatio:false,scales:{x:{ticks:{font:{size:10}}}}};
         weightChartInst=new Chart(document.getElementById('weightChart').getContext('2d'),{type:'line',data:{labels:dates,datasets:[{label:'Weight (kg)',data:weights,borderColor:'#17a2b8',backgroundColor:'#17a2b8',tension:0.3,spanGaps:true}]},options:co});
         ntproChartInst=new Chart(document.getElementById('ntproChart').getContext('2d'),{type:'line',data:{labels:dates,datasets:[{label:'NT-proBNP',data:ntpros,borderColor:'#dc3545',backgroundColor:'#dc3545',tension:0.3,spanGaps:true}]},options:co});
-        bnpChartInst=new Chart(document.getElementById('bnpChart').getContext('2d'),{type:'line',data:{labels:dates,datasets:[{label:'BNP',data:bnps,borderColor:'#ffc107',backgroundColor:'#ffc107',tension:0.3,spanGaps:true}]},options:co});
+        kccqChartInst=new Chart(document.getElementById('kccqChart').getContext('2d'),{type:'line',data:{labels:dates,datasets:[{label:'KCCQ Score (0-100)',data:kccqs,borderColor:'#1d6f42',backgroundColor:'#1d6f42',tension:0.3,spanGaps:true}]},options:Object.assign({},co,{scales:Object.assign({},co.scales,{y:{min:0,max:100,ticks:{stepSize:20,font:{size:10}}}})})});
     });
 }
 
@@ -1567,10 +1570,10 @@ function generateExcel(data,visitsData,id){
     var wb=XLSX.utils.book_new();var pr=[];
     pr.push(["MUBARAK AL-KABEER HOSPITAL - HEART FAILURE REGISTRY"]);
     pr.push(["Patient Name:",data.Patient_Name||'']);pr.push(["Civil ID:",data.Civil_ID||'']);pr.push(["File No:",data.File_No||'']);pr.push(["Age:",data.Age||'']);pr.push(["Gender:",data.Gender||'']);pr.push(["Nationality:",data.Nationality||'']);pr.push(["Mobile:",data.Mobile||'']);pr.push(["Doctor:",data.Doctor_Name||'']);pr.push([]);
-    var sections=[{name:'HF DIAGNOSIS',fields:['HF_Type','EF_Diagnosis','Advanced_HF','Other_Cardio','Valvular_Disease','Admissions','Last_Admission','LOS']},{name:'SYMPTOMS & SIGNS',fields:['Height','Weight','BMI','Dry_Weight','NYHA','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur']},{name:'INVESTIGATIONS',fields:['ECG','ECHO','CMR_CT','Walk_Test','Device_Info','Cath']},{name:'COMORBIDITIES',fields:['DM','HTN','AF','IHD','PCI_CABG','CKD','CVA','PVD','Smoker','Obese_OSA','Lung_Dz','Liver_Dz','FH_Genetics']},{name:'LABORATORY (BASELINE)',fields:['Lab_HbA1c','Lab_Gluc','Lab_UreaCreat','Lab_eGFR','Lab_NaK','Lab_BNP','Lab_IronFerritin','Lab_TrSats','Lab_CBC','Lab_Thyroid','Lab_Lipids','Lab_AlbCreat']},{name:'MEDICATIONS',fields:['Med_ARNI','Med_ARNI_Dose','Med_SGLT2i','Med_SGLT2i_Dose','Med_GLP1','Med_BB','Med_BB_Dose','Med_MRA','Med_MRA_Dose','Med_ACEiARB','Med_ACEiARB_Dose','Med_Vasodilator','Med_Procorolan','Med_Procorolan_Dose','Med_CCB','Med_CCB_Dose','Med_Diuretic','Med_Lipid','Med_Antiplat','Med_OAC','Med_Arrhythmia','Med_K_Chelator']},{name:'OUTCOMES & FOLLOW-UP',fields:['Quad_GDMT','Compliance','Mortality','Rehab','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt']}];
+    var sections=[{name:'HF DIAGNOSIS',fields:['HF_Type','EF_Diagnosis','Advanced_HF','Other_Cardio','Valvular_Disease','Admissions','Last_Admission','LOS']},{name:'SYMPTOMS & SIGNS',fields:['Height','Weight','BMI','Dry_Weight','NYHA','KCCQ','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur']},{name:'INVESTIGATIONS',fields:['ECG','ECHO','CMR_CT','Walk_Test','Device_Info','Cath']},{name:'COMORBIDITIES',fields:['DM','HTN','AF','IHD','PCI_CABG','CKD','CVA','PVD','Smoker','Obese_OSA','Lung_Dz','Liver_Dz','FH_Genetics']},{name:'LABORATORY (BASELINE)',fields:['Lab_HbA1c','Lab_Gluc','Lab_UreaCreat','Lab_eGFR','Lab_NaK','Lab_BNP','Lab_IronFerritin','Lab_TrSats','Lab_CBC','Lab_Thyroid','Lab_Lipids','Lab_AlbCreat']},{name:'MEDICATIONS',fields:['Med_ARNI','Med_ARNI_Dose','Med_SGLT2i','Med_SGLT2i_Dose','Med_GLP1','Med_BB','Med_BB_Dose','Med_MRA','Med_MRA_Dose','Med_ACEiARB','Med_ACEiARB_Dose','Med_Vasodilator','Med_Procorolan','Med_Procorolan_Dose','Med_CCB','Med_CCB_Dose','Med_Diuretic','Med_Lipid','Med_Antiplat','Med_OAC','Med_Arrhythmia','Med_K_Chelator']},{name:'OUTCOMES & FOLLOW-UP',fields:['Quad_GDMT','Compliance','Mortality','Rehab','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt']}];
     sections.forEach(function(sec){pr.push([sec.name]);sec.fields.forEach(function(f){pr.push([f.replace(/_/g," ").replace(/Lab /g,"").replace(/Med /g,""),data[f]||'-']);});pr.push([]);});
     var ws1=XLSX.utils.aoa_to_sheet(pr);XLSX.utils.book_append_sheet(wb,ws1,"Patient Info");
-    if(visitsData.length>0){var vr=[];vr.push(["VISIT HISTORY"]);vr.push([]);visitsData.forEach(function(visit,idx){vr.push(["Visit #"+(visitsData.length-idx),"Date: "+visit.visitDate,"Type: "+visit.visitType]);var vFields=['V_Fatigue','V_NYHA','V_Edema','V_Pulse','V_BP','V_SpO2','V_Weight','V_JVP','V_Rales','V_S3','V_LBBB','V_QRS','V_Arrhythmia','V_EF_Change','V_Echo_Other','V_HbA1c','V_Gluc','V_Urea','V_Creat','V_eGFR','V_Na','V_K','V_BNP','V_NTproBNP','V_INR','V_Iron','V_Transferrin','V_Ferritin','V_WBC','V_Hb','V_Plt','V_TSH','V_FreeT4'];VISIT_MED_LIST.forEach(function(m){vFields.push(m.id);});vFields.push('V_Adverse','V_Plan','V_Others');vFields.forEach(function(f){var val=visit[f];if(val&&val.toString().trim()!=='')vr.push([f.replace('V_','').replace(/_/g,' '),val]);});vr.push([]);});var ws2=XLSX.utils.aoa_to_sheet(vr);XLSX.utils.book_append_sheet(wb,ws2,"Visits");}
+    if(visitsData.length>0){var vr=[];vr.push(["VISIT HISTORY"]);vr.push([]);visitsData.forEach(function(visit,idx){vr.push(["Visit #"+(visitsData.length-idx),"Date: "+visit.visitDate,"Type: "+visit.visitType]);var vFields=['V_Fatigue','V_NYHA','V_KCCQ','V_Edema','V_Pulse','V_BP','V_SpO2','V_Weight','V_JVP','V_Rales','V_S3','V_LBBB','V_QRS','V_Arrhythmia','V_EF_Change','V_Echo_Other','V_HbA1c','V_Gluc','V_Urea','V_Creat','V_eGFR','V_Na','V_K','V_BNP','V_NTproBNP','V_INR','V_Iron','V_Transferrin','V_Ferritin','V_WBC','V_Hb','V_Plt','V_TSH','V_FreeT4'];VISIT_MED_LIST.forEach(function(m){vFields.push(m.id);});vFields.push('V_Adverse','V_Plan','V_Others');vFields.forEach(function(f){var val=visit[f];if(val&&val.toString().trim()!=='')vr.push([f.replace('V_','').replace(/_/g,' '),val]);});vr.push([]);});var ws2=XLSX.utils.aoa_to_sheet(vr);XLSX.utils.book_append_sheet(wb,ws2,"Visits");}
     XLSX.writeFile(wb,"HF_Registry_"+(data.File_No||'unknown')+"_"+(data.Patient_Name||'patient')+".xlsx");showPopup("success","Excel Exported!","File downloaded successfully.");
 }
 
@@ -1581,12 +1584,12 @@ function generatePDF(data,visitsData,id){
     var html="<div id='pdfContent' style='width:750px;margin:0 auto;background:#fff;padding:20px;font-family:Arial,Helvetica,sans-serif;color:#000;'>";
     html+="<div style='text-align:center;border-bottom:3px solid #8b0000;padding-bottom:10px;margin-bottom:20px;'><h2 style='color:#8b0000;margin:0;'>Mubarak Al-Kabeer Hospital</h2><h3 style='margin:5px 0;color:#333;'>Heart Failure Clinic Registry</h3></div>";
     html+="<h3 style='color:#333;'>Patient: "+(data.Patient_Name||'Unknown')+" | File: "+(data.File_No||'N/A')+"</h3>";
-    var sections=[{name:'Demographics',fields:['Patient_Name','Civil_ID','File_No','Age','Gender','Nationality','Mobile','Doctor_Name']},{name:'HF Diagnosis',fields:['HF_Type','EF_Diagnosis','Advanced_HF','Other_Cardio','Valvular_Disease','Admissions','Last_Admission','LOS']},{name:'Symptoms & Signs',fields:['Height','Weight','BMI','Dry_Weight','NYHA','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur']},{name:'Investigations',fields:['ECG','ECHO','CMR_CT','Walk_Test','Device_Info','Cath']},{name:'Comorbidities',fields:['DM','HTN','AF','IHD','PCI_CABG','CKD','CVA','PVD','Smoker','Obese_OSA','Lung_Dz','Liver_Dz','FH_Genetics']},{name:'Laboratory (Baseline)',fields:['Lab_HbA1c','Lab_Gluc','Lab_UreaCreat','Lab_eGFR','Lab_NaK','Lab_BNP','Lab_IronFerritin','Lab_TrSats','Lab_CBC','Lab_Thyroid','Lab_Lipids','Lab_AlbCreat']},{name:'Medications',fields:['Med_ARNI','Med_ARNI_Dose','Med_SGLT2i','Med_SGLT2i_Dose','Med_GLP1','Med_BB','Med_BB_Dose','Med_MRA','Med_MRA_Dose','Med_ACEiARB','Med_ACEiARB_Dose','Med_Vasodilator','Med_Procorolan','Med_Procorolan_Dose','Med_CCB','Med_CCB_Dose','Med_Diuretic','Med_Lipid','Med_Antiplat','Med_OAC','Med_Arrhythmia','Med_K_Chelator']},{name:'Outcomes & Follow-up',fields:['Quad_GDMT','Compliance','Mortality','Rehab','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt']}];
+    var sections=[{name:'Demographics',fields:['Patient_Name','Civil_ID','File_No','Age','Gender','Nationality','Mobile','Doctor_Name']},{name:'HF Diagnosis',fields:['HF_Type','EF_Diagnosis','Advanced_HF','Other_Cardio','Valvular_Disease','Admissions','Last_Admission','LOS']},{name:'Symptoms & Signs',fields:['Height','Weight','BMI','Dry_Weight','NYHA','KCCQ','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur']},{name:'Investigations',fields:['ECG','ECHO','CMR_CT','Walk_Test','Device_Info','Cath']},{name:'Comorbidities',fields:['DM','HTN','AF','IHD','PCI_CABG','CKD','CVA','PVD','Smoker','Obese_OSA','Lung_Dz','Liver_Dz','FH_Genetics']},{name:'Laboratory (Baseline)',fields:['Lab_HbA1c','Lab_Gluc','Lab_UreaCreat','Lab_eGFR','Lab_NaK','Lab_BNP','Lab_IronFerritin','Lab_TrSats','Lab_CBC','Lab_Thyroid','Lab_Lipids','Lab_AlbCreat']},{name:'Medications',fields:['Med_ARNI','Med_ARNI_Dose','Med_SGLT2i','Med_SGLT2i_Dose','Med_GLP1','Med_BB','Med_BB_Dose','Med_MRA','Med_MRA_Dose','Med_ACEiARB','Med_ACEiARB_Dose','Med_Vasodilator','Med_Procorolan','Med_Procorolan_Dose','Med_CCB','Med_CCB_Dose','Med_Diuretic','Med_Lipid','Med_Antiplat','Med_OAC','Med_Arrhythmia','Med_K_Chelator']},{name:'Outcomes & Follow-up',fields:['Quad_GDMT','Compliance','Mortality','Rehab','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt']}];
     sections.forEach(function(sec){html+="<h4 style='background:#f0f0f0;padding:8px;margin-top:15px;color:#8b0000;'>"+sec.name+"</h4><table style='width:100%;border-collapse:collapse;font-size:12px;'>";sec.fields.forEach(function(f){var val=data[f]||'-',label=f.replace(/_/g," ").replace(/Lab /g,"").replace(/Med /g,"");html+="<tr style='border-bottom:1px solid #ddd;'><td style='width:40%;padding:6px;background:#fafafa;font-weight:bold;'>"+label+"</td><td style='padding:6px;'>"+val+"</td></tr>";});html+="</table>";});
     if(visitsData.length>0){html+="<div style='page-break-before:always;'></div><h3 style='color:#8b0000;margin-top:20px;'>Visit History & Follow-ups</h3>";
     var mf=VISIT_MED_LIST.map(function(m){return m.id;});
     visitsData.forEach(function(visit,idx){html+="<div style='border:2px solid #17a2b8;margin:15px 0;padding:15px;border-radius:8px;'><h4 style='color:#17a2b8;margin-top:0;'>Visit #"+(visitsData.length-idx)+": "+visit.visitDate+" ("+visit.visitType+")</h4>";
-    var vs=[{name:'Symptoms',fields:['V_Fatigue','V_NYHA','V_Edema']},{name:'Signs/Vitals',fields:['V_Pulse','V_BP','V_SpO2','V_Weight','V_JVP','V_Rales','V_S3']},{name:'ECG',fields:['V_LBBB','V_QRS','V_Arrhythmia']},{name:'Echo',fields:['V_EF_Change','V_Echo_Other']},{name:'Labs',fields:['V_HbA1c','V_Gluc','V_Urea','V_Creat','V_eGFR','V_Na','V_K','V_BNP','V_NTproBNP','V_INR','V_Iron','V_Transferrin','V_Ferritin','V_WBC','V_Hb','V_Plt','V_TSH','V_FreeT4']},{name:'Medications',fields:mf},{name:'Plan',fields:['V_Adverse','V_Plan','V_Others']}];
+    var vs=[{name:'Symptoms',fields:['V_Fatigue','V_NYHA','V_KCCQ','V_Edema']},{name:'Signs/Vitals',fields:['V_Pulse','V_BP','V_SpO2','V_Weight','V_JVP','V_Rales','V_S3']},{name:'ECG',fields:['V_LBBB','V_QRS','V_Arrhythmia']},{name:'Echo',fields:['V_EF_Change','V_Echo_Other']},{name:'Labs',fields:['V_HbA1c','V_Gluc','V_Urea','V_Creat','V_eGFR','V_Na','V_K','V_BNP','V_NTproBNP','V_INR','V_Iron','V_Transferrin','V_Ferritin','V_WBC','V_Hb','V_Plt','V_TSH','V_FreeT4']},{name:'Medications',fields:mf},{name:'Plan',fields:['V_Adverse','V_Plan','V_Others']}];
     vs.forEach(function(vsec){var hd=false;vsec.fields.forEach(function(vf){if(visit[vf]&&visit[vf].toString().trim()!=='')hd=true;});if(!hd)return;
     html+="<h5 style='margin:10px 0 5px 0;color:#555;'>"+vsec.name+"</h5><table style='width:100%;border-collapse:collapse;font-size:11px;margin-bottom:10px;'>";
     vsec.fields.forEach(function(vf){var val=visit[vf];if(val&&val.toString().trim()!==''){html+="<tr style='border-bottom:1px solid #eee;'><td style='width:40%;padding:4px;background:#f5f5f5;'>"+vf.replace('V_','').replace(/_/g,' ')+"</td><td style='padding:4px;'>"+val+"</td></tr>";}});html+="</table>";});html+="</div>";});}
@@ -1637,7 +1640,7 @@ function exportAnalyticsPDF(){var container=document.getElementById('pdfContaine
 var ALL_PATIENT_FIELDS = [
     'Patient_Name','Civil_ID','File_No','Age','Gender','Nationality','Mobile','Doctor_Name',
     'HF_Type','EF_Diagnosis','Advanced_HF','Other_Cardio','Valvular_Disease','Admissions','Last_Admission','LOS',
-    'Height','Weight','BMI','Dry_Weight','NYHA','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur',
+    'Height','Weight','BMI','Dry_Weight','NYHA','KCCQ','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur',
     'ECG','ECHO','CMR_CT','Walk_Test','Device_Info','Cath',
     'DM','HTN','AF','IHD','PCI_CABG','CKD','CVA','PVD','Smoker','Obese_OSA','Lung_Dz','Liver_Dz','FH_Genetics',
     'Lab_HbA1c','Lab_Gluc','Lab_UreaCreat','Lab_eGFR','Lab_NaK','Lab_BNP','Lab_IronFerritin','Lab_TrSats','Lab_CBC','Lab_Thyroid','Lab_Lipids','Lab_AlbCreat',
@@ -1804,6 +1807,7 @@ function exportAllPatientsSPSS(){
             ['EF_Diagnosis','numeric','%'],
             ['HF_Type','categorical','HFrEF / HFmrEF / HFpEF'],
             ['NYHA','categorical','I / II / III / IV'],
+            ['KCCQ','numeric','Kansas City Cardiomyopathy Questionnaire score, 0-100 (higher = better QOL)'],
             ['MAGGIC_Score','numeric','Points'],
             ['DM, HTN, AF, CKD, CVA, PVD, Obese_OSA, Lung_Dz, Liver_Dz, FH_Genetics','binary','1 = Yes, 0 = No, blank = unknown'],
             ['Advanced_HF, Valvular_Disease','binary','1 = Yes, 0 = No'],
@@ -2537,7 +2541,7 @@ function switchImportTab(which){
 var IMPORT_FIELDS = [
     'Doctor_Name','Patient_Name','Civil_ID','File_No','Age','Gender','Nationality','Mobile',
     'HF_Type','EF_Diagnosis','Advanced_HF','Other_Cardio','Valvular_Disease','Admissions','Last_Admission','LOS',
-    'Height','Weight','BMI','Dry_Weight','NYHA','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur',
+    'Height','Weight','BMI','Dry_Weight','NYHA','KCCQ','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur',
     'ECG','ECHO','CMR_CT','Walk_Test','Device_Info','Cath',
     'DM','HTN','AF','IHD','PCI_CABG','CKD','CVA','PVD','Smoker','Obese_OSA','Lung_Dz','Liver_Dz','FH_Genetics',
     'Lab_HbA1c','Lab_Gluc','Lab_UreaCreat','Lab_eGFR','Lab_NaK','Lab_BNP','Lab_IronFerritin','Lab_TrSats','Lab_CBC','Lab_Thyroid','Lab_Lipids','Lab_AlbCreat',
@@ -2598,6 +2602,7 @@ function downloadImportTemplate(){
             ["Gender","Male / Female"],
             ["HF_Type","HFrEF / HFmrEF / HFpEF"],
             ["NYHA","I / II / III / IV"],
+            ["KCCQ","Integer 0-100 (higher = better quality of life)"],
             ["Yes/No fields (HTN, DM, AF, etc.)","Yes / No"],
             ["Smoker","Never / Current / Former"],
             ["Mortality","Alive / Dead - HF / Dead - Other"],
@@ -2806,6 +2811,7 @@ var PP_LABEL_MAP = {
     'mobile number':'Mobile', 'mobile':'Mobile', 'phone':'Mobile',
     'last ef':'EF_Diagnosis', 'ef':'EF_Diagnosis', 'ef%':'EF_Diagnosis',
     'nyha symptoms on booking visit':'NYHA', 'nyha':'NYHA',
+    'kccq':'KCCQ', 'kccq score':'KCCQ', 'kansas city':'KCCQ',
     'device':'Device_Info',
     'advanced hf':'Advanced_HF',
     'no. of admissions last year':'Admissions', 'admissions':'Admissions',
@@ -2857,6 +2863,7 @@ var PP_MED_MAP = {
 var PP_VISIT_LABEL_MAP = {
     'fatigue':'V_Fatigue',
     'nyha class of sob':'V_NYHA', 'nyha':'V_NYHA',
+    'kccq':'V_KCCQ', 'kccq score':'V_KCCQ', 'kansas city':'V_KCCQ',
     'edema':'V_Edema',
     'pulse':'V_Pulse',
     'bp':'V_BP', 'blood pressure':'V_BP',
@@ -3163,7 +3170,7 @@ function parsePerPatientWorkbook(wb, fileName){
                     var vField = PP_VISIT_LABEL_MAP[rowLabel];
                     if(vField){
                         // Numeric normalization for known number fields
-                        var numericFields = {V_Pulse:1,V_SpO2:1,V_Weight:1,V_Height:1,V_BMI:1,V_HbA1c:1,V_Gluc:1,V_Urea:1,V_Creat:1,V_eGFR:1,V_Na:1,V_K:1,V_BNP:1,V_NTproBNP:1,V_INR:1,V_Iron:1,V_Transferrin:1,V_Ferritin:1,V_WBC:1,V_Hb:1,V_Plt:1,V_TSH:1,V_FreeT4:1,V_QRS:1};
+                        var numericFields = {V_Pulse:1,V_SpO2:1,V_Weight:1,V_Height:1,V_BMI:1,V_KCCQ:1,V_HbA1c:1,V_Gluc:1,V_Urea:1,V_Creat:1,V_eGFR:1,V_Na:1,V_K:1,V_BNP:1,V_NTproBNP:1,V_INR:1,V_Iron:1,V_Transferrin:1,V_Ferritin:1,V_WBC:1,V_Hb:1,V_Plt:1,V_TSH:1,V_FreeT4:1,V_QRS:1};
                         if(numericFields[vField]){
                             var nm = parseFloat(valStr);
                             if(!isNaN(nm)){
