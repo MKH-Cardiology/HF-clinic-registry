@@ -2825,6 +2825,25 @@ var PP_LABEL_MAP = {
     'cvs':'CVA', 'cva':'CVA',
     'obese':'Obese_OSA_obese', 'osa':'Obese_OSA_osa', // combined below
     'family history':'FH_Genetics', 'fh':'FH_Genetics',
+    'f.h. of cardiomyopathy or cad':'FH_Genetics', 'fh of cardiomyopathy or cad':'FH_Genetics',
+    'f.h.':'FH_Genetics', 'fh of cad':'FH_Genetics',
+    'patient discharged on quadruple gdmt?':'Quad_GDMT', 'patient discharged on quadruple gdmt':'Quad_GDMT',
+    'quadruple gdmt':'Quad_GDMT', 'quad gdmt':'Quad_GDMT',
+    'patient discharged on triple gdmt?':'_triple_gdmt', 'patient discharged on triple gdmt':'_triple_gdmt',
+    'dry weight':'Dry_Weight',
+    'valve replacement/repair':'_valve_surgery', 'valve replacement':'_valve_surgery', 'valve repair':'_valve_surgery',
+    'valvular disease':'Valvular_Disease',
+    'pvd':'PVD',
+    'chronic lung disease':'Lung_Dz', 'lung disease':'Lung_Dz',
+    'thyroid disease':'_thyroid', 'thyroid':'_thyroid',
+    'chronic liver disease':'Liver_Dz', 'liver disease':'Liver_Dz',
+    'lbbb':'_lbbb',
+    'qrs width':'_qrs', 'qrs':'_qrs',
+    'arrythmia':'_arrhythmia', 'arrhythmia':'_arrhythmia',
+    'length of hospital stay in last admission':'LOS', 'length of stay':'LOS', 'los':'LOS',
+    'mortality ( if yes in-hospital or out':'_mortality', 'mortality':'_mortality',
+    'genetics':'_genetics', 'frail':'_frail',
+    'echo':'_echo_ef', 'ecg':'_ecg_note', 'cmr/ct':'CMR_CT', 'cmr':'CMR_CT',
     'others':'_others', // collected to notes
     'notes':'Notes'
 };
@@ -2852,14 +2871,54 @@ var PP_MED_MAP = {
     'atozet':{f:'Med_Lipid', v:'Atozet'}, 'zympass':{f:'Med_Lipid', v:'Zympass'},
     'fibrates':{f:'Med_Lipid', v:'Fibrates'}, 'omacor':{f:'Med_Lipid', v:'Omacor'},
     'veltassa':{f:'Med_K_Chelator', v:'Veltassa'}, 'lokelma':{f:'Med_K_Chelator', v:'Lokelma'},
-    'cordarone':{f:'Med_Arrhythmia', v:'Cordarone'}, 'flecainide':{f:'Med_Arrhythmia', v:'Flecainide'},
+    'cordarone':{f:'Med_Arrhythmia', v:'Cordarone'}, 'amiodarone':{f:'Med_Arrhythmia', v:'Cordarone'},
+    'flecainide':{f:'Med_Arrhythmia', v:'Flecainide'},
     'sotalol':{f:'Med_Arrhythmia', v:'Sotalol'}, 'propafenone':{f:'Med_Arrhythmia', v:'Propafenone'},
-    'procorolan':{f:'Med_Procorolan', v:'Procorolan'}
+    'procorolan':{f:'Med_Procorolan', v:'Procorolan'}, 'ivabradine':{f:'Med_Procorolan', v:'Procorolan'},
+    // Antiplatelets
+    'asa':{f:'Med_Antiplat', v:'ASA'}, 'aspirin':{f:'Med_Antiplat', v:'ASA'},
+    'plavix':{f:'Med_Antiplat', v:'Plavix'}, 'clopidogrel':{f:'Med_Antiplat', v:'Plavix'},
+    'brilinta':{f:'Med_Antiplat', v:'Brilinta'}, 'ticagrelor':{f:'Med_Antiplat', v:'Brilinta'},
+    'effient':{f:'Med_Antiplat', v:'Effient'}, 'prasugrel':{f:'Med_Antiplat', v:'Effient'},
+    // CCBs
+    'amlodipine':{f:'Med_CCB', v:'Amlodipine'}, 'norvasc':{f:'Med_CCB', v:'Amlodipine'},
+    'nifedipine':{f:'Med_CCB', v:'Nifedipine'}, 'adalat':{f:'Med_CCB', v:'Nifedipine'},
+    'diltiazem':{f:'Med_CCB', v:'Diltiazem'}, 'verapamil':{f:'Med_CCB', v:'Verapamil'},
+    'isoptin':{f:'Med_CCB', v:'Verapamil'},
+    // Nitrate/vasodilator variants
+    'imdur':{f:'Med_Vasodilator', v:'Nitrates'}, 'isosorbide':{f:'Med_Vasodilator', v:'Nitrates'},
+    'nitroglycerin':{f:'Med_Vasodilator', v:'Nitrates'},
+    // Diuretic variants
+    'lasix':{f:'Med_Diuretic', v:'Furosemide'}, 'bumex':{f:'Med_Diuretic', v:'Bumetanide'},
+    'bumetanide':{f:'Med_Diuretic', v:'Bumetanide'}, 'torsemide':{f:'Med_Diuretic', v:'Torsemide'},
+    'hctz':{f:'Med_Diuretic', v:'HCTZ'}, 'hydrochlorothiazide':{f:'Med_Diuretic', v:'HCTZ'},
+    // OAC variants
+    'pradaxa':{f:'Med_OAC', v:'Pradaxa'}, 'dabigatran':{f:'Med_OAC', v:'Pradaxa'},
+    'rivaroxaban':{f:'Med_OAC', v:'Xarelto'}, 'apixaban':{f:'Med_OAC', v:'Eliquis'},
+    // Beta-blocker variants
+    'bisoprolol':{f:'Med_BB', v:'Concor'}, 'carvedilol':{f:'Med_BB', v:'Dilatrend'},
+    'metoprolol':{f:'Med_BB', v:'Betaloc'}, 'nebivolol':{f:'Med_BB', v:'Nebilet'},
+    'nebilet':{f:'Med_BB', v:'Nebilet'}, 'bystolic':{f:'Med_BB', v:'Nebilet'},
+    // ACEi/ARB variants
+    'lisinopril':{f:'Med_ACEiARB', v:'Zestril'}, 'ramipril':{f:'Med_ACEiARB', v:'Tritace'},
+    'captopril':{f:'Med_ACEiARB', v:'Capoten'}, 'enalapril':{f:'Med_ACEiARB', v:'Enalapril'},
+    'valsartan':{f:'Med_ACEiARB', v:'Diovan'}, 'candesartan':{f:'Med_ACEiARB', v:'Atacand'},
+    'losartan':{f:'Med_ACEiARB', v:'Cozaar'}, 'cozaar':{f:'Med_ACEiARB', v:'Cozaar'},
+    'telmisartan':{f:'Med_ACEiARB', v:'Micardis'}, 'micardis':{f:'Med_ACEiARB', v:'Micardis'},
+    // MRA / SGLT2i / GLP1 / Lipid variants
+    'spironolactone':{f:'Med_MRA', v:'Aldactone'},
+    'dapagliflozin':{f:'Med_SGLT2i', v:'Forxiga'}, 'empagliflozin':{f:'Med_SGLT2i', v:'Jardiance'},
+    'liraglutide':{f:'Med_GLP1', v:'Victoza'}, 'victoza':{f:'Med_GLP1', v:'Victoza'},
+    'semaglutide':{f:'Med_GLP1', v:'Ozempic'}, 'tirzepatide':{f:'Med_GLP1', v:'Mounjaro'},
+    'simvastatin':{f:'Med_Lipid', v:'Zocor'}, 'atorvastatin':{f:'Med_Lipid', v:'Lipitor'},
+    'rosuvastatin':{f:'Med_Lipid', v:'Crestor'}, 'ezetimibe':{f:'Med_Lipid', v:'Ezetrol'},
+    'evolocumab':{f:'Med_Lipid', v:'Repatha'}, 'alirocumab':{f:'Med_Lipid', v:'Praluent'}
 };
 
 // Visit-row labels -> visit field IDs (with V_ prefix)
 var PP_VISIT_LABEL_MAP = {
     'fatigue':'V_Fatigue',
+    'chest pain':'V_ChestPain',
     'nyha class of sob':'V_NYHA', 'nyha':'V_NYHA',
     'kccq':'V_KCCQ', 'kccq score':'V_KCCQ', 'kansas city':'V_KCCQ',
     'edema':'V_Edema',
@@ -2872,9 +2931,10 @@ var PP_VISIT_LABEL_MAP = {
     'jvp':'V_JVP',
     'pulmonary rales':'V_Rales', 'rales':'V_Rales',
     's3':'V_S3',
+    'murmur':'V_Murmur',
     'lbbb':'V_LBBB',
     'qrs width':'V_QRS', 'qrs':'V_QRS',
-    'arrhythmia':'V_Arrhythmia',
+    'arrhythmia':'V_Arrhythmia', 'arrythmia':'V_Arrhythmia',
     'change in ef':'V_EF_Change', 'ef change':'V_EF_Change',
     'hba1c':'V_HbA1c',
     'gluc':'V_Gluc', 'glucose':'V_Gluc',
@@ -2894,6 +2954,8 @@ var PP_VISIT_LABEL_MAP = {
     'plt':'V_Plt', 'platelets':'V_Plt',
     'tsh':'V_TSH',
     'free t4':'V_FreeT4', 't4':'V_FreeT4',
+    'ldl':'V_LDL', 'hdl':'V_HDL', 'tg':'V_TG', 'triglycerides':'V_TG',
+    'alb/creat ratio':'V_AlbCreat', 'albumin/creatinine':'V_AlbCreat',
     'adverse effect of any medication':'V_Adverse', 'adverse':'V_Adverse',
     'plan':'V_Plan', 'plan:':'V_Plan',
     'others':'V_Others', 'others:':'V_Others'
@@ -3042,11 +3104,104 @@ function parsePerPatientWorkbook(wb, fileName){
             return;
         }
         if(mapped === 'Age'){
+            // Handle "1973/ 53" (DOB/age), "1973 53", "53/1973", or plain "53"
+            var nums = String(v).match(/\d+(?:\.\d+)?/g) || [];
+            if(nums.length >= 2){
+                // Pick the number that looks like age (< 130), not a birth year (>= 1800)
+                var ageCandidates = nums.map(parseFloat).filter(function(n){ return n > 0 && n < 130; });
+                if(ageCandidates.length > 0){
+                    result.record.Age = String(Math.round(ageCandidates[0]));
+                    return;
+                }
+            }
             var n = parseFloat(v);
-            if(!isNaN(n)) result.record.Age = String(Math.round(n));
+            if(!isNaN(n) && n > 0 && n < 130) result.record.Age = String(Math.round(n));
+            else if(!isNaN(n) && n >= 1800 && n <= 2100){
+                // Year of birth only — compute age
+                var age = new Date().getFullYear() - Math.round(n);
+                result.record.Age = String(age);
+                result.warnings.push('Age "'+v+'" appeared to be birth year; computed age = '+age);
+            }
             else result.record.Age = v;
             return;
         }
+        // Quad GDMT (Y/N)
+        if(mapped === 'Quad_GDMT'){
+            result.record.Quad_GDMT = (normalizeYN(v)==='Yes') ? 'Yes' : (normalizeYN(v)==='No' ? 'No' : v);
+            return;
+        }
+        if(mapped === '_triple_gdmt'){
+            if(normalizeYN(v)==='Yes') result.notesExtra.push('Triple GDMT on discharge: Yes');
+            return;
+        }
+        if(mapped === 'Dry_Weight'){
+            var dw = parseFloat(v);
+            result.record.Dry_Weight = isNaN(dw) ? v : String(dw);
+            return;
+        }
+        if(mapped === 'Valvular_Disease'){
+            result.record.Valvular_Disease = normalizeYN(v) || v;
+            return;
+        }
+        if(mapped === '_valve_surgery'){
+            if(normalizeYN(v)==='Yes') result.notesExtra.push('Valve replacement/repair: Yes');
+            else if(normalizeYN(v) && normalizeYN(v)!=='No') result.notesExtra.push('Valve: '+v);
+            return;
+        }
+        if(mapped === 'PVD'){ result.record.PVD = normalizeYN(v); return; }
+        if(mapped === 'Lung_Dz'){ result.record.Lung_Dz = normalizeYN(v); return; }
+        if(mapped === 'Liver_Dz'){ result.record.Liver_Dz = normalizeYN(v); return; }
+        if(mapped === '_thyroid'){
+            if(normalizeYN(v)==='Yes') result.notesExtra.push('Thyroid disease: Yes');
+            else if(normalizeYN(v) && normalizeYN(v)!=='No') result.notesExtra.push('Thyroid: '+v);
+            return;
+        }
+        if(mapped === '_lbbb'){
+            if(normalizeYN(v)==='Yes') result.notesExtra.push('LBBB: Yes');
+            return;
+        }
+        if(mapped === '_qrs'){ result.notesExtra.push('QRS width: '+v); return; }
+        if(mapped === '_arrhythmia'){
+            if(normalizeYN(v)==='Yes') result.notesExtra.push('Arrhythmia: Yes');
+            else if(normalizeYN(v) && normalizeYN(v)!=='No') result.notesExtra.push('Arrhythmia: '+v);
+            return;
+        }
+        if(mapped === 'LOS'){
+            var losN = parseFloat(v);
+            result.record.LOS = isNaN(losN) ? v : String(Math.round(losN));
+            return;
+        }
+        if(mapped === '_mortality'){
+            var mv = normalizeYN(v);
+            if(mv === 'No') result.record.Mortality = 'Alive';
+            else if(mv === 'Yes') result.record.Mortality = 'Dead';
+            else if(mv && /dead|died|hf|cardiac/i.test(v)) result.record.Mortality = 'Dead - HF';
+            else if(mv && /other|non-hf|non/i.test(v)) result.record.Mortality = 'Dead - Other';
+            else if(mv) result.record.Mortality = v;
+            return;
+        }
+        if(mapped === '_genetics'){
+            if(normalizeYN(v)==='Yes') result.notesExtra.push('Genetics: Yes');
+            else if(v) result.notesExtra.push('Genetics: '+v);
+            return;
+        }
+        if(mapped === '_frail'){
+            if(v && v.replace(/\s/g,'')!=='') result.notesExtra.push('Frail: '+v.replace(/\s+/g,' ').trim());
+            return;
+        }
+        if(mapped === '_echo_ef'){
+            var efN = parseFloat(v);
+            if(!isNaN(efN)){
+                // If stored as 0.25, convert to 25
+                if(efN > 0 && efN <= 1) efN = efN * 100;
+                if(!result.record.EF_Diagnosis) result.record.EF_Diagnosis = String(Math.round(efN));
+            } else {
+                result.notesExtra.push('Echo: '+v);
+            }
+            return;
+        }
+        if(mapped === '_ecg_note'){ result.notesExtra.push('ECG: '+v); return; }
+        if(mapped === 'CMR_CT'){ result.record.CMR_CT = v; return; }
         if(mapped === 'EF_Diagnosis'){
             // Could be a number ("30") or text ("improved")
             var ef = parseFloat(v);
@@ -3148,27 +3303,45 @@ function parsePerPatientWorkbook(wb, fileName){
                     // Check if this is a medication row
                     if(inMedSection && PP_MED_MAP[rowLabel]){
                         var mm = PP_MED_MAP[rowLabel];
-                        // Set the medication selection
+                        // "Stopped" / "N" / "No" → treat as discontinued (don't set med)
+                        var lowerVal = valStr.toLowerCase();
+                        if(lowerVal === 'stopped' || lowerVal === 'stop' || lowerVal === 'd/c' || lowerVal === 'dc' || lowerVal === 'discontinued' || lowerVal === 'n' || lowerVal === 'no'){
+                            // Record the discontinuation in V_Others but don't set the med as active
+                            visit.V_Others = (visit.V_Others ? visit.V_Others + ' | ' : '') + rowLabelRaw + ': ' + valStr;
+                            hasData = true;
+                            return;
+                        }
+                        // Set the medication selection (first occurrence wins)
                         if(!visitMeds[mm.f]){
                             visitMeds[mm.f] = mm.v;
-                            // Try to parse dose
+                            // Try to parse dose; "Y"/"Yes" means on-med without a numeric dose
                             var doseStr = valStr;
-                            var dn = parseFloat(doseStr);
-                            if(!isNaN(dn) && /^\d+(\.\d+)?$/.test(doseStr)){
-                                var clean = (dn === Math.floor(dn)) ? String(Math.round(dn)) : String(dn);
-                                doseStr = clean + ' mg';
+                            if(lowerVal === 'y' || lowerVal === 'yes'){
+                                doseStr = ''; // no numeric dose supplied
+                            } else {
+                                var dn = parseFloat(doseStr);
+                                if(!isNaN(dn) && /^\d+(\.\d+)?$/.test(doseStr)){
+                                    var clean = (dn === Math.floor(dn)) ? String(Math.round(dn)) : String(dn);
+                                    doseStr = clean + ' mg';
+                                }
                             }
-                            visitMeds[mm.f+'_Dose'] = doseStr;
+                            if(doseStr) visitMeds[mm.f+'_Dose'] = doseStr;
                         }
                         return;
                     }
                     // Header-only med rows like "B-blocker:", "ACEi:" — skip (no value expected, drug rows below carry data)
                     if(inMedSection && /:$/.test(rowLabelRaw)) return;
+                    // SAFETY NET: unknown medication row with a value — don't silently drop
+                    if(inMedSection && rowLabelRaw && !PP_MED_MAP[rowLabel]){
+                        visit.V_Others = (visit.V_Others ? visit.V_Others + ' | ' : '') + rowLabelRaw + ': ' + valStr;
+                        hasData = true;
+                        return;
+                    }
                     // Visit field mapping
                     var vField = PP_VISIT_LABEL_MAP[rowLabel];
                     if(vField){
                         // Numeric normalization for known number fields
-                        var numericFields = {V_Pulse:1,V_SpO2:1,V_Weight:1,V_Height:1,V_BMI:1,V_KCCQ:1,V_HbA1c:1,V_Gluc:1,V_Urea:1,V_Creat:1,V_eGFR:1,V_Na:1,V_K:1,V_BNP:1,V_NTproBNP:1,V_INR:1,V_Iron:1,V_Transferrin:1,V_Ferritin:1,V_WBC:1,V_Hb:1,V_Plt:1,V_TSH:1,V_FreeT4:1,V_QRS:1};
+                        var numericFields = {V_Pulse:1,V_SpO2:1,V_Weight:1,V_Height:1,V_BMI:1,V_KCCQ:1,V_HbA1c:1,V_Gluc:1,V_Urea:1,V_Creat:1,V_eGFR:1,V_Na:1,V_K:1,V_BNP:1,V_NTproBNP:1,V_INR:1,V_Iron:1,V_Transferrin:1,V_Ferritin:1,V_WBC:1,V_Hb:1,V_Plt:1,V_TSH:1,V_FreeT4:1,V_QRS:1,V_LDL:1,V_HDL:1,V_TG:1,V_AlbCreat:1};
                         if(numericFields[vField]){
                             var nm = parseFloat(valStr);
                             if(!isNaN(nm)){
@@ -3181,10 +3354,14 @@ function parsePerPatientWorkbook(wb, fileName){
                             if(['I','II','III','IV'].indexOf(u)!==-1) valStr = u;
                             else if(['1','2','3','4'].indexOf(u)!==-1) valStr = ['','I','II','III','IV'][parseInt(u)];
                         }
-                        if(vField === 'V_Fatigue' || vField === 'V_JVP' || vField === 'V_Rales' || vField === 'V_S3' || vField === 'V_LBBB'){
+                        if(vField === 'V_Fatigue' || vField === 'V_JVP' || vField === 'V_Rales' || vField === 'V_S3' || vField === 'V_LBBB' || vField === 'V_ChestPain' || vField === 'V_Murmur' || vField === 'V_Edema'){
                             valStr = normalizeYN(valStr);
                         }
                         visit[vField] = valStr;
+                        hasData = true;
+                    } else if(rowLabelRaw && !/:$/.test(rowLabelRaw)){
+                        // SAFETY NET: unknown non-header row with a value — append to V_Others
+                        visit.V_Others = (visit.V_Others ? visit.V_Others + ' | ' : '') + rowLabelRaw + ': ' + valStr;
                         hasData = true;
                     }
                 });
