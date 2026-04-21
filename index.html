@@ -3142,6 +3142,114 @@ function formatDateCell(v){
     return s; // give up, store as-is
 }
 
+// Build a lookup: vf (V_Concor etc.) -> [valid dose strings]
+var VISIT_DOSE_OPTIONS = (function(){
+    var m = {};
+    VISIT_MED_GROUPS.forEach(function(g){
+        g.meds.forEach(function(med){
+            m[med.id] = med.doses.filter(function(d){ return d && d.trim() !== ''; });
+        });
+    });
+    return m;
+})();
+
+// Snap a raw dose string to the closest valid dropdown option for the given visit drug field
+function normalizeVisitDose(vf, rawDose){
+    if(!rawDose || rawDose === 'Active') return rawDose || '';
+    var opts = VISIT_DOSE_OPTIONS[vf];
+    if(!opts || opts.length === 0) return rawDose;
+    var raw = String(rawDose).trim();
+    var rawLower = raw.toLowerCase();
+    // Exact or case-insensitive match
+    for(var i=0; i<opts.length; i++){
+        if(opts[i].toLowerCase() === rawLower) return opts[i];
+    }
+    // Special cases per-drug
+    // Entresto: "50 BD" -> "49/51 mg", "100 BD" -> "97/103 mg", "25 BD" -> "24/26 mg", "200 BD" -> "97/103 mg"
+    if(vf === 'V_Entresto'){
+        var bdMatch = raw.match(/(\d+)\s*(?:bd|bid|x\s*2|twice)/i);
+        if(bdMatch){
+            var perDose = parseInt(bdMatch[1], 10);
+            if(perDose <= 25) return '24/26 mg';
+            if(perDose <= 50) return '49/51 mg';
+            return '97/103 mg';
+        }
+        // bare number per dose
+        var bareN = parseFloat(raw);
+        if(!isNaN(bareN)){
+            if(bareN <= 25) return '24/26 mg';
+            if(bareN <= 50) return '49/51 mg';
+            return '97/103 mg';
+        }
+    }
+    // Zympass: "Generic 40/10" / "40/10" / "10/40 mg" -> pick closest available "X/Y mg" option
+    if(vf === 'V_Zympass'){
+        var fractMatch = raw.match(/(\d+)\s*\/\s*(\d+)/);
+        if(fractMatch){
+            var a = parseInt(fractMatch[1], 10), b = parseInt(fractMatch[2], 10);
+            // Options: '5/10 mg','10/10 mg','10/20 mg','20/10 mg' (ezetimibe/statin combo)
+            // Try both orderings since file may have ezetimibe/statin either way
+            for(var j=0; j<opts.length; j++){
+                var om = opts[j].match(/(\d+)\/(\d+)/);
+                if(om && ((parseInt(om[1])===a && parseInt(om[2])===b) || (parseInt(om[1])===b && parseInt(om[2])===a))) return opts[j];
+            }
+        }
+    }
+    // Atozet: "10/10 mg", "10/20 mg", "10/40 mg", "10/80 mg" — ezetimibe/atorvastatin
+    if(vf === 'V_Atozet'){
+        var fm = raw.match(/(\d+)\s*\/\s*(\d+)/);
+        if(fm){
+            for(var k=0; k<opts.length; k++){
+                var om2 = opts[k].match(/(\d+)\/(\d+)/);
+                if(om2 && parseInt(om2[2])===parseInt(fm[2])) return opts[k];
+            }
+        }
+    }
+    // Repatha/Praluent (injectable mg)
+    // General numeric match: raw has a number, find the closest dose in options
+    var n = parseFloat(raw);
+    if(!isNaN(n)){
+        var best = null, bestDiff = Infinity;
+        opts.forEach(function(opt){
+            var optNums = opt.match(/(\d+(?:\.\d+)?)/g);
+            if(optNums){
+                // Use first number in the option for distance
+                var optN = parseFloat(optNums[0]);
+                var diff = Math.abs(optN - n);
+                if(diff < bestDiff){ bestDiff = diff; best = opt; }
+            }
+        });
+        // Only snap if reasonably close (within ~20% of the raw value or 1 unit for small doses)
+        if(best && (bestDiff <= Math.max(n * 0.2, 1))) return best;
+    }
+    // Give up — return raw
+    return raw;
+}
+
+// Resolve "Same" / "same" values by looking backward through visits for the same drug field
+function resolveSameValues(visits){
+    visits.forEach(function(v, idx){
+        Object.keys(v).forEach(function(key){
+            if(!key.startsWith('V_')) return;
+            var val = v[key];
+            if(val === null || val === undefined) return;
+            var lower = String(val).trim().toLowerCase();
+            if(lower === 'same' || lower === 'same as above' || lower === 'continue' || lower === 'cont' || lower === 'cont.' || lower === 'no change' || lower === 'unchanged'){
+                // Walk backward through earlier visits (visits array is in parse order; earlier = smaller idx)
+                for(var j = idx - 1; j >= 0; j--){
+                    var prior = visits[j][key];
+                    if(prior && String(prior).trim() !== '' && String(prior).trim().toLowerCase() !== 'same' && String(prior).trim().toLowerCase() !== 'stopped'){
+                        v[key] = prior;
+                        return;
+                    }
+                }
+                // No prior value found — clear the "Same" to avoid clutter
+                delete v[key];
+            }
+        });
+    });
+}
+
 function handlePerPatientFiles(event){
     var files = Array.from(event.target.files || []);
     if(files.length === 0) return;
@@ -3451,7 +3559,7 @@ function parsePerPatientWorkbook(wb, fileName){
                         if(mm.vf){
                             // Don't overwrite if a later row in same visit has same drug mapped
                             if(!visit[mm.vf]){
-                                visit[mm.vf] = doseStr;
+                                visit[mm.vf] = normalizeVisitDose(mm.vf, doseStr);
                                 hasData = true;
                             }
                         } else {
@@ -3506,6 +3614,9 @@ function parsePerPatientWorkbook(wb, fileName){
                 visit.__visitMeds = visitMeds;
                 if(hasData) result.visits.push(visit);
             });
+            // Resolve "Same"/"continue"/"unchanged" values by copying from the prior visit's same field
+            // (result.visits is in column order — earliest first — so backward-walking finds the prior value)
+            resolveSameValues(result.visits);
             // Apply EARLIEST visit's class-level meds to the patient record (baseline)
             // Visits are appended in column order (oldest first in typical format)
             if(result.visits.length > 0){
@@ -3513,12 +3624,20 @@ function parsePerPatientWorkbook(wb, fileName){
                 Object.keys(baseline).forEach(function(classField){
                     if(!result.record[classField]){
                         result.record[classField] = baseline[classField].v;
-                        if(baseline[classField].dose && baseline[classField].dose !== 'Active'){
-                            result.record[classField+'_Dose'] = baseline[classField].dose;
+                        var baseDose = baseline[classField].dose;
+                        if(baseDose && baseDose !== 'Active'){
+                            // Normalize against the patient-level dose list (uses same brand→dose mapping as visits)
+                            // Find the matching vf for this drug value to snap the dose
+                            var matchedVf = null;
+                            Object.keys(PP_MED_MAP).forEach(function(k){
+                                var entry = PP_MED_MAP[k];
+                                if(entry.f === classField && entry.v === baseline[classField].v && entry.vf) matchedVf = entry.vf;
+                            });
+                            if(matchedVf) baseDose = normalizeVisitDose(matchedVf, baseDose);
+                            result.record[classField+'_Dose'] = baseDose;
                         }
                     }
                 });
-                // Clean up the transient prop so it isn't saved to Firestore
                 result.visits.forEach(function(vst){ delete vst.__visitMeds; });
             }
         }
