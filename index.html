@@ -1404,14 +1404,16 @@ function buildVisitMedDoses(){
         html+='<div class="visit-med-group-label"><i class="fa fa-pills me-1"></i>'+group.label+'</div>';
         html+='<div class="row g-2">';
         group.meds.forEach(function(m){
-            html+='<div class="col-12 col-md-4" style="border:1px solid #f0e6e6;border-radius:6px;padding:6px;background:#fafafa;">';
-            html+='<label style="font-weight:600;">'+m.label+'</label>';
-            html+='<select class="form-select form-select-sm" id="'+m.id+'" style="font-size:0.78rem;">';
+            html+='<div class="col-6 col-md-3">';
+            html+='<label>'+m.label+'</label>';
+            html+='<select class="form-select" id="'+m.id+'">';
             m.doses.forEach(function(d){html+='<option value="'+d+'">'+d+'</option>';});
             html+='</select>';
-            html+='<div class="row g-1 mt-1">';
-            html+='<div class="col-7"><input type="text" class="form-control form-control-sm" id="'+m.id+'_Custom" placeholder="Custom dose" style="font-size:0.72rem;"></div>';
-            html+='<div class="col-5"><input type="text" class="form-control form-control-sm" id="'+m.id+'_Freq" placeholder="Freq (OD/BID/TID)" style="font-size:0.72rem;"></div>';
+            html+='<div class="med-sub-fields visible">';
+            html+='<label class="mt-1" style="font-size:0.7rem;">Custom Dose <small class="text-muted">(if not in list)</small></label>';
+            html+='<input type="text" class="form-control form-control-sm" id="'+m.id+'_Custom" placeholder="e.g. 12.5 mg">';
+            html+='<label class="mt-1" style="font-size:0.7rem;">Frequency</label>';
+            html+='<input type="text" class="form-control form-control-sm" id="'+m.id+'_Freq" placeholder="e.g. OD, BID, TID">';
             html+='</div>';
             html+='</div>';
         });
@@ -1705,7 +1707,30 @@ function generateCardHTML(data,id){
         if(s.toLowerCase() === 'none') return true;
         return false;
     }
-    var html="<div class='card p-3 border-primary shadow-sm patient-card' id='pdf-"+id+"'><h4 class='text-primary mb-3'>"+(data.Patient_Name||'Unknown')+"</h4><div class='row'>";
+    var html="<div class='card p-3 border-primary shadow-sm patient-card' id='pdf-"+id+"'><h4 class='text-primary mb-3'>"+(data.Patient_Name||'Unknown')+"</h4>";
+    // Vaccination alert (this year vs recorded year)
+    var thisYear=new Date().getFullYear();
+    var fluY=parseInt(data.Vacc_Influenza_Year||0);
+    var pneuY=parseInt(data.Vacc_Pneumococcal_Year||0);
+    var covidY=parseInt(data.Vacc_COVID_Year||0);
+    var missingVacc=[];
+    if(fluY<thisYear)missingVacc.push('Influenza');
+    if(!pneuY||thisYear-pneuY>5)missingVacc.push('Pneumococcal');
+    if(covidY<thisYear)missingVacc.push('COVID-19');
+    if(missingVacc.length>0){
+        html+="<div class='alert alert-warning py-2 px-3 mb-3 d-flex align-items-center' style='font-size:0.85rem;border-left:4px solid #f39c12;'><i class='fa fa-syringe me-2 text-warning'></i><div><strong>Vaccinations Due:</strong> "+missingVacc.join(', ')+" <small class='text-muted d-block'>(checked against year "+thisYear+")</small></div></div>";
+    }
+    // Overdue follow-up alert (>2 months since last visit, based on Next_Appt being in the past or missing)
+    var today=new Date();
+    var twoMonthsAgo=new Date(today.getTime()-60*24*60*60*1000);
+    var lastSeenDate=null;
+    if(data.lastEditAt)lastSeenDate=new Date(data.lastEditAt);
+    else if(data.timestamp)lastSeenDate=new Date(data.timestamp);
+    if(lastSeenDate&&lastSeenDate<twoMonthsAgo&&(!data.Next_Appt||data.Next_Appt<today.toISOString().split('T')[0])){
+        var daysSince=Math.floor((today-lastSeenDate)/(1000*60*60*24));
+        html+="<div class='alert alert-danger py-2 px-3 mb-3 d-flex align-items-center' style='font-size:0.85rem;border-left:4px solid #dc3545;'><i class='fa fa-user-clock me-2 text-danger'></i><div><strong>No Follow-up &gt;2 Months:</strong> Last activity "+daysSince+" days ago.</div></div>";
+    }
+    html+="<div class='row'>";
     var totalFilled = 0;
     allFields.forEach(function(s,idx){
         // Build rows for fields that actually have data
@@ -1813,7 +1838,16 @@ function editPt(id){
     document.getElementById("submitBtn").innerHTML='<i class="fa fa-save me-1"></i> Update Patient';
     loadVisits(id);
     goToWizardStep(1);
-    window.scrollTo({top:0,behavior:"smooth"});
+    // Scroll to the form card (where the patient data is), not to top of page
+    setTimeout(function(){
+        var formCard=document.getElementById('formTitle');
+        if(formCard){
+            // Scroll so the form title is near the top of the viewport with a small offset
+            var rect=formCard.getBoundingClientRect();
+            var offset=window.pageYOffset+rect.top-20;
+            window.scrollTo({top:offset,behavior:'smooth'});
+        }
+    },100);
 }
 
 function editFromAdmin(id){editPt(id);goToMain();}
