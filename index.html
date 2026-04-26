@@ -903,7 +903,11 @@ var MED_FORMULARY = {
     // CHANGE 1b: CCB separate
     Med_CCB:        {label:'CCB (Amlodipine)',   options:['None','Amlodipine'], doses:{'Amlodipine':['5 mg OD','10 mg OD']}},
     Med_Diuretic:   {label:'Diuretics',          options:['None','Furosemide','Metolazone','HCTZ','Furosemide + Metolazone','Furosemide + HCTZ','Metolazone + HCTZ'], doses:{'Furosemide':['20 mg PO OD','40 mg PO OD','40 mg PO BID','80 mg PO OD','80 mg PO BID','120 mg PO OD'],'Metolazone':['2.5 mg PO OD','5 mg PO OD','10 mg PO OD'],'HCTZ':['12.5 mg PO OD','25 mg PO OD','50 mg PO OD'],'Furosemide + Metolazone':['Furo 40 + Metolazone 2.5','Furo 40 + Metolazone 5','Furo 80 + Metolazone 2.5','Furo 80 + Metolazone 5','Furo 80 + Metolazone 10','Furo 120 + Metolazone 5','Furo 120 + Metolazone 10'],'Furosemide + HCTZ':['Furo 40 + HCTZ 12.5','Furo 40 + HCTZ 25','Furo 80 + HCTZ 12.5','Furo 80 + HCTZ 25'],'Metolazone + HCTZ':['Metolazone 2.5 + HCTZ 12.5','Metolazone 5 + HCTZ 25']}},
-    Med_Lipid:      {label:'Lipid Lowering',     groups:[{name:'Statin',drugs:['Zocor','Lipitor','Crestor']},{name:'Combination',drugs:['Atozet','Zympass','Ezetrol']},{name:'PCSK9i',drugs:['Repatha','Praluent']},{name:'Fibrate',drugs:['Fibrates']},{name:'Omega-3',drugs:['Omacor']}], options:['None','Zocor','Lipitor','Crestor','Ezetrol','Repatha','Praluent','Atozet','Zympass','Fibrates','Omacor'], doses:{'Zocor':['10 mg PO OD','20 mg PO OD','40 mg PO OD'],'Lipitor':['10 mg PO OD','20 mg PO OD','40 mg PO OD','80 mg PO OD'],'Crestor':['5 mg PO OD','10 mg PO OD','20 mg PO OD','40 mg PO OD'],'Ezetrol':['10 mg PO OD'],'Repatha':['140 mg SC q2wk','420 mg SC q1mo'],'Praluent':['75 mg SC q2wk','150 mg SC q2wk'],'Atozet':['10/10 mg PO OD','10/20 mg PO OD','10/40 mg PO OD','10/80 mg PO OD'],'Zympass':['5/10 mg PO OD','10/10 mg PO OD','10/20 mg PO OD','20/10 mg PO OD'],'Fibrates':['145 mg PO OD','160 mg PO OD'],'Omacor':['1 g PO OD','2 g PO OD']}},
+    Med_Statin:     {label:'Statin',             options:['None','Zocor','Lipitor','Crestor'], doses:{'Zocor':['10 mg PO OD','20 mg PO OD','40 mg PO OD'],'Lipitor':['10 mg PO OD','20 mg PO OD','40 mg PO OD','80 mg PO OD'],'Crestor':['5 mg PO OD','10 mg PO OD','20 mg PO OD','40 mg PO OD']}},
+    Med_LipidCombo: {label:'Lipid Combination',  options:['None','Atozet','Zympass','Ezetrol'], doses:{'Atozet':['10/10 mg PO OD','10/20 mg PO OD','10/40 mg PO OD','10/80 mg PO OD'],'Zympass':['5/10 mg PO OD','10/10 mg PO OD','10/20 mg PO OD','20/10 mg PO OD'],'Ezetrol':['10 mg PO OD']}},
+    Med_PCSK9:      {label:'PCSK9i',              options:['None','Repatha','Praluent'], doses:{'Repatha':['140 mg SC q2wk','420 mg SC q1mo'],'Praluent':['75 mg SC q2wk','150 mg SC q2wk']}},
+    Med_Fibrate:    {label:'Fibrate',             options:['None','Fibrates'], doses:{'Fibrates':['145 mg PO OD','160 mg PO OD']}},
+    Med_Omega3:     {label:'Omega-3',             options:['None','Omacor'], doses:{'Omacor':['1 g PO OD','2 g PO OD']}},
     Med_Antiplat:   {label:'Antiplatelets',      options:['None','ASA','Plavix','Brilinta'], doses:{'ASA':['81 mg OD','100 mg OD'],'Plavix':['75 mg OD'],'Brilinta':['60 mg BID','90 mg BID']}},
     Med_OAC:        {label:'OAC',                options:['None','Warfarin','Eliquis','Xarelto'], doses:{'Warfarin':['1 mg','2 mg','3 mg','5 mg','7.5 mg','10 mg'],'Eliquis':['2.5 mg BID','5 mg BID'],'Xarelto':['10 mg OD','15 mg OD','20 mg OD']}},
     Med_Arrhythmia: {label:'Anti-arrhythmics',   options:['None','Cordarone','Flecainide','Sotalol','Propafenone'], doses:{'Cordarone':['100 mg OD','200 mg OD','400 mg OD'],'Flecainide':['50 mg BID','100 mg BID','150 mg BID'],'Sotalol':['40 mg BID','80 mg BID','160 mg BID'],'Propafenone':['150 mg TID','225 mg TID','300 mg TID']}},
@@ -1434,7 +1438,7 @@ function syncPillsFromData(){
     if(smokerV&&smokerH)smokerV.value=smokerH.value;
 }
 
-var MULTI_SELECT_MEDS = ['Med_Lipid'];
+var MULTI_SELECT_MEDS = [];
 
 function buildMedSection7(){
     var html='';
@@ -3685,23 +3689,23 @@ var PP_MED_MAP = {
     'pradaxa':     {f:'Med_OAC', v:'Pradaxa'},
     'dabigatran':  {f:'Med_OAC', v:'Pradaxa'},
     // Lipid
-    'zocor':        {f:'Med_Lipid', v:'Zocor',    vf:'V_Zocor'},
-    'simvastatin':  {f:'Med_Lipid', v:'Zocor',    vf:'V_Zocor'},
-    'lipitor':      {f:'Med_Lipid', v:'Lipitor',  vf:'V_Lipitor'},
-    'atorvastatin': {f:'Med_Lipid', v:'Lipitor',  vf:'V_Lipitor'},
-    'crestor':      {f:'Med_Lipid', v:'Crestor',  vf:'V_Crestor'},
-    'rosuvastatin': {f:'Med_Lipid', v:'Crestor',  vf:'V_Crestor'},
-    'ezetrol':      {f:'Med_Lipid', v:'Ezetrol',  vf:'V_Ezetrol'},
-    'ezetrol 10':   {f:'Med_Lipid', v:'Ezetrol',  vf:'V_Ezetrol'},
-    'ezetimibe':    {f:'Med_Lipid', v:'Ezetrol',  vf:'V_Ezetrol'},
-    'repatha':      {f:'Med_Lipid', v:'Repatha',  vf:'V_Repatha'},
-    'evolocumab':   {f:'Med_Lipid', v:'Repatha',  vf:'V_Repatha'},
-    'praluent':     {f:'Med_Lipid', v:'Praluent', vf:'V_Praluent'},
-    'alirocumab':   {f:'Med_Lipid', v:'Praluent', vf:'V_Praluent'},
-    'atozet':       {f:'Med_Lipid', v:'Atozet',   vf:'V_Atozet'},
-    'zympass':      {f:'Med_Lipid', v:'Zympass',  vf:'V_Zympass'},
-    'fibrates':     {f:'Med_Lipid', v:'Fibrates', vf:'V_Fibrates'},
-    'omacor':       {f:'Med_Lipid', v:'Omacor',   vf:'V_Omacor'},
+    'zocor':        {f:'Med_Statin',     v:'Zocor',    vf:'V_Zocor'},
+    'simvastatin':  {f:'Med_Statin',     v:'Zocor',    vf:'V_Zocor'},
+    'lipitor':      {f:'Med_Statin',     v:'Lipitor',  vf:'V_Lipitor'},
+    'atorvastatin': {f:'Med_Statin',     v:'Lipitor',  vf:'V_Lipitor'},
+    'crestor':      {f:'Med_Statin',     v:'Crestor',  vf:'V_Crestor'},
+    'rosuvastatin': {f:'Med_Statin',     v:'Crestor',  vf:'V_Crestor'},
+    'ezetrol':      {f:'Med_LipidCombo', v:'Ezetrol',  vf:'V_Ezetrol'},
+    'ezetrol 10':   {f:'Med_LipidCombo', v:'Ezetrol',  vf:'V_Ezetrol'},
+    'ezetimibe':    {f:'Med_LipidCombo', v:'Ezetrol',  vf:'V_Ezetrol'},
+    'repatha':      {f:'Med_PCSK9',      v:'Repatha',  vf:'V_Repatha'},
+    'evolocumab':   {f:'Med_PCSK9',      v:'Repatha',  vf:'V_Repatha'},
+    'praluent':     {f:'Med_PCSK9',      v:'Praluent', vf:'V_Praluent'},
+    'alirocumab':   {f:'Med_PCSK9',      v:'Praluent', vf:'V_Praluent'},
+    'atozet':       {f:'Med_LipidCombo', v:'Atozet',   vf:'V_Atozet'},
+    'zympass':      {f:'Med_LipidCombo', v:'Zympass',  vf:'V_Zympass'},
+    'fibrates':     {f:'Med_Fibrate',    v:'Fibrates', vf:'V_Fibrates'},
+    'omacor':       {f:'Med_Omega3',     v:'Omacor',   vf:'V_Omacor'},
     // Anti-arrhythmics
     'cordarone':   {f:'Med_Arrhythmia', v:'Cordarone',   vf:'V_Cordarone'},
     'amiodarone':  {f:'Med_Arrhythmia', v:'Cordarone',   vf:'V_Cordarone'},
