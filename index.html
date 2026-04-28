@@ -332,6 +332,7 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
         <p class="mb-0">Heart Failure Clinic Registry</p>
         <div class="header-nav-btns">
             <button class="header-nav-btn active-nav" onclick="goToMain()"><i class="fa fa-user-plus me-1"></i>Registry</button>
+            <button class="header-nav-btn" onclick="goToClinic()"><i class="fa fa-hospital me-1"></i>Clinic</button>
             <button class="header-nav-btn" onclick="showAnalyticsLogin()"><i class="fa fa-chart-pie me-1"></i>Analytics</button>
         </div>
     </div>
@@ -339,23 +340,6 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 <div class="container mt-3 mb-5" style="padding-bottom:80px;">
 
 ```
-<!-- MAIN PAGE ALERTS PANEL — Upcoming, No Follow-up, No Vaccinations, Calendar -->
-<div class="card p-3 border-top border-4 border-warning shadow-sm mb-3" id="mainAlertsCard">
-    <div class="d-flex justify-content-between align-items-center mb-1">
-        <small class="text-muted fw-bold" style="font-size:0.7rem;letter-spacing:0.05em;text-transform:uppercase;">Clinic Alerts</small>
-        <button class="btn btn-sm btn-link p-0" style="font-size:0.72rem;text-decoration:none;" onclick="loadMainAlerts()" title="Refresh alerts"><i class="fa fa-arrows-rotate"></i> Refresh</button>
-    </div>
-    <ul class="nav nav-tabs nav-fill mb-2" id="mainAlertsTabs" style="font-size:0.78rem;">
-        <li class="nav-item"><button class="nav-link active" onclick="showMainAlertsTab('upcoming',this)" style="font-weight:600;"><i class="fa fa-clock text-warning"></i> Upcoming 14 Days <span class="badge bg-warning text-dark ms-1" id="mainUpcomingCount">0</span></button></li>
-        <li class="nav-item"><button class="nav-link" onclick="showMainAlertsTab('overdue',this)" style="font-weight:600;"><i class="fa fa-user-clock text-danger"></i> No Follow-up &gt;2 mo <span class="badge bg-danger ms-1" id="mainOverdueCount">0</span></button></li>
-        <li class="nav-item"><button class="nav-link" onclick="showMainAlertsTab('vacc',this)" style="font-weight:600;"><i class="fa fa-syringe text-primary"></i> Vaccinations Due <span class="badge bg-primary ms-1" id="mainVaccCount">0</span></button></li>
-        <li class="nav-item"><button class="nav-link" onclick="showMainAlertsTab('calendar',this)" style="font-weight:600;"><i class="fa fa-calendar text-success"></i> Calendar</button></li>
-    </ul>
-    <div id="mainAlertsBody" style="max-height:420px;overflow-y:auto;font-size:0.85rem;">
-        <div class="text-muted small text-center py-2"><i class="fa fa-spinner fa-spin"></i> Loading alerts...</div>
-    </div>
-</div>
-
 <div class="card p-3 border-top border-4 border-danger shadow">
     <div class="d-flex justify-content-between align-items-center mb-2">
         <h6 class="text-secondary fw-bold mb-0">Search Patient</h6>
@@ -443,6 +427,16 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                 <div class="col-6 col-md-3"><label>QRS Duration (ms)</label><input type="number" class="form-control" id="ECG_QRS" inputmode="numeric" placeholder="e.g. 120" oninput="checkCRTIndication()"></div>
                 <div class="col-12 col-md-3"><label>Arrhythmia</label><input type="text" class="form-control" id="ECG_Arrhythmia" placeholder="Type, if any"></div>
                 <div class="col-12 col-md-3"><label>Pacing Rhythm</label><input type="text" class="form-control" id="ECG_Pacing" placeholder="e.g. AAI, VVI, DDD, BiV"></div>
+                <div class="col-12">
+                    <label class="form-label mb-1" style="font-size:0.82rem;"><i class="fa fa-camera me-1"></i>ECG Image <small class="text-muted fw-normal">(auto-compressed)</small></label>
+                    <div class="d-flex gap-2 align-items-center flex-wrap">
+                        <input type="file" class="form-control form-control-sm" id="ECG_Image_File" accept="image/*" capture="environment" style="max-width:260px;" onchange="handleEcgImageUpload(this,'ECG_Image','ecgImagePreview','ecgImageMeta')">
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearEcgImage('ECG_Image','ECG_Image_File','ecgImagePreview','ecgImageMeta')" title="Remove image"><i class="fa fa-times"></i></button>
+                        <span id="ecgImageMeta" class="text-muted small"></span>
+                    </div>
+                    <input type="hidden" id="ECG_Image">
+                    <div id="ecgImagePreview" class="mt-1" style="max-width:100%;"></div>
+                </div>
                 <div class="col-12"><hr class="my-1"></div>
                 <div class="col-12 col-md-6"><label>ECHO Details</label><input type="text" class="form-control" id="ECHO"></div>
                 <div class="col-12 col-md-6"><label>CMR/CT Angio</label><input type="text" class="form-control" id="CMR_CT"></div>
@@ -628,6 +622,16 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                     <div class="col-4 col-md-3"><label>LBBB</label><select class="form-select" id="V_LBBB"><option>No</option><option>Yes</option></select></div>
                     <div class="col-4 col-md-3"><label>QRS Width (ms)</label><input type="text" class="form-control" id="V_QRS" inputmode="numeric"></div>
                     <div class="col-4 col-md-3"><label>Arrhythmia</label><input type="text" class="form-control" id="V_Arrhythmia"></div>
+                    <div class="col-12">
+                        <label class="form-label mb-1" style="font-size:0.82rem;"><i class="fa fa-camera me-1"></i>Visit ECG Image <small class="text-muted fw-normal">(auto-compressed)</small></label>
+                        <div class="d-flex gap-2 align-items-center flex-wrap">
+                            <input type="file" class="form-control form-control-sm" id="V_ECG_Image_File" accept="image/*" capture="environment" style="max-width:260px;" onchange="handleEcgImageUpload(this,'V_ECG_Image','vEcgImagePreview','vEcgImageMeta')">
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearEcgImage('V_ECG_Image','V_ECG_Image_File','vEcgImagePreview','vEcgImageMeta')" title="Remove image"><i class="fa fa-times"></i></button>
+                            <span id="vEcgImageMeta" class="text-muted small"></span>
+                        </div>
+                        <input type="hidden" id="V_ECG_Image">
+                        <div id="vEcgImagePreview" class="mt-1" style="max-width:100%;"></div>
+                    </div>
                     <div class="col-12"><hr class="my-2"></div>
                     <h6 class="col-12 text-secondary">Echo</h6>
                     <div class="col-6 col-md-4"><label>Change in EF</label><input type="text" class="form-control" id="V_EF_Change"></div>
@@ -722,6 +726,39 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
     <button type="button" class="btn btn-outline-secondary d-none" id="cancelEditBtn" onclick="resetForm()"><i class="fa fa-times me-1"></i> Cancel</button>
 </div>
 
+</div>
+
+<!-- CLINIC PAGE — Calendar, Upcoming, Overdue, Vaccinations -->
+
+<div id="pageClinic" class="page">
+    <div class="clinic-header text-center">
+        <button class="btn btn-light btn-sm position-absolute top-0 start-0 m-2" onclick="goToMain()"><i class="fa fa-arrow-left me-1"></i>Back</button>
+        <i class="fa-solid fa-hospital fa-3x mb-1"></i>
+        <h2 class="fw-bold mb-0">Clinic Dashboard</h2>
+        <p class="mb-0">Mubarak Al-Kabeer Hospital · HF Clinic</p>
+        <div class="header-nav-btns">
+            <button class="header-nav-btn" onclick="goToMain()"><i class="fa fa-user-plus me-1"></i>Registry</button>
+            <button class="header-nav-btn active-nav"><i class="fa fa-hospital me-1"></i>Clinic</button>
+            <button class="header-nav-btn" onclick="showAnalyticsLogin()"><i class="fa fa-chart-pie me-1"></i>Analytics</button>
+        </div>
+    </div>
+    <div class="container mt-3 mb-5" style="padding-bottom:80px;">
+        <div class="card p-3 border-top border-4 border-warning shadow-sm mb-3" id="clinicAlertsCard">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <small class="text-muted fw-bold" style="font-size:0.7rem;letter-spacing:0.05em;text-transform:uppercase;">Clinic Alerts</small>
+                <button class="btn btn-sm btn-link p-0" style="font-size:0.72rem;text-decoration:none;" onclick="loadMainAlerts()" title="Refresh alerts"><i class="fa fa-arrows-rotate"></i> Refresh</button>
+            </div>
+            <ul class="nav nav-tabs nav-fill mb-2" id="mainAlertsTabs" style="font-size:0.78rem;">
+                <li class="nav-item"><button class="nav-link active" onclick="showMainAlertsTab('calendar',this)" style="font-weight:600;"><i class="fa fa-calendar text-success"></i> Calendar</button></li>
+                <li class="nav-item"><button class="nav-link" onclick="showMainAlertsTab('upcoming',this)" style="font-weight:600;"><i class="fa fa-clock text-warning"></i> Upcoming 14 Days <span class="badge bg-warning text-dark ms-1" id="mainUpcomingCount">0</span></button></li>
+                <li class="nav-item"><button class="nav-link" onclick="showMainAlertsTab('overdue',this)" style="font-weight:600;"><i class="fa fa-user-clock text-danger"></i> No Follow-up &gt;2 mo <span class="badge bg-danger ms-1" id="mainOverdueCount">0</span></button></li>
+                <li class="nav-item"><button class="nav-link" onclick="showMainAlertsTab('vacc',this)" style="font-weight:600;"><i class="fa fa-syringe text-primary"></i> Vaccinations Due <span class="badge bg-primary ms-1" id="mainVaccCount">0</span></button></li>
+            </ul>
+            <div id="mainAlertsBody" style="min-height:300px;font-size:0.85rem;">
+                <div class="text-muted small text-center py-2"><i class="fa fa-spinner fa-spin"></i> Loading alerts...</div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- ADMIN PAGE -->
@@ -1047,7 +1084,7 @@ auth.onAuthStateChanged(function(user) {
     } else {
         document.getElementById('pageLogin').style.display = 'flex';
         document.body.classList.add('login-active');
-        ['pageMain','pageAdmin','pageAnalytics'].forEach(function(p){document.getElementById(p).classList.remove('active');});
+        ['pageMain','pageAdmin','pageAnalytics','pageClinic'].forEach(function(p){var el=document.getElementById(p);if(el)el.classList.remove('active');});
     }
 });
 
@@ -1131,7 +1168,7 @@ function doLogin() {
 }
 function doLogout(){if(confirm('Sign out of HF Registry?'))auth.signOut();}
 
-function goToMain(){['pageAdmin','pageAnalytics'].forEach(function(p){document.getElementById(p).classList.remove('active');});document.getElementById('pageMain').classList.add('active');showStickySave();if(typeof loadMainAlerts==='function')loadMainAlerts();}
+function goToMain(){['pageAdmin','pageAnalytics','pageClinic'].forEach(function(p){var el=document.getElementById(p);if(el)el.classList.remove('active');});document.getElementById('pageMain').classList.add('active');showStickySave();if(typeof loadMainAlerts==='function')loadMainAlerts();}
 
 // ========== MAIN PAGE ALERTS (Upcoming / Overdue / Vaccinations / Calendar) ==========
 var _mainAlertsData={upcoming:[],overdue:[],vacc:[],apptByDay:{}};
@@ -1171,23 +1208,49 @@ function renderMainAlertsBody(){
     list.forEach(function(item){
         if(_mainAlertsActiveTab==='upcoming'){
             var color=item.daysUntil<=3?'danger':(item.daysUntil<=7?'warning':'info');
-            html+='<div class="alert alert-'+color+' py-1 px-2 mb-1 d-flex justify-content-between align-items-center" style="font-size:0.82rem;">';
+            html+='<div class="alert alert-'+color+' py-1 px-2 mb-1 d-flex justify-content-between align-items-center flex-wrap" style="font-size:0.82rem;">';
             html+='<span><b>'+(item.name||'Unknown')+'</b> <small class="text-muted">(File: '+(item.file||'-')+')</small></span>';
-            html+='<span><i class="fa fa-calendar"></i> '+item.date+' (in '+item.daysUntil+' day'+(item.daysUntil===1?'':'s')+')</span>';
+            html+='<span><i class="fa fa-calendar"></i> '+item.date+' (in '+item.daysUntil+' day'+(item.daysUntil===1?'':'s')+')';
+            if(item.id)html+=' <button class="btn btn-sm btn-outline-primary py-0 px-2 ms-2" style="font-size:0.72rem;" onclick="openPatientFromClinic(\''+item.id+'\')"><i class="fa fa-edit"></i> Open</button>';
+            html+='</span>';
             html+='</div>';
         }else if(_mainAlertsActiveTab==='overdue'){
-            html+='<div class="alert alert-danger py-1 px-2 mb-1 d-flex justify-content-between align-items-center" style="font-size:0.82rem;">';
+            html+='<div class="alert alert-danger py-1 px-2 mb-1 d-flex justify-content-between align-items-center flex-wrap" style="font-size:0.82rem;">';
             html+='<span><b>'+(item.name||'Unknown')+'</b> <small class="text-muted">(File: '+(item.file||'-')+')</small></span>';
-            html+='<span><i class="fa fa-clock"></i> Last visit: '+(item.lastVisit||'never')+' ('+item.daysSince+' days ago)</span>';
+            html+='<span><i class="fa fa-clock"></i> Last visit: '+(item.lastVisit||'never')+' ('+item.daysSince+' days ago)';
+            if(item.id)html+=' <button class="btn btn-sm btn-outline-light py-0 px-2 ms-2" style="font-size:0.72rem;" onclick="openPatientFromClinic(\''+item.id+'\')"><i class="fa fa-edit"></i> Open</button>';
+            html+='</span>';
             html+='</div>';
         }else if(_mainAlertsActiveTab==='vacc'){
-            html+='<div class="alert alert-primary py-1 px-2 mb-1 d-flex justify-content-between align-items-center" style="font-size:0.82rem;">';
+            html+='<div class="alert alert-primary py-1 px-2 mb-1 d-flex justify-content-between align-items-center flex-wrap" style="font-size:0.82rem;">';
             html+='<span><b>'+(item.name||'Unknown')+'</b> <small class="text-muted">(File: '+(item.file||'-')+')</small></span>';
-            html+='<span style="font-size:0.75rem;"><i class="fa fa-syringe"></i> Missing: '+item.missing+'</span>';
+            html+='<span style="font-size:0.75rem;"><i class="fa fa-syringe"></i> Missing: '+item.missing;
+            if(item.id)html+=' <button class="btn btn-sm btn-outline-light py-0 px-2 ms-2" style="font-size:0.72rem;" onclick="openPatientFromClinic(\''+item.id+'\')"><i class="fa fa-edit"></i> Open</button>';
+            html+='</span>';
             html+='</div>';
         }
     });
     body.innerHTML=html;
+}
+
+// Open patient from clinic dashboard — loads into PC cache first if not present, then routes to registry editor
+function openPatientFromClinic(id){
+    if(!id)return;
+    if(PC[id]){editPt(id);goToMain();return;}
+    db.collection("patients").doc(id).get().then(function(snap){
+        if(!snap.exists){showPopup&&showPopup("error","Not found","Patient record not found.");return;}
+        PC[id]=snap.data();
+        editPt(id);goToMain();
+    }).catch(function(e){showPopup&&showPopup("error","Error","Could not open patient: "+(e.message||e));});
+}
+
+// Pre-load all patients into PC cache so Clinic-page Open buttons work without a registry visit
+function loadClinicCache(){
+    // If admin already loaded, skip
+    if(Object.keys(PC).length>0)return;
+    db.collection("patients").get().then(function(snap){
+        snap.forEach(function(docSnap){PC[docSnap.id]=docSnap.data();});
+    }).catch(function(){});
 }
 
 function loadMainAlerts(){
@@ -1209,7 +1272,7 @@ function loadMainAlerts(){
             // Upcoming appointments (14-day list) AND full calendar map (all future)
             if(d.Next_Appt&&d.Next_Appt>=todayStr){
                 var da=Math.floor((new Date(d.Next_Appt)-new Date(todayStr))/(1000*60*60*24));
-                if(da<=14)_mainAlertsData.upcoming.push({name:d.Patient_Name,file:d.File_No,date:d.Next_Appt,daysUntil:da});
+                if(da<=14)_mainAlertsData.upcoming.push({name:d.Patient_Name,file:d.File_No,date:d.Next_Appt,daysUntil:da,id:id});
                 // Add to calendar (any future date, no 14-day cap)
                 if(!_mainAlertsData.apptByDay[d.Next_Appt])_mainAlertsData.apptByDay[d.Next_Appt]=[];
                 _mainAlertsData.apptByDay[d.Next_Appt].push({name:d.Patient_Name,file:d.File_No,doctor:d.Doctor_Name,id:id});
@@ -1223,7 +1286,7 @@ function loadMainAlerts(){
             // Pneumococcal is given every several years — flag if never recorded OR more than 5 yr ago
             if(!pneuYear||thisYear-pneuYear>5)vMissing.push('Pneumococcal');
             if(covidYear<thisYear)vMissing.push('COVID');
-            if(vMissing.length>0)_mainAlertsData.vacc.push({name:d.Patient_Name,file:d.File_No,missing:vMissing.join(', ')});
+            if(vMissing.length>0)_mainAlertsData.vacc.push({name:d.Patient_Name,file:d.File_No,missing:vMissing.join(', '),id:id});
             // Overdue: needs visit query
             patientPromises.push(
                 db.collection("patients").doc(id).collection("visits").orderBy("visitDate","desc").limit(1).get().then(function(vsnap){
@@ -1232,7 +1295,7 @@ function loadMainAlerts(){
                     var lastDate=lastVisit?new Date(lastVisit):(d.timestamp?new Date(d.timestamp):null);
                     if(lastDate&&lastDate<twoMonthsAgo){
                         var daysSince=Math.floor((today-lastDate)/(1000*60*60*24));
-                        _mainAlertsData.overdue.push({name:d.Patient_Name,file:d.File_No,lastVisit:lastVisit||(d.timestamp?d.timestamp.split('T')[0]+' (registered)':'never'),daysSince:daysSince});
+                        _mainAlertsData.overdue.push({name:d.Patient_Name,file:d.File_No,lastVisit:lastVisit||(d.timestamp?d.timestamp.split('T')[0]+' (registered)':'never'),daysSince:daysSince,id:id});
                     }
                 }).catch(function(){})
             );
@@ -1323,7 +1386,7 @@ function renderCalendarDayList(dateStr){
         html+='<span><b>'+(a.name||'Unknown')+'</b> <small class="text-muted">(File: '+(a.file||'-')+')</small>';
         if(a.doctor)html+=' <small class="text-muted ms-1"><i class="fa fa-user-md"></i> '+a.doctor+'</small>';
         html+='</span>';
-        if(a.id)html+='<button class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size:0.72rem;" onclick="editPt(\''+a.id+'\')"><i class="fa fa-edit"></i> Open</button>';
+        if(a.id)html+='<button class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size:0.72rem;" onclick="openPatientFromClinic(\''+a.id+'\')"><i class="fa fa-edit"></i> Open</button>';
         html+='</div>';
     });
     return html;
@@ -1356,8 +1419,10 @@ function selectCalendarDay(dateStr){
     }
     renderApptCalendar();
 }
-function goToAdmin(){['pageMain','pageAnalytics'].forEach(function(p){document.getElementById(p).classList.remove('active');});document.getElementById('pageAdmin').classList.add('active');hideStickySave();loadAdmin();}
-function goToAnalytics(){['pageMain','pageAdmin'].forEach(function(p){document.getElementById(p).classList.remove('active');});document.getElementById('pageAnalytics').classList.add('active');hideStickySave();loadAnalytics();}
+function goToAdmin(){['pageMain','pageAnalytics','pageClinic'].forEach(function(p){var el=document.getElementById(p);if(el)el.classList.remove('active');});document.getElementById('pageAdmin').classList.add('active');hideStickySave();loadAdmin();}
+function goToAnalytics(){['pageMain','pageAdmin','pageClinic'].forEach(function(p){var el=document.getElementById(p);if(el)el.classList.remove('active');});document.getElementById('pageAnalytics').classList.add('active');hideStickySave();loadAnalytics();}
+function goToClinic(){['pageMain','pageAdmin','pageAnalytics'].forEach(function(p){var el=document.getElementById(p);if(el)el.classList.remove('active');});document.getElementById('pageClinic').classList.add('active');hideStickySave();if(typeof loadClinicCache==='function')loadClinicCache();if(typeof loadMainAlerts==='function')loadMainAlerts();// default tab is calendar
+var firstTab=document.querySelector('#pageClinic #mainAlertsTabs .nav-link.active');if(firstTab&&firstTab.getAttribute('onclick')&&firstTab.getAttribute('onclick').indexOf('calendar')>=0){if(typeof showMainAlertsTab==='function')showMainAlertsTab('calendar',firstTab);}}
 function showAdminLogin(){if(prompt("Admin PIN:")==="1234"){goToAdmin();}else alert("Wrong PIN");}
 function showAnalyticsLogin(){if(prompt("Analytics PIN (same as Admin):")==="1234"){goToAnalytics();}else alert("Wrong PIN");}
 function showStickySave(){document.getElementById('stickySaveBar').classList.add('visible');}
@@ -1823,7 +1888,7 @@ function savePatient(){
     if(!mobile){showPopup("error","Mobile Required","Mobile number is required.");document.getElementById("Mobile").classList.add('input-error');var me=document.getElementById('mobileError');if(me)me.style.display='block';return;}else{document.getElementById("Mobile").classList.remove('input-error');var me2=document.getElementById('mobileError');if(me2)me2.style.display='none';}
     var data={};
     document.querySelectorAll('#hfForm input, #hfForm select, #hfForm textarea').forEach(function(el){
-        if(el.id&&!el.id.startsWith('V_')&&el.id!=='Next_Appt'&&el.id!=='Visit_Date'&&el.id!=='Visit_Type'&&!el.id.endsWith('_Visible'))data[el.id]=el.value;
+        if(el.id&&el.type!=='file'&&!el.id.startsWith('V_')&&el.id!=='Next_Appt'&&el.id!=='Visit_Date'&&el.id!=='Visit_Type'&&!el.id.endsWith('_Visible'))data[el.id]=el.value;
     });
     Object.keys(MED_FORMULARY).forEach(function(medId){
         data[medId+'_Dose']=document.getElementById(medId+'_Dose')&&document.getElementById(medId+'_Dose').value||'';
@@ -1886,7 +1951,7 @@ function saveVisit(){
     if(!currentPatientId&&!editingDocId){showPopup("error","Error","Please save patient data first before adding visits.");return;}
     var patientId=currentPatientId||editingDocId,visitData={},visitDate=document.getElementById("Visit_Date").value,nextAppt=document.getElementById("Next_Appt").value;
     if(!visitDate){showPopup("error","Error","Please enter visit date.");return;}
-    document.querySelectorAll('[id^="V_"]').forEach(function(el){if(el.id)visitData[el.id]=el.value;});
+    document.querySelectorAll('[id^="V_"]').forEach(function(el){if(el.id&&el.type!=='file')visitData[el.id]=el.value;});
     visitData.visitDate=visitDate;visitData.visitType=document.getElementById("Visit_Type").value;
     if(editingVisitId){
         // UPDATE existing visit
@@ -1954,6 +2019,10 @@ function editVisit(visitId){
     if(cancelBtn) cancelBtn.style.display = 'block';
     var formTitle = document.getElementById("visitFormTitle");
     if(formTitle) formTitle.innerHTML = '<i class="fa fa-edit me-1"></i>Editing Visit ('+ (v.visitDate||'') +')';
+    // Restore visit ECG image preview (if any)
+    renderEcgImagePreview('vEcgImagePreview', v.V_ECG_Image||'');
+    var _vem=document.getElementById('vEcgImageMeta'); if(_vem) _vem.textContent = v.V_ECG_Image?'Saved image':'';
+    var _vef=document.getElementById('V_ECG_Image_File'); if(_vef) _vef.value='';
     // Scroll to the visit form
     var visitSection = document.querySelector('.visit-section');
     if(visitSection) visitSection.scrollIntoView({behavior:'smooth', block:'start'});
@@ -1970,9 +2039,74 @@ function cancelEditVisit(){
     if(formTitle) formTitle.innerHTML = 'Add New Visit';
 }
 
+// ===== ECG IMAGE COMPRESSION & UPLOAD =====
+// Compresses ECG images client-side to keep Firestore docs lean (<1 MB limit).
+// Targets long edge ~1400 px, JPEG quality 0.55 — typical output 40–120 KB,
+// readable for arrhythmia/QRS review on phone or desktop.
+function handleEcgImageUpload(inputEl,hiddenId,previewId,metaId){
+    var file=inputEl&&inputEl.files&&inputEl.files[0];
+    if(!file)return;
+    var meta=document.getElementById(metaId);
+    if(meta)meta.textContent='Compressing…';
+    var reader=new FileReader();
+    reader.onload=function(e){
+        var img=new Image();
+        img.onload=function(){
+            var maxEdge=1400;
+            var w=img.width,h=img.height;
+            if(Math.max(w,h)>maxEdge){
+                if(w>=h){var r=maxEdge/w;w=maxEdge;h=Math.round(h*r);}
+                else{var r2=maxEdge/h;h=maxEdge;w=Math.round(w*r2);}
+            }
+            var canvas=document.createElement('canvas');
+            canvas.width=w;canvas.height=h;
+            var ctx=canvas.getContext('2d');
+            ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h); // flatten transparency for JPEG
+            ctx.drawImage(img,0,0,w,h);
+            var dataUrl=canvas.toDataURL('image/jpeg',0.55);
+            // Approximate byte size from base64 length
+            var b64=dataUrl.split(',')[1]||'';
+            var bytes=Math.round(b64.length*3/4);
+            // If still > 700 KB, try a tighter pass
+            if(bytes>700*1024){
+                dataUrl=canvas.toDataURL('image/jpeg',0.4);
+                b64=dataUrl.split(',')[1]||'';
+                bytes=Math.round(b64.length*3/4);
+            }
+            var hidden=document.getElementById(hiddenId);
+            if(hidden)hidden.value=dataUrl;
+            renderEcgImagePreview(previewId,dataUrl);
+            if(meta){
+                var kb=(bytes/1024).toFixed(0);
+                meta.textContent=w+'×'+h+' · ~'+kb+' KB';
+            }
+        };
+        img.onerror=function(){if(meta)meta.textContent='Could not load image.';};
+        img.src=e.target.result;
+    };
+    reader.onerror=function(){if(meta)meta.textContent='Could not read file.';};
+    reader.readAsDataURL(file);
+}
+
+function renderEcgImagePreview(previewId,dataUrl){
+    var preview=document.getElementById(previewId);
+    if(!preview)return;
+    if(!dataUrl){preview.innerHTML='';return;}
+    preview.innerHTML='<a href="'+dataUrl+'" target="_blank" rel="noopener" title="Open full size"><img src="'+dataUrl+'" style="max-width:100%;max-height:280px;border:1px solid #dee2e6;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,0.1);" alt="ECG"></a>';
+}
+
+function clearEcgImage(hiddenId,fileId,previewId,metaId){
+    var h=document.getElementById(hiddenId);if(h)h.value='';
+    var f=document.getElementById(fileId);if(f)f.value='';
+    var p=document.getElementById(previewId);if(p)p.innerHTML='';
+    var m=document.getElementById(metaId);if(m)m.textContent='';
+}
+
 function clearVisitForm(){
     document.querySelectorAll('[id^="V_"]').forEach(function(el){if(el.tagName==='SELECT'){el.selectedIndex=0;}else{el.value="";}});
     document.getElementById("Visit_Date").value="";document.getElementById("Next_Appt").value="";document.getElementById("Visit_Type").value="Routine";
+    // Clear ECG image preview/meta
+    clearEcgImage('V_ECG_Image','V_ECG_Image_File','vEcgImagePreview','vEcgImageMeta');
     // Reset visit med _Status selectors to "No" and collapse their sub-fields
     if(typeof VISIT_MED_LIST !== 'undefined'){
         VISIT_MED_LIST.forEach(function(m){
@@ -2097,6 +2231,11 @@ function resetForm(){
     document.querySelectorAll('.pill-toggle').forEach(function(el){el.classList.remove('active');});
     document.querySelectorAll('#medSection7 .phenotype-dim').forEach(function(el){el.classList.remove('phenotype-dim');});
     document.getElementById('gdmtRationaleSection').style.display='none';
+    // Clear ECG image previews
+    if(typeof clearEcgImage==='function'){
+        clearEcgImage('ECG_Image','ECG_Image_File','ecgImagePreview','ecgImageMeta');
+        clearEcgImage('V_ECG_Image','V_ECG_Image_File','vEcgImagePreview','vEcgImageMeta');
+    }
     goToWizardStep(1);
 }
 
@@ -2267,6 +2406,10 @@ function editPt(id){
         if(el&&d['Rationale_'+medId])el.value=d['Rationale_'+medId];
     });
     applyPhenotypeEmphasis();updateGDMTRationale();checkGDMTAlerts();checkCRTIndication();calcBMI();
+    // Restore baseline ECG image preview (if any)
+    renderEcgImagePreview('ecgImagePreview', d.ECG_Image||'');
+    var _em=document.getElementById('ecgImageMeta'); if(_em) _em.textContent = d.ECG_Image?'Saved image':'';
+    var _ef=document.getElementById('ECG_Image_File'); if(_ef) _ef.value='';
     document.getElementById("formTitle").innerText="Editing: "+d.Patient_Name;
     document.getElementById("cancelEditBtn").classList.remove("d-none");
     document.getElementById("submitBtn").innerHTML='<i class="fa fa-save me-1"></i> Update Patient';
