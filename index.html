@@ -404,7 +404,15 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                 <div class="col-4 col-md-2"><label>NYHA Visit</label><select class="form-select" id="NYHA" onchange="calcMAGGIC()"><option value="">Select...</option><option>I</option><option>II</option><option>III</option><option>IV</option></select></div>
                 <!-- KCCQ removed from baseline — tracked only in visits -->
                 <input type="hidden" id="KCCQ">
-                <div class="col-4 col-md-2"><label>Other Symptoms</label><select class="form-select" id="Fatigue"><option value="">None</option><option>Fatigue</option><option>Chest Pain</option><option>Syncope</option></select></div>
+                <div class="col-12 col-md-6">
+                    <label>Other Symptoms <small class="text-muted" style="font-size:0.7rem;">(multi-select)</small></label>
+                    <div class="d-flex gap-3 flex-wrap p-2" style="border:1px solid #ced4da;border-radius:6px;background:#fff;">
+                        <label class="d-inline-flex align-items-center gap-1 mb-0" style="font-size:0.85rem;cursor:pointer;"><input type="checkbox" class="form-check-input" id="Sym_Fatigue" onchange="syncOtherSymptoms()"> Fatigue</label>
+                        <label class="d-inline-flex align-items-center gap-1 mb-0" style="font-size:0.85rem;cursor:pointer;"><input type="checkbox" class="form-check-input" id="Sym_ChestPain" onchange="syncOtherSymptoms()"> Chest Pain</label>
+                        <label class="d-inline-flex align-items-center gap-1 mb-0" style="font-size:0.85rem;cursor:pointer;"><input type="checkbox" class="form-check-input" id="Sym_Syncope" onchange="syncOtherSymptoms()"> Syncope</label>
+                    </div>
+                    <input type="hidden" id="Fatigue">
+                </div>
                 <div class="col-4 col-md-2"><label>Pulse</label><input type="text" class="form-control" id="Pulse" inputmode="numeric"></div>
                 <div class="col-4 col-md-2"><label>BP</label><input type="text" class="form-control" id="BP" placeholder="120/80" oninput="calcMAGGIC()"></div>
                 <div class="col-4 col-md-2"><label>SpO2 (%)</label><input type="number" class="form-control" id="SpO2" inputmode="numeric"></div>
@@ -453,7 +461,7 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 
                 <div class="col-12"><hr class="my-1"></div>
                 <h6 class="col-12 text-secondary m-0"><i class="fa fa-magnet"></i> CMR</h6>
-                <div class="col-12 col-md-6"><label>CMR/CT Angio</label><input type="text" class="form-control" id="CMR_CT"></div>
+                <div class="col-12 col-md-6"><label>CMR Details</label><input type="text" class="form-control" id="CMR_CT"></div>
                 <div class="col-6 col-md-3"><label>LVEDVI/EDD</label><input type="text" class="form-control" id="CMR_LVEDVI" placeholder="LVEDVI/EDD"></div>
                 <div class="col-6 col-md-3"><label>LVESVI/ESD</label><input type="text" class="form-control" id="CMR_LVESVI" placeholder="LVESVI/ESD"></div>
                 <div class="col-6 col-md-2"><label>LVEF %</label><input type="text" class="form-control" id="CMR_LVEF" inputmode="decimal"></div>
@@ -462,6 +470,12 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                 <div class="col-6 col-md-3"><label>LGE</label><select class="form-select" id="CMR_LGE" onchange="toggleLGEPercent()"><option value="">Select...</option><option>No</option><option>Yes</option></select></div>
                 <div class="col-6 col-md-3" id="cmrLGEPctWrap" style="display:none;"><label>LGE %</label><input type="text" class="form-control" id="CMR_LGE_Pct" inputmode="decimal"></div>
                 <div class="col-12 col-md-6"><label>CMR Others</label><input type="text" class="form-control" id="CMR_Others"></div>
+
+                <div class="col-12"><hr class="my-1"></div>
+                <h6 class="col-12 text-secondary m-0"><i class="fa fa-x-ray"></i> CT Angiography</h6>
+                <div class="col-12 col-md-6"><label>CT Angio Findings</label><input type="text" class="form-control" id="CT_Angio"></div>
+                <div class="col-6 col-md-3"><label>Calcium Score</label><input type="text" class="form-control" id="CT_Calcium" inputmode="decimal"></div>
+                <div class="col-12 col-md-12"><label>CT Angio Notes</label><input type="text" class="form-control" id="CT_Notes"></div>
 
                 <div class="col-12"><hr class="my-1"></div>
                 <h6 class="col-12 text-secondary m-0"><i class="fa fa-walking"></i> 6 Minute Walk Test</h6>
@@ -665,7 +679,15 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                     <div class="col-6 col-md-3"><label>Visit Type</label><select class="form-select" id="Visit_Type"><option>Routine</option><option>Urgent</option><option>Post-Discharge</option><option>Telemedicine</option></select></div>
                     <div class="col-12"><hr class="my-2"></div>
                     <h6 class="col-12 text-secondary">Symptoms</h6>
-                    <div class="col-4 col-md-2"><label>Fatigue</label><select class="form-select" id="V_Fatigue"><option>N</option><option>Y</option></select></div>
+                    <div class="col-12 col-md-6">
+                        <label>Other Symptoms <small class="text-muted" style="font-size:0.7rem;">(multi-select)</small></label>
+                        <div class="d-flex gap-3 flex-wrap p-2" style="border:1px solid #ced4da;border-radius:6px;background:#fff;">
+                            <label class="d-inline-flex align-items-center gap-1 mb-0" style="font-size:0.85rem;cursor:pointer;"><input type="checkbox" class="form-check-input" id="V_Sym_Fatigue" onchange="syncVisitOtherSymptoms()"> Fatigue</label>
+                            <label class="d-inline-flex align-items-center gap-1 mb-0" style="font-size:0.85rem;cursor:pointer;"><input type="checkbox" class="form-check-input" id="V_Sym_ChestPain" onchange="syncVisitOtherSymptoms()"> Chest Pain</label>
+                            <label class="d-inline-flex align-items-center gap-1 mb-0" style="font-size:0.85rem;cursor:pointer;"><input type="checkbox" class="form-check-input" id="V_Sym_Syncope" onchange="syncVisitOtherSymptoms()"> Syncope</label>
+                        </div>
+                        <input type="hidden" id="V_Fatigue">
+                    </div>
                     <div class="col-4 col-md-2"><label>NYHA Class</label><select class="form-select" id="V_NYHA"><option value="">Select</option><option>I</option><option>II</option><option>III</option><option>IV</option></select></div>
                     <div class="col-4 col-md-2"><label>KCCQ (0-100)</label><input type="number" class="form-control" id="V_KCCQ" min="0" max="100" inputmode="numeric" placeholder="0-100"></div>
                     <div class="col-4 col-md-3"><label>Edema</label><select class="form-select" id="V_Edema"><option>No</option><option>Mild feet</option><option>Moderate</option><option>Severe</option></select></div>
@@ -1900,6 +1922,40 @@ function toggleRHCDetails(){
     }
 }
 
+// === Multi-select Other Symptoms (baseline + visit) ===
+function syncOtherSymptoms(){
+    var parts=[];
+    if(document.getElementById('Sym_Fatigue')&&document.getElementById('Sym_Fatigue').checked)parts.push('Fatigue');
+    if(document.getElementById('Sym_ChestPain')&&document.getElementById('Sym_ChestPain').checked)parts.push('Chest Pain');
+    if(document.getElementById('Sym_Syncope')&&document.getElementById('Sym_Syncope').checked)parts.push('Syncope');
+    var hidden=document.getElementById('Fatigue');
+    if(hidden)hidden.value=parts.join(', ');
+}
+function unpackOtherSymptoms(){
+    var hidden=document.getElementById('Fatigue');
+    var v=(hidden&&hidden.value)?hidden.value:'';
+    var lower=v.toLowerCase();
+    var f=document.getElementById('Sym_Fatigue');if(f)f.checked=lower.indexOf('fatigue')>=0;
+    var c=document.getElementById('Sym_ChestPain');if(c)c.checked=lower.indexOf('chest')>=0;
+    var s=document.getElementById('Sym_Syncope');if(s)s.checked=lower.indexOf('syncope')>=0;
+}
+function syncVisitOtherSymptoms(){
+    var parts=[];
+    if(document.getElementById('V_Sym_Fatigue')&&document.getElementById('V_Sym_Fatigue').checked)parts.push('Fatigue');
+    if(document.getElementById('V_Sym_ChestPain')&&document.getElementById('V_Sym_ChestPain').checked)parts.push('Chest Pain');
+    if(document.getElementById('V_Sym_Syncope')&&document.getElementById('V_Sym_Syncope').checked)parts.push('Syncope');
+    var hidden=document.getElementById('V_Fatigue');
+    if(hidden)hidden.value=parts.join(', ');
+}
+function unpackVisitOtherSymptoms(){
+    var hidden=document.getElementById('V_Fatigue');
+    var v=(hidden&&hidden.value)?hidden.value:'';
+    var lower=v.toLowerCase();
+    var f=document.getElementById('V_Sym_Fatigue');if(f)f.checked=lower.indexOf('fatigue')>=0||lower==='y';
+    var c=document.getElementById('V_Sym_ChestPain');if(c)c.checked=lower.indexOf('chest')>=0;
+    var s=document.getElementById('V_Sym_Syncope');if(s)s.checked=lower.indexOf('syncope')>=0;
+}
+
 function checkCRTIndication(){
     var ef=parseInt(document.getElementById('EF_Diagnosis').value)||0;
     // Prefer Section 4 ECG fields; fall back to Visit fields if not set
@@ -2130,7 +2186,8 @@ function editVisit(visitId){
     editingVisitId = visitId;
     // Populate all V_* inputs from the visit record
     document.querySelectorAll('[id^="V_"]').forEach(function(el){
-        if(el.id && v[el.id] !== undefined) el.value = v[el.id] || '';
+        if(el.type==='checkbox'){ el.checked = false; }
+        else if(el.id && v[el.id] !== undefined) el.value = v[el.id] || '';
         else if(el.id){ if(el.tagName==='SELECT') el.selectedIndex = 0; else el.value = ''; }
     });
     document.getElementById("Visit_Date").value = v.visitDate || '';
@@ -2158,6 +2215,8 @@ function editVisit(visitId){
     renderEcgImagePreview('vEcgImagePreview', v.V_ECG_Image||'');
     var _vem=document.getElementById('vEcgImageMeta'); if(_vem) _vem.textContent = v.V_ECG_Image?'Saved image':'';
     var _vef=document.getElementById('V_ECG_Image_File'); if(_vef) _vef.value='';
+    // Restore visit Other Symptoms checkboxes from hidden field
+    if(typeof unpackVisitOtherSymptoms==='function')unpackVisitOtherSymptoms();
     // Scroll to the visit form
     var visitSection = document.querySelector('.visit-section');
     if(visitSection) visitSection.scrollIntoView({behavior:'smooth', block:'start'});
@@ -2241,7 +2300,7 @@ function clearEcgImage(hiddenId,fileId,previewId,metaId){
 }
 
 function clearVisitForm(){
-    document.querySelectorAll('[id^="V_"]').forEach(function(el){if(el.tagName==='SELECT'){el.selectedIndex=0;}else{el.value="";}});
+    document.querySelectorAll('[id^="V_"]').forEach(function(el){if(el.tagName==='SELECT'){el.selectedIndex=0;}else if(el.type==='checkbox'){el.checked=false;}else{el.value="";}});
     document.getElementById("Visit_Date").value="";document.getElementById("Next_Appt").value="";document.getElementById("Visit_Type").value="Routine";
     // Clear ECG image preview/meta
     clearEcgImage('V_ECG_Image','V_ECG_Image_File','vEcgImagePreview','vEcgImageMeta');
@@ -2348,7 +2407,7 @@ function buildVisitDetailHTML(v){
 }
 
 function resetForm(){
-    document.querySelectorAll('#hfForm input, #hfForm select, #hfForm textarea').forEach(function(el){if(el.tagName==='SELECT'){el.selectedIndex=0;}else{el.value="";}});
+    document.querySelectorAll('#hfForm input, #hfForm select, #hfForm textarea').forEach(function(el){if(el.tagName==='SELECT'){el.selectedIndex=0;}else if(el.type==='checkbox'){el.checked=false;}else{el.value="";}});
     document.getElementById("searchInput").value="";document.getElementById("searchResults").innerHTML="";
     editingDocId=null;currentPatientId=null;visits=[];editingVisitId=null;
     document.getElementById("visitHistory").innerHTML="";
@@ -2381,7 +2440,7 @@ function resetForm(){
 }
 
 function generateCardHTML(data,id){
-    var allFields=[['Patient_Name','Civil_ID','File_No','Age','Gender','Nationality','Mobile','Doctor_Name'],['HF_Type','EF_Diagnosis','Advanced_HF','HF_Cause','Other_Cardio','Valvular_Disease','Valvular_Type','Admissions','Last_Admission','LOS'],['Height','Weight','BMI','Dry_Weight','NYHA','KCCQ','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur'],['ECG','ECHO','Echo_EDVI','Echo_ESVI','Echo_EF','CMR_CT','CMR_LVEDVI','CMR_LVESVI','CMR_LVEF','CMR_RVEDI','CMR_RVEF','CMR_LGE','CMR_LGE_Pct','CMR_Others','Walk_Completed','Walk_Meters','CPET_PeakVO2','CPET_VEVCO2','CPET_RER','CPET_AT','CPET_VO2HR','CPET_PetCO2','Device_Type','Device_Date','RHC_Done','RHC_CI','RHC_RAP','RHC_RVP','RHC_PCWP','RHC_PAP','RHC_PVR','RHC_PAPi','RHC_LV','RHC_MVO2'],['DM','HTN','AF','IHD','PCI_CABG','CKD','CVA','PVD','Smoker','Obese_OSA','Lung_Dz','Liver_Dz','FH_Cardio','Genetics'],['Lab_HbA1c','Lab_Gluc','Lab_UreaCreat','Lab_eGFR','Lab_NaK','Lab_BNP','Lab_IronFerritin','Lab_TrSats','Lab_CBC','Lab_Thyroid','Lab_Lipids','Lab_AlbCreat'],['Med_ARNI','Med_ARNI_Dose','Med_SGLT2i','Med_SGLT2i_Dose','Med_GLP1','Med_BB','Med_BB_Dose','Med_MRA','Med_MRA_Dose','Med_ACEiARB','Med_ACEiARB_Dose','Med_Vasodilator','Med_Procorolan','Med_Procorolan_Dose','Med_CCB','Med_CCB_Dose','Med_Diuretic','Med_Lipid','Med_Omega3','Med_Nicotine','Med_Antiplat','Med_OAC','Med_Arrhythmia','Med_K_Chelator'],['Quad_GDMT','Compliance','Mortality','Referral','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt']];
+    var allFields=[['Patient_Name','Civil_ID','File_No','Age','Gender','Nationality','Mobile','Doctor_Name'],['HF_Type','EF_Diagnosis','Advanced_HF','HF_Cause','Other_Cardio','Valvular_Disease','Valvular_Type','Admissions','Last_Admission','LOS'],['Height','Weight','BMI','Dry_Weight','NYHA','KCCQ','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur'],['ECG','ECHO','Echo_EDVI','Echo_ESVI','Echo_EF','CMR_CT','CMR_LVEDVI','CMR_LVESVI','CMR_LVEF','CMR_RVEDI','CMR_RVEF','CMR_LGE','CMR_LGE_Pct','CMR_Others','CT_Angio','CT_Calcium','CT_Notes','Walk_Completed','Walk_Meters','CPET_PeakVO2','CPET_VEVCO2','CPET_RER','CPET_AT','CPET_VO2HR','CPET_PetCO2','Device_Type','Device_Date','RHC_Done','RHC_CI','RHC_RAP','RHC_RVP','RHC_PCWP','RHC_PAP','RHC_PVR','RHC_PAPi','RHC_LV','RHC_MVO2'],['DM','HTN','AF','IHD','PCI_CABG','CKD','CVA','PVD','Smoker','Obese_OSA','Lung_Dz','Liver_Dz','FH_Cardio','Genetics'],['Lab_HbA1c','Lab_Gluc','Lab_UreaCreat','Lab_eGFR','Lab_NaK','Lab_BNP','Lab_IronFerritin','Lab_TrSats','Lab_CBC','Lab_Thyroid','Lab_Lipids','Lab_AlbCreat'],['Med_ARNI','Med_ARNI_Dose','Med_SGLT2i','Med_SGLT2i_Dose','Med_GLP1','Med_BB','Med_BB_Dose','Med_MRA','Med_MRA_Dose','Med_ACEiARB','Med_ACEiARB_Dose','Med_Vasodilator','Med_Procorolan','Med_Procorolan_Dose','Med_CCB','Med_CCB_Dose','Med_Diuretic','Med_Lipid','Med_Omega3','Med_Nicotine','Med_Antiplat','Med_OAC','Med_Arrhythmia','Med_K_Chelator'],['Quad_GDMT','Compliance','Mortality','Referral','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt']];
     var sn=['Demographics','HF Diagnosis','Symptoms & Signs','Investigations','Comorbidities','Baseline Labs','Medications','Outcomes & Management'];
     // Helper: a field is "empty" if null/undefined/empty-string, "None", "No", "-", or just whitespace
     function isEmptyField(val){
@@ -2511,6 +2570,8 @@ function editPt(id){
     if(typeof toggleLGEPercent==='function')toggleLGEPercent();
     if(typeof toggleWalkMeters==='function')toggleWalkMeters();
     if(typeof toggleRHCDetails==='function')toggleRHCDetails();
+    // Restore Other Symptoms checkboxes from hidden field
+    if(typeof unpackOtherSymptoms==='function')unpackOtherSymptoms();
     Object.keys(MED_FORMULARY).forEach(function(medId){
         var isMulti=MULTI_SELECT_MEDS.indexOf(medId)>=0;
         if(isMulti){
@@ -2633,7 +2694,7 @@ function generateExcel(data,visitsData,id){
     var wb=XLSX.utils.book_new();var pr=[];
     pr.push(["MUBARAK AL-KABEER HOSPITAL - HEART FAILURE REGISTRY"]);
     pr.push(["Patient Name:",data.Patient_Name||'']);pr.push(["Civil ID:",data.Civil_ID||'']);pr.push(["File No:",data.File_No||'']);pr.push(["Age:",data.Age||'']);pr.push(["Gender:",data.Gender||'']);pr.push(["Nationality:",data.Nationality||'']);pr.push(["Mobile:",data.Mobile||'']);pr.push(["Doctor:",data.Doctor_Name||'']);pr.push([]);
-    var sections=[{name:'HF DIAGNOSIS',fields:['HF_Type','EF_Diagnosis','Advanced_HF','HF_Cause','Other_Cardio','Valvular_Disease','Valvular_Type','Admissions','Last_Admission','LOS']},{name:'SYMPTOMS & SIGNS',fields:['Height','Weight','BMI','Dry_Weight','NYHA','KCCQ','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur']},{name:'INVESTIGATIONS',fields:['ECG','ECHO','Echo_EDVI','Echo_ESVI','Echo_EF','CMR_CT','CMR_LVEDVI','CMR_LVESVI','CMR_LVEF','CMR_RVEDI','CMR_RVEF','CMR_LGE','CMR_LGE_Pct','CMR_Others','Walk_Completed','Walk_Meters','CPET_PeakVO2','CPET_VEVCO2','CPET_RER','CPET_AT','CPET_VO2HR','CPET_PetCO2','Device_Type','Device_Date','RHC_Done','RHC_CI','RHC_RAP','RHC_RVP','RHC_PCWP','RHC_PAP','RHC_PVR','RHC_PAPi','RHC_LV','RHC_MVO2']},{name:'COMORBIDITIES',fields:['DM','HTN','AF','IHD','PCI_CABG','CKD','CVA','PVD','Smoker','Obese_OSA','Lung_Dz','Liver_Dz','FH_Cardio','Genetics']},{name:'LABORATORY (BASELINE)',fields:['Lab_HbA1c','Lab_Gluc','Lab_UreaCreat','Lab_eGFR','Lab_NaK','Lab_BNP','Lab_IronFerritin','Lab_TrSats','Lab_CBC','Lab_Thyroid','Lab_Lipids','Lab_AlbCreat']},{name:'MEDICATIONS',fields:['Med_ARNI','Med_ARNI_Dose','Med_SGLT2i','Med_SGLT2i_Dose','Med_GLP1','Med_BB','Med_BB_Dose','Med_MRA','Med_MRA_Dose','Med_ACEiARB','Med_ACEiARB_Dose','Med_Vasodilator','Med_Procorolan','Med_Procorolan_Dose','Med_CCB','Med_CCB_Dose','Med_Diuretic','Med_Lipid','Med_Omega3','Med_Nicotine','Med_Antiplat','Med_OAC','Med_Arrhythmia','Med_K_Chelator']},{name:'OUTCOMES & FOLLOW-UP',fields:['Quad_GDMT','Compliance','Mortality','Referral','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt']}];
+    var sections=[{name:'HF DIAGNOSIS',fields:['HF_Type','EF_Diagnosis','Advanced_HF','HF_Cause','Other_Cardio','Valvular_Disease','Valvular_Type','Admissions','Last_Admission','LOS']},{name:'SYMPTOMS & SIGNS',fields:['Height','Weight','BMI','Dry_Weight','NYHA','KCCQ','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur']},{name:'INVESTIGATIONS',fields:['ECG','ECHO','Echo_EDVI','Echo_ESVI','Echo_EF','CMR_CT','CMR_LVEDVI','CMR_LVESVI','CMR_LVEF','CMR_RVEDI','CMR_RVEF','CMR_LGE','CMR_LGE_Pct','CMR_Others','CT_Angio','CT_Calcium','CT_Notes','Walk_Completed','Walk_Meters','CPET_PeakVO2','CPET_VEVCO2','CPET_RER','CPET_AT','CPET_VO2HR','CPET_PetCO2','Device_Type','Device_Date','RHC_Done','RHC_CI','RHC_RAP','RHC_RVP','RHC_PCWP','RHC_PAP','RHC_PVR','RHC_PAPi','RHC_LV','RHC_MVO2']},{name:'COMORBIDITIES',fields:['DM','HTN','AF','IHD','PCI_CABG','CKD','CVA','PVD','Smoker','Obese_OSA','Lung_Dz','Liver_Dz','FH_Cardio','Genetics']},{name:'LABORATORY (BASELINE)',fields:['Lab_HbA1c','Lab_Gluc','Lab_UreaCreat','Lab_eGFR','Lab_NaK','Lab_BNP','Lab_IronFerritin','Lab_TrSats','Lab_CBC','Lab_Thyroid','Lab_Lipids','Lab_AlbCreat']},{name:'MEDICATIONS',fields:['Med_ARNI','Med_ARNI_Dose','Med_SGLT2i','Med_SGLT2i_Dose','Med_GLP1','Med_BB','Med_BB_Dose','Med_MRA','Med_MRA_Dose','Med_ACEiARB','Med_ACEiARB_Dose','Med_Vasodilator','Med_Procorolan','Med_Procorolan_Dose','Med_CCB','Med_CCB_Dose','Med_Diuretic','Med_Lipid','Med_Omega3','Med_Nicotine','Med_Antiplat','Med_OAC','Med_Arrhythmia','Med_K_Chelator']},{name:'OUTCOMES & FOLLOW-UP',fields:['Quad_GDMT','Compliance','Mortality','Referral','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt']}];
     sections.forEach(function(sec){pr.push([sec.name]);sec.fields.forEach(function(f){pr.push([f.replace(/_/g," ").replace(/Lab /g,"").replace(/Med /g,""),data[f]||'-']);});pr.push([]);});
     var ws1=XLSX.utils.aoa_to_sheet(pr);XLSX.utils.book_append_sheet(wb,ws1,"Patient Info");
     if(visitsData.length>0){var vr=[];vr.push(["VISIT HISTORY"]);vr.push([]);visitsData.forEach(function(visit,idx){vr.push(["Visit #"+(visitsData.length-idx),"Date: "+visit.visitDate,"Type: "+visit.visitType]);var vFields=['V_Fatigue','V_NYHA','V_KCCQ','V_Edema','V_Pulse','V_BP','V_SpO2','V_Weight','V_JVP','V_Rales','V_S3','V_LBBB','V_QRS','V_Arrhythmia','V_EF_Change','V_Echo_EDVI','V_Echo_ESVI','V_Echo_EF','V_Echo_Other','V_CMR_LVEDVI','V_CMR_LVESVI','V_CMR_LVEF','V_CMR_RVEDI','V_CMR_RVEF','V_CMR_LGE','V_CMR_LGE_Pct','V_CMR_Others','V_HbA1c','V_Gluc','V_Urea','V_Creat','V_eGFR','V_Na','V_K','V_BNP','V_NTproBNP','V_INR','V_Iron','V_Transferrin','V_Ferritin','V_WBC','V_Hb','V_Plt','V_TSH','V_FreeT4'];VISIT_MED_LIST.forEach(function(m){vFields.push(m.id);});vFields.push('V_Adverse','V_Plan','V_Others');vFields.forEach(function(f){var val=visit[f];if(val&&val.toString().trim()!=='')vr.push([f.replace('V_','').replace(/_/g,' '),val]);});vr.push([]);});var ws2=XLSX.utils.aoa_to_sheet(vr);XLSX.utils.book_append_sheet(wb,ws2,"Visits");}
@@ -2647,7 +2708,7 @@ function generatePDF(data,visitsData,id){
     var html="<div id='pdfContent' style='width:750px;margin:0 auto;background:#fff;padding:20px;font-family:Arial,Helvetica,sans-serif;color:#000;'>";
     html+="<div style='text-align:center;border-bottom:3px solid #8b0000;padding-bottom:10px;margin-bottom:20px;'><h2 style='color:#8b0000;margin:0;'>Mubarak Al-Kabeer Hospital</h2><h3 style='margin:5px 0;color:#333;'>Heart Failure Clinic Registry</h3></div>";
     html+="<h3 style='color:#333;'>Patient: "+(data.Patient_Name||'Unknown')+" | File: "+(data.File_No||'N/A')+"</h3>";
-    var sections=[{name:'Demographics',fields:['Patient_Name','Civil_ID','File_No','Age','Gender','Nationality','Mobile','Doctor_Name']},{name:'HF Diagnosis',fields:['HF_Type','EF_Diagnosis','Advanced_HF','HF_Cause','Other_Cardio','Valvular_Disease','Valvular_Type','Admissions','Last_Admission','LOS']},{name:'Symptoms & Signs',fields:['Height','Weight','BMI','Dry_Weight','NYHA','KCCQ','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur']},{name:'Investigations',fields:['ECG','ECHO','Echo_EDVI','Echo_ESVI','Echo_EF','CMR_CT','CMR_LVEDVI','CMR_LVESVI','CMR_LVEF','CMR_RVEDI','CMR_RVEF','CMR_LGE','CMR_LGE_Pct','CMR_Others','Walk_Completed','Walk_Meters','CPET_PeakVO2','CPET_VEVCO2','CPET_RER','CPET_AT','CPET_VO2HR','CPET_PetCO2','Device_Type','Device_Date','RHC_Done','RHC_CI','RHC_RAP','RHC_RVP','RHC_PCWP','RHC_PAP','RHC_PVR','RHC_PAPi','RHC_LV','RHC_MVO2']},{name:'Comorbidities',fields:['DM','HTN','AF','IHD','PCI_CABG','CKD','CVA','PVD','Smoker','Obese_OSA','Lung_Dz','Liver_Dz','FH_Cardio','Genetics']},{name:'Laboratory (Baseline)',fields:['Lab_HbA1c','Lab_Gluc','Lab_UreaCreat','Lab_eGFR','Lab_NaK','Lab_BNP','Lab_IronFerritin','Lab_TrSats','Lab_CBC','Lab_Thyroid','Lab_Lipids','Lab_AlbCreat']},{name:'Medications',fields:['Med_ARNI','Med_ARNI_Dose','Med_SGLT2i','Med_SGLT2i_Dose','Med_GLP1','Med_BB','Med_BB_Dose','Med_MRA','Med_MRA_Dose','Med_ACEiARB','Med_ACEiARB_Dose','Med_Vasodilator','Med_Procorolan','Med_Procorolan_Dose','Med_CCB','Med_CCB_Dose','Med_Diuretic','Med_Lipid','Med_Omega3','Med_Nicotine','Med_Antiplat','Med_OAC','Med_Arrhythmia','Med_K_Chelator']},{name:'Outcomes & Follow-up',fields:['Quad_GDMT','Compliance','Mortality','Referral','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt']}];
+    var sections=[{name:'Demographics',fields:['Patient_Name','Civil_ID','File_No','Age','Gender','Nationality','Mobile','Doctor_Name']},{name:'HF Diagnosis',fields:['HF_Type','EF_Diagnosis','Advanced_HF','HF_Cause','Other_Cardio','Valvular_Disease','Valvular_Type','Admissions','Last_Admission','LOS']},{name:'Symptoms & Signs',fields:['Height','Weight','BMI','Dry_Weight','NYHA','KCCQ','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur']},{name:'Investigations',fields:['ECG','ECHO','Echo_EDVI','Echo_ESVI','Echo_EF','CMR_CT','CMR_LVEDVI','CMR_LVESVI','CMR_LVEF','CMR_RVEDI','CMR_RVEF','CMR_LGE','CMR_LGE_Pct','CMR_Others','CT_Angio','CT_Calcium','CT_Notes','Walk_Completed','Walk_Meters','CPET_PeakVO2','CPET_VEVCO2','CPET_RER','CPET_AT','CPET_VO2HR','CPET_PetCO2','Device_Type','Device_Date','RHC_Done','RHC_CI','RHC_RAP','RHC_RVP','RHC_PCWP','RHC_PAP','RHC_PVR','RHC_PAPi','RHC_LV','RHC_MVO2']},{name:'Comorbidities',fields:['DM','HTN','AF','IHD','PCI_CABG','CKD','CVA','PVD','Smoker','Obese_OSA','Lung_Dz','Liver_Dz','FH_Cardio','Genetics']},{name:'Laboratory (Baseline)',fields:['Lab_HbA1c','Lab_Gluc','Lab_UreaCreat','Lab_eGFR','Lab_NaK','Lab_BNP','Lab_IronFerritin','Lab_TrSats','Lab_CBC','Lab_Thyroid','Lab_Lipids','Lab_AlbCreat']},{name:'Medications',fields:['Med_ARNI','Med_ARNI_Dose','Med_SGLT2i','Med_SGLT2i_Dose','Med_GLP1','Med_BB','Med_BB_Dose','Med_MRA','Med_MRA_Dose','Med_ACEiARB','Med_ACEiARB_Dose','Med_Vasodilator','Med_Procorolan','Med_Procorolan_Dose','Med_CCB','Med_CCB_Dose','Med_Diuretic','Med_Lipid','Med_Omega3','Med_Nicotine','Med_Antiplat','Med_OAC','Med_Arrhythmia','Med_K_Chelator']},{name:'Outcomes & Follow-up',fields:['Quad_GDMT','Compliance','Mortality','Referral','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt']}];
     sections.forEach(function(sec){html+="<h4 style='background:#f0f0f0;padding:8px;margin-top:15px;color:#8b0000;'>"+sec.name+"</h4><table style='width:100%;border-collapse:collapse;font-size:12px;'>";sec.fields.forEach(function(f){var val=data[f]||'-',label=f.replace(/_/g," ").replace(/Lab /g,"").replace(/Med /g,"");html+="<tr style='border-bottom:1px solid #ddd;'><td style='width:40%;padding:6px;background:#fafafa;font-weight:bold;'>"+label+"</td><td style='padding:6px;'>"+val+"</td></tr>";});html+="</table>";});
     if(visitsData.length>0){html+="<div style='page-break-before:always;'></div><h3 style='color:#8b0000;margin-top:20px;'>Visit History & Follow-ups</h3>";
     var mf=VISIT_MED_LIST.map(function(m){return m.id;});
@@ -2704,7 +2765,7 @@ var ALL_PATIENT_FIELDS = [
     'Patient_Name','Civil_ID','File_No','Age','Gender','Nationality','Mobile','Doctor_Name',
     'HF_Type','EF_Diagnosis','Advanced_HF','HF_Cause','Other_Cardio','Valvular_Disease','Valvular_Type','Admissions','Last_Admission','LOS',
     'Height','Weight','BMI','Dry_Weight','NYHA','KCCQ','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur',
-    'ECG','ECHO','Echo_EDVI','Echo_ESVI','Echo_EF','CMR_CT','CMR_LVEDVI','CMR_LVESVI','CMR_LVEF','CMR_RVEDI','CMR_RVEF','CMR_LGE','CMR_LGE_Pct','CMR_Others','Walk_Completed','Walk_Meters','CPET_PeakVO2','CPET_VEVCO2','CPET_RER','CPET_AT','CPET_VO2HR','CPET_PetCO2','Device_Type','Device_Date','RHC_Done','RHC_CI','RHC_RAP','RHC_RVP','RHC_PCWP','RHC_PAP','RHC_PVR','RHC_PAPi','RHC_LV','RHC_MVO2',
+    'ECG','ECHO','Echo_EDVI','Echo_ESVI','Echo_EF','CMR_CT','CMR_LVEDVI','CMR_LVESVI','CMR_LVEF','CMR_RVEDI','CMR_RVEF','CMR_LGE','CMR_LGE_Pct','CMR_Others','CT_Angio','CT_Calcium','CT_Notes','Walk_Completed','Walk_Meters','CPET_PeakVO2','CPET_VEVCO2','CPET_RER','CPET_AT','CPET_VO2HR','CPET_PetCO2','Device_Type','Device_Date','RHC_Done','RHC_CI','RHC_RAP','RHC_RVP','RHC_PCWP','RHC_PAP','RHC_PVR','RHC_PAPi','RHC_LV','RHC_MVO2',
     'DM','HTN','AF','IHD','PCI_CABG','CKD','CVA','PVD','Smoker','Obese_OSA','Lung_Dz','Liver_Dz','FH_Cardio','Genetics',
     'Lab_HbA1c','Lab_Gluc','Lab_UreaCreat','Lab_eGFR','Lab_NaK','Lab_BNP','Lab_IronFerritin','Lab_TrSats','Lab_CBC','Lab_Thyroid','Lab_Lipids','Lab_AlbCreat',
     'Med_ARNI','Med_ARNI_Dose','Med_SGLT2i','Med_SGLT2i_Dose','Med_GLP1','Med_GLP1_Dose',
@@ -3605,7 +3666,7 @@ var IMPORT_FIELDS = [
     'Doctor_Name','Patient_Name','Civil_ID','File_No','Age','Gender','Nationality','Mobile',
     'HF_Type','EF_Diagnosis','Advanced_HF','HF_Cause','Other_Cardio','Valvular_Disease','Valvular_Type','Admissions','Last_Admission','LOS',
     'Height','Weight','BMI','Dry_Weight','NYHA','KCCQ','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur',
-    'ECG','ECHO','Echo_EDVI','Echo_ESVI','Echo_EF','CMR_CT','CMR_LVEDVI','CMR_LVESVI','CMR_LVEF','CMR_RVEDI','CMR_RVEF','CMR_LGE','CMR_LGE_Pct','CMR_Others','Walk_Completed','Walk_Meters','CPET_PeakVO2','CPET_VEVCO2','CPET_RER','CPET_AT','CPET_VO2HR','CPET_PetCO2','Device_Type','Device_Date','RHC_Done','RHC_CI','RHC_RAP','RHC_RVP','RHC_PCWP','RHC_PAP','RHC_PVR','RHC_PAPi','RHC_LV','RHC_MVO2',
+    'ECG','ECHO','Echo_EDVI','Echo_ESVI','Echo_EF','CMR_CT','CMR_LVEDVI','CMR_LVESVI','CMR_LVEF','CMR_RVEDI','CMR_RVEF','CMR_LGE','CMR_LGE_Pct','CMR_Others','CT_Angio','CT_Calcium','CT_Notes','Walk_Completed','Walk_Meters','CPET_PeakVO2','CPET_VEVCO2','CPET_RER','CPET_AT','CPET_VO2HR','CPET_PetCO2','Device_Type','Device_Date','RHC_Done','RHC_CI','RHC_RAP','RHC_RVP','RHC_PCWP','RHC_PAP','RHC_PVR','RHC_PAPi','RHC_LV','RHC_MVO2',
     'DM','HTN','AF','IHD','PCI_CABG','CKD','CVA','PVD','Smoker','Obese_OSA','Lung_Dz','Liver_Dz','FH_Cardio','Genetics',
     'Lab_HbA1c','Lab_Gluc','Lab_UreaCreat','Lab_eGFR','Lab_NaK','Lab_BNP','Lab_IronFerritin','Lab_TrSats','Lab_CBC','Lab_Thyroid','Lab_Lipids','Lab_AlbCreat',
     'Med_ARNI','Med_ARNI_Dose','Med_SGLT2i','Med_SGLT2i_Dose','Med_GLP1','Med_GLP1_Dose',
