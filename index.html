@@ -28,27 +28,27 @@
 
 /* ===== LOGIN SCREEN ===== */
 #pageLogin{display:none;position:fixed;top:0;left:0;right:0;bottom:0;min-height:100vh;width:100%;z-index:9999;background:linear-gradient(160deg,#1a0000 0%,#3d0000 40%,#8b0000 100%);overflow:hidden;}
-#pageLogin::before{content:’’;position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at center,rgba(139,0,0,0.15) 0%,transparent 60%);animation:pulse-bg 4s ease-in-out infinite;}
+#pageLogin::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at center,rgba(139,0,0,0.15) 0%,transparent 60%);animation:pulse-bg 4s ease-in-out infinite;}
 @keyframes pulse-bg{0%,100%{transform:scale(1);opacity:0.5}50%{transform:scale(1.1);opacity:1}}
 .login-container{position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:30px 20px;}
 .login-logo{text-align:center;margin-bottom:40px;animation:fadeDown 0.8s ease forwards;}
 @keyframes fadeDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
 .login-logo .heart-icon{font-size:3rem;color:#ff6b6b;filter:drop-shadow(0 0 20px rgba(255,107,107,0.5));animation:heartbeat 1.5s ease-in-out infinite;}
 @keyframes heartbeat{0%,100%{transform:scale(1)}15%{transform:scale(1.15)}30%{transform:scale(1)}45%{transform:scale(1.08)}}
-.login-logo h1{font-family:‘Crimson Pro’,serif;color:#fff;font-size:1.6rem;font-weight:700;margin:12px 0 4px;letter-spacing:0.02em;}
+.login-logo h1{font-family:'Crimson Pro',serif;color:#fff;font-size:1.6rem;font-weight:700;margin:12px 0 4px;letter-spacing:0.02em;}
 .login-logo p{color:rgba(255,255,255,0.6);font-size:0.8rem;font-weight:300;letter-spacing:0.08em;text-transform:uppercase;}
 .login-card{background:rgba(255,255,255,0.07);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.12);border-radius:20px;padding:35px 28px;width:100%;max-width:380px;animation:fadeUp 0.8s ease 0.2s forwards;opacity:1;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-.login-card h2{font-family:‘Crimson Pro’,serif;color:#fff;font-size:1.4rem;font-weight:600;margin-bottom:6px;}
+.login-card h2{font-family:'Crimson Pro',serif;color:#fff;font-size:1.4rem;font-weight:600;margin-bottom:6px;}
 .login-card .subtitle{color:rgba(255,255,255,0.5);font-size:0.78rem;margin-bottom:28px;}
 .login-field{margin-bottom:16px;}
 .login-field label{color:rgba(255,255,255,0.7);font-size:0.72rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;display:block;margin-bottom:6px;}
 .login-field .input-wrap{position:relative;}
 .login-field .input-wrap i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,0.4);font-size:0.85rem;}
-.login-field input{width:100%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:12px 14px 12px 38px;color:#fff;font-size:0.9rem;font-family:‘DM Sans’,sans-serif;transition:all 0.2s;outline:none;}
+.login-field input{width:100%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:12px 14px 12px 38px;color:#fff;font-size:0.9rem;font-family:'DM Sans',sans-serif;transition:all 0.2s;outline:none;}
 .login-field input:focus{border-color:rgba(255,107,107,0.6);background:rgba(255,255,255,0.12);box-shadow:0 0 0 3px rgba(255,107,107,0.15);}
 .login-field input::placeholder{color:rgba(255,255,255,0.3);}
-.btn-login{width:100%;padding:13px;background:linear-gradient(135deg,#c0392b,#8b0000);border:none;border-radius:10px;color:#fff;font-family:‘DM Sans’,sans-serif;font-size:0.9rem;font-weight:600;letter-spacing:0.05em;cursor:pointer;transition:all 0.2s;margin-top:8px;box-shadow:0 4px 20px rgba(139,0,0,0.4);}
+.btn-login{width:100%;padding:13px;background:linear-gradient(135deg,#c0392b,#8b0000);border:none;border-radius:10px;color:#fff;font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:600;letter-spacing:0.05em;cursor:pointer;transition:all 0.2s;margin-top:8px;box-shadow:0 4px 20px rgba(139,0,0,0.4);}
 .btn-login:hover{transform:translateY(-1px);box-shadow:0 6px 25px rgba(139,0,0,0.5);}
 .btn-login:active{transform:translateY(0);}
 .btn-login:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
@@ -63,11 +63,11 @@
 /* ===== MAIN APP ===== */
 .clinic-header{background:#8b0000;background:linear-gradient(135deg,#8b0000,#b30000);color:#fff;padding:25px 0;border-radius:0 0 15px 15px;position:relative}
 .card{border:none;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.05);margin-bottom:20px}
-.section-title{color:var(–primary);font-weight:bold;border-bottom:2px solid #e9ecef;padding-bottom:5px;margin-top:20px;margin-bottom:12px}
-.visit-section{background:#fff;border-left:4px solid var(–primary);padding:15px;margin-bottom:15px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+.section-title{color:var(--primary);font-weight:bold;border-bottom:2px solid #e9ecef;padding-bottom:5px;margin-top:20px;margin-bottom:12px}
+.visit-section{background:#fff;border-left:4px solid var(--primary);padding:15px;margin-bottom:15px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
 label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom:2px}
 .form-control,.form-select{border-radius:6px;font-size:.85rem;padding:4px 8px}
-.btn-medical{background:var(–primary);color:#fff;font-weight:bold;width:100%;padding:12px;border:none;border-radius:8px}
+.btn-medical{background:var(--primary);color:#fff;font-weight:bold;width:100%;padding:12px;border:none;border-radius:8px}
 .btn-visit{background:#17a2b8;color:#fff;font-weight:bold}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;justify-content:center;align-items:center}
 .modal-box{background:#fff;border-radius:16px;padding:30px 20px;max-width:500px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.4);animation:pop .3s ease;max-height:90vh;overflow-y:auto;}
@@ -86,7 +86,7 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 .input-error{border:2px solid #dc3545!important}
 .error-msg{color:#dc3545;font-size:0.7rem;display:none}
 .chart-container{position:relative;height:22vh;width:100%;margin-bottom:15px;}
-.clickable-tab{cursor:pointer;padding:10px;background-color:#e9ecef;border-radius:5px;border-left:5px solid var(–primary);transition:0.2s;}
+.clickable-tab{cursor:pointer;padding:10px;background-color:#e9ecef;border-radius:5px;border-left:5px solid var(--primary);transition:0.2s;}
 .clickable-tab:hover{background-color:#dee2e6;}
 #pdfContainer{position:fixed;top:0;left:0;width:100%;min-height:100%;overflow:auto;z-index:99998;background:#fff;display:none;}
 #pdfContainer.active{display:block;}
@@ -145,7 +145,7 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 
 /* ===== HFpEF DIM ===== */
 .phenotype-dim{opacity:0.45;position:relative;}
-.phenotype-dim::after{content:‘Not primary for this HF phenotype’;position:absolute;bottom:-14px;left:0;font-size:0.6rem;color:#999;font-style:italic;}
+.phenotype-dim::after{content:'Not primary for this HF phenotype';position:absolute;bottom:-14px;left:0;font-size:0.6rem;color:#999;font-style:italic;}
 
 /* ===== GDMT RATIONALE ===== */
 .gdmt-rationale{display:none;margin-top:3px;}
@@ -220,15 +220,15 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 #pageAnalytics{display:none;}
 #pageAnalytics.active{display:block;}
 .analytics-header{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);color:#fff;padding:22px 0 18px;border-radius:0 0 15px 15px;position:relative;}
-.analytics-header h2{font-family:‘Crimson Pro’,serif;letter-spacing:0.03em;}
-.stat-kpi{background:#fff;border-radius:12px;padding:16px 14px;box-shadow:0 2px 12px rgba(0,0,0,0.07);border-top:4px solid var(–primary);margin-bottom:14px;text-align:center;transition:transform 0.2s;}
+.analytics-header h2{font-family:'Crimson Pro',serif;letter-spacing:0.03em;}
+.stat-kpi{background:#fff;border-radius:12px;padding:16px 14px;box-shadow:0 2px 12px rgba(0,0,0,0.07);border-top:4px solid var(--primary);margin-bottom:14px;text-align:center;transition:transform 0.2s;}
 .stat-kpi:hover{transform:translateY(-2px);}
-.stat-kpi .kpi-num{font-family:‘Crimson Pro’,serif;font-size:2.2rem;font-weight:700;color:var(–primary);line-height:1;}
+.stat-kpi .kpi-num{font-family:'Crimson Pro',serif;font-size:2.2rem;font-weight:700;color:var(--primary);line-height:1;}
 .stat-kpi .kpi-label{font-size:0.72rem;color:#6c757d;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;}
 .stat-kpi .kpi-sub{font-size:0.7rem;color:#adb5bd;margin-top:2px;}
 .analytics-card{background:#fff;border-radius:12px;padding:16px;box-shadow:0 2px 12px rgba(0,0,0,0.07);margin-bottom:16px;}
 .analytics-card-title{font-size:0.8rem;font-weight:700;color:#1a1a2e;text-transform:uppercase;letter-spacing:0.06em;border-bottom:2px solid #f0f0f0;padding-bottom:8px;margin-bottom:14px;display:flex;align-items:center;gap:7px;}
-.analytics-card-title i{color:var(–primary);}
+.analytics-card-title i{color:var(--primary);}
 .analytics-chart-wrap{position:relative;height:200px;width:100%;}
 .analytics-chart-wrap-sm{position:relative;height:160px;width:100%;}
 .analytics-chart-wrap-lg{position:relative;height:240px;width:100%;}
@@ -236,7 +236,7 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 .comorbidity-bar-row .cb-label{width:70px;font-weight:600;color:#495057;flex-shrink:0;}
 .comorbidity-bar-row .cb-bar-wrap{flex:1;background:#f0f0f0;border-radius:4px;height:16px;overflow:hidden;}
 .comorbidity-bar-row .cb-bar{height:100%;border-radius:4px;transition:width 0.8s ease;background:linear-gradient(90deg,#8b0000,#c0392b);}
-.comorbidity-bar-row .cb-pct{width:38px;text-align:right;font-weight:700;color:var(–primary);flex-shrink:0;}
+.comorbidity-bar-row .cb-pct{width:38px;text-align:right;font-weight:700;color:var(--primary);flex-shrink:0;}
 .gdmt-row{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-radius:8px;margin-bottom:5px;font-size:0.8rem;background:#f8f9fa;}
 .gdmt-row .gdmt-name{font-weight:600;color:#333;}
 .gdmt-row .gdmt-pill{font-weight:700;font-size:0.75rem;padding:3px 10px;border-radius:20px;color:#fff;}
@@ -257,11 +257,11 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 .btn-export-excel{background:linear-gradient(135deg,#1d6f42,#2ecc71);color:#fff;}
 .analytics-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
 .analytics-tab-btn{padding:6px 13px;border-radius:20px;border:2px solid #e9ecef;background:#fff;font-size:0.75rem;font-weight:600;color:#6c757d;cursor:pointer;transition:all 0.2s;}
-.analytics-tab-btn.active{background:var(–primary);border-color:var(–primary);color:#fff;}
+.analytics-tab-btn.active{background:var(--primary);border-color:var(--primary);color:#fff;}
 .analytics-panel{display:none;}
 .analytics-panel.active{display:block;}
 .spinner-overlay{text-align:center;padding:40px 20px;color:#6c757d;}
-.spinner-overlay i{font-size:2rem;color:var(–primary);margin-bottom:10px;animation:spin 1s linear infinite;display:block;}
+.spinner-overlay i{font-size:2rem;color:var(--primary);margin-bottom:10px;animation:spin 1s linear infinite;display:block;}
 @keyframes spin{100%{transform:rotate(360deg);}}
 .header-nav-btns{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:10px;}
 .header-nav-btn{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;font-size:0.75rem;padding:5px 14px;border-radius:20px;cursor:pointer;transition:all 0.2s;font-weight:600;}
@@ -276,6 +276,232 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 
 /* visit history old style kept for inline rendering */
 .visit-history{border-left:3px solid #17a2b8;padding-left:10px;margin:10px 0}
+
+/* ============================================================
+   ===== REDESIGN: COLOR-TINTED SECTIONS & CLEAN LAYOUT  =====
+   ============================================================ */
+
+/* Each step gets a soft-tinted card with a colored accent strip on the left,
+   a header band with an icon, and breathing room around fields. */
+.form-step{padding:0;}
+.form-step.active{display:block;}
+
+.section-card{
+    background:#ffffff;
+    border-radius:12px;
+    padding:0;
+    margin-bottom:14px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.05);
+    border:1px solid #eef0f3;
+    overflow:hidden;
+    position:relative;
+}
+.section-card::before{
+    content:"";
+    position:absolute;
+    left:0;top:0;bottom:0;
+    width:5px;
+    background:var(--section-accent,#8b0000);
+}
+.section-card-head{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:12px 16px 10px;
+    background:var(--section-tint,#fff5f5);
+    border-bottom:1px solid #eef0f3;
+}
+.section-card-head .sc-icon{
+    width:32px;height:32px;border-radius:8px;
+    display:inline-flex;align-items:center;justify-content:center;
+    background:var(--section-accent,#8b0000);
+    color:#fff;
+    font-size:0.85rem;
+    flex-shrink:0;
+    box-shadow:0 2px 6px rgba(0,0,0,0.12);
+}
+.section-card-head .sc-title{
+    font-family:'Crimson Pro',serif;
+    font-size:1.05rem;
+    font-weight:700;
+    color:var(--section-accent-dark,#5c0000);
+    margin:0;
+    line-height:1.1;
+    letter-spacing:0.01em;
+}
+.section-card-head .sc-sub{
+    font-size:0.7rem;
+    color:#7a7a7a;
+    font-weight:500;
+    margin-top:1px;
+}
+.section-card-body{padding:14px 16px 14px;}
+
+/* Field group — for sub-section labels inside a section (e.g. ECG, Glycemic) */
+.field-group{
+    margin-top:14px;
+    padding-top:10px;
+    border-top:1px dashed #e3e6ea;
+}
+.field-group:first-child{margin-top:0;padding-top:0;border-top:none;}
+.field-group-label{
+    font-size:0.7rem;
+    font-weight:700;
+    color:var(--section-accent,#8b0000);
+    text-transform:uppercase;
+    letter-spacing:0.07em;
+    margin:0 0 8px;
+    display:flex;align-items:center;gap:6px;
+}
+.field-group-label i{font-size:0.85rem;}
+
+/* Slightly more breathing room and clearer field labels */
+.section-card-body label{
+    font-size:0.72rem;
+    font-weight:600;
+    color:#4a5560;
+    margin-bottom:3px;
+    letter-spacing:0.01em;
+}
+.section-card-body .form-control,
+.section-card-body .form-select{
+    border-radius:7px;
+    border:1px solid #d8dde3;
+    background:#fafbfc;
+    padding:6px 10px;
+    font-size:0.85rem;
+    transition:all 0.15s;
+}
+.section-card-body .form-control:focus,
+.section-card-body .form-select:focus{
+    border-color:var(--section-accent,#8b0000);
+    background:#fff;
+    box-shadow:0 0 0 3px rgba(139,0,0,0.08);
+}
+.section-card-body .form-control[readonly]{
+    background:#eaf6ee !important;
+    border-color:#b8e0c4;
+}
+/* Required-field label asterisks softer */
+.section-card-body label::after{}
+
+/* Field row spacing override */
+.section-card-body .row.g-2{--bs-gutter-x:0.6rem;--bs-gutter-y:0.55rem;}
+
+/* Per-section color themes */
+.sec-demographics  {--section-accent:#8b0000;--section-accent-dark:#5c0000;--section-tint:#fff5f5;}
+.sec-diagnosis     {--section-accent:#b35900;--section-accent-dark:#7a3d00;--section-tint:#fff7ed;}
+.sec-vitals        {--section-accent:#0d6e6e;--section-accent-dark:#0a5454;--section-tint:#eaf7f7;}
+.sec-investigations{--section-accent:#1565c0;--section-accent-dark:#0d3f7a;--section-tint:#eaf3fc;}
+.sec-comorbid      {--section-accent:#7b1fa2;--section-accent-dark:#5a1278;--section-tint:#f6edfa;}
+.sec-labs          {--section-accent:#2a7a3a;--section-accent-dark:#1d5a28;--section-tint:#ecf6ee;}
+.sec-meds          {--section-accent:#c0392b;--section-accent-dark:#8b0000;--section-tint:#fdebe9;}
+.sec-outcomes      {--section-accent:#0a4a8c;--section-accent-dark:#063060;--section-tint:#e8f1fa;}
+.sec-visits        {--section-accent:#17a2b8;--section-accent-dark:#0e7480;--section-tint:#e6f7fa;}
+
+/* Hide the old plain section-title (we replace it with section-card-head) */
+.form-step .section-title{display:none;}
+
+/* Inline sub-section <h6 class="text-secondary"> -> render as field-group-label automatically */
+.section-card-body > .row > h6.text-secondary,
+.section-card-body h6.text-secondary{
+    font-size:0.7rem !important;
+    font-weight:700 !important;
+    color:var(--section-accent,#8b0000) !important;
+    text-transform:uppercase;
+    letter-spacing:0.07em;
+    margin:10px 0 4px !important;
+    padding:5px 0 4px;
+    border-bottom:1px dashed #e3e6ea;
+}
+.section-card-body > .row > h6.text-secondary:first-child,
+.section-card-body h6.text-secondary:first-child{margin-top:0 !important;}
+
+/* ===== SAVE-SUCCESS CONFIRMATION CARD =====
+   Shown in-place after a successful save/update; user can review what was saved
+   and choose to go back home, continue editing, or add a visit. */
+#saveSuccessPanel{
+    display:none;
+    margin-bottom:18px;
+    border-radius:14px;
+    overflow:hidden;
+    box-shadow:0 4px 22px rgba(29,111,66,0.18);
+    border:1px solid #b8e0c4;
+    animation:fadeUp 0.35s ease;
+}
+#saveSuccessPanel.visible{display:block;}
+.ssp-head{
+    background:linear-gradient(135deg,#1d6f42,#2a9555);
+    color:#fff;
+    padding:14px 18px;
+    display:flex;align-items:center;gap:12px;
+}
+.ssp-head .ssp-icon{
+    width:42px;height:42px;border-radius:50%;
+    background:rgba(255,255,255,0.22);
+    display:inline-flex;align-items:center;justify-content:center;
+    font-size:1.25rem;flex-shrink:0;
+    border:2px solid rgba(255,255,255,0.5);
+}
+.ssp-head h5{margin:0;font-family:'Crimson Pro',serif;font-weight:700;font-size:1.15rem;letter-spacing:0.01em;}
+.ssp-head .ssp-sub{font-size:0.75rem;opacity:0.9;margin-top:2px;}
+.ssp-body{background:#f4faf6;padding:16px 18px;}
+.ssp-summary{
+    background:#fff;
+    border:1px solid #d6ead9;
+    border-radius:10px;
+    padding:12px 14px;
+    margin-bottom:14px;
+}
+.ssp-summary-row{
+    display:flex;
+    gap:10px;
+    padding:5px 0;
+    font-size:0.82rem;
+    border-bottom:1px dashed #eaf2ec;
+}
+.ssp-summary-row:last-child{border-bottom:none;}
+.ssp-summary-row .ssp-label{
+    flex:0 0 110px;
+    color:#6c7d72;
+    font-weight:600;
+    font-size:0.72rem;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    padding-top:1px;
+}
+.ssp-summary-row .ssp-value{
+    flex:1;
+    color:#1d3a26;
+    font-weight:600;
+    word-break:break-word;
+}
+.ssp-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.ssp-actions .btn{
+    padding:9px 16px;
+    font-size:0.82rem;
+    font-weight:600;
+    border-radius:8px;
+    flex:1 1 auto;
+    min-width:140px;
+}
+.ssp-action-home{background:#8b0000;border:none;color:#fff;}
+.ssp-action-home:hover{background:#5c0000;color:#fff;}
+.ssp-action-edit{background:#fff;border:1.5px solid #1d6f42;color:#1d6f42;}
+.ssp-action-edit:hover{background:#1d6f42;color:#fff;}
+.ssp-action-new{background:#fff;border:1.5px solid #c0392b;color:#c0392b;}
+.ssp-action-new:hover{background:#c0392b;color:#fff;}
+.ssp-action-visit{background:#17a2b8;border:none;color:#fff;}
+.ssp-action-visit:hover{background:#0e7480;color:#fff;}
+
+/* When success panel is shown, dim/hide the form to focus attention */
+#hfForm.saved-mode{display:none;}
+#stickySaveBar.saved-mode{display:none !important;}
+.wizard-nav.saved-mode{display:none !important;}
+
+/* Slightly tighter wizard nav */
+.wizard-nav{margin-top:14px;}
+
 </style>
 
 </head>
@@ -362,13 +588,41 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 <div class="card p-3 border-top border-4 border-danger">
     <h4 class="mb-1 text-dark fw-bold" id="formTitle">New Patient Entry</h4>
 
+    <!-- SAVE SUCCESS PANEL — shown after a successful save/update -->
+    <div id="saveSuccessPanel">
+        <div class="ssp-head">
+            <div class="ssp-icon"><i class="fa-solid fa-circle-check"></i></div>
+            <div>
+                <h5 id="sspTitle">Patient Saved</h5>
+                <div class="ssp-sub" id="sspSubtitle">The record was saved successfully.</div>
+            </div>
+        </div>
+        <div class="ssp-body">
+            <div class="ssp-summary" id="sspSummary"></div>
+            <div class="ssp-actions">
+                <button type="button" class="btn ssp-action-home" onclick="sspGoHome()"><i class="fa fa-house me-1"></i> Back to Home</button>
+                <button type="button" class="btn ssp-action-edit" onclick="sspContinueEditing()"><i class="fa fa-pen-to-square me-1"></i> Continue Editing</button>
+                <button type="button" class="btn ssp-action-visit" id="sspAddVisitBtn" onclick="sspAddVisit()"><i class="fa fa-calendar-plus me-1"></i> Add Visit</button>
+                <button type="button" class="btn ssp-action-new" onclick="sspNewPatient()"><i class="fa fa-user-plus me-1"></i> New Patient</button>
+            </div>
+        </div>
+    </div>
+
     <!-- WIZARD PROGRESS — dots with short labels underneath -->
     <div class="wizard-progress" id="wizardProgress"></div>
 
     <div id="hfForm">
         <!-- STEP 1: Demographics -->
         <div class="form-step active" data-step="1">
-            <h6 class="section-title">1. Demographics &amp; Entry Info</h6>
+            <div class="section-card sec-demographics">
+                <div class="section-card-head">
+                    <div class="sc-icon"><i class="fa fa-id-card-clip"></i></div>
+                    <div>
+                        <div class="sc-title">1. Demographics & Entry Info</div>
+                        <div class="sc-sub">Patient identifiers and contact</div>
+                    </div>
+                </div>
+                <div class="section-card-body">
             <div class="row g-2">
                 <div class="col-6 col-md-3"><label class="text-primary fw-bold">Entered By *</label><select class="form-select border-primary" id="Doctor_Name"><option value="">Select...</option><option>Dr Farouk</option><option>Dr Badawy</option><option>Dr Ali</option><option>Dr Hamza</option><option>Dr Ahmed</option></select></div>
                 <div class="col-6 col-md-3"><label>Name *</label><input type="text" class="form-control" id="Patient_Name"></div>
@@ -379,11 +633,21 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                 <div class="col-4 col-md-4"><label>Nationality</label><input type="text" class="form-control" id="Nationality"></div>
                 <div class="col-12 col-md-4"><label>Mobile *</label><input type="tel" class="form-control" id="Mobile" inputmode="tel" required><small class="error-msg" id="mobileError">Mobile number is required</small></div>
             </div>
+            </div>
+        </div>
         </div>
 
         <!-- STEP 2: HF Diagnosis -->
         <div class="form-step" data-step="2">
-            <h6 class="section-title">2. HF Diagnosis &amp; Status</h6>
+            <div class="section-card sec-diagnosis">
+                <div class="section-card-head">
+                    <div class="sc-icon"><i class="fa fa-stethoscope"></i></div>
+                    <div>
+                        <div class="sc-title">2. HF Diagnosis & Status</div>
+                        <div class="sc-sub">Type, cause, severity</div>
+                    </div>
+                </div>
+                <div class="section-card-body">
             <div class="row g-2">
                 <div class="col-6 col-md-3"><label>Type of HF</label><select class="form-select" id="HF_Type" onchange="applyPhenotypeEmphasis(); updateGDMTRationale();"><option value="">Select...</option><option>HFrEF</option><option>HFmrEF</option><option>HFpEF</option><option>RT side HF</option></select></div>
                 <div class="col-6 col-md-2"><label>EF at Diagnosis (%)</label><input type="number" class="form-control" id="EF_Diagnosis" inputmode="numeric" oninput="calcMAGGIC(); checkCRTIndication();"></div>
@@ -396,11 +660,21 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                 <div class="col-6 col-md-3"><label>Last Admission Date</label><input type="date" class="form-control" id="Last_Admission"></div>
                 <div class="col-6 col-md-3"><label>Length of Stay (Days)</label><input type="number" class="form-control" id="LOS" inputmode="numeric"></div>
             </div>
+            </div>
+        </div>
         </div>
 
         <!-- STEP 3: Symptoms & Signs -->
         <div class="form-step" data-step="3">
-            <h6 class="section-title">3. Symptoms, Signs &amp; Vitals (On Admission)</h6>
+            <div class="section-card sec-vitals">
+                <div class="section-card-head">
+                    <div class="sc-icon"><i class="fa fa-heart-pulse"></i></div>
+                    <div>
+                        <div class="sc-title">3. Symptoms, Signs & Vitals</div>
+                        <div class="sc-sub">On admission</div>
+                    </div>
+                </div>
+                <div class="section-card-body">
             <div class="row g-2">
                 <div class="col-4 col-md-2"><label class="text-primary">Height (cm)</label><input type="number" class="form-control border-primary" id="Height" oninput="calcBMI()" inputmode="numeric"></div>
                 <div class="col-4 col-md-2"><label class="text-primary">Weight (kg)</label><input type="number" class="form-control border-primary" id="Weight" oninput="calcBMI()" inputmode="numeric"></div>
@@ -431,11 +705,21 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                 <i class="fa fa-weight-scale"></i>
                 <div><strong>Obesity Clinic Referral:</strong> BMI &gt; 30 — consider referral to MKH Obesity Clinic for weight-management evaluation. Counsel on weight loss, lifestyle modification, and consider GLP-1 agonist therapy if HFpEF/HFmrEF.</div>
             </div>
+            </div>
+        </div>
         </div>
 
         <!-- STEP 4: Investigations -->
         <div class="form-step" data-step="4">
-            <h6 class="section-title">4. Investigations &amp; Procedures</h6>
+            <div class="section-card sec-investigations">
+                <div class="section-card-head">
+                    <div class="sc-icon"><i class="fa fa-magnifying-glass-chart"></i></div>
+                    <div>
+                        <div class="sc-title">4. Investigations & Procedures</div>
+                        <div class="sc-sub">ECG, Echo, CMR, CT, RHC, CPET</div>
+                    </div>
+                </div>
+                <div class="section-card-body">
             <div class="row g-2">
                 <h6 class="col-12 text-secondary m-0"><i class="fa fa-heartbeat"></i> ECG</h6>
                 <div class="col-6 col-md-3"><label>LBBB</label><select class="form-select" id="ECG_LBBB" onchange="checkCRTIndication()"><option value="">Select...</option><option>No</option><option>Yes</option></select></div>
@@ -530,11 +814,21 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                 <i class="fa fa-bolt"></i>
                 <div><strong>CRT/ICD Consideration:</strong> <span id="alertCRTText"></span></div>
             </div>
+            </div>
+        </div>
         </div>
 
         <!-- STEP 5: Comorbidities -->
         <div class="form-step" data-step="5">
-            <h6 class="section-title">5. Comorbidities</h6>
+            <div class="section-card sec-comorbid">
+                <div class="section-card-head">
+                    <div class="sc-icon"><i class="fa fa-notes-medical"></i></div>
+                    <div>
+                        <div class="sc-title">5. Comorbidities</div>
+                        <div class="sc-sub">Risk factors and co-conditions</div>
+                    </div>
+                </div>
+                <div class="section-card-body">
             <div class="pill-group" id="pillComorbidities"></div>
             <div style="display:none;">
                 <select id="DM" onchange="calcMAGGIC()"><option>No</option><option>Yes</option></select>
@@ -571,11 +865,21 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                 <div class="col-12 col-md-3"><label>Genetics</label><select class="form-select" id="Genetics"><option>No</option><option>Yes</option></select></div>
                 <input type="hidden" id="FH_Genetics">
             </div>
+            </div>
+        </div>
         </div>
 
         <!-- STEP 6: Labs -->
         <div class="form-step" data-step="6">
-            <h6 class="section-title">6. In-Hospital Labs <small class="text-muted fw-normal">— Kuwait SI units</small></h6>
+            <div class="section-card sec-labs">
+                <div class="section-card-head">
+                    <div class="sc-icon"><i class="fa fa-vials"></i></div>
+                    <div>
+                        <div class="sc-title">6. In-Hospital Labs</div>
+                        <div class="sc-sub">Kuwait SI units</div>
+                    </div>
+                </div>
+                <div class="section-card-body">
             <div class="row g-2">
                 <h6 class="col-12 text-secondary m-0"><i class="fa fa-vial"></i> Glycemic</h6>
                 <div class="col-6 col-md-3"><label>HbA1c (%)</label><input type="text" class="form-control" id="Lab_HbA1c" inputmode="decimal"></div>
@@ -654,11 +958,21 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                 <i class="fa fa-tint"></i>
                 <div><strong>Iron Deficiency Flagged (ESC Criteria):</strong> Ferritin &lt;100, or 100–299 with TSAT &lt;20%. Consider IV iron.</div>
             </div>
+            </div>
+        </div>
         </div>
 
         <!-- STEP 7: Medications -->
         <div class="form-step" data-step="7">
-            <h6 class="section-title">7. In-Hospital Management &amp; Medications</h6>
+            <div class="section-card sec-meds">
+                <div class="section-card-head">
+                    <div class="sc-icon"><i class="fa fa-pills"></i></div>
+                    <div>
+                        <div class="sc-title">7. In-Hospital Management & Medications</div>
+                        <div class="sc-sub">GDMT and supportive therapy</div>
+                    </div>
+                </div>
+                <div class="section-card-body">
             <div class="clinical-alert alert-info-soft" id="alertPhenotype" style="margin-bottom:10px;">
                 <i class="fa fa-info-circle"></i>
                 <div id="alertPhenotypeText">Select HF Type in Step 2 for phenotype-specific guidance.</div>
@@ -680,11 +994,21 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                 <h6 class="text-danger" style="font-size:0.78rem;"><i class="fa fa-clipboard-question me-1"></i> GDMT Gap Rationale (HFrEF)</h6>
                 <div class="row g-2" id="gdmtRationaleFields"></div>
             </div>
+            </div>
+        </div>
         </div>
 
         <!-- STEP 8: Outcomes -->
         <div class="form-step" data-step="8">
-            <h6 class="section-title">8. Outcomes &amp; Management</h6>
+            <div class="section-card sec-outcomes">
+                <div class="section-card-head">
+                    <div class="sc-icon"><i class="fa fa-flag-checkered"></i></div>
+                    <div>
+                        <div class="sc-title">8. Outcomes & Management</div>
+                        <div class="sc-sub">Plan, referrals, advanced HF</div>
+                    </div>
+                </div>
+                <div class="section-card-body">
             <div class="row g-2">
                 <div class="col-6 col-md-3"><label>Quadruple GDMT?</label><select class="form-select" id="Quad_GDMT"><option>No</option><option>Yes</option></select></div>
                 <div class="col-6 col-md-3"><label>Compliance</label><select class="form-select" id="Compliance"><option>Yes</option><option>No</option></select></div>
@@ -730,11 +1054,21 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                 <input type="hidden" id="MAGGIC_Risk">
                 <div class="col-12 col-md-12"><label>Management Plan / Notes</label><textarea class="form-control" id="Notes" rows="2"></textarea></div>
             </div>
+            </div>
+        </div>
         </div>
 
         <!-- STEP 9: Visits -->
         <div class="form-step" data-step="9">
-            <h6 class="section-title">9. Visits &amp; Follow-ups</h6>
+            <div class="section-card sec-visits">
+                <div class="section-card-head">
+                    <div class="sc-icon"><i class="fa fa-calendar-check"></i></div>
+                    <div>
+                        <div class="sc-title">9. Visits & Follow-ups</div>
+                        <div class="sc-sub">History and next appointment</div>
+                    </div>
+                </div>
+                <div class="section-card-body">
             <!-- Collapsible visit history -->
             <div id="visitHistory" class="visit-history-list mb-3"></div>
             <div class="visit-section">
@@ -935,10 +1269,12 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                     </div>
                 </div>
             </div>
+            </div>
+        </div>
         </div>
 
         <!-- WIZARD NAV -->
-        <div class="wizard-nav">
+        <div class="wizard-nav" id="wizardNav">
             <button class="btn btn-outline-secondary" id="wizPrev" onclick="wizardNav(-1)"><i class="fa fa-chevron-left me-1"></i> Previous</button>
             <button class="btn btn-primary" id="wizNext" onclick="wizardNav(1)">Next <i class="fa fa-chevron-right ms-1"></i></button>
         </div>
@@ -1388,6 +1724,8 @@ function updatePatientWithAudit(patientId, newData, oldData, extra){
         lastEditDoctor: _currentDoctorSelection() || (newData.Doctor_Name || '')
     });
     return db.collection("patients").doc(patientId).update(stamped).then(function(){
+        // Refresh in-memory PC cache so subsequent diffs and renders use the new values.
+        if(typeof PC === 'object') PC[patientId] = Object.assign({}, oldData||{}, stamped);
         if(changes.length === 0 && !extra.forceLog) return; // nothing meaningful changed
         return writeAuditEntry(patientId, {
             action: extra.action || 'update',
@@ -2498,7 +2836,7 @@ function savePatient(){
     if(editingDocId){
         var oldData = PC[editingDocId] || {};
         updatePatientWithAudit(editingDocId, data, oldData, {action:'update'}).then(function(){
-            showPopup("success","Updated!","Patient record updated successfully.");resetForm();window.scrollTo({top:0,behavior:"smooth"});
+            showSaveSuccess(editingDocId, data, 'update');
         }).catch(function(e){showPopup("error","Error",e.message);btn.disabled=false;btn.innerHTML='<i class="fa fa-save me-1"></i> SAVE PATIENT';});
     }else{
         db.collection("patients").where("Civil_ID","==",civilID).get().then(function(snap){
@@ -2507,7 +2845,7 @@ function savePatient(){
                 if(confirm("A patient with this Civil ID already exists:\n"+existing.Patient_Name+" (File: "+existing.File_No+")\n\nDo you want to EDIT the existing record instead?")){
                     editingDocId=snap.docs[0].id;currentPatientId=snap.docs[0].id;
                     updatePatientWithAudit(editingDocId, data, existing, {action:'update', note:'Edit via duplicate-Civil-ID prompt'}).then(function(){
-                        showPopup("success","Updated!","Existing patient record updated.");resetForm();
+                        showSaveSuccess(editingDocId, data, 'update');
                     }).catch(function(e){showPopup("error","Error",e.message);});
                 }else{btn.disabled=false;btn.innerHTML='<i class="fa fa-save me-1"></i> SAVE PATIENT';}
                 return;
@@ -2520,7 +2858,7 @@ function savePatient(){
                 if(confirm("A patient with File No "+fileNo+" already exists:\n"+existing.Patient_Name+"\n\nDo you want to EDIT the existing record instead?")){
                     editingDocId=snap2.docs[0].id;
                     updatePatientWithAudit(editingDocId, data, existing, {action:'update', note:'Edit via duplicate-File-No prompt'}).then(function(){
-                        showPopup("success","Updated!","Existing patient record updated.");resetForm();
+                        showSaveSuccess(editingDocId, data, 'update');
                     });
                 }else{btn.disabled=false;btn.innerHTML='<i class="fa fa-save me-1"></i> SAVE PATIENT';}
                 return;
@@ -2533,10 +2871,132 @@ function savePatient(){
             data.lastEditDoctor = data.createdDoctor;
             db.collection("patients").add(data).then(function(ref){
                 writeAuditEntry(ref.id, {action:'create', changes:[], note:'Patient created'});
-                showPopup("success","Saved!","New patient added successfully.");resetForm();window.scrollTo({top:0,behavior:"smooth"});
+                editingDocId = ref.id;
+                currentPatientId = ref.id;
+                // Cache in PC so future edits diff correctly
+                if(typeof PC === 'object') PC[ref.id] = Object.assign({}, data);
+                showSaveSuccess(ref.id, data, 'create');
             }).catch(function(e){showPopup("error","Error",e.message);btn.disabled=false;btn.innerHTML='<i class="fa fa-save me-1"></i> SAVE PATIENT';});
         }).catch(function(e){showPopup("error","Error",e.message);btn.disabled=false;btn.innerHTML='<i class="fa fa-save me-1"></i> SAVE PATIENT';});
     }
+}
+
+// ===== SAVE-SUCCESS PANEL =====
+// After a successful save/update, instead of clearing everything we keep the user
+// on the same screen and show a confirmation panel summarising the saved record,
+// with options to go back home, continue editing, add a visit, or start a new patient.
+function showSaveSuccess(patientId, data, mode){
+    var panel = document.getElementById('saveSuccessPanel');
+    if(!panel){ resetForm(); return; }
+    // Update title/sub
+    var isUpdate = mode === 'update';
+    var titleEl = document.getElementById('sspTitle');
+    var subEl = document.getElementById('sspSubtitle');
+    if(titleEl) titleEl.textContent = isUpdate ? 'Patient Updated' : 'Patient Saved';
+    if(subEl) subEl.textContent = isUpdate
+        ? 'Your changes have been saved successfully.'
+        : 'New patient added to the registry.';
+    // Build summary of key saved fields
+    var rows = [
+        ['Name',        data.Patient_Name || '—'],
+        ['Civil ID',    data.Civil_ID || '—'],
+        ['File No',     data.File_No || '—'],
+        ['Mobile',      data.Mobile || '—'],
+        ['Age / Gender',((data.Age||'—')+' / '+(data.Gender||'—'))],
+        ['HF Type',     data.HF_Type || '—'],
+        ['EF (%)',      data.EF_Diagnosis || '—'],
+        ['NYHA',        data.NYHA || '—'],
+        ['Doctor',      data.Doctor_Name || '—'],
+        ['Saved at',    new Date().toLocaleString()]
+    ];
+    var html = '';
+    rows.forEach(function(r){
+        html += '<div class="ssp-summary-row">'+
+                  '<div class="ssp-label">'+r[0]+'</div>'+
+                  '<div class="ssp-value">'+ String(r[1]).replace(/</g,'&lt;') +'</div>'+
+                '</div>';
+    });
+    var summaryEl = document.getElementById('sspSummary');
+    if(summaryEl) summaryEl.innerHTML = html;
+
+    // Hide form, show panel, hide sticky save bar
+    var form = document.getElementById('hfForm');
+    if(form) form.classList.add('saved-mode');
+    var bar = document.getElementById('stickySaveBar');
+    if(bar) bar.classList.add('saved-mode');
+    var wn = document.getElementById('wizardNav');
+    if(wn) wn.classList.add('saved-mode');
+    var wp = document.getElementById('wizardProgress');
+    if(wp) wp.style.display = 'none';
+    panel.classList.add('visible');
+    // Update form title to reflect save state
+    var ft = document.getElementById('formTitle');
+    if(ft) ft.innerHTML = '<i class="fa fa-circle-check text-success me-2"></i>'+(isUpdate?'Record Updated':'Record Saved');
+    // Reset save button label so a future save works cleanly when user clicks "Continue Editing"
+    var btn = document.getElementById("submitBtn");
+    if(btn){ btn.disabled=false; btn.innerHTML='<i class="fa fa-save me-1"></i> SAVE PATIENT'; }
+    // Stash the patient id so SSP buttons know who we're working with
+    panel.dataset.patientId = patientId || '';
+    // Scroll panel into view
+    try{ panel.scrollIntoView({behavior:'smooth', block:'start'}); }catch(e){ window.scrollTo({top:0,behavior:'smooth'}); }
+}
+
+// "Back to Home" — clear the form and stay on the registry main screen scrolled to top.
+function sspGoHome(){
+    _hideSaveSuccessPanel();
+    resetForm();
+    window.scrollTo({top:0, behavior:'smooth'});
+    // Refresh main alerts if available so the saved patient shows in calendars/lists.
+    if(typeof loadMainAlerts === 'function') loadMainAlerts();
+}
+
+// Continue editing the same patient — hide the panel and re-show the form (data is still loaded).
+function sspContinueEditing(){
+    _hideSaveSuccessPanel();
+    var form = document.getElementById('hfForm');
+    if(form) form.classList.remove('saved-mode');
+    var bar = document.getElementById('stickySaveBar');
+    if(bar) bar.classList.remove('saved-mode');
+    var wn = document.getElementById('wizardNav');
+    if(wn) wn.classList.remove('saved-mode');
+    var wp = document.getElementById('wizardProgress');
+    if(wp) wp.style.display = '';
+    // Restore form title to "Editing" label
+    var ft = document.getElementById('formTitle');
+    if(ft) ft.innerText = 'Editing Patient';
+    var ce = document.getElementById('cancelEditBtn');
+    if(ce) ce.classList.remove('d-none');
+    if(typeof goToWizardStep === 'function') goToWizardStep(1);
+}
+
+// Jump to the visits step for the just-saved patient.
+function sspAddVisit(){
+    sspContinueEditing();
+    if(typeof goToWizardStep === 'function') goToWizardStep(9);
+    setTimeout(function(){
+        var vd = document.getElementById('Visit_Date');
+        if(vd) vd.focus();
+    }, 200);
+}
+
+// Start a fresh patient entry.
+function sspNewPatient(){
+    _hideSaveSuccessPanel();
+    resetForm();
+    window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function _hideSaveSuccessPanel(){
+    var panel = document.getElementById('saveSuccessPanel');
+    if(panel) panel.classList.remove('visible');
+    var form = document.getElementById('hfForm');
+    if(form) form.classList.remove('saved-mode');
+    var bar = document.getElementById('stickySaveBar');
+    if(bar) bar.classList.remove('saved-mode');
+    var wn = document.getElementById('wizardNav');
+    if(wn) wn.classList.remove('saved-mode');
+    var wp = document.getElementById('wizardProgress');
+    if(wp) wp.style.display = '';
 }
 
 // ----- INLINE VISIT COMMIT (used when "Save Patient" is pressed while editing a visit) -----
@@ -2841,6 +3301,8 @@ function buildVisitDetailHTML(v){
 }
 
 function resetForm(){
+    // Always clear the post-save success panel when starting fresh
+    if(typeof _hideSaveSuccessPanel === 'function') _hideSaveSuccessPanel();
     document.querySelectorAll('#hfForm input, #hfForm select, #hfForm textarea').forEach(function(el){if(el.tagName==='SELECT'){el.selectedIndex=0;}else if(el.type==='checkbox'){el.checked=false;}else{el.value="";}});
     document.getElementById("searchInput").value="";document.getElementById("searchResults").innerHTML="";
     editingDocId=null;currentPatientId=null;visits=[];editingVisitId=null;
@@ -3229,6 +3691,8 @@ function showTrends(patientId){
 }
 
 function editPt(id){
+    // Always hide the post-save success panel when navigating to edit a patient
+    if(typeof _hideSaveSuccessPanel === 'function') _hideSaveSuccessPanel();
     var d=PC[id];editingDocId=id;currentPatientId=id;
     Object.keys(d).forEach(function(k){var el=document.getElementById(k);if(el)el.value=d[k]||"";});
     // Legacy migration: old Obese_OSA combined field maps to both Obese and OSA pills
