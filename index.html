@@ -77,6 +77,11 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 .patient-card{font-size:0.8rem;margin-bottom:15px;}
 .patient-card th{background:#f8f9fa;width:40%;font-weight:600}
 .patient-card td{background:#fff}
+.patient-card-header{transition:background .15s;}
+.patient-card-header:hover{background:#ffe9e9 !important;}
+.patient-card-header .pc-chevron{font-size:0.8rem;}
+.patient-card-body{animation:pc-fade-in .18s ease-out;}
+@keyframes pc-fade-in{from{opacity:0;transform:translateY(-2px);}to{opacity:1;transform:translateY(0);}}
 .empty-field{color:#adb5bd;font-style:italic}
 .input-error{border:2px solid #dc3545!important}
 .error-msg{color:#dc3545;font-size:0.7rem;display:none}
@@ -395,7 +400,7 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 
         <!-- STEP 3: Symptoms & Signs -->
         <div class="form-step" data-step="3">
-            <h6 class="section-title">3. Symptoms &amp; Signs</h6>
+            <h6 class="section-title">3. Symptoms, Signs &amp; Vitals (On Admission)</h6>
             <div class="row g-2">
                 <div class="col-4 col-md-2"><label class="text-primary">Height (cm)</label><input type="number" class="form-control border-primary" id="Height" oninput="calcBMI()" inputmode="numeric"></div>
                 <div class="col-4 col-md-2"><label class="text-primary">Weight (kg)</label><input type="number" class="form-control border-primary" id="Weight" oninput="calcBMI()" inputmode="numeric"></div>
@@ -570,24 +575,33 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 
         <!-- STEP 6: Labs -->
         <div class="form-step" data-step="6">
-            <h6 class="section-title">6. Lab Results (Baseline) <small class="text-muted fw-normal">— Kuwait SI units</small></h6>
+            <h6 class="section-title">6. In-Hospital Labs <small class="text-muted fw-normal">— Kuwait SI units</small></h6>
             <div class="row g-2">
                 <h6 class="col-12 text-secondary m-0"><i class="fa fa-vial"></i> Glycemic</h6>
                 <div class="col-6 col-md-3"><label>HbA1c (%)</label><input type="text" class="form-control" id="Lab_HbA1c" inputmode="decimal"></div>
                 <div class="col-6 col-md-3"><label>Fasting Glucose (mmol/L)</label><input type="text" class="form-control" id="Lab_Gluc" inputmode="decimal"></div>
 
                 <div class="col-12"><hr class="my-1"></div>
-                <h6 class="col-12 text-secondary m-0"><i class="fa fa-tint"></i> Renal &amp; Electrolytes</h6>
-                <div class="col-6 col-md-3"><label>Urea (mmol/L)</label><input type="text" class="form-control" id="Lab_Urea" inputmode="decimal" oninput="syncBaselineUreaCreat();calcBaselineEGFR();"></div>
-                <div class="col-6 col-md-3"><label>Creatinine (µmol/L)</label><input type="text" class="form-control" id="Lab_Creat" inputmode="decimal" oninput="syncBaselineUreaCreat();calcBaselineEGFR();checkGDMTAlerts();"></div>
-                <div class="col-6 col-md-3"><label class="text-success fw-bold">eGFR (ml/min/1.73m²) <span class="auto-badge"><i class="fa fa-lock"></i> Auto</span></label><input type="text" class="form-control bg-light text-success fw-bold" id="Lab_eGFR" readonly></div>
-                <div class="col-6 col-md-3"><label>Sodium / Na (mmol/L)</label><input type="text" class="form-control" id="Lab_Na" inputmode="decimal" oninput="syncBaselineNaK();checkGDMTAlerts()"></div>
-                <div class="col-6 col-md-3"><label>Potassium / K (mmol/L)</label><input type="text" class="form-control" id="Lab_K" inputmode="decimal" oninput="syncBaselineNaK();checkGDMTAlerts()"></div>
+                <h6 class="col-12 text-secondary m-0"><i class="fa fa-tint"></i> Renal Function (RFT) — On Admission</h6>
+                <div class="col-6 col-md-3"><label>Urea Adm (mmol/L)</label><input type="text" class="form-control" id="Lab_Urea" inputmode="decimal" oninput="syncBaselineUreaCreat();calcBaselineEGFR();"></div>
+                <div class="col-6 col-md-3"><label>Creatinine Adm (µmol/L)</label><input type="text" class="form-control" id="Lab_Creat" inputmode="decimal" oninput="syncBaselineUreaCreat();calcBaselineEGFR();checkGDMTAlerts();"></div>
+                <div class="col-6 col-md-3"><label class="text-success fw-bold">eGFR Adm <span class="auto-badge"><i class="fa fa-lock"></i> Auto</span></label><input type="text" class="form-control bg-light text-success fw-bold" id="Lab_eGFR" readonly></div>
+                <div class="col-6 col-md-3"><label>Na Adm (mmol/L)</label><input type="text" class="form-control" id="Lab_Na" inputmode="decimal" oninput="syncBaselineNaK();checkGDMTAlerts()"></div>
+                <div class="col-6 col-md-3"><label>K Adm (mmol/L)</label><input type="text" class="form-control" id="Lab_K" inputmode="decimal" oninput="syncBaselineNaK();checkGDMTAlerts()"></div>
+
+                <h6 class="col-12 text-secondary m-0 mt-2"><i class="fa fa-tint"></i> Renal Function (RFT) — On Discharge</h6>
+                <div class="col-6 col-md-3"><label>Urea Disch (mmol/L)</label><input type="text" class="form-control" id="Lab_Urea_Disch" inputmode="decimal"></div>
+                <div class="col-6 col-md-3"><label>Creatinine Disch (µmol/L)</label><input type="text" class="form-control" id="Lab_Creat_Disch" inputmode="decimal" oninput="calcDischargeEGFR()"></div>
+                <div class="col-6 col-md-3"><label class="text-success fw-bold">eGFR Disch <span class="auto-badge"><i class="fa fa-lock"></i> Auto</span></label><input type="text" class="form-control bg-light text-success fw-bold" id="Lab_eGFR_Disch" readonly></div>
+                <div class="col-6 col-md-3"><label>Na Disch (mmol/L)</label><input type="text" class="form-control" id="Lab_Na_Disch" inputmode="decimal"></div>
+                <div class="col-6 col-md-3"><label>K Disch (mmol/L)</label><input type="text" class="form-control" id="Lab_K_Disch" inputmode="decimal"></div>
 
                 <div class="col-12"><hr class="my-1"></div>
-                <h6 class="col-12 text-secondary m-0"><i class="fa fa-heartbeat"></i> Cardiac Biomarkers</h6>
-                <div class="col-6 col-md-3"><label>BNP (pg/mL)</label><input type="text" class="form-control" id="Lab_BNP_only" inputmode="decimal"></div>
-                <div class="col-6 col-md-3"><label>NT-proBNP (pg/mL)</label><input type="text" class="form-control" id="Lab_BNP" inputmode="decimal"></div>
+                <h6 class="col-12 text-secondary m-0"><i class="fa fa-heartbeat"></i> NT-proBNP &amp; BNP</h6>
+                <div class="col-6 col-md-3"><label>NT-proBNP Adm (pg/mL)</label><input type="text" class="form-control" id="Lab_BNP" inputmode="decimal"></div>
+                <div class="col-6 col-md-3"><label>NT-proBNP Disch (pg/mL)</label><input type="text" class="form-control" id="Lab_BNP_Disch" inputmode="decimal"></div>
+                <div class="col-6 col-md-3"><label>BNP Adm (pg/mL)</label><input type="text" class="form-control" id="Lab_BNP_only" inputmode="decimal"></div>
+                <div class="col-6 col-md-3"><label>BNP Disch (pg/mL)</label><input type="text" class="form-control" id="Lab_BNP_only_Disch" inputmode="decimal"></div>
 
                 <div class="col-12"><hr class="my-1"></div>
                 <h6 class="col-12 text-secondary m-0"><i class="fa fa-syringe"></i> Iron Studies</h6>
@@ -596,8 +610,9 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                 <div class="col-6 col-md-3"><label>Transferrin Sat. / TSAT (%)</label><input type="text" class="form-control" id="Lab_TrSats" inputmode="decimal"></div>
 
                 <div class="col-12"><hr class="my-1"></div>
-                <h6 class="col-12 text-secondary m-0"><i class="fa fa-vials"></i> CBC</h6>
-                <div class="col-4 col-md-2"><label>Hb (g/dL)</label><input type="text" class="form-control" id="Lab_Hb" inputmode="decimal" oninput="syncBaselineCBC()"></div>
+                <h6 class="col-12 text-secondary m-0"><i class="fa fa-vials"></i> CBC — Hb on Admission &amp; Discharge</h6>
+                <div class="col-6 col-md-3"><label>Hb Adm (g/dL)</label><input type="text" class="form-control" id="Lab_Hb" inputmode="decimal" oninput="syncBaselineCBC()"></div>
+                <div class="col-6 col-md-3"><label>Hb Disch (g/dL)</label><input type="text" class="form-control" id="Lab_Hb_Disch" inputmode="decimal"></div>
                 <div class="col-4 col-md-2"><label>WBC (×10⁹/L)</label><input type="text" class="form-control" id="Lab_WBC" inputmode="decimal" oninput="syncBaselineCBC()"></div>
                 <div class="col-4 col-md-2"><label>Platelets (×10⁹/L)</label><input type="text" class="form-control" id="Lab_Plt" inputmode="decimal" oninput="syncBaselineCBC()"></div>
 
@@ -643,10 +658,22 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 
         <!-- STEP 7: Medications -->
         <div class="form-step" data-step="7">
-            <h6 class="section-title">7. Medications</h6>
+            <h6 class="section-title">7. In-Hospital Management &amp; Medications</h6>
             <div class="clinical-alert alert-info-soft" id="alertPhenotype" style="margin-bottom:10px;">
                 <i class="fa fa-info-circle"></i>
                 <div id="alertPhenotypeText">Select HF Type in Step 2 for phenotype-specific guidance.</div>
+            </div>
+            <!-- INOTROPES BLOCK -->
+            <div class="row g-2" style="background:#fff5f5;border-left:3px solid #8b0000;border-radius:6px;padding:10px;margin:0 0 12px 0;">
+                <div class="col-12 col-md-3"><label class="fw-bold text-danger"><i class="fa fa-bolt me-1"></i>Inotropes Used?</label><select class="form-select border-danger" id="Inotropes_Used" onchange="renderInotropesUI()"><option>No</option><option>Yes</option></select></div>
+                <div class="col-12 col-md-9" id="inotropesPickWrap" style="display:none;">
+                    <label class="fw-bold text-danger">Select Inotrope(s) <small class="text-muted fw-normal">(multi-select — tap to toggle)</small></label>
+                    <div class="d-flex gap-2 flex-wrap p-2" id="inotropesPickBox" style="border:1px solid #dc3545;border-radius:6px;background:#fff;"></div>
+                </div>
+                <div class="col-12" id="inotropesDosesWrap" style="display:none;">
+                    <div id="inotropesDoses" class="row g-2 mt-1"></div>
+                </div>
+                <input type="hidden" id="Inotropes_Selected">
             </div>
             <div class="row g-2" id="medSection7"></div>
             <div id="gdmtRationaleSection" style="display:none;margin-top:10px;">
@@ -665,16 +692,39 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                 <div class="col-6 col-md-3"><label>Lost to Follow-up</label><select class="form-select" id="LostFU" onchange="toggleLostFU()"><option>No</option><option>Yes</option></select></div>
                 <div class="col-6 col-md-3" id="lostFUReasonWrap" style="display:none;"><label>Reason</label><select class="form-select" id="LostFU_Reason" onchange="toggleLostFU()"><option value="">Select...</option><option>Travel back home</option><option>Others</option></select></div>
                 <div class="col-12 col-md-6" id="lostFUOtherWrap" style="display:none;"><label>Specify (Others)</label><input type="text" class="form-control" id="LostFU_Other"></div>
-                <div class="col-6 col-md-3"><label>Referral</label><select class="form-select" id="Referral"><option value="">None</option><option>EP</option><option>Obesity Clinic</option><option>Sleep Clinic</option><option>DM/Endocrine</option><option>Nephrology</option><option>Cardiac Rehab</option><option>Dietician</option></select></div>
+
+                <!-- ADVANCED HF — Strong HF + Therapy choices -->
+                <div class="col-12"><hr class="my-2"></div>
+                <h6 class="col-12 text-secondary m-0"><i class="fa fa-heart-circle-bolt"></i> Advanced HF</h6>
+                <div class="col-6 col-md-3"><label class="fw-bold text-danger">Strong / Stage D HF?</label><select class="form-select border-danger" id="Strong_HF"><option>No</option><option>Yes</option></select></div>
+                <div class="col-6 col-md-3"><label class="fw-bold text-danger">Advanced HF Therapy?</label><select class="form-select border-danger" id="Adv_HF_Therapy" onchange="toggleAdvHFTherapy()"><option>No</option><option>Yes</option></select></div>
+                <div class="col-12" id="advHFTherapyWrap" style="display:none;">
+                    <label class="fw-bold text-danger">Therapy Type <small class="text-muted fw-normal">(multi-select — tap to toggle)</small></label>
+                    <div class="d-flex gap-2 flex-wrap p-2" id="advHFTherapyBox" style="border:1px solid #dc3545;border-radius:6px;background:#fff;">
+                        <button type="button" class="btn btn-sm btn-outline-danger" data-advhf="LVAD" onclick="toggleAdvHFTherapyOpt('LVAD')">LVAD</button>
+                        <button type="button" class="btn btn-sm btn-outline-danger" data-advhf="RVDS" onclick="toggleAdvHFTherapyOpt('RVDS')">RVDS</button>
+                        <button type="button" class="btn btn-sm btn-outline-danger" data-advhf="Heart Transplant" onclick="toggleAdvHFTherapyOpt('Heart Transplant')">Heart Transplant</button>
+                    </div>
+                    <input type="hidden" id="Adv_HF_Therapy_Type">
+                </div>
+
+                <!-- REFERRAL — multi-select -->
+                <div class="col-12"><hr class="my-2"></div>
+                <h6 class="col-12 text-secondary m-0"><i class="fa fa-share-from-square"></i> Referral(s)</h6>
+                <div class="col-12">
+                    <label>Select Referral(s) <small class="text-muted fw-normal">(multi-select — tap to toggle)</small></label>
+                    <div class="d-flex gap-2 flex-wrap p-2" id="referralBox" style="border:1px solid #ced4da;border-radius:6px;background:#fff;">
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-ref="EP" onclick="toggleReferralOpt('Referral','EP')">EP</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-ref="Obesity Clinic" onclick="toggleReferralOpt('Referral','Obesity Clinic')">Obesity Clinic</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-ref="Sleep Clinic" onclick="toggleReferralOpt('Referral','Sleep Clinic')">Sleep Clinic</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-ref="DM/Endocrine" onclick="toggleReferralOpt('Referral','DM/Endocrine')">DM/Endocrine</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-ref="Nephrology" onclick="toggleReferralOpt('Referral','Nephrology')">Nephrology</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-ref="Cardiac Rehab" onclick="toggleReferralOpt('Referral','Cardiac Rehab')">Cardiac Rehab</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-ref="Dietician" onclick="toggleReferralOpt('Referral','Dietician')">Dietician</button>
+                    </div>
+                    <input type="hidden" id="Referral">
+                </div>
                 <input type="hidden" id="Rehab">
-                <div class="col-12"><hr class="my-2"></div>
-                <div class="col-12"><hr class="my-2"></div>
-                <h6 class="col-12 text-secondary m-0"><i class="fa fa-syringe"></i> HF Vaccinations</h6>
-                <div class="col-6 col-md-3"><label>Influenza (Year Given)</label><input type="number" class="form-control" id="Vacc_Influenza_Year" inputmode="numeric" placeholder="e.g. 2026" min="2000" max="2100"></div>
-                <div class="col-6 col-md-3"><label>Pneumococcal (Year Given)</label><input type="number" class="form-control" id="Vacc_Pneumococcal_Year" inputmode="numeric" placeholder="e.g. 2024" min="2000" max="2100"></div>
-                <div class="col-6 col-md-3"><label>COVID-19 (Year Given)</label><input type="number" class="form-control" id="Vacc_COVID_Year" inputmode="numeric" placeholder="e.g. 2026" min="2000" max="2100"></div>
-                <div class="col-6 col-md-3"><label>RSV / Other</label><input type="text" class="form-control" id="Vacc_Other" placeholder="Notes / type / date"></div>
-                <!-- MAGGIC Risk Calculator removed per user request -->
                 <input type="hidden" id="HF_Dur" value="No">
                 <input type="hidden" id="MAGGIC_Score">
                 <input type="hidden" id="MAGGIC_Risk">
@@ -819,6 +869,13 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                     <div class="col-6 col-md-3"><label>TSH (mIU/L)</label><input type="text" class="form-control" id="V_TSH" inputmode="decimal"></div>
                     <div class="col-6 col-md-3"><label>Free T4 (pmol/L)</label><input type="text" class="form-control" id="V_FreeT4" inputmode="decimal"></div>
                     <div class="col-6 col-md-3"><label>INR</label><input type="text" class="form-control" id="V_INR" inputmode="decimal"></div>
+
+                    <div class="col-12"><hr class="my-1"></div>
+                    <h6 class="col-12 text-secondary m-0" style="font-size:0.78rem;"><i class="fa fa-chart-line"></i> Lipid Profile (mmol/L)</h6>
+                    <div class="col-4 col-md-2"><label>Total Chol.</label><input type="text" class="form-control" id="V_TotalChol" inputmode="decimal"></div>
+                    <div class="col-4 col-md-2"><label>LDL</label><input type="text" class="form-control" id="V_LDL" inputmode="decimal"></div>
+                    <div class="col-4 col-md-2"><label>HDL</label><input type="text" class="form-control" id="V_HDL" inputmode="decimal"></div>
+                    <div class="col-4 col-md-2"><label>Triglycerides</label><input type="text" class="form-control" id="V_TG" inputmode="decimal"></div>
                     <div class="col-12">
                         <div class="clinical-alert alert-warning-soft" id="alertVisitHyperK">
                             <i class="fa fa-exclamation-triangle"></i>
@@ -835,12 +892,35 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                     <div id="visitMedDoses" class="col-12"></div>
                     <div class="col-12"><hr class="my-2"></div>
                     <h6 class="col-12 text-secondary">Assessment &amp; Plan</h6>
-                    <div class="col-12 col-md-6"><label>Adverse Effects / Complaints</label><textarea class="form-control" id="V_Adverse" rows="2"></textarea></div>
+                    <div class="col-12 col-md-6"><label>Adverse Effects of Medications</label><textarea class="form-control" id="V_AdverseEffects" rows="2" placeholder="e.g. cough on ACEi, hyperK on MRA..."></textarea></div>
+                    <div class="col-12 col-md-6"><label>Compliance to Medications</label><select class="form-select" id="V_Compliance"><option value="">Select...</option><option>Fully compliant</option><option>Partially compliant</option><option>Non-compliant</option></select>
+                        <textarea class="form-control mt-1" id="V_ComplianceNotes" rows="1" placeholder="Compliance notes (optional)"></textarea>
+                    </div>
+                    <div class="col-12 col-md-6"><label>Patient Complaints / Symptoms</label><textarea class="form-control" id="V_Adverse" rows="2"></textarea></div>
                     <div class="col-12 col-md-6"><label>Plan / Recommendations</label><textarea class="form-control" id="V_Plan" rows="2"></textarea></div>
                     <div class="col-12"><label>Other Notes</label><textarea class="form-control" id="V_Others" rows="2"></textarea></div>
                     <div class="col-12"><hr class="my-2"></div>
-                    <h6 class="col-12 text-secondary">Referral</h6>
-                    <div class="col-12 col-md-6"><label>Referral</label><select class="form-select" id="V_Referral"><option value="">None</option><option>EP</option><option>Obesity Clinic</option><option>Sleep Clinic</option><option>DM/Endocrine</option><option>Nephrology</option><option>Cardiac Rehab</option><option>Dietician</option></select></div>
+                    <h6 class="col-12 text-secondary"><i class="fa fa-share-from-square"></i> Referral(s)</h6>
+                    <div class="col-12">
+                        <label>Select Referral(s) <small class="text-muted fw-normal">(multi-select — tap to toggle)</small></label>
+                        <div class="d-flex gap-2 flex-wrap p-2" id="vReferralBox" style="border:1px solid #ced4da;border-radius:6px;background:#fff;">
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-vref="EP" onclick="toggleReferralOpt('V_Referral','EP')">EP</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-vref="Obesity Clinic" onclick="toggleReferralOpt('V_Referral','Obesity Clinic')">Obesity Clinic</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-vref="Sleep Clinic" onclick="toggleReferralOpt('V_Referral','Sleep Clinic')">Sleep Clinic</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-vref="DM/Endocrine" onclick="toggleReferralOpt('V_Referral','DM/Endocrine')">DM/Endocrine</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-vref="Nephrology" onclick="toggleReferralOpt('V_Referral','Nephrology')">Nephrology</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-vref="Cardiac Rehab" onclick="toggleReferralOpt('V_Referral','Cardiac Rehab')">Cardiac Rehab</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-vref="Dietician" onclick="toggleReferralOpt('V_Referral','Dietician')">Dietician</button>
+                        </div>
+                        <input type="hidden" id="V_Referral">
+                    </div>
+
+                    <div class="col-12"><hr class="my-2"></div>
+                    <h6 class="col-12 text-secondary"><i class="fa fa-syringe"></i> HF Vaccinations (this visit)</h6>
+                    <div class="col-6 col-md-3"><label>Influenza (Year Given)</label><input type="number" class="form-control" id="V_Vacc_Influenza_Year" inputmode="numeric" placeholder="e.g. 2026" min="2000" max="2100"></div>
+                    <div class="col-6 col-md-3"><label>Pneumococcal (Year Given)</label><input type="number" class="form-control" id="V_Vacc_Pneumococcal_Year" inputmode="numeric" placeholder="e.g. 2024" min="2000" max="2100"></div>
+                    <div class="col-6 col-md-3"><label>COVID-19 (Year Given)</label><input type="number" class="form-control" id="V_Vacc_COVID_Year" inputmode="numeric" placeholder="e.g. 2026" min="2000" max="2100"></div>
+                    <div class="col-6 col-md-3"><label>RSV / Other</label><input type="text" class="form-control" id="V_Vacc_Other" placeholder="Notes / type / date"></div>
                     <div class="col-12 col-md-4 mt-2">
                         <label class="text-danger fw-bold"><i class="fa fa-calendar-alt"></i> Next Appointment</label>
                         <input type="date" class="form-control border-danger" id="Next_Appt">
@@ -1435,26 +1515,27 @@ function loadMainAlerts(){
                 if(!_mainAlertsData.apptByDay[d.Next_Appt])_mainAlertsData.apptByDay[d.Next_Appt]=[];
                 _mainAlertsData.apptByDay[d.Next_Appt].push({name:d.Patient_Name,file:d.File_No,doctor:d.Doctor_Name,id:id});
             }
-            // Vaccinations: check baseline patient record for this-year flags
-            var vMissing=[];
-            var fluYear=parseInt(d.Vacc_Influenza_Year||0);
-            var pneuYear=parseInt(d.Vacc_Pneumococcal_Year||0);
-            var covidYear=parseInt(d.Vacc_COVID_Year||0);
-            if(fluYear<thisYear)vMissing.push('Flu');
-            // Pneumococcal is given every several years — flag if never recorded OR more than 5 yr ago
-            if(!pneuYear||thisYear-pneuYear>5)vMissing.push('Pneumococcal');
-            if(covidYear<thisYear)vMissing.push('COVID');
-            if(vMissing.length>0)_mainAlertsData.vacc.push({name:d.Patient_Name,file:d.File_No,missing:vMissing.join(', '),id:id});
-            // Overdue: needs visit query
+            // Overdue + Vaccinations check — both pulled from the latest visit when available
+            // (Vaccinations moved from Outcomes section to Visits per user request).
             patientPromises.push(
                 db.collection("patients").doc(id).collection("visits").orderBy("visitDate","desc").limit(1).get().then(function(vsnap){
                     var lastVisit=null;
-                    if(!vsnap.empty){lastVisit=vsnap.docs[0].data().visitDate;}
+                    var lvDoc = !vsnap.empty ? vsnap.docs[0].data() : null;
+                    if(lvDoc) lastVisit = lvDoc.visitDate;
                     var lastDate=lastVisit?new Date(lastVisit):(d.timestamp?new Date(d.timestamp):null);
                     if(lastDate&&lastDate<twoMonthsAgo){
                         var daysSince=Math.floor((today-lastDate)/(1000*60*60*24));
                         _mainAlertsData.overdue.push({name:d.Patient_Name,file:d.File_No,lastVisit:lastVisit||(d.timestamp?d.timestamp.split('T')[0]+' (registered)':'never'),daysSince:daysSince,id:id});
                     }
+                    // Vaccination status — prefer latest visit's V_Vacc_*_Year, fall back to legacy patient-level fields
+                    var vMissing=[];
+                    var fluYear=parseInt((lvDoc && lvDoc.V_Vacc_Influenza_Year)    || d.Vacc_Influenza_Year    || 0);
+                    var pneuYear=parseInt((lvDoc && lvDoc.V_Vacc_Pneumococcal_Year) || d.Vacc_Pneumococcal_Year || 0);
+                    var covidYear=parseInt((lvDoc && lvDoc.V_Vacc_COVID_Year)       || d.Vacc_COVID_Year         || 0);
+                    if(fluYear<thisYear)vMissing.push('Flu');
+                    if(!pneuYear||thisYear-pneuYear>5)vMissing.push('Pneumococcal');
+                    if(covidYear<thisYear)vMissing.push('COVID');
+                    if(vMissing.length>0)_mainAlertsData.vacc.push({name:d.Patient_Name,file:d.File_No,missing:vMissing.join(', '),id:id});
                 }).catch(function(){})
             );
         });
@@ -1591,9 +1672,47 @@ function initFormUI(){
     buildPillComorbidities();
     buildMedSection7();
     buildVisitMedDoses();
+    reorderVisitFormSections();
     showStickySave();
     goToWizardStep(1);
     if(typeof loadMainAlerts==='function')loadMainAlerts();
+}
+
+// Move "Visit Labs" block to appear BEFORE "F/U Echo" — per user request.
+// Strategy: locate the Labs heading + everything up to (but not including) the Medications heading,
+// move that group to immediately before the F/U Echo heading.
+function reorderVisitFormSections(){
+    try {
+        // Wait for DOM to be present
+        var visitSection = document.querySelector('#hfForm .visit-section .row.g-2');
+        if(!visitSection) return;
+        var children = Array.prototype.slice.call(visitSection.children);
+        // Find anchor indices by text content
+        function findIdxByText(txt){
+            for(var i=0;i<children.length;i++){
+                var c=children[i];
+                if(c.tagName==='H6' && c.textContent.indexOf(txt)>=0) return i;
+            }
+            return -1;
+        }
+        var idxEcho = findIdxByText('F/U Echo');
+        var idxLabs = findIdxByText('Visit Labs');
+        var idxMeds = findIdxByText('Medications (Doses)');
+        if(idxEcho<0||idxLabs<0||idxMeds<0) return;
+        if(idxLabs<idxEcho) return; // already in desired order
+        // The HR before F/U Echo (one element before idxEcho) should also be respected.
+        // We'll move children[idxLabs-1 .. idxMeds-2]  (inclusive) to before children[idxEcho-1] (the HR).
+        // Ensure we have an HR before Echo:
+        var moveStart = idxLabs - 1; // include the <hr> right before "Visit Labs"
+        var moveEnd   = idxMeds - 1; // last index to move (just before the HR + Medications heading group)
+        // Capture the nodes to move
+        var nodesToMove = children.slice(moveStart, moveEnd + 1);
+        // Insertion target = the HR before Echo (i.e. children[idxEcho - 1])
+        var insertBefore = children[idxEcho - 1] || children[idxEcho];
+        nodesToMove.forEach(function(node){
+            visitSection.insertBefore(node, insertBefore);
+        });
+    } catch(e){ console.warn('reorderVisitFormSections failed', e); }
 }
 
 // ===== CHANGE 2: WIZARD WITH SHORT LABELS UNDER DOTS =====
@@ -2089,6 +2208,159 @@ function checkCRTIndication(){
     else{alertEl.classList.remove('visible');}
 }
 
+// ===== INOTROPES (Section 7) =====
+var INOTROPES_LIST = ['Dobutamine','Dopamine','Milrinone','Simdax','Levophed','Adrenaline','Vasopressin'];
+
+function renderInotropesUI(){
+    var used = (document.getElementById('Inotropes_Used')||{}).value || 'No';
+    var pickWrap = document.getElementById('inotropesPickWrap');
+    var dosesWrap = document.getElementById('inotropesDosesWrap');
+    if(used !== 'Yes'){
+        if(pickWrap) pickWrap.style.display='none';
+        if(dosesWrap) dosesWrap.style.display='none';
+        var hid=document.getElementById('Inotropes_Selected'); if(hid) hid.value='';
+        // Clear any inotrope dose inputs
+        INOTROPES_LIST.forEach(function(n){
+            var el=document.getElementById('Inotrope_'+n+'_MaxDose'); if(el) el.value='';
+        });
+        return;
+    }
+    if(pickWrap) pickWrap.style.display='block';
+    // Build the toggle pills (idempotent — preserves selections by reading hidden field)
+    var pickBox = document.getElementById('inotropesPickBox');
+    if(pickBox && !pickBox.dataset.built){
+        var selectedRaw = (document.getElementById('Inotropes_Selected')||{}).value || '';
+        var selected = selectedRaw ? selectedRaw.split(',').map(function(s){return s.trim();}) : [];
+        var html='';
+        INOTROPES_LIST.forEach(function(name){
+            var on = selected.indexOf(name) >= 0;
+            html += '<button type="button" class="btn btn-sm '+(on?'btn-danger':'btn-outline-danger')+'" data-inotrope="'+name+'" onclick="toggleInotrope(\''+name+'\')">'+name+'</button>';
+        });
+        pickBox.innerHTML = html;
+        pickBox.dataset.built = '1';
+    }
+    syncInotropesDoses();
+}
+
+function toggleInotrope(name){
+    var btn = document.querySelector('#inotropesPickBox button[data-inotrope="'+name+'"]');
+    if(!btn) return;
+    var on = btn.classList.contains('btn-danger');
+    if(on){ btn.classList.remove('btn-danger'); btn.classList.add('btn-outline-danger'); }
+    else  { btn.classList.add('btn-danger');    btn.classList.remove('btn-outline-danger'); }
+    // Persist current selection to hidden field
+    var sel = [];
+    document.querySelectorAll('#inotropesPickBox button.btn-danger').forEach(function(b){ sel.push(b.getAttribute('data-inotrope')); });
+    document.getElementById('Inotropes_Selected').value = sel.join(', ');
+    syncInotropesDoses();
+}
+
+function syncInotropesDoses(){
+    var dosesWrap = document.getElementById('inotropesDosesWrap');
+    var dosesContainer = document.getElementById('inotropesDoses');
+    var selRaw = (document.getElementById('Inotropes_Selected')||{}).value || '';
+    var sel = selRaw ? selRaw.split(',').map(function(s){return s.trim();}).filter(Boolean) : [];
+    if(sel.length === 0){
+        if(dosesWrap) dosesWrap.style.display='none';
+        if(dosesContainer) dosesContainer.innerHTML='';
+        return;
+    }
+    if(dosesWrap) dosesWrap.style.display='block';
+    // Preserve any existing values
+    var existing = {};
+    INOTROPES_LIST.forEach(function(n){
+        var el = document.getElementById('Inotrope_'+n+'_MaxDose');
+        if(el) existing[n] = el.value;
+    });
+    var html = '<div class="col-12"><label class="fw-bold text-danger" style="font-size:0.78rem;"><i class="fa fa-syringe me-1"></i>Maximum Dose (per inotrope)</label></div>';
+    sel.forEach(function(name){
+        var v = existing[name] || '';
+        html += '<div class="col-6 col-md-3"><label>'+name+' max dose</label>'
+              + '<input type="text" class="form-control" id="Inotrope_'+name+'_MaxDose" value="'+v.replace(/"/g,'&quot;')+'" placeholder="e.g. 10 mcg/kg/min"></div>';
+    });
+    dosesContainer.innerHTML = html;
+}
+
+// Restore inotropes UI from saved data (called by editPt)
+function restoreInotropesFromData(data){
+    var used = data.Inotropes_Used || 'No';
+    var sel  = data.Inotropes_Selected || '';
+    var u = document.getElementById('Inotropes_Used'); if(u) u.value = used;
+    var s = document.getElementById('Inotropes_Selected'); if(s) s.value = sel;
+    var pickBox = document.getElementById('inotropesPickBox'); if(pickBox) pickBox.dataset.built = '';
+    renderInotropesUI();
+    // Restore each inotrope's max-dose field from saved data
+    INOTROPES_LIST.forEach(function(n){
+        var el = document.getElementById('Inotrope_'+n+'_MaxDose');
+        if(el && data['Inotrope_'+n+'_MaxDose']!==undefined) el.value = data['Inotrope_'+n+'_MaxDose'] || '';
+    });
+}
+
+// ===== ADVANCED HF THERAPY (Section 8) =====
+function toggleAdvHFTherapy(){
+    var v = (document.getElementById('Adv_HF_Therapy')||{}).value;
+    var w = document.getElementById('advHFTherapyWrap');
+    if(!w) return;
+    if(v === 'Yes'){ w.style.display='block'; }
+    else {
+        w.style.display='none';
+        var hid=document.getElementById('Adv_HF_Therapy_Type'); if(hid) hid.value='';
+        document.querySelectorAll('#advHFTherapyBox button').forEach(function(b){ b.classList.remove('btn-danger'); b.classList.add('btn-outline-danger'); });
+    }
+}
+function toggleAdvHFTherapyOpt(name){
+    var btn = document.querySelector('#advHFTherapyBox button[data-advhf="'+name+'"]');
+    if(!btn) return;
+    var on = btn.classList.contains('btn-danger');
+    if(on){ btn.classList.remove('btn-danger'); btn.classList.add('btn-outline-danger'); }
+    else  { btn.classList.add('btn-danger');    btn.classList.remove('btn-outline-danger'); }
+    var sel=[];
+    document.querySelectorAll('#advHFTherapyBox button.btn-danger').forEach(function(b){ sel.push(b.getAttribute('data-advhf')); });
+    var hid=document.getElementById('Adv_HF_Therapy_Type'); if(hid) hid.value = sel.join(', ');
+}
+function restoreAdvHFTherapyFromData(data){
+    var v = data.Adv_HF_Therapy || 'No';
+    var t = data.Adv_HF_Therapy_Type || '';
+    var sh = document.getElementById('Strong_HF'); if(sh && data.Strong_HF) sh.value = data.Strong_HF;
+    var ah = document.getElementById('Adv_HF_Therapy'); if(ah) ah.value = v;
+    var hid=document.getElementById('Adv_HF_Therapy_Type'); if(hid) hid.value = t;
+    toggleAdvHFTherapy();
+    if(v === 'Yes'){
+        var sel = t ? t.split(',').map(function(s){return s.trim();}) : [];
+        document.querySelectorAll('#advHFTherapyBox button').forEach(function(b){
+            var name = b.getAttribute('data-advhf');
+            if(sel.indexOf(name) >= 0){ b.classList.add('btn-danger'); b.classList.remove('btn-outline-danger'); }
+            else                       { b.classList.remove('btn-danger'); b.classList.add('btn-outline-danger'); }
+        });
+    }
+}
+
+// ===== MULTI-SELECT REFERRAL (Outcomes + Visits share the same logic) =====
+// hiddenId is 'Referral' (outcomes) or 'V_Referral' (visits)
+function toggleReferralOpt(hiddenId, name){
+    var attr = (hiddenId === 'V_Referral') ? 'data-vref' : 'data-ref';
+    var box  = (hiddenId === 'V_Referral') ? '#vReferralBox' : '#referralBox';
+    var btn = document.querySelector(box+' button['+attr+'="'+name.replace(/"/g,'\\"')+'"]');
+    if(!btn) return;
+    var on = btn.classList.contains('btn-primary');
+    if(on){ btn.classList.remove('btn-primary'); btn.classList.add('btn-outline-primary'); }
+    else  { btn.classList.add('btn-primary');    btn.classList.remove('btn-outline-primary'); }
+    var sel=[];
+    document.querySelectorAll(box+' button.btn-primary').forEach(function(b){ sel.push(b.getAttribute(attr)); });
+    var hid=document.getElementById(hiddenId); if(hid) hid.value = sel.join(', ');
+}
+function restoreReferralUI(hiddenId, savedVal){
+    var attr = (hiddenId === 'V_Referral') ? 'data-vref' : 'data-ref';
+    var box  = (hiddenId === 'V_Referral') ? '#vReferralBox' : '#referralBox';
+    var hid=document.getElementById(hiddenId); if(hid) hid.value = savedVal||'';
+    var sel = (savedVal||'').split(',').map(function(s){return s.trim();}).filter(Boolean);
+    document.querySelectorAll(box+' button').forEach(function(b){
+        var name = b.getAttribute(attr);
+        if(sel.indexOf(name) >= 0){ b.classList.add('btn-primary');    b.classList.remove('btn-outline-primary'); }
+        else                       { b.classList.remove('btn-primary'); b.classList.add('btn-outline-primary'); }
+    });
+}
+
 // ===== CHANGE 3: GROUPED VISIT MED DOSES =====
 function buildVisitMedDoses(){
     var html='';
@@ -2181,6 +2453,7 @@ function unpackBaselineLabs(){
 }
 
 function calcBaselineEGFR(){var age=parseFloat(document.getElementById("Age").value);var gender=document.getElementById("Gender").value;var input=document.getElementById("Lab_UreaCreat").value||"";var creatStr=input.includes('/')?input.split('/')[1]:input;var creat=parseFloat(creatStr);var f=document.getElementById("Lab_eGFR");if(!age||!gender||!creat||isNaN(creat)){f.value="";return;}var cr=creat/88.4,k=gender==="Female"?0.7:0.9,a=gender==="Female"?-0.244:-0.302;if(cr>k)a=-1.200;f.value=Math.round(142*Math.pow(cr/k,a)*Math.pow(0.9938,age)*(gender==="Female"?1.012:1));checkGDMTAlerts();}
+function calcDischargeEGFR(){var age=parseFloat(document.getElementById("Age").value);var gender=document.getElementById("Gender").value;var creat=parseFloat((document.getElementById("Lab_Creat_Disch")||{}).value||'');var f=document.getElementById("Lab_eGFR_Disch");if(!f)return;if(!age||!gender||!creat||isNaN(creat)){f.value="";return;}var cr=creat/88.4,k=gender==="Female"?0.7:0.9,a=gender==="Female"?-0.244:-0.302;if(cr>k)a=-1.200;f.value=Math.round(142*Math.pow(cr/k,a)*Math.pow(0.9938,age)*(gender==="Female"?1.012:1));}
 function calcEGFR(){var age=parseFloat(document.getElementById("Age").value),gender=document.getElementById("Gender").value,creat=parseFloat(document.getElementById("V_Creat").value),f=document.getElementById("V_eGFR");if(!age||!gender||!creat||isNaN(creat)){f.value="";return;}var cr=creat/88.4,k=gender==="Female"?0.7:0.9,a=gender==="Female"?-0.244:-0.302;if(cr>k)a=-1.200;f.value=Math.round(142*Math.pow(cr/k,a)*Math.pow(0.9938,age)*(gender==="Female"?1.012:1));}
 function calcMAGGIC(){/* MAGGIC removed per user request — kept as no-op to preserve onchange handlers */}
 
@@ -2188,6 +2461,18 @@ function clearSearchResults(){document.getElementById("searchInput").value="";do
 function showPopup(type,title,msg){var old=document.getElementById("popOv");if(old)old.remove();var color=type==="success"?"#28a745":type==="delete"?"#dc3545":"#ffc107",icon=type==="success"?"fa-check-circle":type==="delete"?"fa-trash-alt":"fa-exclamation-triangle";var ov=document.createElement("div");ov.id="popOv";ov.className="modal-overlay";ov.innerHTML="<div class='modal-box'><div class='modal-icon' style='background:"+color+";width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;'><i class='fa-solid "+icon+"' style='color:#fff;font-size:1.2rem;'></i></div><h4 style='color:"+color+"'>"+title+"</h4><p class='text-muted'>"+msg+"</p><button class='btn btn-dark w-100' onclick='this.parentElement.parentElement.remove()'>OK</button></div>";document.body.appendChild(ov);}
 
 function savePatient(){
+    // ----- ISSUE #1 FIX: if a visit is currently being edited, commit it first -----
+    // The user pressing the sticky "Save Patient" button while in the middle of
+    // editing a visit naturally expects their visit edits to also be saved.
+    // We delegate to saveVisit() if Visit_Date has a value AND editingVisitId is set;
+    // saveVisit will refresh the visit list and we then continue with patient save.
+    if (typeof editingVisitId !== 'undefined' && editingVisitId) {
+        var vd = document.getElementById('Visit_Date');
+        if (vd && vd.value) {
+            // Inline-commit the visit (silent: no popup interruption) and continue saving patient.
+            try { _commitVisitInline(); } catch(e){ console.warn('Inline visit commit failed', e); }
+        }
+    }
     var civilID=document.getElementById("Civil_ID").value,fileNo=document.getElementById("File_No").value;
     var mobile=(document.getElementById("Mobile").value||'').trim();
     if(civilID.length!==12){showPopup("error","Invalid Civil ID","Civil ID must be exactly 12 digits");return;}
@@ -2252,6 +2537,30 @@ function savePatient(){
             }).catch(function(e){showPopup("error","Error",e.message);btn.disabled=false;btn.innerHTML='<i class="fa fa-save me-1"></i> SAVE PATIENT';});
         }).catch(function(e){showPopup("error","Error",e.message);btn.disabled=false;btn.innerHTML='<i class="fa fa-save me-1"></i> SAVE PATIENT';});
     }
+}
+
+// ----- INLINE VISIT COMMIT (used when "Save Patient" is pressed while editing a visit) -----
+// This persists the in-progress visit edits silently so they don't get lost,
+// then defers UI refresh of the visits list until after savePatient completes.
+function _commitVisitInline(){
+    if(!editingVisitId) return;
+    var pid = currentPatientId || editingDocId;
+    if(!pid) return;
+    var vDate = (document.getElementById('Visit_Date')||{}).value || '';
+    if(!vDate) return;
+    var visitData = {};
+    document.querySelectorAll('[id^="V_"]').forEach(function(el){ if(el.id && el.type!=='file') visitData[el.id] = el.value; });
+    visitData.visitDate = vDate;
+    visitData.visitType = (document.getElementById('Visit_Type')||{}).value || 'Routine';
+    visitData.lastEditAt = new Date().toISOString();
+    visitData.lastEditBy = _currentAuditUser();
+    visitData.lastEditDoctor = _currentDoctorSelection();
+    db.collection("patients").doc(pid).collection("visits").doc(editingVisitId).update(visitData)
+        .then(function(){
+            writeAuditEntry(pid, {action:'visit_edit', changes:[], note:'Visit '+editingVisitId+' edited (via Save Patient, '+vDate+')'});
+        })
+        .catch(function(e){ console.warn('Inline visit save failed:', e.message); });
+    // We do NOT clear the visit form here — the patient save itself triggers resetForm() on success.
 }
 
 function saveVisit(){
@@ -2333,6 +2642,8 @@ function editVisit(visitId){
     var _vef=document.getElementById('V_ECG_Image_File'); if(_vef) _vef.value='';
     // Restore visit Other Symptoms checkboxes from hidden field
     if(typeof unpackVisitOtherSymptoms==='function')unpackVisitOtherSymptoms();
+    // Restore visit multi-select referral UI
+    if(typeof restoreReferralUI==='function') restoreReferralUI('V_Referral', v.V_Referral||'');
     // Restore visit Walk Test and RHC panel states
     if(typeof toggleVisitWalkMeters==='function')toggleVisitWalkMeters();
     if(typeof toggleVisitRHCDetails==='function')toggleVisitRHCDetails();
@@ -2492,8 +2803,9 @@ function buildVisitDetailHTML(v){
     var sections=[
         {name:'Symptoms & Vitals', fields:[['NYHA','V_NYHA'],['KCCQ','V_KCCQ'],['Fatigue','V_Fatigue'],['Edema','V_Edema'],['Pulse','V_Pulse'],['BP','V_BP'],['SpO2','V_SpO2'],['Weight','V_Weight'],['JVP','V_JVP'],['Rales','V_Rales'],['S3','V_S3']]},
         {name:'ECG / Echo',        fields:[['LBBB','V_LBBB'],['QRS','V_QRS'],['Arrhythmia','V_Arrhythmia'],['EF Change','V_EF_Change'],['Echo Other','V_Echo_Other']]},
-        {name:'Labs',              fields:[['HbA1c','V_HbA1c'],['Glucose','V_Gluc'],['Urea','V_Urea'],['Creat','V_Creat'],['eGFR','V_eGFR'],['Na','V_Na'],['K','V_K'],['BNP','V_BNP'],['NT-proBNP','V_NTproBNP'],['INR','V_INR'],['Iron','V_Iron'],['Ferritin','V_Ferritin'],['Transferrin','V_Transferrin'],['Hb','V_Hb'],['WBC','V_WBC'],['Plt','V_Plt'],['TSH','V_TSH'],['FreeT4','V_FreeT4']]},
-        {name:'Assessment & Plan', fields:[['Adverse Effects','V_Adverse'],['Plan','V_Plan'],['Notes','V_Others'],['Referral','V_Referral']]}
+        {name:'Labs',              fields:[['HbA1c','V_HbA1c'],['Glucose','V_Gluc'],['Urea','V_Urea'],['Creat','V_Creat'],['eGFR','V_eGFR'],['Na','V_Na'],['K','V_K'],['BNP','V_BNP'],['NT-proBNP','V_NTproBNP'],['INR','V_INR'],['Iron','V_Iron'],['Ferritin','V_Ferritin'],['Transferrin','V_Transferrin'],['Hb','V_Hb'],['WBC','V_WBC'],['Plt','V_Plt'],['TSH','V_TSH'],['FreeT4','V_FreeT4'],['Total Chol','V_TotalChol'],['LDL','V_LDL'],['HDL','V_HDL'],['Triglycerides','V_TG']]},
+        {name:'Assessment & Plan', fields:[['Adverse Effects (Meds)','V_AdverseEffects'],['Compliance','V_Compliance'],['Compliance Notes','V_ComplianceNotes'],['Patient Complaints','V_Adverse'],['Plan','V_Plan'],['Notes','V_Others'],['Referral','V_Referral']]},
+        {name:'Vaccinations',      fields:[['Influenza Yr','V_Vacc_Influenza_Year'],['Pneumococcal Yr','V_Vacc_Pneumococcal_Year'],['COVID-19 Yr','V_Vacc_COVID_Year'],['RSV / Other','V_Vacc_Other']]}
     ];
     var html='<table>';
     sections.forEach(function(sec){
@@ -2550,6 +2862,18 @@ function resetForm(){
     document.querySelectorAll('.pill-toggle').forEach(function(el){el.classList.remove('active');});
     document.querySelectorAll('#medSection7 .phenotype-dim').forEach(function(el){el.classList.remove('phenotype-dim');});
     document.getElementById('gdmtRationaleSection').style.display='none';
+    // Reset multi-select pill UI states (referrals, advanced HF therapy, inotropes)
+    if(typeof restoreReferralUI==='function'){
+        restoreReferralUI('Referral','');
+        restoreReferralUI('V_Referral','');
+    }
+    var _ahft=document.getElementById('Adv_HF_Therapy'); if(_ahft) _ahft.value='No';
+    if(typeof toggleAdvHFTherapy==='function') toggleAdvHFTherapy();
+    var _strHF=document.getElementById('Strong_HF'); if(_strHF) _strHF.value='No';
+    var _iu=document.getElementById('Inotropes_Used'); if(_iu) _iu.value='No';
+    var _is=document.getElementById('Inotropes_Selected'); if(_is) _is.value='';
+    var _ipb=document.getElementById('inotropesPickBox'); if(_ipb) _ipb.dataset.built='';
+    if(typeof renderInotropesUI==='function') renderInotropesUI();
     // Hide conditional panels
     var hideIds=['valvularTypeWrap','cmrLGEPctWrap','vCmrLGEPctWrap','walkMetersWrap','rhcDetailsWrap','pciCabgDetailsWrap','ctAngioDetailsWrap','lostFUReasonWrap','lostFUOtherWrap','valveSurgeryDateWrap'];
     hideIds.forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='none';});
@@ -2561,72 +2885,281 @@ function resetForm(){
     goToWizardStep(1);
 }
 
-function generateCardHTML(data,id){
-    var allFields=[['Patient_Name','Civil_ID','File_No','Age','Gender','Nationality','Mobile','Doctor_Name'],['HF_Type','EF_Diagnosis','Advanced_HF','HF_Cause','Other_Cardio','Valvular_Disease','Valvular_Type','Admissions','Last_Admission','LOS'],['Height','Weight','BMI','Dry_Weight','NYHA','KCCQ','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur'],['ECG','ECHO','Echo_EDVI','Echo_ESVI','Echo_EF','CMR_CT','CMR_LVEDVI','CMR_LVESVI','CMR_LVEF','CMR_RVEDI','CMR_RVEF','CMR_LGE','CMR_LGE_Pct','CMR_Others','CT_Done','CT_Angio','CT_Calcium','CT_Notes','Walk_Completed','Walk_Meters','CPET_PeakVO2','CPET_VEVCO2','CPET_RER','CPET_AT','CPET_VO2HR','CPET_PetCO2','Device_Type','Device_Date','RHC_Done','RHC_CI','RHC_RAP','RHC_RVP','RHC_PCWP','RHC_PAP','RHC_PVR','RHC_PAPi','RHC_LV','RHC_MVO2'],['DM','HTN','AF','IHD','PCI_CABG','CKD','CVA','PVD','Smoker','Obese','OSA','Obese_OSA','Dyslipidemia','Valve_Surgery','Valve_Surgery_Date','Lung_Dz','Liver_Dz','Thyroid_Dz','FH_Cardio','Genetics'],['Lab_HbA1c','Lab_Gluc','Lab_UreaCreat','Lab_eGFR','Lab_NaK','Lab_BNP','Lab_IronFerritin','Lab_TrSats','Lab_CBC','Lab_Thyroid','Lab_Lipids','Lab_AlbCreat'],['Med_ARNI','Med_ARNI_Dose','Med_SGLT2i','Med_SGLT2i_Dose','Med_GLP1','Med_BB','Med_BB_Dose','Med_MRA','Med_MRA_Dose','Med_ACEiARB','Med_ACEiARB_Dose','Med_Vasodilator','Med_Procorolan','Med_Procorolan_Dose','Med_CCB','Med_CCB_Dose','Med_Diuretic','Med_Lipid','Med_Omega3','Med_Nicotine','Med_Antiplat','Med_OAC','Med_Arrhythmia','Med_K_Chelator'],['Quad_GDMT','Compliance','Mortality','LostFU','LostFU_Reason','LostFU_Other','Referral','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt']];
-    var sn=['Demographics','HF Diagnosis','Symptoms & Signs','Investigations','Comorbidities','Baseline Labs','Medications','Outcomes & Management'];
-    // Helper: a field is "empty" if null/undefined/empty-string, "None", "No", "-", or just whitespace
+function generateCardHTML(data, id, latestVisit){
+    // ===== Card sections (now powered by the LATEST snapshot — baseline + most recent visit overlay) =====
+    // latestVisit is OPTIONAL — when provided, its V_* labs/meds override the baseline equivalents
+    // so the card shows the freshest clinical picture.
+    var snap = _buildLatestSnapshot(data, latestVisit);
+
+    var allFields=[
+        ['Patient_Name','Civil_ID','File_No','Age','Gender','Nationality','Mobile','Doctor_Name'],
+        ['HF_Type','EF_Diagnosis','Advanced_HF','HF_Cause','Other_Cardio','Valvular_Disease','Valvular_Type','Admissions','Last_Admission','LOS'],
+        ['Height','Weight','BMI','Dry_Weight','NYHA','KCCQ','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur'],
+        ['ECG_LBBB','ECG_QRS','ECG_Arrhythmia','ECG_Pacing','ECHO','Echo_EDVI','Echo_ESVI','Echo_EF','CMR_CT','CMR_LVEDVI','CMR_LVESVI','CMR_LVEF','CMR_RVEDI','CMR_RVEF','CMR_LGE','CMR_LGE_Pct','CMR_Others','CT_Done','CT_Angio','CT_Calcium','CT_Notes','Walk_Completed','Walk_Meters','CPET_PeakVO2','CPET_VEVCO2','CPET_RER','CPET_AT','CPET_VO2HR','CPET_PetCO2','Device_Type','Device_Date','RHC_Done','RHC_CI','RHC_RAP','RHC_RVP','RHC_PCWP','RHC_PAP','RHC_PVR','RHC_PAPi','RHC_LV','RHC_MVO2'],
+        ['DM','HTN','AF','IHD','PCI_CABG','CKD','CVA','PVD','Smoker','Obese','OSA','Dyslipidemia','Valve_Surgery','Valve_Surgery_Date','Lung_Dz','Liver_Dz','Thyroid_Dz','FH_Cardio','Genetics'],
+        // Latest labs (baseline + visit overlay; admission/discharge variants where available)
+        ['Lab_HbA1c','Lab_Gluc','Lab_Urea','Lab_Creat','Lab_eGFR','Lab_Urea_Disch','Lab_Creat_Disch','Lab_eGFR_Disch','Lab_Na','Lab_K','Lab_Na_Disch','Lab_K_Disch','Lab_BNP','Lab_BNP_Disch','Lab_BNP_only','Lab_BNP_only_Disch','Lab_Hb','Lab_Hb_Disch','Lab_WBC','Lab_Plt','Lab_Iron','Lab_Ferritin','Lab_TrSats','Lab_TSH','Lab_FreeT4','Lab_TotalChol','Lab_LDL','Lab_HDL','Lab_TG','Lab_AlbCreat'],
+        // Inotropes / In-hospital (Section 7) — show separately
+        ['Inotropes_Used','Inotropes_Selected'],
+        // Outcomes
+        ['Quad_GDMT','Compliance','Mortality','LostFU','LostFU_Reason','LostFU_Other','Strong_HF','Adv_HF_Therapy','Adv_HF_Therapy_Type','Referral','Notes','Next_Appt']
+    ];
+    var sn=['Demographics','HF Diagnosis','Symptoms & Signs (latest)','Investigations','Comorbidities','Latest Labs','In-Hospital (Inotropes)','Outcomes & Management'];
+
     function isEmptyField(val){
         if(val === null || val === undefined) return true;
         var s = String(val).trim();
         if(s === '' || s === '-') return true;
-        if(s.toLowerCase() === 'none') return true;
+        if(s.toLowerCase() === 'none' || s.toLowerCase() === 'no') return true;
         return false;
     }
-    var html="<div class='card p-3 border-primary shadow-sm patient-card' id='pdf-"+id+"'><h4 class='text-primary mb-3'>"+(data.Patient_Name||'Unknown')+"</h4>";
-    // Vaccination alert (this year vs recorded year)
+    function isEmptyForLab(val){
+        // Labs: keep "0" style values, only filter empty/dash
+        if(val === null || val === undefined) return true;
+        var s = String(val).trim();
+        if(s === '' || s === '-') return true;
+        return false;
+    }
+
+    var nameDisplay = data.Patient_Name || 'Unknown';
+    var nationalityDisplay = data.Nationality || '—';
+    var mrnDisplay = data.File_No || data.Civil_ID || '—';
+    var civilDisplay = data.Civil_ID || '';
+
+    // ALERTS — computed and shown in the COLLAPSED HEADER (not just expanded body)
+    var headerBadges = '';
     var thisYear=new Date().getFullYear();
-    var fluY=parseInt(data.Vacc_Influenza_Year||0);
-    var pneuY=parseInt(data.Vacc_Pneumococcal_Year||0);
-    var covidY=parseInt(data.Vacc_COVID_Year||0);
+    // Vaccinations: pick from latest visit if present, else from any visit (we have only latestVisit here)
+    var fluY=parseInt((latestVisit && latestVisit.V_Vacc_Influenza_Year) || data.Vacc_Influenza_Year || 0);
+    var pneuY=parseInt((latestVisit && latestVisit.V_Vacc_Pneumococcal_Year) || data.Vacc_Pneumococcal_Year || 0);
+    var covidY=parseInt((latestVisit && latestVisit.V_Vacc_COVID_Year) || data.Vacc_COVID_Year || 0);
     var missingVacc=[];
-    if(fluY<thisYear)missingVacc.push('Influenza');
-    if(!pneuY||thisYear-pneuY>5)missingVacc.push('Pneumococcal');
-    if(covidY<thisYear)missingVacc.push('COVID-19');
-    if(missingVacc.length>0){
-        html+="<div class='alert alert-warning py-2 px-3 mb-3 d-flex align-items-center' style='font-size:0.85rem;border-left:4px solid #f39c12;'><i class='fa fa-syringe me-2 text-warning'></i><div><strong>Vaccinations Due:</strong> "+missingVacc.join(', ')+" <small class='text-muted d-block'>(checked against year "+thisYear+")</small></div></div>";
-    }
-    // Obesity clinic referral alert (BMI > 30)
+    if(fluY<thisYear)missingVacc.push('Flu');
+    if(!pneuY||thisYear-pneuY>5)missingVacc.push('Pneumo');
+    if(covidY<thisYear)missingVacc.push('COVID');
+    if(missingVacc.length>0) headerBadges += "<span class='badge bg-warning text-dark me-1'><i class='fa fa-syringe me-1'></i>Vacc: "+missingVacc.join(',')+"</span>";
+
     var bmiVal=parseFloat(data.BMI||0);
-    if(bmiVal>30){
-        html+="<div class='alert alert-warning py-2 px-3 mb-3 d-flex align-items-center' style='font-size:0.85rem;border-left:4px solid #d97706;'><i class='fa fa-weight-scale me-2 text-warning'></i><div><strong>Obesity Clinic Referral:</strong> BMI = "+bmiVal.toFixed(1)+" — consider referral to MKH Obesity Clinic.</div></div>";
-    }
-    // Overdue follow-up alert (>2 months since last visit, based on Next_Appt being in the past or missing)
+    if(bmiVal>30) headerBadges += "<span class='badge bg-warning text-dark me-1'><i class='fa fa-weight-scale me-1'></i>BMI "+bmiVal.toFixed(1)+"</span>";
+
     var today=new Date();
     var twoMonthsAgo=new Date(today.getTime()-60*24*60*60*1000);
     var lastSeenDate=null;
     if(data.lastEditAt)lastSeenDate=new Date(data.lastEditAt);
     else if(data.timestamp)lastSeenDate=new Date(data.timestamp);
+    var overdueBadge='';
     if(lastSeenDate&&lastSeenDate<twoMonthsAgo&&(!data.Next_Appt||data.Next_Appt<today.toISOString().split('T')[0])){
         var daysSince=Math.floor((today-lastSeenDate)/(1000*60*60*24));
-        html+="<div class='alert alert-danger py-2 px-3 mb-3 d-flex align-items-center' style='font-size:0.85rem;border-left:4px solid #dc3545;'><i class='fa fa-user-clock me-2 text-danger'></i><div><strong>No Follow-up &gt;2 Months:</strong> Last activity "+daysSince+" days ago.</div></div>";
+        overdueBadge = "<span class='badge bg-danger me-1'><i class='fa fa-user-clock me-1'></i>"+daysSince+"d overdue</span>";
     }
-    html+="<div class='row'>";
+
+    // ===== ACCORDION HEADER (always visible) =====
+    // Shows: Name, Nationality, MRN/File, badges, action buttons. Click anywhere on the row body
+    // (excluding action buttons) to toggle the accordion.
+    var html  = "<div class='card border-primary shadow-sm patient-card mb-3' id='pdf-"+id+"' data-patient-card='1'>";
+    html += "<div class='patient-card-header d-flex flex-wrap align-items-center justify-content-between p-2' style='cursor:pointer;background:#fff5f5;border-bottom:1px solid #f0d4d4;' onclick='togglePatientCard(this)'>";
+    html += "<div class='d-flex flex-wrap align-items-center gap-2' style='flex:1 1 60%;min-width:0;'>";
+    html += "<i class='fa fa-chevron-right pc-chevron text-primary' style='transition:transform .18s;flex:0 0 auto;'></i>";
+    html += "<div style='min-width:0;'>";
+    html += "<div class='fw-bold text-primary' style='font-size:1rem;line-height:1.2;'>"+_escHtml(nameDisplay)+"</div>";
+    html += "<div class='small text-muted' style='line-height:1.1;'>";
+    html += "<i class='fa fa-globe me-1'></i>"+_escHtml(nationalityDisplay);
+    html += " &middot; <i class='fa fa-id-card me-1'></i>File: "+_escHtml(mrnDisplay);
+    if(civilDisplay) html += " &middot; <span class='text-muted'>Civil: "+_escHtml(civilDisplay)+"</span>";
+    html += "</div>";
+    if(headerBadges || overdueBadge) html += "<div class='mt-1'>"+overdueBadge+headerBadges+"</div>";
+    html += "</div></div>";
+    // Action buttons (stop click propagation so card doesn't toggle)
+    html += "<div class='d-flex flex-wrap gap-1' style='flex:0 0 auto;' onclick='event.stopPropagation()'>";
+    html += "<button class='btn btn-sm btn-primary' onclick='editPt(\""+id+"\")' title='Edit'><i class='fa fa-edit'></i></button>";
+    html += "<button class='btn btn-sm btn-info text-white' onclick='showTrends(\""+id+"\")' title='Trends'><i class='fa fa-chart-line'></i></button>";
+    html += "<button class='btn btn-sm btn-danger' onclick='pdfFromAdmin(\""+id+"\")' title='PDF'><i class='fa fa-file-pdf'></i></button>";
+    html += "<button class='btn btn-sm btn-success' onclick='exportPatientExcel(\""+id+"\")' title='Excel'><i class='fa fa-file-excel'></i></button>";
+    html += "</div></div>";
+
+    // ===== ACCORDION BODY (collapsed by default) =====
+    html += "<div class='patient-card-body p-3' style='display:none;'>";
+
+    // Latest visit info banner (so the doctor knows what the "latest" snapshot is based on)
+    if(latestVisit && latestVisit.visitDate){
+        html += "<div class='alert alert-info py-1 px-2 mb-2' style='font-size:0.78rem;'><i class='fa fa-clock me-1'></i><strong>Latest visit:</strong> "+_escHtml(latestVisit.visitDate)+" ("+_escHtml(latestVisit.visitType||'Routine')+") &middot; labs &amp; meds shown reflect this visit.</div>";
+    }
+
+    html += "<div class='row'>";
     var totalFilled = 0;
-    allFields.forEach(function(s,idx){
-        // Build rows for fields that actually have data
+    allFields.forEach(function(s, idx){
         var rows = '';
         var filledInSection = 0;
         s.forEach(function(f){
-            var val = data[f];
+            var val = snap[f];
+            // For inotropes section, only show if Inotropes_Used is Yes
+            if(f.indexOf('Inotropes_')===0 && (snap.Inotropes_Used||'No')!=='Yes') return;
             if(isEmptyField(val)) return;
             filledInSection++;
-            var l = f.replace(/_/g," ").replace(/Lab /g,"").replace(/Med /g,"");
-            rows += "<tr><th>"+l+"</th><td>"+val+"</td></tr>";
+            var l = f.replace(/_/g," ").replace(/Lab /g,"").replace(/Med /g,"").replace(/ECG /g,"ECG ");
+            rows += "<tr><th>"+_escHtml(l)+"</th><td>"+_escHtml(val)+"</td></tr>";
         });
-        if(filledInSection === 0) return; // Skip entire section if nothing to show
+        // For "In-Hospital (Inotropes)" — also dump per-inotrope max-dose fields
+        if(idx === 6 && (snap.Inotropes_Used||'No')==='Yes'){
+            var selRaw = snap.Inotropes_Selected || '';
+            var sel = selRaw ? selRaw.split(',').map(function(x){return x.trim();}).filter(Boolean) : [];
+            sel.forEach(function(name){
+                var maxDose = data['Inotrope_'+name+'_MaxDose'] || '';
+                if(!isEmptyField(maxDose)){
+                    rows += "<tr><th>"+_escHtml(name)+" max dose</th><td>"+_escHtml(maxDose)+"</td></tr>";
+                    filledInSection++;
+                }
+            });
+        }
+        if(filledInSection === 0) return;
         totalFilled += filledInSection;
         html += "<div class='col-12 mb-3'><h6 class='text-secondary border-bottom pb-1'>"+sn[idx]+" <small class='text-muted fw-normal'>("+filledInSection+" field"+(filledInSection>1?'s':'')+")</small></h6><table class='table table-sm table-bordered mb-0'>"+rows+"</table></div>";
     });
+
+    // ===== MEDICATIONS — pretty-formatted from latest visit (if any) else baseline =====
+    var medsRows = _buildMedsRowsForCard(data, latestVisit);
+    if(medsRows){
+        html += "<div class='col-12 mb-3'><h6 class='text-secondary border-bottom pb-1'>Medications <small class='text-muted fw-normal'>(latest)</small></h6><table class='table table-sm table-bordered mb-0'>"+medsRows+"</table></div>";
+        totalFilled++;
+    }
+
     if(totalFilled === 0){
         html += "<div class='col-12'><div class='alert alert-light border text-center text-muted mb-0'>This record has no data entered yet.</div></div>";
     }
-    html+="</div><div class='d-flex flex-wrap gap-2 mt-2'>";
-    html+="<button class='btn btn-sm btn-primary' onclick='editPt(\""+id+"\")'><i class='fa fa-edit me-1'></i>Edit</button>";
-    html+="<button class='btn btn-sm btn-info text-white' onclick='showTrends(\""+id+"\")'><i class='fa fa-chart-line me-1'></i>Trends</button>";
-    html+="<button class='btn btn-sm btn-danger' onclick='pdfFromAdmin(\""+id+"\")'><i class='fa fa-file-pdf me-1'></i>PDF</button>";
-    html+="<button class='btn btn-sm btn-success' onclick='exportPatientExcel(\""+id+"\")'><i class='fa fa-file-excel me-1'></i>Excel</button>";
-    html+="</div></div>";return html;
+    html += "</div></div></div>"; // close .row, .patient-card-body, .card
+    return html;
 }
+
+// ----- Helpers powering the new card -----
+function _escHtml(s){
+    if(s===null||s===undefined) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Build a flat "latest" snapshot: starts from baseline patient data,
+// then overlays any non-empty fields from the latest visit.
+// Visit field naming: V_<name> with some special cases (e.g. V_NTproBNP -> Lab_BNP).
+function _buildLatestSnapshot(data, latestVisit){
+    var snap = Object.assign({}, data);
+    if(!latestVisit) return snap;
+    // Map visit field -> baseline field name
+    var VISIT_TO_BASELINE = {
+        V_NYHA:'NYHA', V_KCCQ:'KCCQ', V_Edema:'Edema', V_Pulse:'Pulse', V_BP:'BP', V_SpO2:'SpO2',
+        V_Weight:'Weight', V_JVP:'JVP', V_Rales:'Rales', V_S3:'S3',
+        V_LBBB:'ECG_LBBB', V_QRS:'ECG_QRS', V_Arrhythmia:'ECG_Arrhythmia',
+        V_Echo_EDVI:'Echo_EDVI', V_Echo_ESVI:'Echo_ESVI', V_Echo_EF:'Echo_EF', V_Echo_Other:'ECHO',
+        V_CMR_LVEDVI:'CMR_LVEDVI', V_CMR_LVESVI:'CMR_LVESVI', V_CMR_LVEF:'CMR_LVEF',
+        V_CMR_RVEDI:'CMR_RVEDI', V_CMR_RVEF:'CMR_RVEF', V_CMR_LGE:'CMR_LGE', V_CMR_LGE_Pct:'CMR_LGE_Pct', V_CMR_Others:'CMR_Others',
+        V_Walk_Completed:'Walk_Completed', V_Walk_Meters:'Walk_Meters',
+        V_CPET_PeakVO2:'CPET_PeakVO2', V_CPET_VEVCO2:'CPET_VEVCO2', V_CPET_RER:'CPET_RER',
+        V_CPET_AT:'CPET_AT', V_CPET_VO2HR:'CPET_VO2HR', V_CPET_PetCO2:'CPET_PetCO2',
+        V_RHC_Done:'RHC_Done', V_RHC_CI:'RHC_CI', V_RHC_RAP:'RHC_RAP', V_RHC_RVP:'RHC_RVP',
+        V_RHC_PCWP:'RHC_PCWP', V_RHC_PAP:'RHC_PAP', V_RHC_PVR:'RHC_PVR', V_RHC_PAPi:'RHC_PAPi',
+        V_RHC_LV:'RHC_LV', V_RHC_MVO2:'RHC_MVO2',
+        // Labs
+        V_HbA1c:'Lab_HbA1c', V_Gluc:'Lab_Gluc', V_Urea:'Lab_Urea', V_Creat:'Lab_Creat', V_eGFR:'Lab_eGFR',
+        V_Na:'Lab_Na', V_K:'Lab_K', V_BNP:'Lab_BNP_only', V_NTproBNP:'Lab_BNP',
+        V_Iron:'Lab_Iron', V_Ferritin:'Lab_Ferritin', V_Transferrin:'Lab_TrSats',
+        V_Hb:'Lab_Hb', V_WBC:'Lab_WBC', V_Plt:'Lab_Plt', V_TSH:'Lab_TSH', V_FreeT4:'Lab_FreeT4',
+        V_TotalChol:'Lab_TotalChol', V_LDL:'Lab_LDL', V_HDL:'Lab_HDL', V_TG:'Lab_TG'
+    };
+    Object.keys(VISIT_TO_BASELINE).forEach(function(vk){
+        var bk = VISIT_TO_BASELINE[vk];
+        var vv = latestVisit[vk];
+        if(vv !== undefined && vv !== null && String(vv).trim() !== ''){
+            snap[bk] = vv;
+        }
+    });
+    // Vaccinations from visit override patient-level if present
+    if(latestVisit.V_Vacc_Influenza_Year)     snap.Vacc_Influenza_Year     = latestVisit.V_Vacc_Influenza_Year;
+    if(latestVisit.V_Vacc_Pneumococcal_Year)  snap.Vacc_Pneumococcal_Year  = latestVisit.V_Vacc_Pneumococcal_Year;
+    if(latestVisit.V_Vacc_COVID_Year)         snap.Vacc_COVID_Year         = latestVisit.V_Vacc_COVID_Year;
+    if(latestVisit.V_Vacc_Other)              snap.Vacc_Other              = latestVisit.V_Vacc_Other;
+    return snap;
+}
+
+// Build pretty medication rows for the patient card. Prefers visit medications when latestVisit
+// has any med data; falls back to baseline (Section 7) medications otherwise.
+function _buildMedsRowsForCard(data, latestVisit){
+    var rows = '';
+    var anyVisitMed = false;
+    if(latestVisit && typeof VISIT_MED_LIST !== 'undefined'){
+        for(var i=0;i<VISIT_MED_LIST.length;i++){
+            var m = VISIT_MED_LIST[i];
+            var status = latestVisit[m.id+'_Status']||'';
+            var dose   = latestVisit[m.id]||'';
+            var custom = latestVisit[m.id+'_Custom']||'';
+            var freq   = latestVisit[m.id+'_Freq']||'';
+            if(status==='Yes' || (dose && String(dose).trim()) || (custom && String(custom).trim()) || (freq && String(freq).trim())){
+                anyVisitMed = true;
+                var parts=[];
+                if(dose && String(dose).trim()) parts.push(String(dose).trim());
+                if(custom && String(custom).trim()) parts.push('('+String(custom).trim()+')');
+                if(freq && String(freq).trim()) parts.push(String(freq).trim());
+                var displayDose = parts.length ? parts.join(' ') : 'Yes';
+                rows += "<tr><th>"+_escHtml(m.label)+"</th><td>"+_escHtml(displayDose)+"</td></tr>";
+            }
+        }
+    }
+    if(anyVisitMed) return rows;
+
+    // ---- Fallback to baseline (Section 7) medications, with proper labels and dose formatting ----
+    if(typeof MED_FORMULARY === 'undefined') return rows;
+    Object.keys(MED_FORMULARY).forEach(function(medId){
+        var med = MED_FORMULARY[medId];
+        var sel = data[medId];
+        if(!sel || String(sel).trim()==='' || String(sel).toLowerCase()==='no' || String(sel).toLowerCase()==='none') return;
+        // Check if it's a multi-select med (comma-separated entries)
+        var entries = String(sel).split(',').map(function(s){return s.trim();}).filter(function(s){return s && s.toLowerCase()!=='none';});
+        if(entries.length === 0) return;
+        // Per-medId dose / custom / freq fields can be either "Med_X_Dose" (single)
+        // or per-option fields keyed by safeId. We display either.
+        var simpleDose = data[medId+'_Dose'] || '';
+        var customDose = data[medId+'_DoseCustom'] || '';
+        var freq       = data[medId+'_Freq'] || '';
+        var doseDisplay = '';
+        if(simpleDose) doseDisplay = simpleDose;
+        else if(customDose) doseDisplay = customDose + (freq?(' '+freq):'');
+        else if(freq) doseDisplay = freq;
+        // For multi-select meds, try per-option fields
+        if(entries.length > 1 || (entries.length === 1 && !doseDisplay)){
+            var perOpt = [];
+            entries.forEach(function(opt){
+                var safeId = medId+'_opt_'+opt.replace(/[^a-zA-Z0-9]/g,'');
+                var d  = data[safeId+'_Dose']||'';
+                var c  = data[safeId+'_DoseCustom']||'';
+                var fq = data[safeId+'_Freq']||'';
+                var thisDose = d || (c?(c+(fq?(' '+fq):'')):(fq||''));
+                if(thisDose) perOpt.push(opt+' — '+thisDose);
+                else perOpt.push(opt);
+            });
+            if(perOpt.length){
+                rows += "<tr><th>"+_escHtml(med.label)+"</th><td>"+_escHtml(perOpt.join('; '))+"</td></tr>";
+                return;
+            }
+        }
+        // Single entry — display "Drug name — dose" cleanly
+        var entryLabel = entries[0];
+        // For binary meds (e.g. Med_ARNI: Yes/No), entryLabel === 'Yes' — show drug label not "Yes"
+        var displayName = (entryLabel === 'Yes') ? med.label.replace(/\s*\(.+?\)$/,'') : entryLabel;
+        var displayVal  = doseDisplay ? (displayName + ' — ' + doseDisplay) : displayName;
+        rows += "<tr><th>"+_escHtml(med.label)+"</th><td>"+_escHtml(displayVal)+"</td></tr>";
+    });
+    return rows;
+}
+
+// Toggle the accordion body on a patient card
+function togglePatientCard(headerEl){
+    var card = headerEl.parentElement;
+    var body = card.querySelector('.patient-card-body');
+    if(!body) return;
+    var open = body.style.display !== 'none';
+    body.style.display = open ? 'none' : 'block';
+    var chev = headerEl.querySelector('.pc-chevron');
+    if(chev) chev.style.transform = open ? '' : 'rotate(90deg)';
+}
+
+
 
 function searchPatient(){
     var rawVal=document.getElementById("searchInput").value.trim();
@@ -2636,8 +3169,7 @@ function searchPatient(){
     var valDigits=rawVal.replace(/\D/g,""); // digits only — for civil/file ID comparison
     res.innerHTML="<div class='text-center'><i class='fa fa-spinner fa-spin'></i> Searching...</div>";
     db.collection("patients").get().then(function(s){
-        res.innerHTML="<div class='mb-2'><button class='btn btn-sm btn-outline-dark fw-bold' onclick='clearSearchResults()'><i class='fa fa-arrow-left'></i> Back</button></div>";
-        var found=0;
+        var matches = [];
         s.forEach(function(d){
             var data=d.data();
             var name=String(data.Patient_Name||"").toLowerCase();
@@ -2645,14 +3177,31 @@ function searchPatient(){
             var fno=String(data.File_No||"").trim();
             var civilDigits=civil.replace(/\D/g,"");
             var fnoDigits=fno.replace(/\D/g,"");
-            var matches=false;
-            // Civil/File: digit-based match (exact or substring) — works regardless of case
-            if(valDigits && (civilDigits===valDigits || fnoDigits===valDigits || (civilDigits&&civilDigits.indexOf(valDigits)>=0) || (fnoDigits&&fnoDigits.indexOf(valDigits)>=0))) matches=true;
-            // Name: case-insensitive substring
-            else if(name && name.indexOf(valLower)>=0) matches=true;
-            if(matches){found++;PC[d.id]=data;res.innerHTML+=generateCardHTML(data,d.id);}
+            var match=false;
+            if(valDigits && (civilDigits===valDigits || fnoDigits===valDigits || (civilDigits&&civilDigits.indexOf(valDigits)>=0) || (fnoDigits&&fnoDigits.indexOf(valDigits)>=0))) match=true;
+            else if(name && name.indexOf(valLower)>=0) match=true;
+            if(match){ PC[d.id]=data; matches.push({id:d.id, data:data}); }
         });
-        if(found===0){res.innerHTML="<div class='alert alert-warning'>No patient found. <button class='btn btn-sm btn-outline-dark ms-2' onclick='clearSearchResults()'>Back</button></div>";}
+        if(matches.length === 0){
+            res.innerHTML="<div class='alert alert-warning'>No patient found. <button class='btn btn-sm btn-outline-dark ms-2' onclick='clearSearchResults()'>Back</button></div>";
+            return;
+        }
+        // Fetch latest visit for each match in parallel, then render accordion cards
+        var visitPromises = matches.map(function(m){
+            return db.collection("patients").doc(m.id).collection("visits").orderBy("visitDate","desc").limit(1).get()
+                .then(function(snap){
+                    if(snap.size > 0){ var d=snap.docs[0]; return Object.assign({id:d.id}, d.data()); }
+                    return null;
+                })
+                .catch(function(){ return null; });
+        });
+        Promise.all(visitPromises).then(function(latestVisits){
+            var html = "<div class='mb-2'><button class='btn btn-sm btn-outline-dark fw-bold' onclick='clearSearchResults()'><i class='fa fa-arrow-left'></i> Back</button> <small class='text-muted ms-2'>"+matches.length+" result"+(matches.length>1?'s':'')+" — tap a card to expand</small></div>";
+            matches.forEach(function(m, i){
+                html += generateCardHTML(m.data, m.id, latestVisits[i]);
+            });
+            res.innerHTML = html;
+        });
     }).catch(function(e){res.innerHTML="<div class='alert alert-danger'>Error: "+e.message+"</div>";});
 }
 
@@ -2743,7 +3292,12 @@ function editPt(id){
         var el=document.getElementById('Rationale_'+medId);
         if(el&&d['Rationale_'+medId])el.value=d['Rationale_'+medId];
     });
+    // Restore inotropes (Section 7), advanced-HF therapy (Section 8) and multi-select Referral
+    if(typeof restoreInotropesFromData==='function')   restoreInotropesFromData(d);
+    if(typeof restoreAdvHFTherapyFromData==='function')restoreAdvHFTherapyFromData(d);
+    if(typeof restoreReferralUI==='function')          restoreReferralUI('Referral', d.Referral||'');
     applyPhenotypeEmphasis();updateGDMTRationale();checkGDMTAlerts();checkCRTIndication();calcBMI();
+    if(typeof calcDischargeEGFR==='function') calcDischargeEGFR();
     // Restore baseline ECG image preview (if any)
     renderEcgImagePreview('ecgImagePreview', d.ECG_Image||'');
     var _em=document.getElementById('ecgImageMeta'); if(_em) _em.textContent = d.ECG_Image?'Saved image':'';
@@ -2825,10 +3379,10 @@ function generateExcel(data,visitsData,id){
     var wb=XLSX.utils.book_new();var pr=[];
     pr.push(["MUBARAK AL-KABEER HOSPITAL - HEART FAILURE REGISTRY"]);
     pr.push(["Patient Name:",data.Patient_Name||'']);pr.push(["Civil ID:",data.Civil_ID||'']);pr.push(["File No:",data.File_No||'']);pr.push(["Age:",data.Age||'']);pr.push(["Gender:",data.Gender||'']);pr.push(["Nationality:",data.Nationality||'']);pr.push(["Mobile:",data.Mobile||'']);pr.push(["Doctor:",data.Doctor_Name||'']);pr.push([]);
-    var sections=[{name:'HF DIAGNOSIS',fields:['HF_Type','EF_Diagnosis','Advanced_HF','HF_Cause','Other_Cardio','Valvular_Disease','Valvular_Type','Admissions','Last_Admission','LOS']},{name:'SYMPTOMS & SIGNS',fields:['Height','Weight','BMI','Dry_Weight','NYHA','KCCQ','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur']},{name:'INVESTIGATIONS',fields:['ECG','ECHO','Echo_EDVI','Echo_ESVI','Echo_EF','CMR_CT','CMR_LVEDVI','CMR_LVESVI','CMR_LVEF','CMR_RVEDI','CMR_RVEF','CMR_LGE','CMR_LGE_Pct','CMR_Others','CT_Done','CT_Angio','CT_Calcium','CT_Notes','Walk_Completed','Walk_Meters','CPET_PeakVO2','CPET_VEVCO2','CPET_RER','CPET_AT','CPET_VO2HR','CPET_PetCO2','Device_Type','Device_Date','RHC_Done','RHC_CI','RHC_RAP','RHC_RVP','RHC_PCWP','RHC_PAP','RHC_PVR','RHC_PAPi','RHC_LV','RHC_MVO2']},{name:'COMORBIDITIES',fields:['DM','HTN','AF','IHD','PCI_CABG','CKD','CVA','PVD','Smoker','Obese','OSA','Obese_OSA','Dyslipidemia','Valve_Surgery','Valve_Surgery_Date','Lung_Dz','Liver_Dz','Thyroid_Dz','FH_Cardio','Genetics']},{name:'LABORATORY (BASELINE)',fields:['Lab_HbA1c','Lab_Gluc','Lab_UreaCreat','Lab_eGFR','Lab_NaK','Lab_BNP','Lab_IronFerritin','Lab_TrSats','Lab_CBC','Lab_Thyroid','Lab_Lipids','Lab_AlbCreat']},{name:'MEDICATIONS',fields:['Med_ARNI','Med_ARNI_Dose','Med_SGLT2i','Med_SGLT2i_Dose','Med_GLP1','Med_BB','Med_BB_Dose','Med_MRA','Med_MRA_Dose','Med_ACEiARB','Med_ACEiARB_Dose','Med_Vasodilator','Med_Procorolan','Med_Procorolan_Dose','Med_CCB','Med_CCB_Dose','Med_Diuretic','Med_Lipid','Med_Omega3','Med_Nicotine','Med_Antiplat','Med_OAC','Med_Arrhythmia','Med_K_Chelator']},{name:'OUTCOMES & FOLLOW-UP',fields:['Quad_GDMT','Compliance','Mortality','LostFU','LostFU_Reason','LostFU_Other','Referral','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt']}];
+    var sections=[{name:'HF DIAGNOSIS',fields:['HF_Type','EF_Diagnosis','Advanced_HF','HF_Cause','Other_Cardio','Valvular_Disease','Valvular_Type','Admissions','Last_Admission','LOS']},{name:'SYMPTOMS & SIGNS (ON ADMISSION)',fields:['Height','Weight','BMI','Dry_Weight','NYHA','KCCQ','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur']},{name:'INVESTIGATIONS',fields:['ECG_LBBB','ECG_QRS','ECG_Arrhythmia','ECG_Pacing','ECHO','Echo_EDVI','Echo_ESVI','Echo_EF','CMR_CT','CMR_LVEDVI','CMR_LVESVI','CMR_LVEF','CMR_RVEDI','CMR_RVEF','CMR_LGE','CMR_LGE_Pct','CMR_Others','CT_Done','CT_Angio','CT_Calcium','CT_Notes','Walk_Completed','Walk_Meters','CPET_PeakVO2','CPET_VEVCO2','CPET_RER','CPET_AT','CPET_VO2HR','CPET_PetCO2','Device_Type','Device_Date','RHC_Done','RHC_CI','RHC_RAP','RHC_RVP','RHC_PCWP','RHC_PAP','RHC_PVR','RHC_PAPi','RHC_LV','RHC_MVO2']},{name:'COMORBIDITIES',fields:['DM','HTN','AF','IHD','PCI_CABG','PCI_CABG_Date','PCI_CABG_Details','CKD','CVA','PVD','Smoker','Obese','OSA','Dyslipidemia','Valve_Surgery','Valve_Surgery_Date','Lung_Dz','Liver_Dz','Thyroid_Dz','FH_Cardio','Genetics']},{name:'IN-HOSPITAL LABS',fields:['Lab_HbA1c','Lab_Gluc','Lab_Urea','Lab_Creat','Lab_eGFR','Lab_Na','Lab_K','Lab_Urea_Disch','Lab_Creat_Disch','Lab_eGFR_Disch','Lab_Na_Disch','Lab_K_Disch','Lab_BNP','Lab_BNP_Disch','Lab_BNP_only','Lab_BNP_only_Disch','Lab_Iron','Lab_Ferritin','Lab_TrSats','Lab_Hb','Lab_Hb_Disch','Lab_WBC','Lab_Plt','Lab_TSH','Lab_FreeT4','Lab_TotalChol','Lab_LDL','Lab_HDL','Lab_TG','Lab_AlbCreat']},{name:'IN-HOSPITAL MGMT (INOTROPES)',fields:['Inotropes_Used','Inotropes_Selected','Inotrope_Dobutamine_MaxDose','Inotrope_Dopamine_MaxDose','Inotrope_Milrinone_MaxDose','Inotrope_Simdax_MaxDose','Inotrope_Levophed_MaxDose','Inotrope_Adrenaline_MaxDose','Inotrope_Vasopressin_MaxDose']},{name:'MEDICATIONS',fields:['Med_ARNI','Med_ARNI_Dose','Med_SGLT2i','Med_SGLT2i_Dose','Med_GLP1','Med_BB','Med_BB_Dose','Med_MRA','Med_MRA_Dose','Med_ACEiARB','Med_ACEiARB_Dose','Med_Vasodilator','Med_Procorolan','Med_Procorolan_Dose','Med_CCB','Med_CCB_Dose','Med_Diuretic','Med_Statin','Med_LipidCombo','Med_PCSK9','Med_Fibrate','Med_Omega3','Med_Nicotine','Med_Antiplat','Med_OAC','Med_Arrhythmia','Med_K_Chelator']},{name:'OUTCOMES & FOLLOW-UP',fields:['Quad_GDMT','Compliance','Mortality','LostFU','LostFU_Reason','LostFU_Other','Strong_HF','Adv_HF_Therapy','Adv_HF_Therapy_Type','Referral','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt']}];
     sections.forEach(function(sec){pr.push([sec.name]);sec.fields.forEach(function(f){pr.push([f.replace(/_/g," ").replace(/Lab /g,"").replace(/Med /g,""),data[f]||'-']);});pr.push([]);});
     var ws1=XLSX.utils.aoa_to_sheet(pr);XLSX.utils.book_append_sheet(wb,ws1,"Patient Info");
-    if(visitsData.length>0){var vr=[];vr.push(["VISIT HISTORY"]);vr.push([]);visitsData.forEach(function(visit,idx){vr.push(["Visit #"+(visitsData.length-idx),"Date: "+visit.visitDate,"Type: "+visit.visitType]);var vFields=['V_Fatigue','V_NYHA','V_KCCQ','V_Edema','V_Pulse','V_BP','V_SpO2','V_Weight','V_JVP','V_Rales','V_S3','V_LBBB','V_QRS','V_Arrhythmia','V_EF_Change','V_Echo_EDVI','V_Echo_ESVI','V_Echo_EF','V_Echo_Other','V_CMR_LVEDVI','V_CMR_LVESVI','V_CMR_LVEF','V_CMR_RVEDI','V_CMR_RVEF','V_CMR_LGE','V_CMR_LGE_Pct','V_CMR_Others','V_Walk_Completed','V_Walk_Meters','V_CPET_PeakVO2','V_CPET_VEVCO2','V_CPET_RER','V_CPET_AT','V_CPET_VO2HR','V_CPET_PetCO2','V_RHC_Done','V_RHC_CI','V_RHC_RAP','V_RHC_RVP','V_RHC_PCWP','V_RHC_PAP','V_RHC_PVR','V_RHC_PAPi','V_RHC_LV','V_RHC_MVO2','V_HbA1c','V_Gluc','V_Urea','V_Creat','V_eGFR','V_Na','V_K','V_BNP','V_NTproBNP','V_INR','V_Iron','V_Transferrin','V_Ferritin','V_WBC','V_Hb','V_Plt','V_TSH','V_FreeT4'];VISIT_MED_LIST.forEach(function(m){vFields.push(m.id);});vFields.push('V_Adverse','V_Plan','V_Others','V_Referral');vFields.forEach(function(f){var val=visit[f];if(val&&val.toString().trim()!=='')vr.push([f.replace('V_','').replace(/_/g,' '),val]);});vr.push([]);});var ws2=XLSX.utils.aoa_to_sheet(vr);XLSX.utils.book_append_sheet(wb,ws2,"Visits");}
+    if(visitsData.length>0){var vr=[];vr.push(["VISIT HISTORY"]);vr.push([]);visitsData.forEach(function(visit,idx){vr.push(["Visit #"+(visitsData.length-idx),"Date: "+visit.visitDate,"Type: "+visit.visitType]);var vFields=['V_Fatigue','V_NYHA','V_KCCQ','V_Edema','V_Pulse','V_BP','V_SpO2','V_Weight','V_JVP','V_Rales','V_S3','V_LBBB','V_QRS','V_Arrhythmia','V_EF_Change','V_Echo_EDVI','V_Echo_ESVI','V_Echo_EF','V_Echo_Other','V_CMR_LVEDVI','V_CMR_LVESVI','V_CMR_LVEF','V_CMR_RVEDI','V_CMR_RVEF','V_CMR_LGE','V_CMR_LGE_Pct','V_CMR_Others','V_Walk_Completed','V_Walk_Meters','V_CPET_PeakVO2','V_CPET_VEVCO2','V_CPET_RER','V_CPET_AT','V_CPET_VO2HR','V_CPET_PetCO2','V_RHC_Done','V_RHC_CI','V_RHC_RAP','V_RHC_RVP','V_RHC_PCWP','V_RHC_PAP','V_RHC_PVR','V_RHC_PAPi','V_RHC_LV','V_RHC_MVO2','V_HbA1c','V_Gluc','V_Urea','V_Creat','V_eGFR','V_Na','V_K','V_BNP','V_NTproBNP','V_INR','V_Iron','V_Transferrin','V_Ferritin','V_WBC','V_Hb','V_Plt','V_TSH','V_FreeT4','V_TotalChol','V_LDL','V_HDL','V_TG','V_Vacc_Influenza_Year','V_Vacc_Pneumococcal_Year','V_Vacc_COVID_Year','V_Vacc_Other'];VISIT_MED_LIST.forEach(function(m){vFields.push(m.id);vFields.push(m.id+'_Status');vFields.push(m.id+'_Custom');vFields.push(m.id+'_Freq');});vFields.push('V_AdverseEffects','V_Compliance','V_ComplianceNotes','V_Adverse','V_Plan','V_Others','V_Referral');vFields.forEach(function(f){var val=visit[f];if(val&&val.toString().trim()!=='')vr.push([f.replace('V_','').replace(/_/g,' '),val]);});vr.push([]);});var ws2=XLSX.utils.aoa_to_sheet(vr);XLSX.utils.book_append_sheet(wb,ws2,"Visits");}
     XLSX.writeFile(wb,"HF_Registry_"+(data.File_No||'unknown')+"_"+(data.Patient_Name||'patient')+".xlsx");showPopup("success","Excel Exported!","File downloaded successfully.");
 }
 
@@ -2839,12 +3393,12 @@ function generatePDF(data,visitsData,id){
     var html="<div id='pdfContent' style='width:750px;margin:0 auto;background:#fff;padding:20px;font-family:Arial,Helvetica,sans-serif;color:#000;'>";
     html+="<div style='text-align:center;border-bottom:3px solid #8b0000;padding-bottom:10px;margin-bottom:20px;'><h2 style='color:#8b0000;margin:0;'>Mubarak Al-Kabeer Hospital</h2><h3 style='margin:5px 0;color:#333;'>Heart Failure Clinic Registry</h3></div>";
     html+="<h3 style='color:#333;'>Patient: "+(data.Patient_Name||'Unknown')+" | File: "+(data.File_No||'N/A')+"</h3>";
-    var sections=[{name:'Demographics',fields:['Patient_Name','Civil_ID','File_No','Age','Gender','Nationality','Mobile','Doctor_Name']},{name:'HF Diagnosis',fields:['HF_Type','EF_Diagnosis','Advanced_HF','HF_Cause','Other_Cardio','Valvular_Disease','Valvular_Type','Admissions','Last_Admission','LOS']},{name:'Symptoms & Signs',fields:['Height','Weight','BMI','Dry_Weight','NYHA','KCCQ','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur']},{name:'Investigations',fields:['ECG','ECHO','Echo_EDVI','Echo_ESVI','Echo_EF','CMR_CT','CMR_LVEDVI','CMR_LVESVI','CMR_LVEF','CMR_RVEDI','CMR_RVEF','CMR_LGE','CMR_LGE_Pct','CMR_Others','CT_Done','CT_Angio','CT_Calcium','CT_Notes','Walk_Completed','Walk_Meters','CPET_PeakVO2','CPET_VEVCO2','CPET_RER','CPET_AT','CPET_VO2HR','CPET_PetCO2','Device_Type','Device_Date','RHC_Done','RHC_CI','RHC_RAP','RHC_RVP','RHC_PCWP','RHC_PAP','RHC_PVR','RHC_PAPi','RHC_LV','RHC_MVO2']},{name:'Comorbidities',fields:['DM','HTN','AF','IHD','PCI_CABG','CKD','CVA','PVD','Smoker','Obese','OSA','Obese_OSA','Dyslipidemia','Valve_Surgery','Valve_Surgery_Date','Lung_Dz','Liver_Dz','Thyroid_Dz','FH_Cardio','Genetics']},{name:'Laboratory (Baseline)',fields:['Lab_HbA1c','Lab_Gluc','Lab_UreaCreat','Lab_eGFR','Lab_NaK','Lab_BNP','Lab_IronFerritin','Lab_TrSats','Lab_CBC','Lab_Thyroid','Lab_Lipids','Lab_AlbCreat']},{name:'Medications',fields:['Med_ARNI','Med_ARNI_Dose','Med_SGLT2i','Med_SGLT2i_Dose','Med_GLP1','Med_BB','Med_BB_Dose','Med_MRA','Med_MRA_Dose','Med_ACEiARB','Med_ACEiARB_Dose','Med_Vasodilator','Med_Procorolan','Med_Procorolan_Dose','Med_CCB','Med_CCB_Dose','Med_Diuretic','Med_Lipid','Med_Omega3','Med_Nicotine','Med_Antiplat','Med_OAC','Med_Arrhythmia','Med_K_Chelator']},{name:'Outcomes & Follow-up',fields:['Quad_GDMT','Compliance','Mortality','LostFU','LostFU_Reason','LostFU_Other','Referral','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt']}];
+    var sections=[{name:'Demographics',fields:['Patient_Name','Civil_ID','File_No','Age','Gender','Nationality','Mobile','Doctor_Name']},{name:'HF Diagnosis',fields:['HF_Type','EF_Diagnosis','Advanced_HF','HF_Cause','Other_Cardio','Valvular_Disease','Valvular_Type','Admissions','Last_Admission','LOS']},{name:'Symptoms & Signs (On Admission)',fields:['Height','Weight','BMI','Dry_Weight','NYHA','KCCQ','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur']},{name:'Investigations',fields:['ECG_LBBB','ECG_QRS','ECG_Arrhythmia','ECG_Pacing','ECHO','Echo_EDVI','Echo_ESVI','Echo_EF','CMR_CT','CMR_LVEDVI','CMR_LVESVI','CMR_LVEF','CMR_RVEDI','CMR_RVEF','CMR_LGE','CMR_LGE_Pct','CMR_Others','CT_Done','CT_Angio','CT_Calcium','CT_Notes','Walk_Completed','Walk_Meters','CPET_PeakVO2','CPET_VEVCO2','CPET_RER','CPET_AT','CPET_VO2HR','CPET_PetCO2','Device_Type','Device_Date','RHC_Done','RHC_CI','RHC_RAP','RHC_RVP','RHC_PCWP','RHC_PAP','RHC_PVR','RHC_PAPi','RHC_LV','RHC_MVO2']},{name:'Comorbidities',fields:['DM','HTN','AF','IHD','PCI_CABG','PCI_CABG_Date','PCI_CABG_Details','CKD','CVA','PVD','Smoker','Obese','OSA','Dyslipidemia','Valve_Surgery','Valve_Surgery_Date','Lung_Dz','Liver_Dz','Thyroid_Dz','FH_Cardio','Genetics']},{name:'In-Hospital Labs',fields:['Lab_HbA1c','Lab_Gluc','Lab_Urea','Lab_Creat','Lab_eGFR','Lab_Na','Lab_K','Lab_Urea_Disch','Lab_Creat_Disch','Lab_eGFR_Disch','Lab_Na_Disch','Lab_K_Disch','Lab_BNP','Lab_BNP_Disch','Lab_BNP_only','Lab_BNP_only_Disch','Lab_Iron','Lab_Ferritin','Lab_TrSats','Lab_Hb','Lab_Hb_Disch','Lab_WBC','Lab_Plt','Lab_TSH','Lab_FreeT4','Lab_TotalChol','Lab_LDL','Lab_HDL','Lab_TG','Lab_AlbCreat']},{name:'In-Hospital Mgmt (Inotropes)',fields:['Inotropes_Used','Inotropes_Selected','Inotrope_Dobutamine_MaxDose','Inotrope_Dopamine_MaxDose','Inotrope_Milrinone_MaxDose','Inotrope_Simdax_MaxDose','Inotrope_Levophed_MaxDose','Inotrope_Adrenaline_MaxDose','Inotrope_Vasopressin_MaxDose']},{name:'Medications',fields:['Med_ARNI','Med_ARNI_Dose','Med_SGLT2i','Med_SGLT2i_Dose','Med_GLP1','Med_BB','Med_BB_Dose','Med_MRA','Med_MRA_Dose','Med_ACEiARB','Med_ACEiARB_Dose','Med_Vasodilator','Med_Procorolan','Med_Procorolan_Dose','Med_CCB','Med_CCB_Dose','Med_Diuretic','Med_Statin','Med_LipidCombo','Med_PCSK9','Med_Fibrate','Med_Omega3','Med_Nicotine','Med_Antiplat','Med_OAC','Med_Arrhythmia','Med_K_Chelator']},{name:'Outcomes & Follow-up',fields:['Quad_GDMT','Compliance','Mortality','LostFU','LostFU_Reason','LostFU_Other','Strong_HF','Adv_HF_Therapy','Adv_HF_Therapy_Type','Referral','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt']}];
     sections.forEach(function(sec){html+="<h4 style='background:#f0f0f0;padding:8px;margin-top:15px;color:#8b0000;'>"+sec.name+"</h4><table style='width:100%;border-collapse:collapse;font-size:12px;'>";sec.fields.forEach(function(f){var val=data[f]||'-',label=f.replace(/_/g," ").replace(/Lab /g,"").replace(/Med /g,"");html+="<tr style='border-bottom:1px solid #ddd;'><td style='width:40%;padding:6px;background:#fafafa;font-weight:bold;'>"+label+"</td><td style='padding:6px;'>"+val+"</td></tr>";});html+="</table>";});
     if(visitsData.length>0){html+="<div style='page-break-before:always;'></div><h3 style='color:#8b0000;margin-top:20px;'>Visit History & Follow-ups</h3>";
     var mf=VISIT_MED_LIST.map(function(m){return m.id;});
     visitsData.forEach(function(visit,idx){html+="<div style='border:2px solid #17a2b8;margin:15px 0;padding:15px;border-radius:8px;'><h4 style='color:#17a2b8;margin-top:0;'>Visit #"+(visitsData.length-idx)+": "+visit.visitDate+" ("+visit.visitType+")</h4>";
-    var vs=[{name:'Symptoms',fields:['V_Fatigue','V_NYHA','V_KCCQ','V_Edema']},{name:'Signs/Vitals',fields:['V_Pulse','V_BP','V_SpO2','V_Weight','V_JVP','V_Rales','V_S3']},{name:'ECG',fields:['V_LBBB','V_QRS','V_Arrhythmia']},{name:'F/U Echo',fields:['V_EF_Change','V_Echo_EDVI','V_Echo_ESVI','V_Echo_EF','V_Echo_Other']},{name:'F/U CMR',fields:['V_CMR_LVEDVI','V_CMR_LVESVI','V_CMR_LVEF','V_CMR_RVEDI','V_CMR_RVEF','V_CMR_LGE','V_CMR_LGE_Pct','V_CMR_Others']},{name:'F/U 6MWT',fields:['V_Walk_Completed','V_Walk_Meters']},{name:'F/U CPET',fields:['V_CPET_PeakVO2','V_CPET_VEVCO2','V_CPET_RER','V_CPET_AT','V_CPET_VO2HR','V_CPET_PetCO2']},{name:'F/U Right Heart Cath',fields:['V_RHC_Done','V_RHC_CI','V_RHC_RAP','V_RHC_RVP','V_RHC_PCWP','V_RHC_PAP','V_RHC_PVR','V_RHC_PAPi','V_RHC_LV','V_RHC_MVO2']},{name:'Labs',fields:['V_HbA1c','V_Gluc','V_Urea','V_Creat','V_eGFR','V_Na','V_K','V_BNP','V_NTproBNP','V_INR','V_Iron','V_Transferrin','V_Ferritin','V_WBC','V_Hb','V_Plt','V_TSH','V_FreeT4']},{name:'Medications',fields:mf},{name:'Plan',fields:['V_Adverse','V_Plan','V_Others','V_Referral']}];
+    var vs=[{name:'Symptoms',fields:['V_Fatigue','V_NYHA','V_KCCQ','V_Edema']},{name:'Signs/Vitals',fields:['V_Pulse','V_BP','V_SpO2','V_Weight','V_JVP','V_Rales','V_S3']},{name:'ECG',fields:['V_LBBB','V_QRS','V_Arrhythmia']},{name:'Labs',fields:['V_HbA1c','V_Gluc','V_Urea','V_Creat','V_eGFR','V_Na','V_K','V_BNP','V_NTproBNP','V_INR','V_Iron','V_Transferrin','V_Ferritin','V_WBC','V_Hb','V_Plt','V_TSH','V_FreeT4','V_TotalChol','V_LDL','V_HDL','V_TG']},{name:'F/U Echo',fields:['V_EF_Change','V_Echo_EDVI','V_Echo_ESVI','V_Echo_EF','V_Echo_Other']},{name:'F/U CMR',fields:['V_CMR_LVEDVI','V_CMR_LVESVI','V_CMR_LVEF','V_CMR_RVEDI','V_CMR_RVEF','V_CMR_LGE','V_CMR_LGE_Pct','V_CMR_Others']},{name:'F/U 6MWT',fields:['V_Walk_Completed','V_Walk_Meters']},{name:'F/U CPET',fields:['V_CPET_PeakVO2','V_CPET_VEVCO2','V_CPET_RER','V_CPET_AT','V_CPET_VO2HR','V_CPET_PetCO2']},{name:'F/U Right Heart Cath',fields:['V_RHC_Done','V_RHC_CI','V_RHC_RAP','V_RHC_RVP','V_RHC_PCWP','V_RHC_PAP','V_RHC_PVR','V_RHC_PAPi','V_RHC_LV','V_RHC_MVO2']},{name:'Medications',fields:mf},{name:'Vaccinations',fields:['V_Vacc_Influenza_Year','V_Vacc_Pneumococcal_Year','V_Vacc_COVID_Year','V_Vacc_Other']},{name:'Plan',fields:['V_AdverseEffects','V_Compliance','V_ComplianceNotes','V_Adverse','V_Plan','V_Others','V_Referral']}];
     vs.forEach(function(vsec){var hd=false;vsec.fields.forEach(function(vf){if(visit[vf]&&visit[vf].toString().trim()!=='')hd=true;});if(!hd)return;
     html+="<h5 style='margin:10px 0 5px 0;color:#555;'>"+vsec.name+"</h5><table style='width:100%;border-collapse:collapse;font-size:11px;margin-bottom:10px;'>";
     vsec.fields.forEach(function(vf){var val=visit[vf];if(val&&val.toString().trim()!==''){html+="<tr style='border-bottom:1px solid #eee;'><td style='width:40%;padding:4px;background:#f5f5f5;'>"+vf.replace('V_','').replace(/_/g,' ')+"</td><td style='padding:4px;'>"+val+"</td></tr>";}});html+="</table>";});html+="</div>";});}
@@ -2866,21 +3420,157 @@ function loadAnalytics(){
     document.getElementById('analyticsSpinner').style.display='block';document.getElementById('analyticsBody').style.display='none';
     db.collection("patients").get().then(function(snap){
         allPatientsData=[];snap.forEach(function(doc){allPatientsData.push(Object.assign({id:doc.id},doc.data()));});
-        var d=allPatientsData,n=d.length;
-        document.getElementById('analyticsSpinner').style.display='none';document.getElementById('analyticsBody').style.display='block';
-        document.getElementById('analyticsUpdateTime').textContent='Data as of '+new Date().toLocaleString()+' · '+n+' patients';
-        buildKPIs(d,n);buildOverview(d,n);buildGDMT(d,n);buildRisk(d,n);buildDemographics(d,n);buildComorbidities(d,n);buildOutcomes(d,n);buildGDMTGap(d,n);buildEnrollment(d,n);
+        // ----- ISSUE #11 — fetch latest visit per patient so analytics can reflect MOST RECENT med/lab data -----
+        var visitPromises = allPatientsData.map(function(p){
+            return db.collection("patients").doc(p.id).collection("visits").orderBy("visitDate","desc").limit(1).get()
+                .then(function(s){ if(s.size>0) return s.docs[0].data(); return null; })
+                .catch(function(){ return null; });
+        });
+        return Promise.all(visitPromises).then(function(latestVisits){
+            // Attach latestVisit to each patient and build a "latest snapshot" merging baseline + visit
+            allPatientsData.forEach(function(p, i){
+                p._latestVisit = latestVisits[i] || null;
+                p._latest      = (typeof _buildLatestSnapshot === 'function') ? _buildLatestSnapshot(p, latestVisits[i]) : Object.assign({}, p);
+                // Compute GDMT-from-latest flags so charts can use them
+                p._latestMeds  = _computeLatestMedFlags(p, latestVisits[i]);
+            });
+            var d=allPatientsData,n=d.length;
+            document.getElementById('analyticsSpinner').style.display='none';document.getElementById('analyticsBody').style.display='block';
+            document.getElementById('analyticsUpdateTime').textContent='Data as of '+new Date().toLocaleString()+' · '+n+' patients · GDMT/labs reflect latest visit when available';
+            buildKPIs(d,n);buildOverview(d,n);buildGDMT(d,n);buildRisk(d,n);buildDemographics(d,n);buildComorbidities(d,n);buildOutcomes(d,n);buildGDMTGap(d,n);buildEnrollment(d,n);
+        });
     }).catch(function(e){document.getElementById('analyticsSpinner').innerHTML='<div class="text-danger">Error: '+e.message+'</div>';});
 }
 
-function buildKPIs(d,n){var quad=d.filter(function(p){return p.Quad_GDMT==='Yes';}).length;var hfref=d.filter(function(p){return p.HF_Type==='HFrEF';}).length;var anyAdm=d.filter(function(p){var a=parseInt(p.Admissions||0);return a>0;}).length;var avgEF=0,efCount=0;d.forEach(function(p){var ef=parseFloat(p.EF_Diagnosis);if(!isNaN(ef)&&ef>0){avgEF+=ef;efCount++;}});avgEF=efCount>0?Math.round(avgEF/efCount):0;var kpis=[{num:n,label:'Total Patients',sub:'Registry',color:'#8b0000'},{num:pctStr(quad,n),label:'Quad GDMT',sub:quad+' patients',color:'#1d6f42'},{num:pctStr(hfref,n),label:'HFrEF',sub:hfref+' patients',color:'#c0392b'},{num:anyAdm,label:'≥1 Admission Last Yr',sub:pctStr(anyAdm,n)+' of registry',color:'#dc3545'},{num:avgEF+(avgEF?'%':'—'),label:'Mean EF',sub:efCount+' with data',color:'#0f3460'},{num:pctStr(d.filter(function(p){return p.Mortality&&p.Mortality!=='Alive';}).length,n),label:'Mortality',sub:d.filter(function(p){return p.Mortality&&p.Mortality!=='Alive';}).length+' deaths',color:'#6c757d'}];var html='';kpis.forEach(function(k){html+="<div class='col-4 col-md-2'><div class='stat-kpi' style='border-top-color:"+k.color+"'><div class='kpi-num' style='color:"+k.color+"'>"+k.num+"</div><div class='kpi-label'>"+k.label+"</div><div class='kpi-sub'>"+k.sub+"</div></div></div>";});document.getElementById('kpiRow').innerHTML=html;}
+// Compute "latest med" flags by checking the latest visit's V_* med fields first, then falling back to baseline.
+// Returns { onARNI:bool, onSGLT2i:bool, onBB:bool, onMRA:bool, onACEiARB:bool, onDiuretic:bool, onOAC:bool, onProcorolan:bool, onCCB:bool, onStatin:bool }
+function _computeLatestMedFlags(patient, latestVisit){
+    var out = {};
+    function visitHas(prefixIds){
+        if(!latestVisit) return false;
+        for(var i=0;i<prefixIds.length;i++){
+            var id=prefixIds[i];
+            var status = latestVisit[id+'_Status']||'';
+            var dose   = latestVisit[id]||'';
+            var custom = latestVisit[id+'_Custom']||'';
+            if(status==='Yes' || (dose && String(dose).trim()) || (custom && String(custom).trim())) return true;
+        }
+        return false;
+    }
+    function baselineHas(field, isYesNo){
+        var v = patient[field];
+        if(!v) return false;
+        if(isYesNo) return String(v).trim()==='Yes';
+        var s = String(v).trim();
+        return s !== '' && s.toLowerCase() !== 'none' && s.toLowerCase() !== 'no';
+    }
+    out.onARNI       = visitHas(['V_Entresto'])                                               || baselineHas('Med_ARNI', true);
+    out.onSGLT2i     = visitHas(['V_Forxiga','V_Jardiance'])                                  || baselineHas('Med_SGLT2i');
+    out.onBB         = visitHas(['V_Concor','V_Betaloc','V_Dilatrend','V_Lopressor'])          || baselineHas('Med_BB');
+    out.onMRA        = visitHas(['V_Aldactone','V_Eplerenone','V_Finerenone'])                 || baselineHas('Med_MRA');
+    out.onACEiARB    = visitHas(['V_Zestril','V_Tritace','V_Capoten','V_Diovan','V_Atacand'])  || baselineHas('Med_ACEiARB') || out.onARNI;
+    out.onDiuretic   = visitHas(['V_Furosemide','V_Metolazone','V_HCTZ'])                      || baselineHas('Med_Diuretic');
+    out.onOAC        = visitHas(['V_Warfarin','V_Xarelto','V_Eliquis'])                        || baselineHas('Med_OAC');
+    out.onProcorolan = visitHas(['V_Procorolan'])                                              || baselineHas('Med_Procorolan');
+    out.onCCB        = visitHas(['V_Amlodipine'])                                              || baselineHas('Med_CCB');
+    out.onStatin     = visitHas(['V_Zocor','V_Lipitor','V_Crestor'])                           || baselineHas('Med_Statin');
+    return out;
+}
+
+function buildKPIs(d,n){
+    // Quad GDMT — recomputed from _latestMeds (latest visit overlay) for accuracy
+    var quad=d.filter(function(p){
+        var m = p._latestMeds || {};
+        return m.onARNI && m.onSGLT2i && m.onBB && m.onMRA;
+    }).length;
+    var hfref=d.filter(function(p){return p.HF_Type==='HFrEF';}).length;
+    var anyAdm=d.filter(function(p){var a=parseInt(p.Admissions||0);return a>0;}).length;
+    var avgEF=0,efCount=0;
+    d.forEach(function(p){
+        // Prefer latest snapshot EF if visit overlay produced one
+        var efVal = (p._latest && p._latest.Echo_EF) ? p._latest.Echo_EF : p.EF_Diagnosis;
+        var ef=parseFloat(efVal);
+        if(!isNaN(ef)&&ef>0){avgEF+=ef;efCount++;}
+    });
+    avgEF=efCount>0?Math.round(avgEF/efCount):0;
+    var kpis=[
+        {num:n,label:'Total Patients',sub:'Registry',color:'#8b0000'},
+        {num:pctStr(quad,n),label:'Quad GDMT',sub:quad+' patients (latest)',color:'#1d6f42'},
+        {num:pctStr(hfref,n),label:'HFrEF',sub:hfref+' patients',color:'#c0392b'},
+        {num:anyAdm,label:'≥1 Admission Last Yr',sub:pctStr(anyAdm,n)+' of registry',color:'#dc3545'},
+        {num:avgEF+(avgEF?'%':'—'),label:'Mean EF',sub:efCount+' with data',color:'#0f3460'},
+        {num:pctStr(d.filter(function(p){return p.Mortality&&p.Mortality!=='Alive';}).length,n),label:'Mortality',sub:d.filter(function(p){return p.Mortality&&p.Mortality!=='Alive';}).length+' deaths',color:'#6c757d'}
+    ];
+    var html='';
+    kpis.forEach(function(k){html+="<div class='col-4 col-md-2'><div class='stat-kpi' style='border-top-color:"+k.color+"'><div class='kpi-num' style='color:"+k.color+"'>"+k.num+"</div><div class='kpi-label'>"+k.label+"</div><div class='kpi-sub'>"+k.sub+"</div></div></div>";});
+    document.getElementById('kpiRow').innerHTML=html;
+}
 function buildOverview(d,n){var hfTypes={HFrEF:0,HFmrEF:0,HFpEF:0,Other:0};d.forEach(function(p){if(hfTypes[p.HF_Type]!==undefined)hfTypes[p.HF_Type]++;else if(p.HF_Type)hfTypes.Other++;});makeChart('chartHFType','doughnut',Object.keys(hfTypes),[{data:Object.values(hfTypes),backgroundColor:['#8b0000','#c0392b','#e74c3c','#aaa'],borderWidth:2}],{plugins:{legend:{position:'bottom'}}});var nyha={I:0,II:0,III:0,IV:0,Unknown:0};d.forEach(function(p){if(nyha[p.NYHA]!==undefined)nyha[p.NYHA]++;else nyha.Unknown++;});makeChart('chartNYHA','bar',Object.keys(nyha),[{label:'Patients',data:Object.values(nyha),backgroundColor:['#27ae60','#f39c12','#e74c3c','#8b0000','#aaa'],borderRadius:6}],{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}});var male=d.filter(function(p){return p.Gender==='Male';}).length,female=d.filter(function(p){return p.Gender==='Female';}).length;makeChart('chartGender','pie',['Male','Female','Unknown'],[{data:[male,female,n-male-female],backgroundColor:['#2980b9','#e91e63','#aaa'],borderWidth:2}],{});var ag={'<40':0,'40-49':0,'50-59':0,'60-69':0,'70-79':0,'≥80':0};d.forEach(function(p){var a=parseInt(p.Age)||0;if(a<40)ag['<40']++;else if(a<50)ag['40-49']++;else if(a<60)ag['50-59']++;else if(a<70)ag['60-69']++;else if(a<80)ag['70-79']++;else ag['≥80']++;});makeChart('chartAge','bar',Object.keys(ag),[{label:'Patients',data:Object.values(ag),backgroundColor:'#0f3460',borderRadius:6}],{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}});}
-function buildGDMT(d,n){var gdmtItems=[{label:'Any ARNI (Entresto)',fn:function(p){return p.Med_ARNI==='Yes';}},{label:'Any SGLT2i',fn:function(p){return p.Med_SGLT2i&&p.Med_SGLT2i!=='None'&&p.Med_SGLT2i!=='';}},{label:'Any Beta-Blocker',fn:function(p){return p.Med_BB&&p.Med_BB!=='None'&&p.Med_BB!=='';}},{label:'Any MRA',fn:function(p){return p.Med_MRA&&p.Med_MRA!=='None'&&p.Med_MRA!=='';}},{label:'ACEi/ARB/ARNI',fn:function(p){return(p.Med_ACEiARB&&p.Med_ACEiARB!=='None'&&p.Med_ACEiARB!=='')||p.Med_ARNI==='Yes';}},{label:'Diuretics',fn:function(p){return p.Med_Diuretic&&p.Med_Diuretic!=='None'&&p.Med_Diuretic!=='';}},{label:'OAC',fn:function(p){return p.Med_OAC&&p.Med_OAC!=='None'&&p.Med_OAC!=='';}},{label:'Procorolan',fn:function(p){return p.Med_Procorolan&&p.Med_Procorolan!=='None'&&p.Med_Procorolan!=='';}},{label:'CCB',fn:function(p){return p.Med_CCB&&p.Med_CCB!=='None'&&p.Med_CCB!=='';}}];var html='';gdmtItems.forEach(function(item){var cnt=d.filter(item.fn).length;var p=pct(cnt,n);var cls=p>=70?'gdmt-pill-high':(p>=40?'gdmt-pill-mid':'gdmt-pill-low');html+="<div class='gdmt-row'><span class='gdmt-name'>"+item.label+"</span><div style='flex:1;margin:0 12px;'><div style='background:#f0f0f0;border-radius:4px;height:10px;overflow:hidden;'><div style='width:"+p+"%;height:100%;background:linear-gradient(90deg,#8b0000,#c0392b);border-radius:4px;transition:width 0.8s;'></div></div></div><span class='gdmt-pill "+cls+"'>"+p+"%</span></div>";});document.getElementById('gdmtBars').innerHTML=html;var qy=d.filter(function(p){return p.Quad_GDMT==='Yes';}).length,qn=n-qy;makeChart('chartQuad','doughnut',['Quadruple GDMT','Incomplete'],[{data:[qy,qn],backgroundColor:['#1d6f42','#f0f0f0'],borderWidth:2}],{});var cy=d.filter(function(p){return p.Compliance==='Yes';}).length;makeChart('chartCompliance','doughnut',['Compliant','Non-compliant'],[{data:[cy,n-cy],backgroundColor:['#2980b9','#e74c3c'],borderWidth:2}],{});}
+function buildGDMT(d,n){
+    // Use _latestMeds (computed in loadAnalytics) which overlays the most recent visit's medications
+    // on top of baseline. Falls back gracefully if a patient has no visits yet.
+    var gdmtItems=[
+        {label:'Any ARNI (Entresto)', fn:function(p){return (p._latestMeds&&p._latestMeds.onARNI);}},
+        {label:'Any SGLT2i',          fn:function(p){return (p._latestMeds&&p._latestMeds.onSGLT2i);}},
+        {label:'Any Beta-Blocker',    fn:function(p){return (p._latestMeds&&p._latestMeds.onBB);}},
+        {label:'Any MRA',             fn:function(p){return (p._latestMeds&&p._latestMeds.onMRA);}},
+        {label:'ACEi/ARB/ARNI',       fn:function(p){return (p._latestMeds&&p._latestMeds.onACEiARB);}},
+        {label:'Diuretics',           fn:function(p){return (p._latestMeds&&p._latestMeds.onDiuretic);}},
+        {label:'OAC',                 fn:function(p){return (p._latestMeds&&p._latestMeds.onOAC);}},
+        {label:'Procorolan',          fn:function(p){return (p._latestMeds&&p._latestMeds.onProcorolan);}},
+        {label:'CCB',                 fn:function(p){return (p._latestMeds&&p._latestMeds.onCCB);}}
+    ];
+    var html='';
+    gdmtItems.forEach(function(item){
+        var cnt=d.filter(item.fn).length;
+        var p=pct(cnt,n);
+        var cls=p>=70?'gdmt-pill-high':(p>=40?'gdmt-pill-mid':'gdmt-pill-low');
+        html+="<div class='gdmt-row'><span class='gdmt-name'>"+item.label+"</span><div style='flex:1;margin:0 12px;'><div style='background:#f0f0f0;border-radius:4px;height:10px;overflow:hidden;'><div style='width:"+p+"%;height:100%;background:linear-gradient(90deg,#8b0000,#c0392b);border-radius:4px;transition:width 0.8s;'></div></div></div><span class='gdmt-pill "+cls+"'>"+p+"%</span></div>";
+    });
+    document.getElementById('gdmtBars').innerHTML=html;
+    // Quad GDMT — recomputed from latest snapshot (4 pillars all present)
+    var qy=d.filter(function(p){
+        var m = p._latestMeds || {};
+        return m.onARNI && m.onSGLT2i && m.onBB && m.onMRA;
+    }).length;
+    var qn=n-qy;
+    makeChart('chartQuad','doughnut',['Quadruple GDMT','Incomplete'],[{data:[qy,qn],backgroundColor:['#1d6f42','#f0f0f0'],borderWidth:2}],{});
+    // Compliance — prefer latest visit's V_Compliance value if present, else baseline
+    var cy=d.filter(function(p){
+        var v = p._latestVisit;
+        if(v && v.V_Compliance){
+            var s = String(v.V_Compliance).toLowerCase();
+            return s === 'fully compliant';
+        }
+        return p.Compliance==='Yes';
+    }).length;
+    makeChart('chartCompliance','doughnut',['Compliant','Non-compliant'],[{data:[cy,n-cy],backgroundColor:['#2980b9','#e74c3c'],borderWidth:2}],{});
+}
 function buildRisk(d,n){/* MAGGIC Risk panel removed per user request */}
 function buildDemographics(d,n){var natCount={};d.forEach(function(p){var nat=(p.Nationality||'Unknown').trim();natCount[nat]=(natCount[nat]||0)+1;});var sorted=Object.entries(natCount).sort(function(a,b){return b[1]-a[1];}).slice(0,8);var nbHtml='';sorted.forEach(function(entry){var nat=entry[0],cnt=entry[1];var p=pct(cnt,n);nbHtml+="<div class='comorbidity-bar-row'><span class='cb-label' style='width:90px;'>"+nat+"</span><div class='cb-bar-wrap'><div class='cb-bar' style='width:"+p+"%;background:linear-gradient(90deg,#0f3460,#2980b9);'></div></div><span class='cb-pct' style='color:#0f3460;'>"+cnt+"</span></div>";});document.getElementById('nationalityBars').innerHTML=nbHtml||'<p class="text-muted small">No data.</p>';var docCount={};d.forEach(function(p){var doc=p.Doctor_Name||'Unknown';docCount[doc]=(docCount[doc]||0)+1;});makeChart('chartDoctors','bar',Object.keys(docCount),[{label:'Patients',data:Object.values(docCount),backgroundColor:PIE_COLORS,borderRadius:6}],{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}});var icd=d.filter(function(p){return p.Device_Info&&p.Device_Info.toLowerCase().includes('icd');}).length;var crt=d.filter(function(p){return p.Device_Info&&p.Device_Info.toLowerCase().includes('crt');}).length;var none=d.filter(function(p){return!p.Device_Info||p.Device_Info.trim()==='';}).length;var dHtml="<div class='gdmt-row'><span class='gdmt-name'>ICD</span><span class='gdmt-pill gdmt-pill-high'>"+icd+" ("+pctStr(icd,n)+")</span></div>";dHtml+="<div class='gdmt-row'><span class='gdmt-name'>CRT</span><span class='gdmt-pill gdmt-pill-mid'>"+crt+" ("+pctStr(crt,n)+")</span></div>";dHtml+="<div class='gdmt-row'><span class='gdmt-name'>No Device</span><span class='gdmt-pill gdmt-pill-low'>"+none+" ("+pctStr(none,n)+")</span></div>";document.getElementById('deviceStats').innerHTML=dHtml;var efBins={'<20':0,'20-29':0,'30-39':0,'40-49':0,'50-59':0,'≥60':0,'N/A':0};d.forEach(function(p){var ef=parseFloat(p.EF_Diagnosis);if(isNaN(ef)||ef<=0)efBins['N/A']++;else if(ef<20)efBins['<20']++;else if(ef<30)efBins['20-29']++;else if(ef<40)efBins['30-39']++;else if(ef<50)efBins['40-49']++;else if(ef<60)efBins['50-59']++;else efBins['≥60']++;});makeChart('chartEF','bar',Object.keys(efBins),[{label:'Patients',data:Object.values(efBins),backgroundColor:['#c0392b','#e74c3c','#e67e22','#f39c12','#27ae60','#1d6f42','#aaa'],borderRadius:6}],{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}});}
 function buildComorbidities(d,n){var comorbItems=[{label:'HTN',fn:function(p){return p.HTN==='Yes';}},{label:'DM',fn:function(p){return p.DM==='Yes';}},{label:'IHD',fn:function(p){return p.IHD&&p.IHD!=='No'&&p.IHD!=='';}},{label:'AF',fn:function(p){return p.AF==='Yes';}},{label:'CKD',fn:function(p){return p.CKD==='Yes';}},{label:'Obese/OSA',fn:function(p){return p.Obese_OSA==='Yes';}},{label:'PCI/CABG',fn:function(p){return p.PCI_CABG&&p.PCI_CABG!=='No'&&p.PCI_CABG!=='';}},{label:'CVA',fn:function(p){return p.CVA==='Yes';}},{label:'Lung Dz',fn:function(p){return p.Lung_Dz==='Yes';}},{label:'PVD',fn:function(p){return p.PVD==='Yes';}},{label:'Liver Dz',fn:function(p){return p.Liver_Dz==='Yes';}}];var sorted=comorbItems.map(function(item){return Object.assign({},item,{cnt:d.filter(item.fn).length});}).sort(function(a,b){return b.cnt-a.cnt;});var html='';sorted.forEach(function(item){var p=pct(item.cnt,n);html+="<div class='comorbidity-bar-row'><span class='cb-label'>"+item.label+"</span><div class='cb-bar-wrap'><div class='cb-bar' style='width:"+p+"%;'></div></div><span class='cb-pct'>"+item.cnt+" ("+p+"%)</span></div>";});document.getElementById('comorbiditiesBars').innerHTML=html;var snv=d.filter(function(p){return p.Smoker==='Never'||!p.Smoker;}).length;var sc=d.filter(function(p){return p.Smoker==='Current';}).length;var sf=d.filter(function(p){return p.Smoker==='Former';}).length;makeChart('chartSmoking','pie',['Never','Current','Former'],[{data:[snv,sc,sf],backgroundColor:['#27ae60','#e74c3c','#f39c12'],borderWidth:2}],{});var adv=d.filter(function(p){return p.Advanced_HF==='Yes';}).length;var val=d.filter(function(p){return p.Valvular_Disease==='Yes';}).length;var both=d.filter(function(p){return p.Advanced_HF==='Yes'&&p.Valvular_Disease==='Yes';}).length;var aHtml="<div class='gdmt-row'><span class='gdmt-name'>Advanced HF</span><span class='gdmt-pill gdmt-pill-low'>"+adv+" ("+pctStr(adv,n)+")</span></div>";aHtml+="<div class='gdmt-row'><span class='gdmt-name'>Valvular Disease</span><span class='gdmt-pill gdmt-pill-mid'>"+val+" ("+pctStr(val,n)+")</span></div>";aHtml+="<div class='gdmt-row'><span class='gdmt-name'>Both</span><span class='gdmt-pill gdmt-pill-low'>"+both+" ("+pctStr(both,n)+")</span></div>";document.getElementById('advancedStats').innerHTML=aHtml;}
 function buildOutcomes(d,n){var alive=d.filter(function(p){return p.Mortality==='Alive'||!p.Mortality;}).length;var inh=d.filter(function(p){return p.Mortality==='In-hospital';}).length;var outh=d.filter(function(p){return p.Mortality==='Out-of-hospital';}).length;makeChart('chartMortality','doughnut',['Alive','In-hospital Death','Out-of-hospital Death'],[{data:[alive,inh,outh],backgroundColor:['#27ae60','#e74c3c','#8b0000'],borderWidth:2}],{});var admBins={'0':0,'1':0,'2':0,'3':0,'4+':0};d.forEach(function(p){var a=parseInt(p.Admissions)||0;if(a===0)admBins['0']++;else if(a===1)admBins['1']++;else if(a===2)admBins['2']++;else if(a===3)admBins['3']++;else admBins['4+']++;});makeChart('chartAdmissions','bar',Object.keys(admBins).map(function(k){return k+' admission'+(k==='1'?'':'s');}),[{label:'Patients',data:Object.values(admBins),backgroundColor:'#c0392b',borderRadius:6}],{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}});var ry=d.filter(function(p){return p.Rehab==='Yes';}).length;makeChart('chartRehab','doughnut',['Enrolled','Not Enrolled'],[{data:[ry,n-ry],backgroundColor:['#2980b9','#e9ecef'],borderWidth:2}],{});var losVals=d.map(function(p){return parseFloat(p.LOS);}).filter(function(v){return!isNaN(v)&&v>0;});var avgLOS=losVals.length>0?(losVals.reduce(function(a,b){return a+b;},0)/losVals.length).toFixed(1):'—';var maxLOS=losVals.length>0?Math.max.apply(null,losVals):'—';var losHtml="<div class='row text-center g-2'><div class='col-4'><div style='font-size:1.8rem;font-weight:700;color:#8b0000;font-family:Crimson Pro,serif;'>"+avgLOS+"</div><div style='font-size:0.7rem;color:#666;text-transform:uppercase;letter-spacing:0.05em;'>Avg Days</div></div><div class='col-4'><div style='font-size:1.8rem;font-weight:700;color:#c0392b;font-family:Crimson Pro,serif;'>"+maxLOS+"</div><div style='font-size:0.7rem;color:#666;text-transform:uppercase;letter-spacing:0.05em;'>Max Days</div></div><div class='col-4'><div style='font-size:1.8rem;font-weight:700;color:#0f3460;font-family:Crimson Pro,serif;'>"+losVals.length+"</div><div style='font-size:0.7rem;color:#666;text-transform:uppercase;letter-spacing:0.05em;'>With Data</div></div></div>";document.getElementById('losStats').innerHTML=losHtml;}
-function buildGDMTGap(d,n){var hfref=d.filter(function(p){return p.HF_Type==='HFrEF';});if(hfref.length===0){document.getElementById('gdmtGapTableWrap').innerHTML='<p class="text-muted small">No HFrEF patients in registry.</p>';return;}var html='<table class="gap-table table table-sm table-bordered"><thead><tr><th>Patient</th><th>File</th><th>ARNI</th><th>SGLT2i</th><th>BB</th><th>MRA</th><th>Gaps</th></tr></thead><tbody>';hfref.forEach(function(p){var arni=p.Med_ARNI==='Yes',sglt=p.Med_SGLT2i&&p.Med_SGLT2i!=='None'&&p.Med_SGLT2i!=='',bb=p.Med_BB&&p.Med_BB!=='None'&&p.Med_BB!=='',mra=p.Med_MRA&&p.Med_MRA!=='None'&&p.Med_MRA!=='';var gaps=4-[arni,sglt,bb,mra].filter(Boolean).length;if(gaps===0)return;html+='<tr><td style="text-align:left;font-weight:600;">'+(p.Patient_Name||'?')+'</td><td>'+(p.File_No||'-')+'</td>';html+='<td class="'+(arni?'gap-check':'gap-miss')+'">'+(arni?'✓':'✗')+'</td>';html+='<td class="'+(sglt?'gap-check':'gap-miss')+'">'+(sglt?'✓':'✗')+'</td>';html+='<td class="'+(bb?'gap-check':'gap-miss')+'">'+(bb?'✓':'✗')+'</td>';html+='<td class="'+(mra?'gap-check':'gap-miss')+'">'+(mra?'✓':'✗')+'</td>';html+='<td><span class="risk-badge '+(gaps>=3?'risk-high':(gaps>=2?'risk-mid':'risk-low'))+'">'+gaps+' missing</span></td></tr>';});html+='</tbody></table>';document.getElementById('gdmtGapTableWrap').innerHTML=html;}
+function buildGDMTGap(d,n){
+    var hfref=d.filter(function(p){return p.HF_Type==='HFrEF';});
+    if(hfref.length===0){document.getElementById('gdmtGapTableWrap').innerHTML='<p class="text-muted small">No HFrEF patients in registry.</p>';return;}
+    var html='<table class="gap-table table table-sm table-bordered"><thead><tr><th>Patient</th><th>File</th><th>ARNI</th><th>SGLT2i</th><th>BB</th><th>MRA</th><th>Gaps</th><th>Source</th></tr></thead><tbody>';
+    hfref.forEach(function(p){
+        var m = p._latestMeds || {};
+        var arni = !!m.onARNI, sglt = !!m.onSGLT2i, bb = !!m.onBB, mra = !!m.onMRA;
+        var gaps = 4 - [arni,sglt,bb,mra].filter(Boolean).length;
+        if(gaps===0) return;
+        var src = p._latestVisit ? ('Visit '+(p._latestVisit.visitDate||'')) : 'Baseline';
+        html+='<tr><td style="text-align:left;font-weight:600;">'+(p.Patient_Name||'?')+'</td><td>'+(p.File_No||'-')+'</td>';
+        html+='<td class="'+(arni?'gap-check':'gap-miss')+'">'+(arni?'✓':'✗')+'</td>';
+        html+='<td class="'+(sglt?'gap-check':'gap-miss')+'">'+(sglt?'✓':'✗')+'</td>';
+        html+='<td class="'+(bb?'gap-check':'gap-miss')+'">'+(bb?'✓':'✗')+'</td>';
+        html+='<td class="'+(mra?'gap-check':'gap-miss')+'">'+(mra?'✓':'✗')+'</td>';
+        html+='<td><span class="risk-badge '+(gaps>=3?'risk-high':(gaps>=2?'risk-mid':'risk-low'))+'">'+gaps+' missing</span></td>';
+        html+='<td style="font-size:0.7rem;color:#666;">'+src+'</td></tr>';
+    });
+    html+='</tbody></table>';
+    document.getElementById('gdmtGapTableWrap').innerHTML=html;
+}
 function buildEnrollment(d,n){var months={};d.forEach(function(p){if(!p.timestamp)return;var m=p.timestamp.substring(0,7);months[m]=(months[m]||0)+1;});var sorted=Object.keys(months).sort();makeChart('chartEnrollment','line',sorted.map(function(m){var parts=m.split('-');return parts[1]+'/'+parts[0];}),
     [{label:'New Patients',data:sorted.map(function(m){return months[m];}),borderColor:'#8b0000',backgroundColor:'rgba(139,0,0,0.1)',fill:true,tension:0.3,pointRadius:5,pointBackgroundColor:'#8b0000'}],
     {plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}});}
@@ -2896,15 +3586,33 @@ var ALL_PATIENT_FIELDS = [
     'Patient_Name','Civil_ID','File_No','Age','Gender','Nationality','Mobile','Doctor_Name',
     'HF_Type','EF_Diagnosis','Advanced_HF','HF_Cause','Other_Cardio','Valvular_Disease','Valvular_Type','Admissions','Last_Admission','LOS',
     'Height','Weight','BMI','Dry_Weight','NYHA','KCCQ','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur',
-    'ECG','ECHO','Echo_EDVI','Echo_ESVI','Echo_EF','CMR_CT','CMR_LVEDVI','CMR_LVESVI','CMR_LVEF','CMR_RVEDI','CMR_RVEF','CMR_LGE','CMR_LGE_Pct','CMR_Others','CT_Done','CT_Angio','CT_Calcium','CT_Notes','Walk_Completed','Walk_Meters','CPET_PeakVO2','CPET_VEVCO2','CPET_RER','CPET_AT','CPET_VO2HR','CPET_PetCO2','Device_Type','Device_Date','RHC_Done','RHC_CI','RHC_RAP','RHC_RVP','RHC_PCWP','RHC_PAP','RHC_PVR','RHC_PAPi','RHC_LV','RHC_MVO2',
-    'DM','HTN','AF','IHD','PCI_CABG','CKD','CVA','PVD','Smoker','Obese','OSA','Obese_OSA','Dyslipidemia','Valve_Surgery','Valve_Surgery_Date','Lung_Dz','Liver_Dz','Thyroid_Dz','FH_Cardio','Genetics',
-    'Lab_HbA1c','Lab_Gluc','Lab_UreaCreat','Lab_eGFR','Lab_NaK','Lab_BNP','Lab_IronFerritin','Lab_TrSats','Lab_CBC','Lab_Thyroid','Lab_Lipids','Lab_AlbCreat',
+    'ECG','ECG_LBBB','ECG_QRS','ECG_Arrhythmia','ECG_Pacing','ECHO','Echo_EDVI','Echo_ESVI','Echo_EF','CMR_CT','CMR_LVEDVI','CMR_LVESVI','CMR_LVEF','CMR_RVEDI','CMR_RVEF','CMR_LGE','CMR_LGE_Pct','CMR_Others','CT_Done','CT_Angio','CT_Calcium','CT_Notes','Walk_Completed','Walk_Meters','CPET_PeakVO2','CPET_VEVCO2','CPET_RER','CPET_AT','CPET_VO2HR','CPET_PetCO2','Device_Type','Device_Date','RHC_Done','RHC_CI','RHC_RAP','RHC_RVP','RHC_PCWP','RHC_PAP','RHC_PVR','RHC_PAPi','RHC_LV','RHC_MVO2',
+    'DM','HTN','AF','IHD','PCI_CABG','PCI_CABG_Date','PCI_CABG_Details','CKD','CVA','PVD','Smoker','Obese','OSA','Obese_OSA','Dyslipidemia','Valve_Surgery','Valve_Surgery_Date','Lung_Dz','Liver_Dz','Thyroid_Dz','FH_Cardio','Genetics',
+    // In-Hospital Labs (Section 6 — admission + discharge variants)
+    'Lab_HbA1c','Lab_Gluc',
+    'Lab_Urea','Lab_Creat','Lab_eGFR','Lab_Na','Lab_K',
+    'Lab_Urea_Disch','Lab_Creat_Disch','Lab_eGFR_Disch','Lab_Na_Disch','Lab_K_Disch',
+    'Lab_BNP','Lab_BNP_Disch','Lab_BNP_only','Lab_BNP_only_Disch',
+    'Lab_Iron','Lab_Ferritin','Lab_TrSats',
+    'Lab_Hb','Lab_Hb_Disch','Lab_WBC','Lab_Plt',
+    'Lab_TSH','Lab_FreeT4',
+    'Lab_TotalChol','Lab_LDL','Lab_HDL','Lab_TG','Lab_AlbCreat',
+    // Legacy combined-format mirrors (kept for back-compat)
+    'Lab_UreaCreat','Lab_NaK','Lab_IronFerritin','Lab_CBC','Lab_Thyroid','Lab_Lipids',
+    // Section 7 — In-hospital management & inotropes
+    'Inotropes_Used','Inotropes_Selected',
+    'Inotrope_Dobutamine_MaxDose','Inotrope_Dopamine_MaxDose','Inotrope_Milrinone_MaxDose','Inotrope_Simdax_MaxDose','Inotrope_Levophed_MaxDose','Inotrope_Adrenaline_MaxDose','Inotrope_Vasopressin_MaxDose',
+    // Medications (baseline / Section 7)
     'Med_ARNI','Med_ARNI_Dose','Med_SGLT2i','Med_SGLT2i_Dose','Med_GLP1','Med_GLP1_Dose',
     'Med_BB','Med_BB_Dose','Med_MRA','Med_MRA_Dose','Med_ACEiARB','Med_ACEiARB_Dose',
     'Med_Vasodilator','Med_Vasodilator_Dose','Med_Procorolan','Med_Procorolan_Dose','Med_CCB','Med_CCB_Dose',
-    'Med_Diuretic','Med_Diuretic_Dose','Med_Lipid','Med_Lipid_Dose','Med_Omega3','Med_Omega3_Dose','Med_Nicotine','Med_Nicotine_Dose','Med_Antiplat','Med_Antiplat_Dose',
+    'Med_Diuretic','Med_Diuretic_Dose','Med_Statin','Med_Statin_Dose','Med_LipidCombo','Med_LipidCombo_Dose','Med_PCSK9','Med_PCSK9_Dose','Med_Fibrate','Med_Fibrate_Dose',
+    'Med_Lipid','Med_Lipid_Dose','Med_Omega3','Med_Omega3_Dose','Med_Nicotine','Med_Nicotine_Dose','Med_Antiplat','Med_Antiplat_Dose',
     'Med_OAC','Med_OAC_Dose','Med_Arrhythmia','Med_Arrhythmia_Dose','Med_K_Chelator','Med_K_Chelator_Dose',
-    'Quad_GDMT','Compliance','Mortality','LostFU','LostFU_Reason','LostFU_Other','Referral','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt'
+    // Outcomes (Section 8) — Strong HF + Advanced HF Therapy + multi-select Referral
+    'Quad_GDMT','Compliance','Mortality','LostFU','LostFU_Reason','LostFU_Other',
+    'Strong_HF','Adv_HF_Therapy','Adv_HF_Therapy_Type',
+    'Referral','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt'
 ];
 
 function exportAllPatientsExcel(){
