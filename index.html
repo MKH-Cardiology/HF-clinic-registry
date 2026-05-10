@@ -1302,10 +1302,13 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                     <div class="col-4 col-md-2"><label>Pulse</label><input type="text" class="form-control" id="V_Pulse" inputmode="numeric"></div>
                     <div class="col-4 col-md-2"><label>BP</label><input type="text" class="form-control" id="V_BP" placeholder="120/80"></div>
                     <div class="col-4 col-md-2"><label>SpO2 %</label><input type="number" class="form-control" id="V_SpO2" inputmode="numeric"></div>
-                    <div class="col-4 col-md-2"><label>Weight (kg)</label><input type="number" class="form-control" id="V_Weight" inputmode="numeric"></div>
+                    <div class="col-4 col-md-2"><label>Height (cm)</label><input type="number" class="form-control" id="V_Height" oninput="calcVisitBMI()" inputmode="numeric"></div>
+                    <div class="col-4 col-md-2"><label>Weight (kg)</label><input type="number" class="form-control" id="V_Weight" oninput="calcVisitBMI()" inputmode="numeric"></div>
+                    <div class="col-4 col-md-2"><label class="text-success fw-bold">BMI <span class="auto-badge"><i class="fa fa-lock"></i> Auto</span></label><input type="text" class="form-control bg-light text-success fw-bold" id="V_BMI" readonly></div>
                     <div class="col-4 col-md-2"><label>JVP</label><select class="form-select" id="V_JVP"><option>N</option><option>Raised</option></select></div>
                     <div class="col-4 col-md-2"><label>Pulm. Rales</label><select class="form-select" id="V_Rales"><option>N</option><option>Y</option></select></div>
                     <div class="col-4 col-md-2"><label>S3</label><select class="form-select" id="V_S3"><option>N</option><option>Y</option></select></div>
+                    <div class="col-8 col-md-4"><label>Murmur</label><input type="text" class="form-control" id="V_Murmur" placeholder="e.g. ESM at apex, grade 3/6"></div>
                     <div class="col-12"><hr class="my-2"></div>
                     <h6 class="col-12 text-secondary">ECG</h6>
                     <div class="col-4 col-md-3"><label>LBBB</label><select class="form-select" id="V_LBBB"><option>No</option><option>Yes</option></select></div>
@@ -3153,6 +3156,17 @@ function calcBMI(){
     }
     calcMAGGIC();
 }
+
+// Visit-form BMI: auto-computed from V_Height + V_Weight, mirrors baseline calcBMI.
+function calcVisitBMI(){
+    var hEl = document.getElementById('V_Height');
+    var wEl = document.getElementById('V_Weight');
+    var bEl = document.getElementById('V_BMI');
+    if(!bEl) return;
+    var w = parseFloat(wEl && wEl.value);
+    var h = parseFloat(hEl && hEl.value);
+    bEl.value = (w && h) ? (w / ((h/100)**2)).toFixed(1) : '';
+}
 // Sync new individual baseline lab fields back to the legacy combined fields used elsewhere
 function syncBaselineUreaCreat(){var u=document.getElementById('Lab_Urea').value.trim(),c=document.getElementById('Lab_Creat').value.trim();var combo=(u||c)?(u+'/'+c):'';var t=document.getElementById('Lab_UreaCreat');if(t)t.value=combo;}
 function syncBaselineNaK(){var n=document.getElementById('Lab_Na').value.trim(),k=document.getElementById('Lab_K').value.trim();var combo=(n||k)?(n+'/'+k):'';var t=document.getElementById('Lab_NaK');if(t)t.value=combo;}
@@ -3185,18 +3199,37 @@ function clearSearchResults(){document.getElementById("searchInput").value="";do
 function showPopup(type,title,msg){var old=document.getElementById("popOv");if(old)old.remove();var color=type==="success"?"#28a745":type==="delete"?"#dc3545":"#ffc107",icon=type==="success"?"fa-check-circle":type==="delete"?"fa-trash-alt":"fa-exclamation-triangle";var ov=document.createElement("div");ov.id="popOv";ov.className="modal-overlay";ov.innerHTML="<div class='modal-box'><div class='modal-icon' style='background:"+color+";width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;'><i class='fa-solid "+icon+"' style='color:#fff;font-size:1.2rem;'></i></div><h4 style='color:"+color+"'>"+title+"</h4><p class='text-muted'>"+msg+"</p><button class='btn btn-dark w-100' onclick='this.parentElement.parentElement.remove()'>OK</button></div>";document.body.appendChild(ov);}
 
 function savePatient(){
-    // ----- ISSUE #1 FIX: if a visit is currently being edited, commit it first -----
-    // The user pressing the sticky "Save Patient" button while in the middle of
-    // editing a visit naturally expects their visit edits to also be saved.
-    // We delegate to saveVisit() if Visit_Date has a value AND editingVisitId is set;
-    // saveVisit will refresh the visit list and we then continue with patient save.
-    if (typeof editingVisitId !== 'undefined' && editingVisitId) {
-        var vd = document.getElementById('Visit_Date');
-        if (vd && vd.value) {
-            // Inline-commit the visit (silent: no popup interruption) and continue saving patient.
-            try { _commitVisitInline(); } catch(e){ console.warn('Inline visit commit failed', e); }
-        }
+    // ----- VISIT AUTO-COMMIT FIX -----
+    // If the user has typed a Visit Date in step 9 and presses "Save Patient" without
+    // clicking "Add Visit to Patient Record" first, persist that visit anyway.
+    // - If editingVisitId is set → update the existing visit
+    // - Else if Visit_Date is filled and we're editing an existing patient → add new visit
+    // We chain the patient save AFTER the visit write completes so loadVisits can refresh
+    // properly; otherwise the patient save fires before the visit lands and the user
+    // sees a "Saved" panel without their visit recorded.
+    var pendingVisitPromise = null;
+    var vd = document.getElementById('Visit_Date');
+    var visitDateValue = (vd && vd.value) || '';
+    if (typeof editingVisitId !== 'undefined' && editingVisitId && visitDateValue) {
+        // Updating an existing visit
+        try { pendingVisitPromise = _commitVisitInline(); } catch(e){ console.warn('Inline visit commit failed', e); }
+    } else if (visitDateValue && (typeof editingDocId !== 'undefined' && editingDocId)) {
+        // Adding a NEW visit silently as part of patient save
+        try { pendingVisitPromise = _commitNewVisitInline(); } catch(e){ console.warn('Inline visit add failed', e); }
     }
+    // If we kicked off a visit write, wait for it to settle before continuing the patient save
+    // so the visits subcollection is up to date by the time the success panel appears.
+    if (pendingVisitPromise && typeof pendingVisitPromise.then === 'function') {
+        pendingVisitPromise.then(function(){ _savePatientCore(); }).catch(function(e){
+            console.warn('Visit save before patient save failed:', e);
+            _savePatientCore(); // continue anyway so the patient itself isn't blocked
+        });
+        return;
+    }
+    _savePatientCore();
+}
+
+function _savePatientCore(){
     var civilID=document.getElementById("Civil_ID").value,fileNo=document.getElementById("File_No").value;
     var mobile=(document.getElementById("Mobile").value||'').trim();
     if(civilID.length!==12){showPopup("error","Invalid Civil ID","Civil ID must be exactly 12 digits");return;}
@@ -3323,6 +3356,11 @@ function showSaveSuccess(patientId, data, mode){
     if(btn){ btn.disabled=false; btn.innerHTML='<i class="fa fa-save me-1"></i> SAVE PATIENT'; }
     // Stash the patient id so SSP buttons know who we're working with
     panel.dataset.patientId = patientId || '';
+    // Refresh the visits list so any visit that was committed alongside the patient save
+    // is visible when the user clicks "Continue Editing" or "Add Visit".
+    if(patientId && typeof loadVisits === 'function'){ try { loadVisits(patientId); } catch(e){} }
+    // Also clear the visit form so it doesn't carry the just-saved values into a new entry.
+    if(typeof clearVisitForm === 'function'){ try { clearVisitForm(); } catch(e){} }
     // Scroll panel into view
     try{ panel.scrollIntoView({behavior:'smooth', block:'start'}); }catch(e){ window.scrollTo({top:0,behavior:'smooth'}); }
 }
@@ -3389,11 +3427,11 @@ function _hideSaveSuccessPanel(){
 // This persists the in-progress visit edits silently so they don't get lost,
 // then defers UI refresh of the visits list until after savePatient completes.
 function _commitVisitInline(){
-    if(!editingVisitId) return;
+    if(!editingVisitId) return null;
     var pid = currentPatientId || editingDocId;
-    if(!pid) return;
+    if(!pid) return null;
     var vDate = (document.getElementById('Visit_Date')||{}).value || '';
-    if(!vDate) return;
+    if(!vDate) return null;
     var visitData = {};
     document.querySelectorAll('[id^="V_"]').forEach(function(el){ if(el.id && el.type!=='file') visitData[el.id] = el.value; });
     visitData.visitDate = vDate;
@@ -3401,12 +3439,42 @@ function _commitVisitInline(){
     visitData.lastEditAt = new Date().toISOString();
     visitData.lastEditBy = _currentAuditUser();
     visitData.lastEditDoctor = _currentDoctorSelection();
-    db.collection("patients").doc(pid).collection("visits").doc(editingVisitId).update(visitData)
+    var visitId = editingVisitId;
+    return db.collection("patients").doc(pid).collection("visits").doc(visitId).update(visitData)
         .then(function(){
-            writeAuditEntry(pid, {action:'visit_edit', changes:[], note:'Visit '+editingVisitId+' edited (via Save Patient, '+vDate+')'});
+            return writeAuditEntry(pid, {action:'visit_edit', changes:[], note:'Visit '+visitId+' edited (via Save Patient, '+vDate+')'});
         })
         .catch(function(e){ console.warn('Inline visit save failed:', e.message); });
     // We do NOT clear the visit form here — the patient save itself triggers resetForm() on success.
+}
+
+// Adds a NEW visit silently when the user fills Visit_Date but presses "Save Patient"
+// instead of "Add Visit to Patient Record". Returns a Promise so savePatient can chain.
+function _commitNewVisitInline(){
+    var pid = currentPatientId || editingDocId;
+    if(!pid) return null;
+    var vDate = (document.getElementById('Visit_Date')||{}).value || '';
+    if(!vDate) return null;
+    // Don't double-add if we're already editing an existing visit (handled by _commitVisitInline)
+    if(typeof editingVisitId !== 'undefined' && editingVisitId) return null;
+    var visitData = {};
+    document.querySelectorAll('[id^="V_"]').forEach(function(el){ if(el.id && el.type!=='file') visitData[el.id] = el.value; });
+    visitData.visitDate = vDate;
+    visitData.visitType = (document.getElementById('Visit_Type')||{}).value || 'Routine';
+    visitData.timestamp = new Date().toISOString();
+    visitData.addedBy = _currentAuditUser();
+    visitData.addedDoctor = _currentDoctorSelection();
+    var nextAppt = (document.getElementById('Next_Appt')||{}).value || '';
+    return db.collection("patients").doc(pid).collection("visits").add(visitData)
+        .then(function(ref){
+            // Mirror Next_Appt onto the patient doc so the calendar / 14-day panel pick it up
+            if(nextAppt){
+                db.collection("patients").doc(pid).update({Next_Appt:nextAppt});
+                if(typeof PC === 'object' && PC[pid]) PC[pid].Next_Appt = nextAppt;
+            }
+            return writeAuditEntry(pid, {action:'visit_add', changes:[], note:'Visit added on '+vDate+' ('+visitData.visitType+') — via Save Patient'});
+        })
+        .catch(function(e){ console.warn('Inline new visit save failed:', e.message); });
 }
 
 function saveVisit(){
@@ -3493,6 +3561,8 @@ function editVisit(visitId){
     // Restore visit Walk Test and RHC panel states
     if(typeof toggleVisitWalkMeters==='function')toggleVisitWalkMeters();
     if(typeof toggleVisitRHCDetails==='function')toggleVisitRHCDetails();
+    // Recalculate BMI in case the saved visit predates V_BMI (older records)
+    if(typeof calcVisitBMI==='function') calcVisitBMI();
     // Scroll to the visit form
     var visitSection = document.querySelector('.visit-section');
     if(visitSection) visitSection.scrollIntoView({behavior:'smooth', block:'start'});
