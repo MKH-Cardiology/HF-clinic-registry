@@ -502,6 +502,213 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 /* Slightly tighter wizard nav */
 .wizard-nav{margin-top:14px;}
 
+/* ============================================================
+   ===== PREMIUM POLISH: tinted field groups + accordions =====
+   ============================================================ */
+
+/* Each logical sub-group of fields (labs, ECG, CMR, etc.) sits in its own
+   soft-tinted box so the eye groups them at a glance. */
+.field-tint{
+    background:var(--tint-bg,#f7f9fc);
+    border:1px solid var(--tint-border,#e3e8ef);
+    border-left:3px solid var(--tint-accent,#90a0b3);
+    border-radius:10px;
+    padding:11px 14px 10px;
+    margin:10px 0;
+    position:relative;
+    transition:border-color 0.2s, box-shadow 0.2s;
+}
+.field-tint:hover{box-shadow:0 2px 8px rgba(0,0,0,0.04);}
+.field-tint > .ft-head{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    font-size:0.7rem;
+    font-weight:700;
+    color:var(--tint-accent-dark,#3a4a5c);
+    text-transform:uppercase;
+    letter-spacing:0.07em;
+    margin-bottom:8px;
+    padding-bottom:5px;
+    border-bottom:1px dashed var(--tint-border,#e3e8ef);
+}
+.field-tint > .ft-head i{
+    width:20px;height:20px;
+    border-radius:5px;
+    display:inline-flex;align-items:center;justify-content:center;
+    background:var(--tint-accent,#90a0b3);
+    color:#fff;
+    font-size:0.7rem;
+    flex-shrink:0;
+}
+.field-tint > .ft-head .ft-count{
+    margin-left:auto;
+    font-size:0.62rem;
+    color:#8b96a3;
+    font-weight:600;
+    letter-spacing:0.04em;
+    text-transform:none;
+}
+.field-tint > .ft-body{
+    /* Body holds a Bootstrap row directly */
+}
+
+/* Field-tint color palettes (used inside any section) */
+.tint-glycemic   {--tint-bg:#fef7e7;--tint-border:#f0d99a;--tint-accent:#c97f17;--tint-accent-dark:#8a5a0d;}
+.tint-renal      {--tint-bg:#e9f4fb;--tint-border:#a9cfe8;--tint-accent:#1976c2;--tint-accent-dark:#0d4e87;}
+.tint-renal-disch{--tint-bg:#eaf2f9;--tint-border:#b6cee2;--tint-accent:#3582bd;--tint-accent-dark:#1a4d7d;}
+.tint-bnp        {--tint-bg:#fdebec;--tint-border:#f0b8bc;--tint-accent:#c0392b;--tint-accent-dark:#7a1f15;}
+.tint-iron       {--tint-bg:#f4ebe2;--tint-border:#d4b89b;--tint-accent:#8a5a2c;--tint-accent-dark:#5a3a1c;}
+.tint-cbc        {--tint-bg:#fcecef;--tint-border:#e6b8c2;--tint-accent:#a72447;--tint-accent-dark:#6a1428;}
+.tint-thyroid    {--tint-bg:#e9f5f2;--tint-border:#a8d3c8;--tint-accent:#1d8a73;--tint-accent-dark:#0e5547;}
+.tint-lipids     {--tint-bg:#f0ecf7;--tint-border:#c7b8e0;--tint-accent:#5e3aa8;--tint-accent-dark:#3a1f78;}
+.tint-urine      {--tint-bg:#fffbeb;--tint-border:#e8d99a;--tint-accent:#a3892b;--tint-accent-dark:#6e5a14;}
+.tint-coag       {--tint-bg:#f5e9f1;--tint-border:#daafce;--tint-accent:#a02d77;--tint-accent-dark:#651148;}
+
+.tint-symptoms   {--tint-bg:#fef3e7;--tint-border:#f0c89a;--tint-accent:#d17a1c;--tint-accent-dark:#8a4a0d;}
+.tint-vitals     {--tint-bg:#eaf6f2;--tint-border:#abd6c5;--tint-accent:#168a6a;--tint-accent-dark:#0c5440;}
+.tint-ecg        {--tint-bg:#e9f0fa;--tint-border:#a5bce0;--tint-accent:#3551a8;--tint-accent-dark:#1d2e6a;}
+.tint-echo       {--tint-bg:#eaf2fb;--tint-border:#a5c7e8;--tint-accent:#1565c0;--tint-accent-dark:#0a3d7a;}
+.tint-cmr        {--tint-bg:#f0ebf9;--tint-border:#c7b3e6;--tint-accent:#5b35a8;--tint-accent-dark:#321f6a;}
+.tint-walk       {--tint-bg:#eef6ea;--tint-border:#bedeb0;--tint-accent:#3d8a2a;--tint-accent-dark:#1f5414;}
+.tint-cpet       {--tint-bg:#e6f4f6;--tint-border:#9ed1d8;--tint-accent:#0d6e80;--tint-accent-dark:#063e48;}
+.tint-rhc        {--tint-bg:#fcecec;--tint-border:#e6b1b1;--tint-accent:#a8261a;--tint-accent-dark:#6a1410;}
+.tint-meds       {--tint-bg:#fef0eb;--tint-border:#f0bca5;--tint-accent:#c0512b;--tint-accent-dark:#7a2e15;}
+.tint-plan       {--tint-bg:#eef1f5;--tint-border:#b8c2cf;--tint-accent:#4a5a6e;--tint-accent-dark:#2a3445;}
+.tint-referral   {--tint-bg:#e9f1fa;--tint-border:#a5c4e8;--tint-accent:#1565c0;--tint-accent-dark:#0a3d7a;}
+.tint-vaccine    {--tint-bg:#eaf6e6;--tint-border:#abd9a3;--tint-accent:#2a8a3a;--tint-accent-dark:#155a1f;}
+.tint-appt       {--tint-bg:#fef3f0;--tint-border:#f5b8a8;--tint-accent:#c0392b;--tint-accent-dark:#7a1f15;}
+
+/* ===== COLLAPSIBLE FIELD GROUPS (used in Visits step) ===== */
+.field-tint.collapsible > .ft-head{cursor:pointer;user-select:none;margin-bottom:0;border-bottom:none;padding-bottom:0;}
+.field-tint.collapsible > .ft-head .ft-chev{
+    margin-left:6px;
+    color:var(--tint-accent,#90a0b3);
+    font-size:0.7rem;
+    transition:transform 0.2s ease;
+    flex-shrink:0;
+}
+.field-tint.collapsible.expanded > .ft-head{
+    margin-bottom:8px;padding-bottom:5px;
+    border-bottom:1px dashed var(--tint-border,#e3e8ef);
+}
+.field-tint.collapsible.expanded > .ft-head .ft-chev{transform:rotate(90deg);}
+.field-tint.collapsible > .ft-body{display:none;}
+.field-tint.collapsible.expanded > .ft-body{display:block;animation:fadeUp 0.2s ease;}
+.field-tint.collapsible > .ft-head .ft-filled{
+    margin-left:auto;
+    font-size:0.62rem;
+    background:var(--tint-accent,#90a0b3);
+    color:#fff;
+    padding:1px 7px;
+    border-radius:10px;
+    font-weight:700;
+    letter-spacing:0.03em;
+    text-transform:none;
+    display:none;
+}
+.field-tint.collapsible > .ft-head .ft-filled.has-data{display:inline-block;}
+
+/* ===== PREMIUM POLISH: refined section card =====
+   Slightly more elevation, gentle gradient on header, tighter typography. */
+.section-card{
+    box-shadow:0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04);
+    border:1px solid #eef0f3;
+    transition:box-shadow 0.25s ease;
+}
+.section-card:hover{
+    box-shadow:0 1px 3px rgba(0,0,0,0.05), 0 12px 32px rgba(0,0,0,0.06);
+}
+.section-card-head{
+    background:linear-gradient(135deg, var(--section-tint,#fff5f5) 0%, #ffffff 130%);
+}
+.section-card-head .sc-icon{
+    box-shadow:0 3px 10px rgba(0,0,0,0.18);
+    background:linear-gradient(135deg, var(--section-accent,#8b0000), var(--section-accent-dark,#5c0000));
+}
+.section-card-body{
+    padding:14px 16px 12px;
+    background:#ffffff;
+}
+
+/* Better typography on labels / values (premium feel) */
+.section-card-body label{
+    font-family:'DM Sans',sans-serif;
+    font-size:0.7rem;
+    font-weight:600;
+    color:#5a6573;
+    letter-spacing:0.01em;
+}
+.section-card-body .form-control,
+.section-card-body .form-select{
+    border:1px solid #d8dde3;
+    background:#fcfcfd;
+    color:#1a2331;
+    font-size:0.86rem;
+    transition:all 0.15s;
+    box-shadow:0 1px 0 rgba(0,0,0,0.02);
+}
+.section-card-body .form-control:hover,
+.section-card-body .form-select:hover{
+    border-color:#b8c1cc;
+    background:#fff;
+}
+.section-card-body .form-control:focus,
+.section-card-body .form-select:focus{
+    border-color:var(--section-accent,#8b0000);
+    background:#fff;
+    box-shadow:0 0 0 3px rgba(139,0,0,0.10);
+    outline:none;
+}
+
+/* Inside .field-tint, controls have a slightly different feel — white on tinted bg */
+.field-tint .form-control,
+.field-tint .form-select{
+    background:#ffffff;
+    border-color:rgba(0,0,0,0.08);
+}
+.field-tint .form-control:focus,
+.field-tint .form-select:focus{
+    border-color:var(--tint-accent,#90a0b3);
+    box-shadow:0 0 0 3px rgba(0,0,0,0.05);
+}
+
+/* Hide raw <hr> and old text-secondary headers when they're going to be replaced
+   by the JS post-processor — covered with a tag we add at runtime so we don't
+   nuke ones we still want. */
+.section-card-body hr.legacy-divider{display:none;}
+.section-card-body h6.legacy-subhead{display:none;}
+
+/* Refined wizard dots */
+.wizard-dot{
+    box-shadow:0 1px 3px rgba(0,0,0,0.08);
+}
+.wizard-dot.active{
+    box-shadow:0 0 0 3px rgba(139,0,0,0.18), 0 2px 6px rgba(139,0,0,0.25);
+}
+
+/* Refined sticky save bar */
+.sticky-save-bar .btn-danger{
+    background:linear-gradient(135deg, #c0392b, #8b0000);
+    border:none;
+    box-shadow:0 4px 14px rgba(139,0,0,0.35);
+}
+.sticky-save-bar .btn-danger:hover{
+    background:linear-gradient(135deg, #d04a3c, #a30000);
+    transform:translateY(-1px);
+    box-shadow:0 6px 18px rgba(139,0,0,0.45);
+}
+
+/* Header polish */
+.clinic-header{
+    background:linear-gradient(135deg, #5c0000 0%, #8b0000 50%, #b30000 100%);
+    box-shadow:0 4px 18px rgba(0,0,0,0.12);
+}
+.clinic-header h2{
+    font-family:'Crimson Pro',serif;
+    letter-spacing:0.02em;
+}
+
 </style>
 
 </head>
@@ -2011,9 +2218,188 @@ function initFormUI(){
     buildMedSection7();
     buildVisitMedDoses();
     reorderVisitFormSections();
+    applyFieldTints();
+    applyVisitAccordions();
     showStickySave();
     goToWizardStep(1);
     if(typeof loadMainAlerts==='function')loadMainAlerts();
+}
+
+// ===== FIELD-TINT POST-PROCESSOR =====
+// Walks each .section-card-body and groups every consecutive run of fields
+// (from one <h6 class="text-secondary"> sub-heading until the next <hr> + sub-heading
+// pair, or until the end of the row) into a tinted .field-tint box.
+// This is a one-pass transformation done after DOM build; safe to re-run.
+function applyFieldTints(){
+    try {
+        // Map of common sub-heading text fragments to a tint-class + icon.
+        // Order matters: more specific keys first.
+        var tintMap = [
+            // Labs (used in both step 6 and step 9)
+            ['Glycemic',                'tint-glycemic',  'fa-droplet'],
+            ['Renal Function (RFT) — On Discharge', 'tint-renal-disch','fa-water'],
+            ['Renal Function (RFT) — On Admission', 'tint-renal',     'fa-water'],
+            ['Renal & Electrolytes',    'tint-renal',     'fa-water'],
+            ['NT-proBNP',               'tint-bnp',       'fa-heart-pulse'],
+            ['Cardiac Biomarkers',      'tint-bnp',       'fa-heart-pulse'],
+            ['Iron Studies',            'tint-iron',      'fa-syringe'],
+            ['CBC',                     'tint-cbc',       'fa-vials'],
+            ['Thyroid & Coagulation',   'tint-coag',      'fa-flask'],
+            ['Thyroid',                 'tint-thyroid',   'fa-flask'],
+            ['Lipids',                  'tint-lipids',    'fa-chart-line'],
+            ['Lipid Profile',           'tint-lipids',    'fa-chart-line'],
+            ['Urine',                   'tint-urine',     'fa-flask'],
+            // Visits-specific
+            ['Symptoms',                'tint-symptoms',  'fa-comment-medical'],
+            ['Signs / Vitals',          'tint-vitals',    'fa-heart-pulse'],
+            ['ECG',                     'tint-ecg',       'fa-heart-pulse'],
+            ['F/U Echo',                'tint-echo',      'fa-wave-square'],
+            ['F/U CMR',                 'tint-cmr',       'fa-magnifying-glass-chart'],
+            ['F/U 6 Minute Walk Test',  'tint-walk',      'fa-person-walking'],
+            ['F/U CPET',                'tint-cpet',      'fa-lungs'],
+            ['F/U Right Side Cath',     'tint-rhc',       'fa-syringe'],
+            ['Visit Labs',              'tint-renal',     'fa-flask-vial'], // header label only
+            ['Medications (Doses)',     'tint-meds',      'fa-pills'],
+            ['Assessment & Plan',       'tint-plan',      'fa-clipboard-list'],
+            ['Referral',                'tint-referral',  'fa-share-from-square'],
+            ['HF Vaccinations',         'tint-vaccine',   'fa-syringe'],
+            // Section 4 (Investigations) sub-heads
+            ['Echo',                    'tint-echo',      'fa-wave-square'],
+            ['CMR / CT',                'tint-cmr',       'fa-magnifying-glass-chart'],
+            ['CMR',                     'tint-cmr',       'fa-magnifying-glass-chart'],
+            ['Right Side Cath',         'tint-rhc',       'fa-syringe'],
+            ['6 Minute Walk',           'tint-walk',      'fa-person-walking'],
+            ['CPET',                    'tint-cpet',      'fa-lungs']
+        ];
+        function pickTint(text){
+            for(var i=0;i<tintMap.length;i++){
+                if(text.indexOf(tintMap[i][0]) >= 0) return {cls:tintMap[i][1], icon:tintMap[i][2], label:tintMap[i][0]};
+            }
+            return {cls:'', icon:'fa-circle-dot', label:text.replace(/\s+/g,' ').trim()};
+        }
+        // Process each step's row container
+        document.querySelectorAll('.section-card-body > .row.g-2, .section-card-body .visit-section > .row.g-2').forEach(function(row){
+            // Skip if already processed
+            if(row.dataset.fieldTinted === '1') return;
+            var children = Array.prototype.slice.call(row.children);
+            // Find subhead indices (h6 with text-secondary class, excluding ones already inside a field-tint)
+            var groups = []; // {start, end, label, h6}
+            var current = null;
+            for(var i=0;i<children.length;i++){
+                var c = children[i];
+                if(c.tagName === 'H6' && c.classList.contains('text-secondary')){
+                    if(current){ current.end = i-1; groups.push(current); }
+                    current = { start:i, end:children.length-1, label:c.textContent, h6:c };
+                }
+            }
+            if(current){ groups.push(current); }
+            if(groups.length === 0) return;
+            // Build tint boxes
+            // We replace each h6 with a div.field-tint that absorbs the h6's siblings
+            // up to (but not including) the start of the next group. We also drop the
+            // <hr class="col-12"> separators between groups.
+            groups.forEach(function(g){
+                var tint = pickTint(g.label);
+                var box = document.createElement('div');
+                box.className = 'col-12 field-tint ' + tint.cls;
+                var labelText = (g.label || tint.label).replace(/<[^>]*>/g,'').trim();
+                box.innerHTML =
+                    '<div class="ft-head">'+
+                        '<i class="fa '+tint.icon+'"></i>'+
+                        '<span>'+labelText+'</span>'+
+                    '</div>'+
+                    '<div class="ft-body"><div class="row g-2"></div></div>';
+                var bodyRow = box.querySelector('.ft-body .row');
+                // Move every child between g.h6 (exclusive) and g.end (inclusive) into the new box,
+                // skipping empty <hr> spacer divs.
+                // We need to capture references BEFORE moving (the live NodeList shifts on each move).
+                var nodesToMove = [];
+                for(var k=g.start+1; k<=g.end; k++){ nodesToMove.push(children[k]); }
+                nodesToMove.forEach(function(n){
+                    if(!n) return;
+                    // Skip the legacy hr separators
+                    if(n.tagName === 'DIV' && n.children.length === 1 && n.children[0].tagName === 'HR'){
+                        n.remove(); return;
+                    }
+                    // Some sub-heads inside have nested h6 (e.g. labs inside visits) — also skip those that are downgraded
+                    if(n.tagName === 'H6' && n.classList.contains('text-secondary') && n !== g.h6){
+                        // shouldn't happen given grouping logic, but be safe
+                        return;
+                    }
+                    bodyRow.appendChild(n);
+                });
+                // Replace the original h6 with our tint box
+                g.h6.parentNode.insertBefore(box, g.h6);
+                g.h6.remove();
+                // If the body ended up empty (e.g. a section banner like "Visit Labs"
+                // immediately followed by another sub-head), drop the wrapper entirely.
+                if(bodyRow.children.length === 0){
+                    box.remove();
+                }
+            });
+            // Clean up any remaining stray <hr> separator divs at the row level
+            row.querySelectorAll(':scope > div').forEach(function(d){
+                if(d.children.length === 1 && d.children[0].tagName === 'HR'){
+                    d.remove();
+                }
+            });
+            row.dataset.fieldTinted = '1';
+        });
+    } catch(e){ console.warn('applyFieldTints failed:', e); }
+}
+
+// ===== VISIT-STEP ACCORDIONS =====
+// In step 9, several heavy sub-groups (echo, CMR, walk, CPET, RHC, labs, meds, plan)
+// are turned into collapsible boxes — closed by default — to declutter.
+// Lightweight groups (Visit Date, Symptoms, Signs/Vitals, ECG, Next Appt) stay open.
+function applyVisitAccordions(){
+    try {
+        var step9 = document.querySelector('.form-step[data-step="9"] .visit-section > .row.g-2');
+        if(!step9) return;
+        // Collapsed-by-default labels (substring match)
+        var collapsibleLabels = ['F/U Echo','F/U CMR','F/U 6 Minute','F/U CPET','F/U Right Side','Iron Studies','CBC','Thyroid','Lipid','Urine','HF Vaccinations','Medications (Doses)','Assessment & Plan','Referral'];
+        step9.querySelectorAll(':scope > .field-tint').forEach(function(box){
+            var head = box.querySelector('.ft-head');
+            if(!head) return;
+            var labelEl = head.querySelector('span');
+            var label = labelEl ? labelEl.textContent : '';
+            var collapsible = collapsibleLabels.some(function(l){ return label.indexOf(l) >= 0; });
+            if(!collapsible) return;
+            box.classList.add('collapsible');
+            // Add chevron + filled-count badge
+            var chev = document.createElement('i');
+            chev.className = 'fa fa-chevron-right ft-chev ms-auto';
+            head.appendChild(chev);
+            var pill = document.createElement('span');
+            pill.className = 'ft-filled';
+            pill.textContent = '0 filled';
+            head.appendChild(pill);
+            head.addEventListener('click', function(ev){
+                // Don't toggle if user clicked a control inside the head (shouldn't happen, but safe)
+                if(ev.target.closest('input,select,button,textarea')) return;
+                box.classList.toggle('expanded');
+            });
+            // Update filled-count whenever inputs in the body change
+            function updateCount(){
+                var inputs = box.querySelectorAll('.ft-body input, .ft-body select, .ft-body textarea');
+                var n = 0;
+                inputs.forEach(function(el){
+                    if(el.type === 'hidden') return;
+                    if(el.type === 'checkbox'){ if(el.checked) n++; return; }
+                    var v = (el.value||'').trim();
+                    if(v && v !== 'No' && v !== 'N' && v !== 'Select...' && v !== 'Never' && v !== 'Alive' && v !== 'Routine') n++;
+                });
+                pill.textContent = n + ' filled';
+                if(n > 0) pill.classList.add('has-data'); else pill.classList.remove('has-data');
+            }
+            box.querySelectorAll('.ft-body input, .ft-body select, .ft-body textarea').forEach(function(el){
+                el.addEventListener('change', updateCount);
+                el.addEventListener('input', updateCount);
+            });
+            // Initial count
+            updateCount();
+        });
+    } catch(e){ console.warn('applyVisitAccordions failed:', e); }
 }
 
 // Move "Visit Labs" block to appear BEFORE "F/U Echo" — per user request.
