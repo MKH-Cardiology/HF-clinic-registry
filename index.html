@@ -3766,13 +3766,16 @@ function loadVisits(patientId){
 // Return a YYYY-MM-DD form for display/sorting only. Never mutates the stored visitDate.
 function _normalizeDisplayDate(s){
     if(!s) return '';
-    s = String(s).trim();
+    s = String(s);
+    // Strip BOM, zero-width spaces, leading apostrophe/backtick/whitespace
+    s = s.replace(/^[\uFEFF\u200B\u200C\u200D'`\s]+/, '').replace(/\s+$/, '');
     if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;          // already ISO
-    var m = s.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})$/);
+    // Accept lookalikes 'l'/'I' for '1', 'O' for '0' adjacent to digits
+    var fixed = s.replace(/[lI](?=\d)|(?<=\d)[lI]/g, '1').replace(/O(?=\d)|(?<=\d)O/g, '0');
+    var m = fixed.match(/^(\d{1,2})[\/\-\.\s](\d{1,2})[\/\-\.\s](\d{2,4})$/);
     if(!m) return s;
     var day=parseInt(m[1],10), mon=parseInt(m[2],10), yr=parseInt(m[3],10);
     if(yr<100) yr+=2000;
-    // Assume D/M/Y (Ahmed's convention). Only swap when D/M/Y is impossible.
     if(mon>12 && day<=12){ var tmp=day; day=mon; mon=tmp; }
     if(mon<1||mon>12||day<1||day>31) return s;
     return yr+'-'+String(mon).padStart(2,'0')+'-'+String(day).padStart(2,'0');
@@ -4869,28 +4872,49 @@ function scanImportedDates(){
             // For each patient: find swaps that recover monotonic order;
             // include the full imported-visit list so manual swaps can be added.
             var allProposals = [];
+            var diagnosticOnly = []; // patients with non-ISO dates the scanner couldn't auto-fix
             results.forEach(function(r){
-                if(r.visits.length < 2) return;
+                if(r.visits.length === 0) return;
                 var visits = r.visits.slice();
                 var proposals = _proposeSwapsForChronology(visits);
                 var importedVisits = visits.filter(function(v){ return v.data.imported; });
-                // Include patient if there are auto-detected swaps OR if there are imported visits the user might want to manually fix
+                // Also collect any visit whose date isn't ISO (regardless of import flag) for diagnostic display
+                var nonISO = visits.filter(function(v){
+                    return v.data.visitDate && !/^\d{4}-\d{2}-\d{2}$/.test(String(v.data.visitDate));
+                });
                 if(proposals.length > 0){
                     allProposals.push({
                         patientId: r.patientId,
                         patientName: r.patient.Patient_Name || '(no name)',
                         fileNo: r.patient.File_No || '',
                         swaps: proposals,
-                        allImportedVisits: importedVisits
+                        allImportedVisits: importedVisits,
+                        nonISODates: nonISO,
+                        unfixableNonISO: visits._unfixableNonISO || []
+                    });
+                } else if(nonISO.length > 0){
+                    // No auto-fixable swaps but has non-ISO date(s) — diagnostic only
+                    diagnosticOnly.push({
+                        patientId: r.patientId,
+                        patientName: r.patient.Patient_Name || '(no name)',
+                        fileNo: r.patient.File_No || '',
+                        swaps: [],
+                        allImportedVisits: importedVisits,
+                        nonISODates: nonISO,
+                        unfixableNonISO: visits._unfixableNonISO || []
                     });
                 }
             });
             document.getElementById("popOv") && document.getElementById("popOv").remove();
-            if(allProposals.length === 0){
-                showPopup("success","All Dates Look Good","No swapped dates detected. Every patient's visit history is already in chronological order.");
+            // Merge diagnostic-only patients into the preview as well
+            var combined = allProposals.concat(diagnosticOnly);
+            var totalVisitsScanned = results.reduce(function(s,r){ return s + r.visits.length; }, 0);
+            var totalPatientsScanned = results.length;
+            if(combined.length === 0){
+                showPopup("success","All Dates Look Good","Scanned "+totalVisitsScanned+" visit(s) across "+totalPatientsScanned+" patient(s). No swapped dates or non-ISO formats detected.");
                 return;
             }
-            _renderDateFixPreview(allProposals);
+            _renderDateFixPreview(combined);
         }).catch(function(e){
             document.getElementById("popOv") && document.getElementById("popOv").remove();
             showPopup("error","Scan Failed", e.message);
@@ -4922,24 +4946,35 @@ function _proposeSwapsForChronology(visits){
         if(t.getMonth()+1 !== mo || t.getDate() !== dy) return null;
         return y+'-'+String(mo).padStart(2,'0')+'-'+String(dy).padStart(2,'0');
     }
-    // STRATEGY 0: format normalization — convert non-ISO D/M/YYYY strings (e.g. "18/12/2025")
-    // to ISO ("2025-12-18"). These are unambiguous (no swap involved) and were left behind by
-    // the older import code that stored visit dates verbatim from Excel.
+    // STRATEGY 0: format normalization — convert non-ISO date strings to ISO. These
+    // are usually unambiguous (no swap involved) and were left behind by the original
+    // import code that stored visit dates verbatim from Excel. We aggressively normalize:
+    //   - strip leading apostrophe (Excel text-mode), BOM, zero-width chars
+    //   - accept '/' '-' '.' separators
+    //   - accept lookalike characters 'l' 'I' for '1', 'O' for '0'
     var normSwaps = [];
+    var unfixableNonISO = []; // for diagnostic display
     visits.forEach(function(v){
         var d = v.data.visitDate; if(!d || isISO(d)) return;
-        var m = String(d).trim().match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})$/);
-        if(!m) return;
+        var raw = String(d);
+        // Strip BOM, zero-width spaces, leading apostrophe/backtick/whitespace
+        var cleaned = raw.replace(/^[\uFEFF\u200B\u200C\u200D'`\s]+/, '').replace(/\s+$/, '');
+        // Replace common OCR lookalikes adjacent to digits
+        var fixed = cleaned.replace(/[lI](?=\d)|(?<=\d)[lI]/g, '1').replace(/O(?=\d)|(?<=\d)O/g, '0');
+        var m = fixed.match(/^(\d{1,2})[\/\-\.\s](\d{1,2})[\/\-\.\s](\d{2,4})$/);
+        if(!m){ unfixableNonISO.push({visitId:v.id, raw:raw}); return; }
         var day=parseInt(m[1],10), mon=parseInt(m[2],10), yr=parseInt(m[3],10);
         if(yr<100) yr+=2000;
         // Assume D/M/Y (Ahmed's convention). If D/M/Y is impossible (month>12), swap to M/D/Y.
         if(mon>12 && day<=12){ var tmp=day; day=mon; mon=tmp; }
-        if(mon<1||mon>12||day<1||day>31) return;
+        if(mon<1||mon>12||day<1||day>31){ unfixableNonISO.push({visitId:v.id, raw:raw}); return; }
         var t = new Date(yr+'-'+String(mon).padStart(2,'0')+'-'+String(day).padStart(2,'0'));
-        if(isNaN(t.getTime())||t.getMonth()+1!==mon||t.getDate()!==day) return;
+        if(isNaN(t.getTime())||t.getMonth()+1!==mon||t.getDate()!==day){ unfixableNonISO.push({visitId:v.id, raw:raw}); return; }
         var iso = yr+'-'+String(mon).padStart(2,'0')+'-'+String(day).padStart(2,'0');
-        if(iso !== d) normSwaps.push({visitId: v.id, from: d, to: iso, reason: 'Convert D/M/YYYY → ISO'});
+        if(iso !== d) normSwaps.push({visitId: v.id, from: raw, to: iso, reason: 'Convert D/M/YYYY → ISO'});
     });
+    // Stash diagnostic info on the visits array (caller can read it)
+    visits._unfixableNonISO = unfixableNonISO;
     // STRATEGY 1: importedSeq-based — if ALL imported visits have importedSeq, sort by it
     // and look for non-monotonic dates. This is the strongest signal.
     var imported = visits.filter(function(v){ return v.data.imported && typeof v.data.importedSeq === 'number'; });
@@ -4997,12 +5032,14 @@ function _renderDateFixPreview(proposals){
     ov.id = 'dateFixOverlay';
     ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;';
     var totalSwaps = proposals.reduce(function(s,p){ return s + p.swaps.length; }, 0);
+    var totalManual = proposals.reduce(function(s,p){ return s + ((p.nonISODates||[]).filter(function(v){ return !p.swaps.find(function(sw){return sw.visitId===v.id;});}).length); }, 0);
     var html = '<div style="background:#fff;border-radius:12px;max-width:840px;width:100%;padding:18px;box-shadow:0 10px 40px rgba(0,0,0,0.3);">';
     html += '<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #17a2b8;padding-bottom:8px;margin-bottom:10px;">';
     html += '<h5 style="margin:0;color:#17a2b8;"><i class="fa fa-calendar-check me-1"></i>Fix Imported Dates</h5>';
     html += '<button class="btn-close" onclick="document.getElementById(\'dateFixOverlay\').remove();"></button></div>';
-    html += '<div class="alert alert-info py-2 small mb-3"><b>'+proposals.length+' patient(s)</b> with <b>'+totalSwaps+'</b> auto-detected fix(es). ';
-    html += 'Auto-detected rows are pre-checked (green). To swap an additional date the scanner missed, click "Show all imports" and check it manually. Then click <b>Apply</b>.</div>';
+    html += '<div class="alert alert-info py-2 small mb-3"><b>'+proposals.length+' patient(s)</b> · <b>'+totalSwaps+'</b> auto-detected fix(es)';
+    if(totalManual > 0) html += ' · <b>'+totalManual+'</b> non-ISO date(s) needing manual review';
+    html += '. Auto-detected rows are pre-checked (green). For non-ISO dates, type the correct ISO date in the yellow box. Then click <b>Apply</b>.</div>';
     html += '<div style="max-height:60vh;overflow-y:auto;padding-right:6px;">';
     proposals.forEach(function(p, idx){
         html += '<div class="card mb-2" id="dfix-card-'+idx+'" style="border-left:4px solid #17a2b8;">';
@@ -5030,8 +5067,34 @@ function _renderDateFixPreview(proposals){
         p.swaps.forEach(function(sw){
             html += '<tr><td><input type="checkbox" class="dfix-check" data-pidx="'+idx+'" data-vid="'+sw.visitId+'" data-from="'+sw.from+'" data-to="'+sw.to+'" checked></td><td><code>'+sw.from+'</code></td><td>→</td><td><code style="color:#27ae60;">'+sw.to+'</code></td><td><small class="text-muted">'+sw.reason+'</small></td></tr>';
         });
-        if(p.swaps.length===0) html += '<tr><td colspan="5" class="text-muted small">No auto-detected swaps.</td></tr>';
+        if(p.swaps.length===0) html += '<tr><td colspan="5" class="text-muted small">No auto-detected fixes.</td></tr>';
         html += '</tbody></table></div>';
+        // DIAGNOSTIC section — non-ISO dates the scanner couldn't auto-fix
+        var ambiguousNonISO = (p.nonISODates || []).filter(function(v){
+            // exclude ones that are already in the auto-fix list
+            return !swapMap[v.id];
+        });
+        if(ambiguousNonISO.length > 0){
+            html += '<div style="background:#fff8e1;border-left:3px solid #ffc107;border-radius:4px;padding:8px;margin-top:8px;font-size:0.78rem;">';
+            html += '<div class="fw-bold mb-1" style="color:#856404;"><i class="fa fa-question-circle me-1"></i>Non-ISO date(s) needing manual review</div>';
+            html += '<div class="small mb-2" style="color:#666;">These dates are stored in an unrecognized format. Type the correct ISO date (YYYY-MM-DD) and tap Save to fix.</div>';
+            html += '<table class="table table-sm mb-0" style="font-size:0.78rem;"><thead><tr><th>Current (raw)</th><th>Hex preview</th><th>Correct ISO date</th></tr></thead><tbody>';
+            ambiguousNonISO.forEach(function(v){
+                var raw = v.data.visitDate || '';
+                // Show character codes for the first 12 chars to help diagnose hidden characters
+                var hex = Array.prototype.map.call(String(raw).slice(0,12), function(c){
+                    var code = c.charCodeAt(0);
+                    return code < 128 ? c : '\\u'+('0000'+code.toString(16)).slice(-4);
+                }).join('');
+                html += '<tr>';
+                html += '<td><code style="color:#c00;">'+_escHtml(raw)+'</code></td>';
+                html += '<td><code style="font-size:0.7rem;color:#666;">'+_escHtml(hex)+'</code></td>';
+                html += '<td><input type="date" class="form-control form-control-sm dfix-manual" data-pidx="'+idx+'" data-vid="'+v.id+'" data-from="'+_escHtml(raw)+'" style="font-size:0.78rem;width:160px;"></td>';
+                html += '</tr>';
+            });
+            html += '</tbody></table>';
+            html += '</div>';
+        }
         // FULL list (hidden by default) — shows every imported visit so user can manually flag a swap
         html += '<div class="dfix-all" id="dfix-all-'+idx+'" style="display:none;border-top:1px dashed #ccc;margin-top:6px;padding-top:6px;">';
         html += '<div class="text-muted small mb-1">All imported visits for this patient — check any extra dates to also swap:</div>';
@@ -5069,21 +5132,29 @@ function applyDateFix(idx){
     if(!card) return;
     // Collect every checked swap inside this card
     var checked = Array.from(card.querySelectorAll('input.dfix-check:checked'));
-    if(checked.length === 0){
-        showPopup("warning","Nothing Checked","Tick at least one date to apply.");
+    // Also collect any manual date inputs that have been filled in
+    var manuals = Array.from(card.querySelectorAll('input.dfix-manual')).filter(function(el){ return el.value && /^\d{4}-\d{2}-\d{2}$/.test(el.value); });
+    if(checked.length === 0 && manuals.length === 0){
+        showPopup("warning","Nothing to Apply","Tick at least one date or type a correct ISO date in a manual field.");
         return;
     }
     var p = window._dateFixProposals[idx];
     card.style.opacity='0.5'; card.style.pointerEvents='none';
     var batch = db.batch();
+    var totalUpdates = 0;
     checked.forEach(function(cb){
-        var vid = cb.dataset.vid, from = cb.dataset.from, to = cb.dataset.to;
-        var ref = db.collection("patients").doc(p.patientId).collection("visits").doc(vid);
-        batch.update(ref, {visitDate: to, _dateFixedAt: new Date().toISOString(), _dateFixedFrom: from});
+        var ref = db.collection("patients").doc(p.patientId).collection("visits").doc(cb.dataset.vid);
+        batch.update(ref, {visitDate: cb.dataset.to, _dateFixedAt: new Date().toISOString(), _dateFixedFrom: cb.dataset.from});
+        totalUpdates++;
+    });
+    manuals.forEach(function(el){
+        var ref = db.collection("patients").doc(p.patientId).collection("visits").doc(el.dataset.vid);
+        batch.update(ref, {visitDate: el.value, _dateFixedAt: new Date().toISOString(), _dateFixedFrom: el.dataset.from || ''});
+        totalUpdates++;
     });
     batch.commit().then(function(){
         card.style.background='#d4edda';
-        showPopup("success","Fixed", checked.length+" visit date(s) updated for "+p.patientName+".");
+        showPopup("success","Fixed", totalUpdates+" visit date(s) updated for "+p.patientName+".");
     }).catch(function(e){
         card.style.opacity='1'; card.style.pointerEvents='auto'; card.style.background='#f8d7da';
         showPopup("error","Update Failed", e.message);
@@ -5099,13 +5170,14 @@ function applyAllDateFixes(){
     var ov = document.getElementById('dateFixOverlay');
     if(!ov) return;
     var checked = Array.from(ov.querySelectorAll('input.dfix-check:checked'));
-    if(checked.length === 0){
-        showPopup("warning","Nothing Checked","Tick at least one date to apply.");
+    var manuals = Array.from(ov.querySelectorAll('input.dfix-manual')).filter(function(el){ return el.value && /^\d{4}-\d{2}-\d{2}$/.test(el.value); });
+    var totalCount = checked.length + manuals.length;
+    if(totalCount === 0){
+        showPopup("warning","Nothing to Apply","Tick at least one date or type a correct ISO date in a manual field.");
         return;
     }
-    if(!confirm('Apply '+checked.length+' visit date fix(es) across all patients?\n\nVisit dates will be updated in the database. The original date is preserved in _dateFixedFrom on each visit for auditing.')) return;
+    if(!confirm('Apply '+totalCount+' visit date fix(es) across all patients?\n\nVisit dates will be updated in the database. The original date is preserved in _dateFixedFrom on each visit for auditing.')) return;
     var props = window._dateFixProposals;
-    // Group checked by patientIdx -> patientId
     var batch = db.batch();
     var patientCount = 0; var seen = {};
     checked.forEach(function(cb){
@@ -5115,9 +5187,16 @@ function applyAllDateFixes(){
         var ref = db.collection("patients").doc(p.patientId).collection("visits").doc(cb.dataset.vid);
         batch.update(ref, {visitDate: cb.dataset.to, _dateFixedAt: new Date().toISOString(), _dateFixedFrom: cb.dataset.from});
     });
+    manuals.forEach(function(el){
+        var pidx = parseInt(el.dataset.pidx,10);
+        var p = props[pidx]; if(!p) return;
+        if(!seen[p.patientId]){ seen[p.patientId]=1; patientCount++; }
+        var ref = db.collection("patients").doc(p.patientId).collection("visits").doc(el.dataset.vid);
+        batch.update(ref, {visitDate: el.value, _dateFixedAt: new Date().toISOString(), _dateFixedFrom: el.dataset.from || ''});
+    });
     batch.commit().then(function(){
         ov.remove();
-        showPopup("success","Done", checked.length+" visit date(s) updated across "+patientCount+" patient(s).");
+        showPopup("success","Done", totalCount+" visit date(s) updated across "+patientCount+" patient(s).");
     }).catch(function(e){
         showPopup("error","Batch Update Failed", e.message+'. Try applying patient-by-patient.');
     });
