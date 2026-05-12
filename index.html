@@ -858,7 +858,7 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
             <div class="row g-2">
                 <div class="col-6 col-md-3"><label>Type of HF</label><select class="form-select" id="HF_Type" onchange="applyPhenotypeEmphasis(); updateGDMTRationale();"><option value="">Select...</option><option>HFrEF</option><option>HFmrEF</option><option>HFpEF</option><option>RT side HF</option></select></div>
                 <div class="col-6 col-md-2"><label>EF at Diagnosis (%)</label><input type="number" class="form-control" id="EF_Diagnosis" inputmode="numeric" oninput="calcMAGGIC(); checkCRTIndication();"></div>
-                <div class="col-6 col-md-2"><label>Advanced HF</label><select class="form-select" id="Advanced_HF"><option>No</option><option>Yes</option></select></div>
+                <div class="col-6 col-md-2"><label>Advanced HF</label><select class="form-select" id="Advanced_HF" onchange="syncAdvancedHF('diag')"><option>No</option><option>Yes</option></select></div>
                 <div class="col-6 col-md-3"><label>Cause of HF</label><select class="form-select" id="HF_Cause"><option value="">Select...</option><option>DCM</option><option>ICM</option><option>HCM</option><option>Myocarditis</option><option>ARVD</option><option>PAH</option><option>Others</option></select></div>
                 <div class="col-6 col-md-5"><label>Other Cardiomyopathies</label><input type="text" class="form-control" id="Other_Cardio"></div>
                 <div class="col-6 col-md-3"><label>Valvular Disease</label><select class="form-select" id="Valvular_Disease" onchange="toggleValvularType()"><option>No</option><option>Yes</option></select></div>
@@ -1196,6 +1196,19 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                 </div>
                 <input type="hidden" id="Inotropes_Selected">
             </div>
+            <!-- HEMODYNAMIC SUPPORT BLOCK -->
+            <div class="row g-2" style="background:#fff0e8;border-left:3px solid #c55a11;border-radius:6px;padding:10px;margin:0 0 12px 0;">
+                <div class="col-12 col-md-4"><label class="fw-bold" style="color:#c55a11;"><i class="fa fa-heart-pulse me-1"></i>Haemodynamic Support?</label><select class="form-select" style="border-color:#c55a11;" id="Hemo_Support" onchange="renderHemoSupportUI()"><option>No</option><option>Yes</option></select></div>
+                <div class="col-12 col-md-8" id="hemoSupportPickWrap" style="display:none;">
+                    <label class="fw-bold" style="color:#c55a11;">Type(s) <small class="text-muted fw-normal">(multi-select — tap to toggle)</small></label>
+                    <div class="d-flex gap-2 flex-wrap p-2" id="hemoSupportPickBox" style="border:1px solid #c55a11;border-radius:6px;background:#fff;">
+                        <button type="button" class="btn btn-sm btn-outline-warning" data-hemo="IABP" onclick="toggleHemoSupportOpt('IABP')">IABP</button>
+                        <button type="button" class="btn btn-sm btn-outline-warning" data-hemo="Impella" onclick="toggleHemoSupportOpt('Impella')">Impella</button>
+                        <button type="button" class="btn btn-sm btn-outline-warning" data-hemo="VA-ECMO" onclick="toggleHemoSupportOpt('VA-ECMO')">VA-ECMO</button>
+                    </div>
+                    <input type="hidden" id="Hemo_Support_Type">
+                </div>
+            </div>
             <div class="row g-2" id="medSection7"></div>
             <div id="gdmtRationaleSection" style="display:none;margin-top:10px;">
                 <h6 class="text-danger" style="font-size:0.78rem;"><i class="fa fa-clipboard-question me-1"></i> GDMT Gap Rationale (HFrEF)</h6>
@@ -1218,7 +1231,8 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                 <div class="section-card-body">
             <div class="row g-2">
                 <div class="col-6 col-md-3"><label>Quadruple GDMT?</label><select class="form-select" id="Quad_GDMT"><option>No</option><option>Yes</option></select></div>
-                <div class="col-6 col-md-3"><label>Compliance</label><select class="form-select" id="Compliance"><option>Yes</option><option>No</option></select></div>
+                <div class="col-6 col-md-3"><label>On Maximum GDMT Doses?</label><select class="form-select" id="Max_GDMT"><option>No</option><option>Yes</option></select></div>
+                <div class="col-6 col-md-3"><label>Recovered LV?</label><select class="form-select" id="Recovered_LV"><option>No</option><option>Yes</option></select></div>
                 <div class="col-6 col-md-3"><label>Mortality</label><select class="form-select" id="Mortality"><option>Alive</option><option>In-hospital</option><option>Out-of-hospital</option></select></div>
                 <div class="col-6 col-md-3"><label>Lost to Follow-up</label><select class="form-select" id="LostFU" onchange="toggleLostFU()"><option>No</option><option>Yes</option></select></div>
                 <div class="col-6 col-md-3" id="lostFUReasonWrap" style="display:none;"><label>Reason</label><select class="form-select" id="LostFU_Reason" onchange="toggleLostFU()"><option value="">Select...</option><option>Travel back home</option><option>Others</option></select></div>
@@ -1227,7 +1241,8 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                 <!-- ADVANCED HF — Strong HF + Therapy choices -->
                 <div class="col-12"><hr class="my-2"></div>
                 <h6 class="col-12 text-secondary m-0"><i class="fa fa-heart-circle-bolt"></i> Advanced HF</h6>
-                <div class="col-6 col-md-3"><label class="fw-bold text-danger">Strong / Stage D HF?</label><select class="form-select border-danger" id="Strong_HF"><option>No</option><option>Yes</option></select></div>
+                <div class="col-6 col-md-3"><label class="fw-bold text-danger">Advanced HF?</label><select class="form-select border-danger" id="Advanced_HF_Outcome" onchange="syncAdvancedHF('outcome')"><option>No</option><option>Yes</option></select><small class="text-muted" style="font-size:0.65rem;">Mirrors HF Diagnosis · Step 2</small></div>
+                <div class="col-6 col-md-3"><label class="fw-bold text-danger">Strong HF eligible?</label><select class="form-select border-danger" id="Strong_HF"><option>No</option><option>Yes</option></select></div>
                 <div class="col-6 col-md-3"><label class="fw-bold text-danger">Advanced HF Therapy?</label><select class="form-select border-danger" id="Adv_HF_Therapy" onchange="toggleAdvHFTherapy()"><option>No</option><option>Yes</option></select></div>
                 <div class="col-12" id="advHFTherapyWrap" style="display:none;">
                     <label class="fw-bold text-danger">Therapy Type <small class="text-muted fw-normal">(multi-select — tap to toggle)</small></label>
@@ -1563,6 +1578,9 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                 <button class="btn btn-sm btn-warning" onclick="findDuplicates()" title="Find likely duplicate records and merge them">
                     <i class="fa fa-user-friends me-1"></i>Find &amp; Merge Duplicates
                 </button>
+                <button class="btn btn-sm btn-info" onclick="scanImportedDates()" title="Find imported visit dates where day/month look swapped and offer to fix">
+                    <i class="fa fa-calendar-check me-1"></i>Fix Imported Dates
+                </button>
             </div>
         </div>
         <!-- Upcoming Follow-ups moved to Main page; div kept hidden for loadAdmin compatibility -->
@@ -1628,7 +1646,9 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                 <div class="analytics-card mb-3"><div class="analytics-card-title"><i class="fa fa-pills"></i> GDMT Component Uptake</div><div id="gdmtBars"></div></div>
                 <div class="row g-3">
                     <div class="col-12 col-md-6"><div class="analytics-card"><div class="analytics-card-title"><i class="fa fa-check-circle"></i> Quadruple Therapy Rate</div><div class="analytics-chart-wrap-sm"><canvas id="chartQuad"></canvas></div></div></div>
-                    <div class="col-12 col-md-6"><div class="analytics-card"><div class="analytics-card-title"><i class="fa fa-hand-holding-medical"></i> Treatment Compliance</div><div class="analytics-chart-wrap-sm"><canvas id="chartCompliance"></canvas></div></div></div>
+                    <div class="col-12 col-md-6"><div class="analytics-card"><div class="analytics-card-title"><i class="fa fa-gauge-high"></i> On Maximum GDMT Doses</div><div class="analytics-chart-wrap-sm"><canvas id="chartMaxGDMT"></canvas></div></div></div>
+                    <div class="col-12 col-md-6"><div class="analytics-card"><div class="analytics-card-title"><i class="fa fa-heart-circle-check"></i> Recovered LV</div><div class="analytics-chart-wrap-sm"><canvas id="chartRecoveredLV"></canvas></div></div></div>
+                    <div class="col-12 col-md-6"><div class="analytics-card"><div class="analytics-card-title"><i class="fa fa-hand-holding-medical"></i> Treatment Compliance <small class="text-muted" style="font-weight:normal;font-size:0.7rem;">(latest visit)</small></div><div class="analytics-chart-wrap-sm"><canvas id="chartCompliance"></canvas></div></div></div>
                 </div>
             </div>
             <div class="analytics-panel" id="tab-risk" style="display:none;"></div>
@@ -3035,6 +3055,58 @@ function toggleAdvHFTherapy(){
         document.querySelectorAll('#advHFTherapyBox button').forEach(function(b){ b.classList.remove('btn-danger'); b.classList.add('btn-outline-danger'); });
     }
 }
+
+// ===== HEMODYNAMIC (MECHANICAL CIRCULATORY) SUPPORT (Section 7) =====
+var HEMO_SUPPORT_LIST = ['IABP','Impella','VA-ECMO'];
+function renderHemoSupportUI(){
+    var used = (document.getElementById('Hemo_Support')||{}).value || 'No';
+    var pickWrap = document.getElementById('hemoSupportPickWrap');
+    if(!pickWrap) return;
+    if(used === 'Yes'){
+        pickWrap.style.display='block';
+    } else {
+        pickWrap.style.display='none';
+        var hid=document.getElementById('Hemo_Support_Type'); if(hid) hid.value='';
+        document.querySelectorAll('#hemoSupportPickBox button').forEach(function(b){
+            b.classList.remove('btn-warning'); b.classList.add('btn-outline-warning');
+        });
+    }
+}
+function toggleHemoSupportOpt(name){
+    var btn = document.querySelector('#hemoSupportPickBox button[data-hemo="'+name+'"]');
+    if(!btn) return;
+    var on = btn.classList.contains('btn-warning');
+    if(on){ btn.classList.remove('btn-warning'); btn.classList.add('btn-outline-warning'); }
+    else  { btn.classList.add('btn-warning');    btn.classList.remove('btn-outline-warning'); }
+    var sel=[];
+    document.querySelectorAll('#hemoSupportPickBox button.btn-warning').forEach(function(b){ sel.push(b.getAttribute('data-hemo')); });
+    var hid=document.getElementById('Hemo_Support_Type'); if(hid) hid.value = sel.join(', ');
+}
+function restoreHemoSupportFromData(data){
+    var used = data.Hemo_Support || 'No';
+    var sel  = data.Hemo_Support_Type || '';
+    var u = document.getElementById('Hemo_Support'); if(u) u.value = used;
+    var hid=document.getElementById('Hemo_Support_Type'); if(hid) hid.value = sel;
+    renderHemoSupportUI();
+    if(used === 'Yes'){
+        var arr = sel ? sel.split(',').map(function(s){return s.trim();}) : [];
+        document.querySelectorAll('#hemoSupportPickBox button').forEach(function(b){
+            var name = b.getAttribute('data-hemo');
+            if(arr.indexOf(name) >= 0){ b.classList.add('btn-warning'); b.classList.remove('btn-outline-warning'); }
+            else                       { b.classList.remove('btn-warning'); b.classList.add('btn-outline-warning'); }
+        });
+    }
+}
+
+// ===== ADVANCED_HF SYNC (Step 2 ↔ Step 8 outcomes mirror) =====
+function syncAdvancedHF(source){
+    var a = document.getElementById('Advanced_HF');
+    var b = document.getElementById('Advanced_HF_Outcome');
+    if(!a || !b) return;
+    if(source === 'outcome') a.value = b.value;
+    else                     b.value = a.value;
+}
+
 function toggleAdvHFTherapyOpt(name){
     var btn = document.querySelector('#advHFTherapyBox button[data-advhf="'+name+'"]');
     if(!btn) return;
@@ -3788,10 +3860,17 @@ function resetForm(){
     var _ahft=document.getElementById('Adv_HF_Therapy'); if(_ahft) _ahft.value='No';
     if(typeof toggleAdvHFTherapy==='function') toggleAdvHFTherapy();
     var _strHF=document.getElementById('Strong_HF'); if(_strHF) _strHF.value='No';
+    var _ahfOut=document.getElementById('Advanced_HF_Outcome'); if(_ahfOut) _ahfOut.value='No';
+    var _maxg=document.getElementById('Max_GDMT'); if(_maxg) _maxg.value='No';
+    var _rlv=document.getElementById('Recovered_LV'); if(_rlv) _rlv.value='No';
     var _iu=document.getElementById('Inotropes_Used'); if(_iu) _iu.value='No';
     var _is=document.getElementById('Inotropes_Selected'); if(_is) _is.value='';
     var _ipb=document.getElementById('inotropesPickBox'); if(_ipb) _ipb.dataset.built='';
     if(typeof renderInotropesUI==='function') renderInotropesUI();
+    // Hemodynamic support reset
+    var _hs=document.getElementById('Hemo_Support'); if(_hs) _hs.value='No';
+    var _hst=document.getElementById('Hemo_Support_Type'); if(_hst) _hst.value='';
+    if(typeof renderHemoSupportUI==='function') renderHemoSupportUI();
     // Hide conditional panels
     var hideIds=['valvularTypeWrap','cmrLGEPctWrap','vCmrLGEPctWrap','walkMetersWrap','rhcDetailsWrap','pciCabgDetailsWrap','ctAngioDetailsWrap','lostFUReasonWrap','lostFUOtherWrap','valveSurgeryDateWrap'];
     hideIds.forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='none';});
@@ -3817,10 +3896,10 @@ function generateCardHTML(data, id, latestVisit){
         ['DM','HTN','AF','IHD','PCI_CABG','CKD','CVA','PVD','Smoker','Obese','OSA','Dyslipidemia','Valve_Surgery','Valve_Surgery_Date','Lung_Dz','Liver_Dz','Thyroid_Dz','FH_Cardio','Genetics'],
         // Latest labs (baseline + visit overlay; admission/discharge variants where available)
         ['Lab_HbA1c','Lab_Gluc','Lab_Urea','Lab_Creat','Lab_eGFR','Lab_Urea_Disch','Lab_Creat_Disch','Lab_eGFR_Disch','Lab_Na','Lab_K','Lab_Na_Disch','Lab_K_Disch','Lab_BNP','Lab_BNP_Disch','Lab_BNP_only','Lab_BNP_only_Disch','Lab_Hb','Lab_Hb_Disch','Lab_WBC','Lab_Plt','Lab_Iron','Lab_Ferritin','Lab_TrSats','Lab_TSH','Lab_FreeT4','Lab_TotalChol','Lab_LDL','Lab_HDL','Lab_TG','Lab_AlbCreat'],
-        // Inotropes / In-hospital (Section 7) — show separately
-        ['Inotropes_Used','Inotropes_Selected'],
+        // Inotropes / Hemodynamic support — In-hospital (Section 7)
+        ['Inotropes_Used','Inotropes_Selected','Hemo_Support','Hemo_Support_Type'],
         // Outcomes
-        ['Quad_GDMT','Compliance','Mortality','LostFU','LostFU_Reason','LostFU_Other','Strong_HF','Adv_HF_Therapy','Adv_HF_Therapy_Type','Referral','Notes','Next_Appt']
+        ['Quad_GDMT','Max_GDMT','Recovered_LV','Mortality','LostFU','LostFU_Reason','LostFU_Other','Advanced_HF_Outcome','Strong_HF','Adv_HF_Therapy','Adv_HF_Therapy_Type','Referral','Notes','Next_Appt']
     ];
     var sn=['Demographics','HF Diagnosis','Symptoms & Signs (latest)','Investigations','Comorbidities','Latest Labs','In-Hospital (Inotropes)','Outcomes & Management'];
 
@@ -4212,10 +4291,19 @@ function editPt(id){
         var el=document.getElementById('Rationale_'+medId);
         if(el&&d['Rationale_'+medId])el.value=d['Rationale_'+medId];
     });
-    // Restore inotropes (Section 7), advanced-HF therapy (Section 8) and multi-select Referral
+    // Restore inotropes (Section 7), hemodynamic support, advanced-HF therapy (Section 8) and multi-select Referral
     if(typeof restoreInotropesFromData==='function')   restoreInotropesFromData(d);
+    if(typeof restoreHemoSupportFromData==='function') restoreHemoSupportFromData(d);
     if(typeof restoreAdvHFTherapyFromData==='function')restoreAdvHFTherapyFromData(d);
     if(typeof restoreReferralUI==='function')          restoreReferralUI('Referral', d.Referral||'');
+    // Sync Advanced HF outcome mirror with diagnosis value. Prefer outcome value if explicitly set; else mirror diagnosis.
+    var _ahfOut = document.getElementById('Advanced_HF_Outcome');
+    if(_ahfOut){
+        _ahfOut.value = d.Advanced_HF_Outcome || d.Advanced_HF || 'No';
+        // Mirror back to diagnosis to keep them in sync
+        var _ahfDiag = document.getElementById('Advanced_HF');
+        if(_ahfDiag && _ahfOut.value && !d.Advanced_HF) _ahfDiag.value = _ahfOut.value;
+    }
     applyPhenotypeEmphasis();updateGDMTRationale();checkGDMTAlerts();checkCRTIndication();calcBMI();
     if(typeof calcDischargeEGFR==='function') calcDischargeEGFR();
     // Restore baseline ECG image preview (if any)
@@ -4299,7 +4387,7 @@ function generateExcel(data,visitsData,id){
     var wb=XLSX.utils.book_new();var pr=[];
     pr.push(["MUBARAK AL-KABEER HOSPITAL - HEART FAILURE REGISTRY"]);
     pr.push(["Patient Name:",data.Patient_Name||'']);pr.push(["Civil ID:",data.Civil_ID||'']);pr.push(["File No:",data.File_No||'']);pr.push(["Age:",data.Age||'']);pr.push(["Gender:",data.Gender||'']);pr.push(["Nationality:",data.Nationality||'']);pr.push(["Mobile:",data.Mobile||'']);pr.push(["Doctor:",data.Doctor_Name||'']);pr.push([]);
-    var sections=[{name:'HF DIAGNOSIS',fields:['HF_Type','EF_Diagnosis','Advanced_HF','HF_Cause','Other_Cardio','Valvular_Disease','Valvular_Type','Admissions','Last_Admission','LOS']},{name:'SYMPTOMS & SIGNS (ON ADMISSION)',fields:['Height','Weight','BMI','Dry_Weight','NYHA','KCCQ','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur']},{name:'INVESTIGATIONS',fields:['ECG_LBBB','ECG_QRS','ECG_Arrhythmia','ECG_Pacing','ECHO','Echo_EDVI','Echo_ESVI','Echo_EF','CMR_CT','CMR_LVEDVI','CMR_LVESVI','CMR_LVEF','CMR_RVEDI','CMR_RVEF','CMR_LGE','CMR_LGE_Pct','CMR_Others','CT_Done','CT_Angio','CT_Calcium','CT_Notes','Walk_Completed','Walk_Meters','CPET_PeakVO2','CPET_VEVCO2','CPET_RER','CPET_AT','CPET_VO2HR','CPET_PetCO2','Device_Type','Device_Date','RHC_Done','RHC_CI','RHC_RAP','RHC_RVP','RHC_PCWP','RHC_PAP','RHC_PVR','RHC_PAPi','RHC_LV','RHC_MVO2']},{name:'COMORBIDITIES',fields:['DM','HTN','AF','IHD','PCI_CABG','PCI_CABG_Date','PCI_CABG_Details','CKD','CVA','PVD','Smoker','Obese','OSA','Dyslipidemia','Valve_Surgery','Valve_Surgery_Date','Lung_Dz','Liver_Dz','Thyroid_Dz','FH_Cardio','Genetics']},{name:'IN-HOSPITAL LABS',fields:['Lab_HbA1c','Lab_Gluc','Lab_Urea','Lab_Creat','Lab_eGFR','Lab_Na','Lab_K','Lab_Urea_Disch','Lab_Creat_Disch','Lab_eGFR_Disch','Lab_Na_Disch','Lab_K_Disch','Lab_BNP','Lab_BNP_Disch','Lab_BNP_only','Lab_BNP_only_Disch','Lab_Iron','Lab_Ferritin','Lab_TrSats','Lab_Hb','Lab_Hb_Disch','Lab_WBC','Lab_Plt','Lab_TSH','Lab_FreeT4','Lab_TotalChol','Lab_LDL','Lab_HDL','Lab_TG','Lab_AlbCreat']},{name:'IN-HOSPITAL MGMT (INOTROPES)',fields:['Inotropes_Used','Inotropes_Selected','Inotrope_Dobutamine_MaxDose','Inotrope_Dopamine_MaxDose','Inotrope_Milrinone_MaxDose','Inotrope_Simdax_MaxDose','Inotrope_Levophed_MaxDose','Inotrope_Adrenaline_MaxDose','Inotrope_Vasopressin_MaxDose']},{name:'MEDICATIONS',fields:['Med_ARNI','Med_ARNI_Dose','Med_SGLT2i','Med_SGLT2i_Dose','Med_GLP1','Med_BB','Med_BB_Dose','Med_MRA','Med_MRA_Dose','Med_ACEiARB','Med_ACEiARB_Dose','Med_Vasodilator','Med_Procorolan','Med_Procorolan_Dose','Med_CCB','Med_CCB_Dose','Med_Diuretic','Med_Statin','Med_LipidCombo','Med_PCSK9','Med_Fibrate','Med_Omega3','Med_Nicotine','Med_Antiplat','Med_OAC','Med_Arrhythmia','Med_K_Chelator']},{name:'OUTCOMES & FOLLOW-UP',fields:['Quad_GDMT','Compliance','Mortality','LostFU','LostFU_Reason','LostFU_Other','Strong_HF','Adv_HF_Therapy','Adv_HF_Therapy_Type','Referral','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt']}];
+    var sections=[{name:'HF DIAGNOSIS',fields:['HF_Type','EF_Diagnosis','Advanced_HF','HF_Cause','Other_Cardio','Valvular_Disease','Valvular_Type','Admissions','Last_Admission','LOS']},{name:'SYMPTOMS & SIGNS (ON ADMISSION)',fields:['Height','Weight','BMI','Dry_Weight','NYHA','KCCQ','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur']},{name:'INVESTIGATIONS',fields:['ECG_LBBB','ECG_QRS','ECG_Arrhythmia','ECG_Pacing','ECHO','Echo_EDVI','Echo_ESVI','Echo_EF','CMR_CT','CMR_LVEDVI','CMR_LVESVI','CMR_LVEF','CMR_RVEDI','CMR_RVEF','CMR_LGE','CMR_LGE_Pct','CMR_Others','CT_Done','CT_Angio','CT_Calcium','CT_Notes','Walk_Completed','Walk_Meters','CPET_PeakVO2','CPET_VEVCO2','CPET_RER','CPET_AT','CPET_VO2HR','CPET_PetCO2','Device_Type','Device_Date','RHC_Done','RHC_CI','RHC_RAP','RHC_RVP','RHC_PCWP','RHC_PAP','RHC_PVR','RHC_PAPi','RHC_LV','RHC_MVO2']},{name:'COMORBIDITIES',fields:['DM','HTN','AF','IHD','PCI_CABG','PCI_CABG_Date','PCI_CABG_Details','CKD','CVA','PVD','Smoker','Obese','OSA','Dyslipidemia','Valve_Surgery','Valve_Surgery_Date','Lung_Dz','Liver_Dz','Thyroid_Dz','FH_Cardio','Genetics']},{name:'IN-HOSPITAL LABS',fields:['Lab_HbA1c','Lab_Gluc','Lab_Urea','Lab_Creat','Lab_eGFR','Lab_Na','Lab_K','Lab_Urea_Disch','Lab_Creat_Disch','Lab_eGFR_Disch','Lab_Na_Disch','Lab_K_Disch','Lab_BNP','Lab_BNP_Disch','Lab_BNP_only','Lab_BNP_only_Disch','Lab_Iron','Lab_Ferritin','Lab_TrSats','Lab_Hb','Lab_Hb_Disch','Lab_WBC','Lab_Plt','Lab_TSH','Lab_FreeT4','Lab_TotalChol','Lab_LDL','Lab_HDL','Lab_TG','Lab_AlbCreat']},{name:'IN-HOSPITAL MGMT (INOTROPES & MCS)',fields:['Inotropes_Used','Inotropes_Selected','Inotrope_Dobutamine_MaxDose','Inotrope_Dopamine_MaxDose','Inotrope_Milrinone_MaxDose','Inotrope_Simdax_MaxDose','Inotrope_Levophed_MaxDose','Inotrope_Adrenaline_MaxDose','Inotrope_Vasopressin_MaxDose','Hemo_Support','Hemo_Support_Type']},{name:'MEDICATIONS',fields:['Med_ARNI','Med_ARNI_Dose','Med_SGLT2i','Med_SGLT2i_Dose','Med_GLP1','Med_BB','Med_BB_Dose','Med_MRA','Med_MRA_Dose','Med_ACEiARB','Med_ACEiARB_Dose','Med_Vasodilator','Med_Procorolan','Med_Procorolan_Dose','Med_CCB','Med_CCB_Dose','Med_Diuretic','Med_Statin','Med_LipidCombo','Med_PCSK9','Med_Fibrate','Med_Omega3','Med_Nicotine','Med_Antiplat','Med_OAC','Med_Arrhythmia','Med_K_Chelator']},{name:'OUTCOMES & FOLLOW-UP',fields:['Quad_GDMT','Max_GDMT','Recovered_LV','Mortality','LostFU','LostFU_Reason','LostFU_Other','Advanced_HF_Outcome','Strong_HF','Adv_HF_Therapy','Adv_HF_Therapy_Type','Referral','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt']}];
     sections.forEach(function(sec){pr.push([sec.name]);sec.fields.forEach(function(f){pr.push([f.replace(/_/g," ").replace(/Lab /g,"").replace(/Med /g,""),data[f]||'-']);});pr.push([]);});
     var ws1=XLSX.utils.aoa_to_sheet(pr);XLSX.utils.book_append_sheet(wb,ws1,"Patient Info");
     if(visitsData.length>0){var vr=[];vr.push(["VISIT HISTORY"]);vr.push([]);visitsData.forEach(function(visit,idx){vr.push(["Visit #"+(visitsData.length-idx),"Date: "+visit.visitDate,"Type: "+visit.visitType]);var vFields=['V_Fatigue','V_NYHA','V_KCCQ','V_Edema','V_Pulse','V_BP','V_SpO2','V_Weight','V_JVP','V_Rales','V_S3','V_LBBB','V_QRS','V_Arrhythmia','V_EF_Change','V_Echo_EDVI','V_Echo_ESVI','V_Echo_EF','V_Echo_Other','V_CMR_LVEDVI','V_CMR_LVESVI','V_CMR_LVEF','V_CMR_RVEDI','V_CMR_RVEF','V_CMR_LGE','V_CMR_LGE_Pct','V_CMR_Others','V_Walk_Completed','V_Walk_Meters','V_CPET_PeakVO2','V_CPET_VEVCO2','V_CPET_RER','V_CPET_AT','V_CPET_VO2HR','V_CPET_PetCO2','V_RHC_Done','V_RHC_CI','V_RHC_RAP','V_RHC_RVP','V_RHC_PCWP','V_RHC_PAP','V_RHC_PVR','V_RHC_PAPi','V_RHC_LV','V_RHC_MVO2','V_HbA1c','V_Gluc','V_Urea','V_Creat','V_eGFR','V_Na','V_K','V_BNP','V_NTproBNP','V_INR','V_Iron','V_Transferrin','V_Ferritin','V_WBC','V_Hb','V_Plt','V_TSH','V_FreeT4','V_TotalChol','V_LDL','V_HDL','V_TG','V_Vacc_Influenza_Year','V_Vacc_Pneumococcal_Year','V_Vacc_COVID_Year','V_Vacc_Other'];VISIT_MED_LIST.forEach(function(m){vFields.push(m.id);vFields.push(m.id+'_Status');vFields.push(m.id+'_Custom');vFields.push(m.id+'_Freq');});vFields.push('V_AdverseEffects','V_Compliance','V_ComplianceNotes','V_Adverse','V_Plan','V_Others','V_Referral');vFields.forEach(function(f){var val=visit[f];if(val&&val.toString().trim()!=='')vr.push([f.replace('V_','').replace(/_/g,' '),val]);});vr.push([]);});var ws2=XLSX.utils.aoa_to_sheet(vr);XLSX.utils.book_append_sheet(wb,ws2,"Visits");}
@@ -4313,7 +4401,7 @@ function generatePDF(data,visitsData,id){
     var html="<div id='pdfContent' style='width:750px;margin:0 auto;background:#fff;padding:20px;font-family:Arial,Helvetica,sans-serif;color:#000;'>";
     html+="<div style='text-align:center;border-bottom:3px solid #8b0000;padding-bottom:10px;margin-bottom:20px;'><h2 style='color:#8b0000;margin:0;'>Mubarak Al-Kabeer Hospital</h2><h3 style='margin:5px 0;color:#333;'>Heart Failure Clinic Registry</h3></div>";
     html+="<h3 style='color:#333;'>Patient: "+(data.Patient_Name||'Unknown')+" | File: "+(data.File_No||'N/A')+"</h3>";
-    var sections=[{name:'Demographics',fields:['Patient_Name','Civil_ID','File_No','Age','Gender','Nationality','Mobile','Doctor_Name']},{name:'HF Diagnosis',fields:['HF_Type','EF_Diagnosis','Advanced_HF','HF_Cause','Other_Cardio','Valvular_Disease','Valvular_Type','Admissions','Last_Admission','LOS']},{name:'Symptoms & Signs (On Admission)',fields:['Height','Weight','BMI','Dry_Weight','NYHA','KCCQ','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur']},{name:'Investigations',fields:['ECG_LBBB','ECG_QRS','ECG_Arrhythmia','ECG_Pacing','ECHO','Echo_EDVI','Echo_ESVI','Echo_EF','CMR_CT','CMR_LVEDVI','CMR_LVESVI','CMR_LVEF','CMR_RVEDI','CMR_RVEF','CMR_LGE','CMR_LGE_Pct','CMR_Others','CT_Done','CT_Angio','CT_Calcium','CT_Notes','Walk_Completed','Walk_Meters','CPET_PeakVO2','CPET_VEVCO2','CPET_RER','CPET_AT','CPET_VO2HR','CPET_PetCO2','Device_Type','Device_Date','RHC_Done','RHC_CI','RHC_RAP','RHC_RVP','RHC_PCWP','RHC_PAP','RHC_PVR','RHC_PAPi','RHC_LV','RHC_MVO2']},{name:'Comorbidities',fields:['DM','HTN','AF','IHD','PCI_CABG','PCI_CABG_Date','PCI_CABG_Details','CKD','CVA','PVD','Smoker','Obese','OSA','Dyslipidemia','Valve_Surgery','Valve_Surgery_Date','Lung_Dz','Liver_Dz','Thyroid_Dz','FH_Cardio','Genetics']},{name:'In-Hospital Labs',fields:['Lab_HbA1c','Lab_Gluc','Lab_Urea','Lab_Creat','Lab_eGFR','Lab_Na','Lab_K','Lab_Urea_Disch','Lab_Creat_Disch','Lab_eGFR_Disch','Lab_Na_Disch','Lab_K_Disch','Lab_BNP','Lab_BNP_Disch','Lab_BNP_only','Lab_BNP_only_Disch','Lab_Iron','Lab_Ferritin','Lab_TrSats','Lab_Hb','Lab_Hb_Disch','Lab_WBC','Lab_Plt','Lab_TSH','Lab_FreeT4','Lab_TotalChol','Lab_LDL','Lab_HDL','Lab_TG','Lab_AlbCreat']},{name:'In-Hospital Mgmt (Inotropes)',fields:['Inotropes_Used','Inotropes_Selected','Inotrope_Dobutamine_MaxDose','Inotrope_Dopamine_MaxDose','Inotrope_Milrinone_MaxDose','Inotrope_Simdax_MaxDose','Inotrope_Levophed_MaxDose','Inotrope_Adrenaline_MaxDose','Inotrope_Vasopressin_MaxDose']},{name:'Medications',fields:['Med_ARNI','Med_ARNI_Dose','Med_SGLT2i','Med_SGLT2i_Dose','Med_GLP1','Med_BB','Med_BB_Dose','Med_MRA','Med_MRA_Dose','Med_ACEiARB','Med_ACEiARB_Dose','Med_Vasodilator','Med_Procorolan','Med_Procorolan_Dose','Med_CCB','Med_CCB_Dose','Med_Diuretic','Med_Statin','Med_LipidCombo','Med_PCSK9','Med_Fibrate','Med_Omega3','Med_Nicotine','Med_Antiplat','Med_OAC','Med_Arrhythmia','Med_K_Chelator']},{name:'Outcomes & Follow-up',fields:['Quad_GDMT','Compliance','Mortality','LostFU','LostFU_Reason','LostFU_Other','Strong_HF','Adv_HF_Therapy','Adv_HF_Therapy_Type','Referral','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt']}];
+    var sections=[{name:'Demographics',fields:['Patient_Name','Civil_ID','File_No','Age','Gender','Nationality','Mobile','Doctor_Name']},{name:'HF Diagnosis',fields:['HF_Type','EF_Diagnosis','Advanced_HF','HF_Cause','Other_Cardio','Valvular_Disease','Valvular_Type','Admissions','Last_Admission','LOS']},{name:'Symptoms & Signs (On Admission)',fields:['Height','Weight','BMI','Dry_Weight','NYHA','KCCQ','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur']},{name:'Investigations',fields:['ECG_LBBB','ECG_QRS','ECG_Arrhythmia','ECG_Pacing','ECHO','Echo_EDVI','Echo_ESVI','Echo_EF','CMR_CT','CMR_LVEDVI','CMR_LVESVI','CMR_LVEF','CMR_RVEDI','CMR_RVEF','CMR_LGE','CMR_LGE_Pct','CMR_Others','CT_Done','CT_Angio','CT_Calcium','CT_Notes','Walk_Completed','Walk_Meters','CPET_PeakVO2','CPET_VEVCO2','CPET_RER','CPET_AT','CPET_VO2HR','CPET_PetCO2','Device_Type','Device_Date','RHC_Done','RHC_CI','RHC_RAP','RHC_RVP','RHC_PCWP','RHC_PAP','RHC_PVR','RHC_PAPi','RHC_LV','RHC_MVO2']},{name:'Comorbidities',fields:['DM','HTN','AF','IHD','PCI_CABG','PCI_CABG_Date','PCI_CABG_Details','CKD','CVA','PVD','Smoker','Obese','OSA','Dyslipidemia','Valve_Surgery','Valve_Surgery_Date','Lung_Dz','Liver_Dz','Thyroid_Dz','FH_Cardio','Genetics']},{name:'In-Hospital Labs',fields:['Lab_HbA1c','Lab_Gluc','Lab_Urea','Lab_Creat','Lab_eGFR','Lab_Na','Lab_K','Lab_Urea_Disch','Lab_Creat_Disch','Lab_eGFR_Disch','Lab_Na_Disch','Lab_K_Disch','Lab_BNP','Lab_BNP_Disch','Lab_BNP_only','Lab_BNP_only_Disch','Lab_Iron','Lab_Ferritin','Lab_TrSats','Lab_Hb','Lab_Hb_Disch','Lab_WBC','Lab_Plt','Lab_TSH','Lab_FreeT4','Lab_TotalChol','Lab_LDL','Lab_HDL','Lab_TG','Lab_AlbCreat']},{name:'In-Hospital Mgmt (Inotropes & MCS)',fields:['Inotropes_Used','Inotropes_Selected','Inotrope_Dobutamine_MaxDose','Inotrope_Dopamine_MaxDose','Inotrope_Milrinone_MaxDose','Inotrope_Simdax_MaxDose','Inotrope_Levophed_MaxDose','Inotrope_Adrenaline_MaxDose','Inotrope_Vasopressin_MaxDose','Hemo_Support','Hemo_Support_Type']},{name:'Medications',fields:['Med_ARNI','Med_ARNI_Dose','Med_SGLT2i','Med_SGLT2i_Dose','Med_GLP1','Med_BB','Med_BB_Dose','Med_MRA','Med_MRA_Dose','Med_ACEiARB','Med_ACEiARB_Dose','Med_Vasodilator','Med_Procorolan','Med_Procorolan_Dose','Med_CCB','Med_CCB_Dose','Med_Diuretic','Med_Statin','Med_LipidCombo','Med_PCSK9','Med_Fibrate','Med_Omega3','Med_Nicotine','Med_Antiplat','Med_OAC','Med_Arrhythmia','Med_K_Chelator']},{name:'Outcomes & Follow-up',fields:['Quad_GDMT','Max_GDMT','Recovered_LV','Mortality','LostFU','LostFU_Reason','LostFU_Other','Advanced_HF_Outcome','Strong_HF','Adv_HF_Therapy','Adv_HF_Therapy_Type','Referral','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt']}];
     sections.forEach(function(sec){html+="<h4 style='background:#f0f0f0;padding:8px;margin-top:15px;color:#8b0000;'>"+sec.name+"</h4><table style='width:100%;border-collapse:collapse;font-size:12px;'>";sec.fields.forEach(function(f){var val=data[f]||'-',label=f.replace(/_/g," ").replace(/Lab /g,"").replace(/Med /g,"");html+="<tr style='border-bottom:1px solid #ddd;'><td style='width:40%;padding:6px;background:#fafafa;font-weight:bold;'>"+label+"</td><td style='padding:6px;'>"+val+"</td></tr>";});html+="</table>";});
     if(visitsData.length>0){html+="<div style='page-break-before:always;'></div><h3 style='color:#8b0000;margin-top:20px;'>Visit History & Follow-ups</h3>";
     var mf=VISIT_MED_LIST.map(function(m){return m.id;});
@@ -4455,16 +4543,26 @@ function buildGDMT(d,n){
     }).length;
     var qn=n-qy;
     makeChart('chartQuad','doughnut',['Quadruple GDMT','Incomplete'],[{data:[qy,qn],backgroundColor:['#1d6f42','#f0f0f0'],borderWidth:2}],{});
-    // Compliance — prefer latest visit's V_Compliance value if present, else baseline
+    // Compliance chart — based on latest visit's V_Compliance only (baseline Compliance field has been removed).
+    // If no visit-level data, the chart is hidden by showing zeros — V_Compliance is per-visit and still tracked.
     var cy=d.filter(function(p){
         var v = p._latestVisit;
         if(v && v.V_Compliance){
             var s = String(v.V_Compliance).toLowerCase();
             return s === 'fully compliant';
         }
-        return p.Compliance==='Yes';
+        return false;
     }).length;
-    makeChart('chartCompliance','doughnut',['Compliant','Non-compliant'],[{data:[cy,n-cy],backgroundColor:['#2980b9','#e74c3c'],borderWidth:2}],{});
+    var cTotal = d.filter(function(p){ return p._latestVisit && p._latestVisit.V_Compliance; }).length;
+    makeChart('chartCompliance','doughnut',['Fully compliant','Other'],[{data:[cy, Math.max(0, cTotal-cy)],backgroundColor:['#2980b9','#e74c3c'],borderWidth:2}],{});
+    // Recovered LV — outcomes-level field
+    var rlv = d.filter(function(p){ return p.Recovered_LV==='Yes'; }).length;
+    var rlvCanvas = document.getElementById('chartRecoveredLV');
+    if(rlvCanvas) makeChart('chartRecoveredLV','doughnut',['Recovered LV','Not recovered'],[{data:[rlv, n-rlv],backgroundColor:['#1d6f42','#e9ecef'],borderWidth:2}],{});
+    // On Maximum GDMT
+    var maxg = d.filter(function(p){ return p.Max_GDMT==='Yes'; }).length;
+    var maxgCanvas = document.getElementById('chartMaxGDMT');
+    if(maxgCanvas) makeChart('chartMaxGDMT','doughnut',['On max GDMT','Not on max'],[{data:[maxg, n-maxg],backgroundColor:['#16a085','#f0f0f0'],borderWidth:2}],{});
 }
 function buildRisk(d,n){/* MAGGIC Risk panel removed per user request */}
 function buildDemographics(d,n){var natCount={};d.forEach(function(p){var nat=(p.Nationality||'Unknown').trim();natCount[nat]=(natCount[nat]||0)+1;});var sorted=Object.entries(natCount).sort(function(a,b){return b[1]-a[1];}).slice(0,8);var nbHtml='';sorted.forEach(function(entry){var nat=entry[0],cnt=entry[1];var p=pct(cnt,n);nbHtml+="<div class='comorbidity-bar-row'><span class='cb-label' style='width:90px;'>"+nat+"</span><div class='cb-bar-wrap'><div class='cb-bar' style='width:"+p+"%;background:linear-gradient(90deg,#0f3460,#2980b9);'></div></div><span class='cb-pct' style='color:#0f3460;'>"+cnt+"</span></div>";});document.getElementById('nationalityBars').innerHTML=nbHtml||'<p class="text-muted small">No data.</p>';var docCount={};d.forEach(function(p){var doc=p.Doctor_Name||'Unknown';docCount[doc]=(docCount[doc]||0)+1;});makeChart('chartDoctors','bar',Object.keys(docCount),[{label:'Patients',data:Object.values(docCount),backgroundColor:PIE_COLORS,borderRadius:6}],{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}});var icd=d.filter(function(p){return p.Device_Info&&p.Device_Info.toLowerCase().includes('icd');}).length;var crt=d.filter(function(p){return p.Device_Info&&p.Device_Info.toLowerCase().includes('crt');}).length;var none=d.filter(function(p){return!p.Device_Info||p.Device_Info.trim()==='';}).length;var dHtml="<div class='gdmt-row'><span class='gdmt-name'>ICD</span><span class='gdmt-pill gdmt-pill-high'>"+icd+" ("+pctStr(icd,n)+")</span></div>";dHtml+="<div class='gdmt-row'><span class='gdmt-name'>CRT</span><span class='gdmt-pill gdmt-pill-mid'>"+crt+" ("+pctStr(crt,n)+")</span></div>";dHtml+="<div class='gdmt-row'><span class='gdmt-name'>No Device</span><span class='gdmt-pill gdmt-pill-low'>"+none+" ("+pctStr(none,n)+")</span></div>";document.getElementById('deviceStats').innerHTML=dHtml;var efBins={'<20':0,'20-29':0,'30-39':0,'40-49':0,'50-59':0,'≥60':0,'N/A':0};d.forEach(function(p){var ef=parseFloat(p.EF_Diagnosis);if(isNaN(ef)||ef<=0)efBins['N/A']++;else if(ef<20)efBins['<20']++;else if(ef<30)efBins['20-29']++;else if(ef<40)efBins['30-39']++;else if(ef<50)efBins['40-49']++;else if(ef<60)efBins['50-59']++;else efBins['≥60']++;});makeChart('chartEF','bar',Object.keys(efBins),[{label:'Patients',data:Object.values(efBins),backgroundColor:['#c0392b','#e74c3c','#e67e22','#f39c12','#27ae60','#1d6f42','#aaa'],borderRadius:6}],{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}});}
@@ -4519,9 +4617,10 @@ var ALL_PATIENT_FIELDS = [
     'Lab_TotalChol','Lab_LDL','Lab_HDL','Lab_TG','Lab_AlbCreat',
     // Legacy combined-format mirrors (kept for back-compat)
     'Lab_UreaCreat','Lab_NaK','Lab_IronFerritin','Lab_CBC','Lab_Thyroid','Lab_Lipids',
-    // Section 7 — In-hospital management & inotropes
+    // Section 7 — In-hospital management, inotropes & mechanical circulatory support
     'Inotropes_Used','Inotropes_Selected',
     'Inotrope_Dobutamine_MaxDose','Inotrope_Dopamine_MaxDose','Inotrope_Milrinone_MaxDose','Inotrope_Simdax_MaxDose','Inotrope_Levophed_MaxDose','Inotrope_Adrenaline_MaxDose','Inotrope_Vasopressin_MaxDose',
+    'Hemo_Support','Hemo_Support_Type',
     // Medications (baseline / Section 7)
     'Med_ARNI','Med_ARNI_Dose','Med_SGLT2i','Med_SGLT2i_Dose','Med_GLP1','Med_GLP1_Dose',
     'Med_BB','Med_BB_Dose','Med_MRA','Med_MRA_Dose','Med_ACEiARB','Med_ACEiARB_Dose',
@@ -4529,9 +4628,9 @@ var ALL_PATIENT_FIELDS = [
     'Med_Diuretic','Med_Diuretic_Dose','Med_Statin','Med_Statin_Dose','Med_LipidCombo','Med_LipidCombo_Dose','Med_PCSK9','Med_PCSK9_Dose','Med_Fibrate','Med_Fibrate_Dose',
     'Med_Lipid','Med_Lipid_Dose','Med_Omega3','Med_Omega3_Dose','Med_Nicotine','Med_Nicotine_Dose','Med_Antiplat','Med_Antiplat_Dose',
     'Med_OAC','Med_OAC_Dose','Med_Arrhythmia','Med_Arrhythmia_Dose','Med_K_Chelator','Med_K_Chelator_Dose',
-    // Outcomes (Section 8) — Strong HF + Advanced HF Therapy + multi-select Referral
-    'Quad_GDMT','Compliance','Mortality','LostFU','LostFU_Reason','LostFU_Other',
-    'Strong_HF','Adv_HF_Therapy','Adv_HF_Therapy_Type',
+    // Outcomes (Section 8) — Max GDMT, Recovered LV, Advanced HF, Strong HF, Adv Therapy + multi-select Referral
+    'Quad_GDMT','Max_GDMT','Recovered_LV','Mortality','LostFU','LostFU_Reason','LostFU_Other',
+    'Advanced_HF_Outcome','Strong_HF','Adv_HF_Therapy','Adv_HF_Therapy_Type',
     'Referral','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt'
 ];
 
@@ -4623,8 +4722,8 @@ function exportAllPatientsSPSS(){
         // Fields to treat as binary 1/0 (Yes/No)
         var BINARY_FIELDS = {
             DM:1,HTN:1,AF:1,CKD:1,CVA:1,PVD:1,Obese_OSA:1,Lung_Dz:1,Liver_Dz:1,FH_Genetics:1,
-            Advanced_HF:1,Valvular_Disease:1,
-            Med_ARNI:1,Quad_GDMT:1,Compliance:1,Rehab:1
+            Advanced_HF:1,Advanced_HF_Outcome:1,Valvular_Disease:1,
+            Med_ARNI:1,Quad_GDMT:1,Max_GDMT:1,Recovered_LV:1,Strong_HF:1,Adv_HF_Therapy:1,Hemo_Support:1,Rehab:1
         };
         // Fields to treat as numeric (empty -> blank, else parseFloat)
         var NUMERIC_FIELDS = {
@@ -4697,7 +4796,8 @@ function exportAllPatientsSPSS(){
             ['Med_ARNI','binary','1 = Yes, 0 = No'],
             ['Med_SGLT2i, Med_BB, Med_MRA, Med_ACEiARB, Med_Diuretic, Med_OAC, etc.','categorical','Drug name or "None"'],
             ['*_Dose','string','Free-text dose (parse if needed)'],
-            ['Quad_GDMT, Compliance, Rehab','binary','1 = Yes, 0 = No'],
+            ['Quad_GDMT, Max_GDMT, Recovered_LV, Rehab, Strong_HF, Adv_HF_Therapy, Hemo_Support','binary','1 = Yes, 0 = No'],
+            ['Hemo_Support_Type, Adv_HF_Therapy_Type','categorical (multi)','Comma-separated list (IABP/Impella/VA-ECMO or LVAD/RVDS/Heart Transplant)'],
             ['Mortality','categorical','Alive / Dead-HF / Dead-Other'],
             ['Next_Appt, Last_Admission','date','YYYY-MM-DD']
         ];
@@ -4712,6 +4812,270 @@ function exportAllPatientsSPSS(){
     }).catch(function(e){
         document.getElementById("popOv") && document.getElementById("popOv").remove();
         showPopup("error","Export Failed",e.message);
+    });
+}
+
+/* ===== FIX IMPORTED DATES (retroactive day/month-swap repair) =====
+   For every patient with imported visits, look for dates where the inferred
+   chronological order is broken. When swapping day↔month in a date fixes
+   the order AND the swapped form is a valid date, propose the swap. The
+   admin reviews each patient's proposed changes before committing.
+*/
+function scanImportedDates(){
+    showPopup("warning","Scanning…","Looking through all imported visits for day/month-swapped dates…");
+    db.collection("patients").get().then(function(snap){
+        if(snap.size === 0){
+            document.getElementById("popOv") && document.getElementById("popOv").remove();
+            showPopup("warning","Empty Registry","No patients to scan.");
+            return;
+        }
+        var allPatients = [];
+        snap.forEach(function(d){ allPatients.push({id:d.id, data:d.data()}); });
+        // For each patient, fetch their visits, then analyse
+        var promises = allPatients.map(function(p){
+            return db.collection("patients").doc(p.id).collection("visits").orderBy("visitDate","asc").get()
+                .then(function(vs){
+                    var visits = [];
+                    vs.forEach(function(doc){ visits.push({id:doc.id, data:doc.data()}); });
+                    return {patientId:p.id, patient:p.data, visits:visits};
+                })
+                .catch(function(){ return {patientId:p.id, patient:p.data, visits:[]}; });
+        });
+        Promise.all(promises).then(function(results){
+            // For each patient: find swaps that recover monotonic order;
+            // include the full imported-visit list so manual swaps can be added.
+            var allProposals = [];
+            results.forEach(function(r){
+                if(r.visits.length < 2) return;
+                var visits = r.visits.slice();
+                var proposals = _proposeSwapsForChronology(visits);
+                var importedVisits = visits.filter(function(v){ return v.data.imported; });
+                // Include patient if there are auto-detected swaps OR if there are imported visits the user might want to manually fix
+                if(proposals.length > 0){
+                    allProposals.push({
+                        patientId: r.patientId,
+                        patientName: r.patient.Patient_Name || '(no name)',
+                        fileNo: r.patient.File_No || '',
+                        swaps: proposals,
+                        allImportedVisits: importedVisits
+                    });
+                }
+            });
+            document.getElementById("popOv") && document.getElementById("popOv").remove();
+            if(allProposals.length === 0){
+                showPopup("success","All Dates Look Good","No swapped dates detected. Every patient's visit history is already in chronological order.");
+                return;
+            }
+            _renderDateFixPreview(allProposals);
+        }).catch(function(e){
+            document.getElementById("popOv") && document.getElementById("popOv").remove();
+            showPopup("error","Scan Failed", e.message);
+        });
+    });
+}
+
+// Take a list of visits sorted by current visitDate. Detect swapped day↔month and propose fixes.
+//
+// Two strategies, in order of confidence:
+//
+// 1. importedSeq strategy (HIGH confidence) — visits imported by the post-fix code carry
+//    an `importedSeq` field reflecting their original Excel column order. Sort by that,
+//    then any non-monotonic visit is a likely swap.
+// 2. Heuristic strategy (MEDIUM confidence) — for legacy records without importedSeq, look
+//    at each visit's date in isolation and propose a swap IF the swapped form is valid AND
+//    swapping it would bring it closer to the median of the other visits' dates (i.e.
+//    the swap eliminates an "outlier" that breaks the cluster).
+function _proposeSwapsForChronology(visits){
+    function isISO(s){ return /^\d{4}-\d{2}-\d{2}$/.test(s||''); }
+    function swap(s){
+        var m = (s||'').match(/^(\d{4})-(\d{2})-(\d{2})$/); if(!m) return null;
+        var y=m[1], mo=parseInt(m[3],10), dy=parseInt(m[2],10);
+        if(mo<1||mo>12||dy<1||dy>31) return null;
+        var t = new Date(y+'-'+String(mo).padStart(2,'0')+'-'+String(dy).padStart(2,'0'));
+        if(isNaN(t.getTime())) return null;
+        if(t.getMonth()+1 !== mo || t.getDate() !== dy) return null;
+        return y+'-'+String(mo).padStart(2,'0')+'-'+String(dy).padStart(2,'0');
+    }
+    // STRATEGY 1: importedSeq-based — if ALL imported visits have importedSeq, sort by it
+    // and look for non-monotonic dates. This is the strongest signal.
+    var imported = visits.filter(function(v){ return v.data.imported && typeof v.data.importedSeq === 'number'; });
+    if(imported.length >= 2 && imported.length === visits.filter(function(v){return v.data.imported;}).length){
+        var bySeq = imported.slice().sort(function(a,b){ return a.data.importedSeq - b.data.importedSeq; });
+        var dates = bySeq.map(function(v){ return v.data.visitDate; });
+        var swaps = [];
+        var maxPasses = 4;
+        function countOOO(arr){
+            var c=0;
+            for(var i=1;i<arr.length;i++){ if(isISO(arr[i-1])&&isISO(arr[i])&&arr[i]<arr[i-1]) c++; }
+            return c;
+        }
+        while(maxPasses-- > 0){
+            var changed = false;
+            for(var i=0;i<dates.length;i++){
+                if(!isISO(dates[i])) continue;
+                var swp = swap(dates[i]); if(!swp || swp === dates[i]) continue;
+                var trial = dates.slice(); trial[i] = swp;
+                if(countOOO(trial) < countOOO(dates)){
+                    swaps.push({visitId: bySeq[i].id, from: dates[i], to: swp, reason: 'Restores imported sequence order'});
+                    dates[i] = swp;
+                    changed = true;
+                }
+            }
+            if(!changed) break;
+        }
+        return swaps;
+    }
+    // STRATEGY 2: heuristic — for visits without importedSeq, detect outliers from the median month.
+    // For every visit whose day and month differ (and day<=12), try swapping; accept if the
+    // swapped date is closer to the median of other visits' dates than the original.
+    var allDates = visits.map(function(v){ return v.data.visitDate; }).filter(isISO).map(function(d){ return new Date(d).getTime(); });
+    if(allDates.length < 3) return [];
+    allDates.sort(function(a,b){return a-b;});
+    var median = allDates[Math.floor(allDates.length/2)];
+    var heuristicSwaps = [];
+    visits.forEach(function(v){
+        var d = v.data.visitDate; if(!isISO(d)) return;
+        var swp = swap(d); if(!swp || swp === d) return;
+        var origDist = Math.abs(new Date(d).getTime() - median);
+        var swpDist  = Math.abs(new Date(swp).getTime() - median);
+        // Only propose if swap meaningfully closer to median (≥ 25-day improvement to avoid noise)
+        if(origDist - swpDist > 25*86400*1000){
+            heuristicSwaps.push({visitId: v.id, from: d, to: swp, reason: 'Swapped date is closer to other visits (heuristic)'});
+        }
+    });
+    return heuristicSwaps;
+}
+
+function _renderDateFixPreview(proposals){
+    var existing = document.getElementById('dateFixOverlay');
+    if(existing) existing.remove();
+    var ov = document.createElement('div');
+    ov.id = 'dateFixOverlay';
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;';
+    var totalSwaps = proposals.reduce(function(s,p){ return s + p.swaps.length; }, 0);
+    var html = '<div style="background:#fff;border-radius:12px;max-width:840px;width:100%;padding:18px;box-shadow:0 10px 40px rgba(0,0,0,0.3);">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #17a2b8;padding-bottom:8px;margin-bottom:10px;">';
+    html += '<h5 style="margin:0;color:#17a2b8;"><i class="fa fa-calendar-check me-1"></i>Fix Imported Dates</h5>';
+    html += '<button class="btn-close" onclick="document.getElementById(\'dateFixOverlay\').remove();"></button></div>';
+    html += '<div class="alert alert-info py-2 small mb-3"><b>'+proposals.length+' patient(s)</b> with <b>'+totalSwaps+'</b> auto-detected fix(es). ';
+    html += 'Auto-detected rows are pre-checked (green). To swap an additional date the scanner missed, click "Show all imports" and check it manually. Then click <b>Apply</b>.</div>';
+    html += '<div style="max-height:60vh;overflow-y:auto;padding-right:6px;">';
+    proposals.forEach(function(p, idx){
+        html += '<div class="card mb-2" id="dfix-card-'+idx+'" style="border-left:4px solid #17a2b8;">';
+        html += '<div class="card-body p-2">';
+        html += '<div class="d-flex justify-content-between align-items-center mb-1">';
+        html += '<div><b>'+_escHtml(p.patientName)+'</b> <small class="text-muted">File: '+_escHtml(p.fileNo)+'</small></div>';
+        html += '<div>';
+        html += '<button class="btn btn-sm btn-outline-secondary me-1" onclick="toggleShowAllVisits('+idx+')"><i class="fa fa-list me-1"></i>Show all imports</button>';
+        html += '<button class="btn btn-sm btn-success me-1" onclick="applyDateFix('+idx+')"><i class="fa fa-check me-1"></i>Apply</button>';
+        html += '<button class="btn btn-sm btn-outline-secondary" onclick="skipDateFix('+idx+')"><i class="fa fa-times me-1"></i>Skip</button>';
+        html += '</div>';
+        html += '</div>';
+        // Build a complete checklist of swappable dates (auto-detected + manual candidates)
+        var swapMap = {}; p.swaps.forEach(function(sw){ swapMap[sw.visitId] = sw; });
+        function swapISO(s){
+            var m = (s||'').match(/^(\d{4})-(\d{2})-(\d{2})$/); if(!m) return null;
+            var y=m[1], dy=parseInt(m[2],10), mo=parseInt(m[3],10);
+            if(mo<1||mo>12||dy<1||dy>31) return null;
+            var t = new Date(y+'-'+String(mo).padStart(2,'0')+'-'+String(dy).padStart(2,'0'));
+            if(isNaN(t.getTime())||t.getMonth()+1!==mo||t.getDate()!==dy) return null;
+            return y+'-'+String(mo).padStart(2,'0')+'-'+String(dy).padStart(2,'0');
+        }
+        // AUTO section
+        html += '<div class="dfix-auto"><table class="table table-sm mb-0" style="font-size:0.78rem;"><thead><tr><th style="width:30px;"></th><th>Current</th><th><i class="fa fa-arrow-right"></i></th><th>Will become</th><th>Source</th></tr></thead><tbody>';
+        p.swaps.forEach(function(sw){
+            html += '<tr><td><input type="checkbox" class="dfix-check" data-pidx="'+idx+'" data-vid="'+sw.visitId+'" data-from="'+sw.from+'" data-to="'+sw.to+'" checked></td><td><code>'+sw.from+'</code></td><td>→</td><td><code style="color:#27ae60;">'+sw.to+'</code></td><td><small class="text-muted">'+sw.reason+'</small></td></tr>';
+        });
+        if(p.swaps.length===0) html += '<tr><td colspan="5" class="text-muted small">No auto-detected swaps.</td></tr>';
+        html += '</tbody></table></div>';
+        // FULL list (hidden by default) — shows every imported visit so user can manually flag a swap
+        html += '<div class="dfix-all" id="dfix-all-'+idx+'" style="display:none;border-top:1px dashed #ccc;margin-top:6px;padding-top:6px;">';
+        html += '<div class="text-muted small mb-1">All imported visits for this patient — check any extra dates to also swap:</div>';
+        html += '<table class="table table-sm mb-0" style="font-size:0.78rem;"><thead><tr><th style="width:30px;"></th><th>Current</th><th>Manual swap →</th></tr></thead><tbody>';
+        p.allImportedVisits.forEach(function(v){
+            if(swapMap[v.id]) return; // already shown above
+            var swp = swapISO(v.data.visitDate);
+            if(!swp || swp === v.data.visitDate){
+                html += '<tr><td><span class="text-muted small">—</span></td><td><code>'+(v.data.visitDate||'?')+'</code></td><td class="text-muted small">(day/month identical — no swap available)</td></tr>';
+            } else {
+                html += '<tr><td><input type="checkbox" class="dfix-check" data-pidx="'+idx+'" data-vid="'+v.id+'" data-from="'+v.data.visitDate+'" data-to="'+swp+'"></td><td><code>'+v.data.visitDate+'</code></td><td><code style="color:#0d6efd;">'+swp+'</code></td></tr>';
+            }
+        });
+        html += '</tbody></table></div>';
+        html += '</div></div>';
+    });
+    html += '</div>';
+    html += '<div class="d-flex justify-content-end gap-2 mt-3 border-top pt-2">';
+    html += '<button class="btn btn-sm btn-secondary" onclick="document.getElementById(\'dateFixOverlay\').remove();">Cancel All</button>';
+    html += '<button class="btn btn-sm btn-warning" onclick="applyAllDateFixes()"><i class="fa fa-check-double me-1"></i>Apply All Checked</button>';
+    html += '</div></div>';
+    ov.innerHTML = html;
+    document.body.appendChild(ov);
+    window._dateFixProposals = proposals;
+}
+
+function toggleShowAllVisits(idx){
+    var el = document.getElementById('dfix-all-'+idx);
+    if(!el) return;
+    el.style.display = (el.style.display === 'none') ? 'block' : 'none';
+}
+
+function applyDateFix(idx){
+    var card = document.getElementById('dfix-card-'+idx);
+    if(!card) return;
+    // Collect every checked swap inside this card
+    var checked = Array.from(card.querySelectorAll('input.dfix-check:checked'));
+    if(checked.length === 0){
+        showPopup("warning","Nothing Checked","Tick at least one date to apply.");
+        return;
+    }
+    var p = window._dateFixProposals[idx];
+    card.style.opacity='0.5'; card.style.pointerEvents='none';
+    var batch = db.batch();
+    checked.forEach(function(cb){
+        var vid = cb.dataset.vid, from = cb.dataset.from, to = cb.dataset.to;
+        var ref = db.collection("patients").doc(p.patientId).collection("visits").doc(vid);
+        batch.update(ref, {visitDate: to, _dateFixedAt: new Date().toISOString(), _dateFixedFrom: from});
+    });
+    batch.commit().then(function(){
+        card.style.background='#d4edda';
+        showPopup("success","Fixed", checked.length+" visit date(s) updated for "+p.patientName+".");
+    }).catch(function(e){
+        card.style.opacity='1'; card.style.pointerEvents='auto'; card.style.background='#f8d7da';
+        showPopup("error","Update Failed", e.message);
+    });
+}
+
+function skipDateFix(idx){
+    var card = document.getElementById('dfix-card-'+idx);
+    if(card){ card.style.opacity='0.4'; card.style.pointerEvents='none'; card.style.background='#fff3cd'; }
+}
+
+function applyAllDateFixes(){
+    var ov = document.getElementById('dateFixOverlay');
+    if(!ov) return;
+    var checked = Array.from(ov.querySelectorAll('input.dfix-check:checked'));
+    if(checked.length === 0){
+        showPopup("warning","Nothing Checked","Tick at least one date to apply.");
+        return;
+    }
+    if(!confirm('Apply '+checked.length+' visit date fix(es) across all patients?\n\nVisit dates will be updated in the database. The original date is preserved in _dateFixedFrom on each visit for auditing.')) return;
+    var props = window._dateFixProposals;
+    // Group checked by patientIdx -> patientId
+    var batch = db.batch();
+    var patientCount = 0; var seen = {};
+    checked.forEach(function(cb){
+        var pidx = parseInt(cb.dataset.pidx,10);
+        var p = props[pidx]; if(!p) return;
+        if(!seen[p.patientId]){ seen[p.patientId]=1; patientCount++; }
+        var ref = db.collection("patients").doc(p.patientId).collection("visits").doc(cb.dataset.vid);
+        batch.update(ref, {visitDate: cb.dataset.to, _dateFixedAt: new Date().toISOString(), _dateFixedFrom: cb.dataset.from});
+    });
+    batch.commit().then(function(){
+        ov.remove();
+        showPopup("success","Done", checked.length+" visit date(s) updated across "+patientCount+" patient(s).");
+    }).catch(function(e){
+        showPopup("error","Batch Update Failed", e.message+'. Try applying patient-by-patient.');
     });
 }
 
@@ -5314,7 +5678,7 @@ function purgeDeletedRecord(tombstoneId){
     }).catch(function(e){ showPopup("error","Error",e.message); });
 }
 
-function exportAnalyticsExcel(){var d=allPatientsData,n=d.length;if(n===0){showPopup("error","No Data","No patient data.");return;}var wb=XLSX.utils.book_new();var s1=[["HF CLINIC REGISTRY — ANALYTICS REPORT"],["MKH · Generated: "+new Date().toLocaleString()],["Total Patients:",n],[]];s1.push(["METRIC","COUNT","PERCENTAGE"]);var hfTypes={HFrEF:0,HFmrEF:0,HFpEF:0};d.forEach(function(p){if(hfTypes[p.HF_Type]!==undefined)hfTypes[p.HF_Type]++;});s1.push(["HFrEF",hfTypes.HFrEF,pctStr(hfTypes.HFrEF,n)]);s1.push(["HFmrEF",hfTypes.HFmrEF,pctStr(hfTypes.HFmrEF,n)]);s1.push(["HFpEF",hfTypes.HFpEF,pctStr(hfTypes.HFpEF,n)]);s1.push([]);s1.push(["Quadruple GDMT",d.filter(function(p){return p.Quad_GDMT==='Yes';}).length,pctStr(d.filter(function(p){return p.Quad_GDMT==='Yes';}).length,n)]);XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(s1),"Summary");var headers=["File No","Name","Age","Gender","Nationality","HF Type","EF (%)","NYHA","Quad GDMT","Compliance","Mortality","DM","HTN","AF","IHD","CKD","ARNI","ARNI Dose","SGLT2i","SGLT2i Dose","BB","BB Dose","MRA","MRA Dose","ACEi/ARB","Procorolan","CCB","Rehab","Next Appt","Doctor"];var rows=[headers];d.forEach(function(p){rows.push([p.File_No||'',p.Patient_Name||'',p.Age||'',p.Gender||'',p.Nationality||'',p.HF_Type||'',p.EF_Diagnosis||'',p.NYHA||'',p.Quad_GDMT||'',p.Compliance||'',p.Mortality||'',p.DM||'',p.HTN||'',p.AF||'',p.IHD||'',p.CKD||'',p.Med_ARNI||'',p.Med_ARNI_Dose||'',p.Med_SGLT2i||'',p.Med_SGLT2i_Dose||'',p.Med_BB||'',p.Med_BB_Dose||'',p.Med_MRA||'',p.Med_MRA_Dose||'',p.Med_ACEiARB||'',p.Med_Procorolan||'',p.Med_CCB||'',p.Rehab||'',p.Next_Appt||'',p.Doctor_Name||'']);});XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),"All Patients");var gapRows=[["GDMT GAP ANALYSIS (HFrEF)"],["File","Name","ARNI","SGLT2i","BB","MRA","Gaps"]];d.filter(function(p){return p.HF_Type==='HFrEF';}).forEach(function(p){var arni=p.Med_ARNI==='Yes',sglt=p.Med_SGLT2i&&p.Med_SGLT2i!=='None',bb=p.Med_BB&&p.Med_BB!=='None',mra=p.Med_MRA&&p.Med_MRA!=='None';var gaps=4-[arni,sglt,bb,mra].filter(Boolean).length;if(gaps>0)gapRows.push([p.File_No||'',p.Patient_Name||'',arni?'Yes':'NO',sglt?'Yes':'NO',bb?'Yes':'NO',mra?'Yes':'NO',gaps]);});XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(gapRows),"GDMT Gaps");XLSX.writeFile(wb,"HF_Analytics_MKH_"+new Date().toISOString().split('T')[0]+".xlsx");showPopup("success","Excel Exported!","Analytics workbook downloaded.");}
+function exportAnalyticsExcel(){var d=allPatientsData,n=d.length;if(n===0){showPopup("error","No Data","No patient data.");return;}var wb=XLSX.utils.book_new();var s1=[["HF CLINIC REGISTRY — ANALYTICS REPORT"],["MKH · Generated: "+new Date().toLocaleString()],["Total Patients:",n],[]];s1.push(["METRIC","COUNT","PERCENTAGE"]);var hfTypes={HFrEF:0,HFmrEF:0,HFpEF:0};d.forEach(function(p){if(hfTypes[p.HF_Type]!==undefined)hfTypes[p.HF_Type]++;});s1.push(["HFrEF",hfTypes.HFrEF,pctStr(hfTypes.HFrEF,n)]);s1.push(["HFmrEF",hfTypes.HFmrEF,pctStr(hfTypes.HFmrEF,n)]);s1.push(["HFpEF",hfTypes.HFpEF,pctStr(hfTypes.HFpEF,n)]);s1.push([]);s1.push(["Quadruple GDMT",d.filter(function(p){return p.Quad_GDMT==='Yes';}).length,pctStr(d.filter(function(p){return p.Quad_GDMT==='Yes';}).length,n)]);s1.push(["On Maximum GDMT Doses",d.filter(function(p){return p.Max_GDMT==='Yes';}).length,pctStr(d.filter(function(p){return p.Max_GDMT==='Yes';}).length,n)]);s1.push(["Recovered LV",d.filter(function(p){return p.Recovered_LV==='Yes';}).length,pctStr(d.filter(function(p){return p.Recovered_LV==='Yes';}).length,n)]);XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(s1),"Summary");var headers=["File No","Name","Age","Gender","Nationality","HF Type","EF (%)","NYHA","Quad GDMT","Max GDMT","Recovered LV","Mortality","DM","HTN","AF","IHD","CKD","ARNI","ARNI Dose","SGLT2i","SGLT2i Dose","BB","BB Dose","MRA","MRA Dose","ACEi/ARB","Procorolan","CCB","Rehab","Hemo Support","Hemo Type","Next Appt","Doctor"];var rows=[headers];d.forEach(function(p){rows.push([p.File_No||'',p.Patient_Name||'',p.Age||'',p.Gender||'',p.Nationality||'',p.HF_Type||'',p.EF_Diagnosis||'',p.NYHA||'',p.Quad_GDMT||'',p.Max_GDMT||'',p.Recovered_LV||'',p.Mortality||'',p.DM||'',p.HTN||'',p.AF||'',p.IHD||'',p.CKD||'',p.Med_ARNI||'',p.Med_ARNI_Dose||'',p.Med_SGLT2i||'',p.Med_SGLT2i_Dose||'',p.Med_BB||'',p.Med_BB_Dose||'',p.Med_MRA||'',p.Med_MRA_Dose||'',p.Med_ACEiARB||'',p.Med_Procorolan||'',p.Med_CCB||'',p.Rehab||'',p.Hemo_Support||'',p.Hemo_Support_Type||'',p.Next_Appt||'',p.Doctor_Name||'']);});XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),"All Patients");var gapRows=[["GDMT GAP ANALYSIS (HFrEF)"],["File","Name","ARNI","SGLT2i","BB","MRA","Gaps"]];d.filter(function(p){return p.HF_Type==='HFrEF';}).forEach(function(p){var arni=p.Med_ARNI==='Yes',sglt=p.Med_SGLT2i&&p.Med_SGLT2i!=='None',bb=p.Med_BB&&p.Med_BB!=='None',mra=p.Med_MRA&&p.Med_MRA!=='None';var gaps=4-[arni,sglt,bb,mra].filter(Boolean).length;if(gaps>0)gapRows.push([p.File_No||'',p.Patient_Name||'',arni?'Yes':'NO',sglt?'Yes':'NO',bb?'Yes':'NO',mra?'Yes':'NO',gaps]);});XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(gapRows),"GDMT Gaps");XLSX.writeFile(wb,"HF_Analytics_MKH_"+new Date().toISOString().split('T')[0]+".xlsx");showPopup("success","Excel Exported!","Analytics workbook downloaded.");}
 
 
 /* ===== BULK IMPORT FROM EXCEL / CSV ===== */
@@ -5433,7 +5797,8 @@ var IMPORT_FIELDS = [
     'Med_Vasodilator','Med_Vasodilator_Dose','Med_Procorolan','Med_Procorolan_Dose','Med_CCB','Med_CCB_Dose',
     'Med_Diuretic','Med_Diuretic_Dose','Med_Lipid','Med_Lipid_Dose','Med_Omega3','Med_Omega3_Dose','Med_Nicotine','Med_Nicotine_Dose','Med_Antiplat','Med_Antiplat_Dose',
     'Med_OAC','Med_OAC_Dose','Med_Arrhythmia','Med_Arrhythmia_Dose','Med_K_Chelator','Med_K_Chelator_Dose',
-    'Quad_GDMT','Compliance','Mortality','LostFU','LostFU_Reason','LostFU_Other','Referral','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt'
+    'Hemo_Support','Hemo_Support_Type',
+    'Quad_GDMT','Max_GDMT','Recovered_LV','Mortality','LostFU','LostFU_Reason','LostFU_Other','Advanced_HF_Outcome','Strong_HF','Adv_HF_Therapy','Adv_HF_Therapy_Type','Referral','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt'
 ];
 
 var importParsedRows = [];
@@ -5714,6 +6079,12 @@ var PP_LABEL_MAP = {
     'f.h.':'FH_Genetics', 'fh of cad':'FH_Genetics',
     'patient discharged on quadruple gdmt?':'Quad_GDMT', 'patient discharged on quadruple gdmt':'Quad_GDMT',
     'quadruple gdmt':'Quad_GDMT', 'quad gdmt':'Quad_GDMT',
+    'on maximum gdmt doses':'Max_GDMT', 'on maximum gdmt':'Max_GDMT', 'max gdmt':'Max_GDMT', 'maximum gdmt doses':'Max_GDMT', 'max gdmt doses':'Max_GDMT',
+    'recovered lv':'Recovered_LV', 'lv recovery':'Recovered_LV', 'lv recovered':'Recovered_LV',
+    'haemodynamic support':'Hemo_Support', 'hemodynamic support':'Hemo_Support', 'mcs':'Hemo_Support', 'mechanical circulatory support':'Hemo_Support',
+    'haemodynamic support type':'Hemo_Support_Type', 'hemodynamic support type':'Hemo_Support_Type', 'mcs type':'Hemo_Support_Type',
+    'strong hf':'Strong_HF', 'strong hf eligible':'Strong_HF', 'strong / stage d hf':'Strong_HF', 'stage d hf':'Strong_HF',
+    'advanced hf therapy':'Adv_HF_Therapy', 'advanced hf therapy type':'Adv_HF_Therapy_Type',
     'patient discharged on triple gdmt?':'_triple_gdmt', 'patient discharged on triple gdmt':'_triple_gdmt',
     'dry weight':'Dry_Weight',
     'valve replacement/repair':'_valve_surgery', 'valve replacement':'_valve_surgery', 'valve repair':'_valve_surgery',
@@ -5951,19 +6322,68 @@ function formatDateCell(v){
         return y+'-'+m+'-'+d;
     }
     var s = String(v).trim();
-    // Try common formats: "24/4/2025", "4/24/2025", "2025-04-24"
-    var m1 = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
-    if(m1){
-        var a = parseInt(m1[1],10), b = parseInt(m1[2],10), y = parseInt(m1[3],10);
-        if(y < 100) y += 2000;
-        // Ambiguous: assume D/M/Y (the example file uses this)
+    // Already in ISO form? (YYYY-MM-DD)
+    var iso = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if(iso) return iso[1]+'-'+iso[2].padStart(2,'0')+'-'+iso[3].padStart(2,'0');
+    // Full D/M/Y or M/D/Y form — we assume Ahmed's convention is ALWAYS D/M/Y.
+    // Only swap when D/M/Y is impossible (day>31 or month>12).
+    var full = s.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})$/);
+    if(full){
+        var a = parseInt(full[1],10), b = parseInt(full[2],10), y2 = parseInt(full[3],10);
+        if(y2 < 100) y2 += 2000;
         var day = a, mon = b;
-        if(day > 31 || mon > 12){ day = b; mon = a; }
-        return y+'-'+String(mon).padStart(2,'0')+'-'+String(day).padStart(2,'0');
+        // If D/M/Y would yield an invalid month, swap to M/D/Y
+        if(mon > 12 && day <= 12){ day = b; mon = a; }
+        // Still invalid? return as-is
+        if(mon < 1 || mon > 12 || day < 1 || day > 31) return s;
+        return y2+'-'+String(mon).padStart(2,'0')+'-'+String(day).padStart(2,'0');
     }
-    var m2 = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
-    if(m2) return m2[1]+'-'+m2[2].padStart(2,'0')+'-'+m2[3].padStart(2,'0');
+    // Short form "D/M" with no year — caller should resolve year from context.
+    var nodate = s.match(/^(\d{1,2})[\/\-\.](\d{1,2})$/);
+    if(nodate){
+        var d2 = parseInt(nodate[1],10), m2 = parseInt(nodate[2],10);
+        if(m2 > 12 && d2 <= 12){ var tmp=d2; d2=m2; m2=tmp; }
+        if(m2 < 1 || m2 > 12 || d2 < 1 || d2 > 31) return s;
+        // Use sentinel year 0000 — visit-import code below detects this and infers from context.
+        return '0000-'+String(m2).padStart(2,'0')+'-'+String(d2).padStart(2,'0');
+    }
     return s; // give up, store as-is
+}
+
+// Repair a visit-date list by filling in missing years (sentinel 0000-MM-DD).
+// Strategy: walk the list, when an entry has year 0000, inherit the most recent
+// known year. If that produces a chronological regression (the inferred date is
+// earlier than the preceding visit), bump the year by 1.
+function repairVisitDateYears(dateList){
+    var lastKnownYear = null;
+    var lastIsoBefore = null;
+    var out = dateList.slice();
+    // First pass: find any concrete year as a starting anchor
+    for(var i=0; i<out.length; i++){
+        var m = (out[i]||'').match(/^(\d{4})-/);
+        if(m && m[1] !== '0000'){ lastKnownYear = parseInt(m[1],10); break; }
+    }
+    if(lastKnownYear === null) lastKnownYear = new Date().getFullYear();
+    // Second pass: forward-fill years, bumping if dates regress
+    lastIsoBefore = null;
+    for(var j=0; j<out.length; j++){
+        var d = out[j] || '';
+        var mm = d.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        if(!mm){ continue; }
+        var yr = parseInt(mm[1],10), mo = mm[2], dy = mm[3];
+        if(yr === 0){
+            yr = lastKnownYear;
+            var candidate = yr+'-'+mo+'-'+dy;
+            if(lastIsoBefore && candidate < lastIsoBefore){ yr += 1; candidate = yr+'-'+mo+'-'+dy; }
+            out[j] = candidate;
+            lastKnownYear = yr;
+            lastIsoBefore = candidate;
+        } else {
+            lastKnownYear = yr;
+            lastIsoBefore = d;
+        }
+    }
+    return out;
 }
 
 // Build a lookup: vf (V_Concor etc.) -> [valid dose strings]
@@ -6089,7 +6509,12 @@ function handlePerPatientFiles(event){
         reader.onload = function(e){
             try{
                 var data = new Uint8Array(e.target.result);
-                var wb = XLSX.read(data, {type:'array', cellDates:true});
+                // IMPORTANT: cellDates:false + raw:false (used below) returns the literal
+                // formatted text shown in Excel (e.g. "5/1/2026"), preserving the user's
+                // intended D/M/Y order. cellDates:true would silently coerce ambiguous
+                // dates using the JS engine's locale (usually M/D/Y), which scrambles
+                // day/month for dates like 5/1/2026 (meant Jan 5, became May 1).
+                var wb = XLSX.read(data, {type:'array', cellDates:false});
                 var parsed = parsePerPatientWorkbook(wb, file.name);
                 ppParsedPatients.push(parsed);
             }catch(err){
@@ -6113,9 +6538,9 @@ function parsePerPatientWorkbook(wb, fileName){
     var infoSheetName = wb.SheetNames.filter(function(n){ return n.toLowerCase().indexOf('patient info')!==-1 || n.toLowerCase().indexOf('info')!==-1; })[0] || wb.SheetNames[0];
     var infoSheet = wb.Sheets[infoSheetName];
     if(!infoSheet){ result.error = "No 'Patient Info' sheet found"; return result; }
-    var infoRows = XLSX.utils.sheet_to_json(infoSheet, {header:1, defval:'', raw:true});
+    var infoRows = XLSX.utils.sheet_to_json(infoSheet, {header:1, defval:'', raw:false});
     var hfTypeFlags = {};
-    var ynFields = {DM:1,HTN:1,IHD:1,CKD:1,AF:1,CVA:1,Smoker:1,Advanced_HF:1,FH_Cardio:1,Genetics:1,FH_Genetics:1,Obese:1,OSA:1,Obese_OSA:1,Dyslipidemia:1,LostFU:1};
+    var ynFields = {DM:1,HTN:1,IHD:1,CKD:1,AF:1,CVA:1,Smoker:1,Advanced_HF:1,Advanced_HF_Outcome:1,FH_Cardio:1,Genetics:1,FH_Genetics:1,Obese:1,OSA:1,Obese_OSA:1,Dyslipidemia:1,LostFU:1,Max_GDMT:1,Recovered_LV:1,Strong_HF:1,Adv_HF_Therapy:1,Hemo_Support:1,PVD:1,Lung_Dz:1,Liver_Dz:1};
     var pciVal='', cabgVal='', obeseVal='', osaVal='';
     infoRows.forEach(function(row){
         var label = (row[0]||'').toString().trim().toLowerCase().replace(/\s+/g,' ');
@@ -6319,7 +6744,7 @@ function parsePerPatientWorkbook(wb, fileName){
     var visitSheetName = wb.SheetNames.filter(function(n){ return n.toLowerCase().indexOf('progress')!==-1 || n.toLowerCase().indexOf('visit')!==-1 || n.toLowerCase().indexOf('note')!==-1; })[0];
     if(visitSheetName){
         var visitSheet = wb.Sheets[visitSheetName];
-        var vRows = XLSX.utils.sheet_to_json(visitSheet, {header:1, defval:'', raw:true});
+        var vRows = XLSX.utils.sheet_to_json(visitSheet, {header:1, defval:'', raw:false});
         if(vRows.length > 1){
             // Visit dates are in row 1, columns C onward (index 2+)
             var headerRow = vRows[0] || [];
@@ -6330,9 +6755,27 @@ function parsePerPatientWorkbook(wb, fileName){
                     visitCols.push({colIdx: c, date: formatDateCell(dt)});
                 }
             }
-            // For each visit column, build a visit object
-            visitCols.forEach(function(vc){
-                var visit = {visitDate: vc.date, visitType:'Routine', timestamp: new Date().toISOString(), imported:true};
+            // Resolve missing years (e.g. "29/12" with no year) using chronological context
+            var rawDateList = visitCols.map(function(v){ return v.date; });
+            var fixedDateList = repairVisitDateYears(rawDateList);
+            for(var fi=0; fi<visitCols.length; fi++){
+                if(visitCols[fi].date !== fixedDateList[fi]){
+                    result.warnings.push('Visit date inferred: "'+visitCols[fi].date+'" → "'+fixedDateList[fi]+'"');
+                    visitCols[fi].date = fixedDateList[fi];
+                }
+            }
+            // Sanity warning: visit dates should generally be in chronological order
+            for(var oi=1; oi<visitCols.length; oi++){
+                var prev = visitCols[oi-1].date, cur = visitCols[oi].date;
+                if(prev && cur && /^\d{4}-\d{2}-\d{2}$/.test(prev) && /^\d{4}-\d{2}-\d{2}$/.test(cur) && cur < prev){
+                    result.warnings.push('Visit dates out of order: '+prev+' → '+cur+' — please verify after import.');
+                }
+            }
+            // For each visit column, build a visit object — stamp `importedSeq` to preserve
+            // the original Excel column ordering (used by the date-fix admin tool to detect
+            // day/month swaps in records imported before the date-format fix).
+            visitCols.forEach(function(vc, _seq){
+                var visit = {visitDate: vc.date, visitType:'Routine', timestamp: new Date().toISOString(), imported:true, importedSeq:_seq};
                 var hasData = false;
                 // Track meds for this visit
                 var visitMeds = {};
