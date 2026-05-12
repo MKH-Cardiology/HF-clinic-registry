@@ -3750,8 +3750,32 @@ function loadVisits(patientId){
         visits=[];
         if(snapshot.size===0){document.getElementById("visitHistory").innerHTML='<p class="text-muted small mb-2">No visits recorded yet.</p>';return;}
         snapshot.forEach(function(doc){visits.push({id:doc.id,...doc.data()});});
+        // Defensive: Firestore's orderBy is a string sort, so legacy non-ISO dates
+        // (e.g. "18/12/2025") mis-sort relative to ISO ("2025-12-18"). Compute a normalized
+        // ISO key for display + re-sort here, without touching the underlying DB record.
+        // (The admin "Fix Imported Dates" tool offers a permanent DB-level fix.)
+        visits.forEach(function(v){ v._displayDate = _normalizeDisplayDate(v.visitDate); });
+        visits.sort(function(a,b){
+            var ka=a._displayDate||'', kb=b._displayDate||'';
+            return ka<kb ? 1 : (ka>kb ? -1 : 0); // descending
+        });
         renderCollapsibleVisits(visits);
     });
+}
+
+// Return a YYYY-MM-DD form for display/sorting only. Never mutates the stored visitDate.
+function _normalizeDisplayDate(s){
+    if(!s) return '';
+    s = String(s).trim();
+    if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;          // already ISO
+    var m = s.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})$/);
+    if(!m) return s;
+    var day=parseInt(m[1],10), mon=parseInt(m[2],10), yr=parseInt(m[3],10);
+    if(yr<100) yr+=2000;
+    // Assume D/M/Y (Ahmed's convention). Only swap when D/M/Y is impossible.
+    if(mon>12 && day<=12){ var tmp=day; day=mon; mon=tmp; }
+    if(mon<1||mon>12||day<1||day>31) return s;
+    return yr+'-'+String(mon).padStart(2,'0')+'-'+String(day).padStart(2,'0');
 }
 
 function renderCollapsibleVisits(visitsArr){
@@ -3767,7 +3791,7 @@ function renderCollapsibleVisits(visitsArr){
         var summary=summaryParts.join(' · ')||'—';
         html+='<div class="visit-history-row">';
         html+='<div class="visit-history-header'+(isExpanded?' expanded':'')+'" onclick="toggleVisitRow(this)">';
-        html+='<span class="vh-date">'+(v.visitDate||'?')+'</span>';
+        html+='<span class="vh-date">'+(v._displayDate||v.visitDate||'?')+'</span>';
         html+='<span class="vh-type">('+( v.visitType||'Routine')+')</span>';
         html+='<span class="vh-summary">'+summary+'</span>';
         html+='<button class="btn btn-sm btn-outline-primary py-0 px-2 me-2" style="font-size:0.7rem;" onclick="event.stopPropagation(); editVisit(\''+v.id+'\')" title="Edit this visit"><i class="fa fa-edit"></i></button>';
@@ -4876,8 +4900,10 @@ function scanImportedDates(){
 
 // Take a list of visits sorted by current visitDate. Detect swapped day↔month and propose fixes.
 //
-// Two strategies, in order of confidence:
+// Three strategies, all combined:
 //
+// 0. Format normalization — convert raw D/M/YYYY strings (e.g. "18/12/2025") to ISO. These
+//    are unambiguous and were left by the original import code before the format fix.
 // 1. importedSeq strategy (HIGH confidence) — visits imported by the post-fix code carry
 //    an `importedSeq` field reflecting their original Excel column order. Sort by that,
 //    then any non-monotonic visit is a likely swap.
@@ -4896,13 +4922,31 @@ function _proposeSwapsForChronology(visits){
         if(t.getMonth()+1 !== mo || t.getDate() !== dy) return null;
         return y+'-'+String(mo).padStart(2,'0')+'-'+String(dy).padStart(2,'0');
     }
+    // STRATEGY 0: format normalization — convert non-ISO D/M/YYYY strings (e.g. "18/12/2025")
+    // to ISO ("2025-12-18"). These are unambiguous (no swap involved) and were left behind by
+    // the older import code that stored visit dates verbatim from Excel.
+    var normSwaps = [];
+    visits.forEach(function(v){
+        var d = v.data.visitDate; if(!d || isISO(d)) return;
+        var m = String(d).trim().match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})$/);
+        if(!m) return;
+        var day=parseInt(m[1],10), mon=parseInt(m[2],10), yr=parseInt(m[3],10);
+        if(yr<100) yr+=2000;
+        // Assume D/M/Y (Ahmed's convention). If D/M/Y is impossible (month>12), swap to M/D/Y.
+        if(mon>12 && day<=12){ var tmp=day; day=mon; mon=tmp; }
+        if(mon<1||mon>12||day<1||day>31) return;
+        var t = new Date(yr+'-'+String(mon).padStart(2,'0')+'-'+String(day).padStart(2,'0'));
+        if(isNaN(t.getTime())||t.getMonth()+1!==mon||t.getDate()!==day) return;
+        var iso = yr+'-'+String(mon).padStart(2,'0')+'-'+String(day).padStart(2,'0');
+        if(iso !== d) normSwaps.push({visitId: v.id, from: d, to: iso, reason: 'Convert D/M/YYYY → ISO'});
+    });
     // STRATEGY 1: importedSeq-based — if ALL imported visits have importedSeq, sort by it
     // and look for non-monotonic dates. This is the strongest signal.
     var imported = visits.filter(function(v){ return v.data.imported && typeof v.data.importedSeq === 'number'; });
     if(imported.length >= 2 && imported.length === visits.filter(function(v){return v.data.imported;}).length){
         var bySeq = imported.slice().sort(function(a,b){ return a.data.importedSeq - b.data.importedSeq; });
         var dates = bySeq.map(function(v){ return v.data.visitDate; });
-        var swaps = [];
+        var seqSwaps = [];
         var maxPasses = 4;
         function countOOO(arr){
             var c=0;
@@ -4916,20 +4960,20 @@ function _proposeSwapsForChronology(visits){
                 var swp = swap(dates[i]); if(!swp || swp === dates[i]) continue;
                 var trial = dates.slice(); trial[i] = swp;
                 if(countOOO(trial) < countOOO(dates)){
-                    swaps.push({visitId: bySeq[i].id, from: dates[i], to: swp, reason: 'Restores imported sequence order'});
+                    seqSwaps.push({visitId: bySeq[i].id, from: dates[i], to: swp, reason: 'Restores imported sequence order'});
                     dates[i] = swp;
                     changed = true;
                 }
             }
             if(!changed) break;
         }
-        return swaps;
+        return normSwaps.concat(seqSwaps);
     }
     // STRATEGY 2: heuristic — for visits without importedSeq, detect outliers from the median month.
     // For every visit whose day and month differ (and day<=12), try swapping; accept if the
     // swapped date is closer to the median of other visits' dates than the original.
     var allDates = visits.map(function(v){ return v.data.visitDate; }).filter(isISO).map(function(d){ return new Date(d).getTime(); });
-    if(allDates.length < 3) return [];
+    if(allDates.length < 3) return normSwaps;
     allDates.sort(function(a,b){return a-b;});
     var median = allDates[Math.floor(allDates.length/2)];
     var heuristicSwaps = [];
@@ -4943,7 +4987,7 @@ function _proposeSwapsForChronology(visits){
             heuristicSwaps.push({visitId: v.id, from: d, to: swp, reason: 'Swapped date is closer to other visits (heuristic)'});
         }
     });
-    return heuristicSwaps;
+    return normSwaps.concat(heuristicSwaps);
 }
 
 function _renderDateFixPreview(proposals){
