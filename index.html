@@ -6514,17 +6514,27 @@ function handlePerPatientFiles(event){
                 // intended D/M/Y order. cellDates:true would silently coerce ambiguous
                 // dates using the JS engine's locale (usually M/D/Y), which scrambles
                 // day/month for dates like 5/1/2026 (meant Jan 5, became May 1).
-                var wb = XLSX.read(data, {type:'array', cellDates:false});
-                var parsed = parsePerPatientWorkbook(wb, file.name);
+                var wb;
+                try { wb = XLSX.read(data, {type:'array', cellDates:false}); }
+                catch(readErr){ throw new Error("XLSX.read failed: "+(readErr.message||readErr)); }
+                var parsed;
+                try { parsed = parsePerPatientWorkbook(wb, file.name); }
+                catch(parseErr){
+                    parsed = {fileName:file.name, error:"Parse error: "+(parseErr.message||parseErr)+" (line ~"+((parseErr.stack||'').split('\n')[1]||'?').trim()+")", record:null, visits:[]};
+                }
                 ppParsedPatients.push(parsed);
             }catch(err){
-                ppParsedPatients.push({fileName:file.name, error:err.message, record:null, visits:[]});
+                ppParsedPatients.push({fileName:file.name, error:(err.message||String(err)), record:null, visits:[]});
             }
             done++;
             if(done === files.length) renderPerPatientPreview();
         };
         reader.onerror = function(){
-            ppParsedPatients.push({fileName:file.name, error:'Failed to read file', record:null, visits:[]});
+            var msg = "FileReader error";
+            try { if(reader.error && reader.error.message) msg += ": "+reader.error.message;
+                  else if(reader.error && reader.error.name) msg += ": "+reader.error.name; }
+            catch(_){}
+            ppParsedPatients.push({fileName:file.name, error:msg, record:null, visits:[]});
             done++;
             if(done === files.length) renderPerPatientPreview();
         };
