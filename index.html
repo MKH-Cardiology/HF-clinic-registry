@@ -6548,11 +6548,24 @@ function parsePerPatientWorkbook(wb, fileName){
     var infoSheetName = wb.SheetNames.filter(function(n){ return n.toLowerCase().indexOf('patient info')!==-1 || n.toLowerCase().indexOf('info')!==-1; })[0] || wb.SheetNames[0];
     var infoSheet = wb.Sheets[infoSheetName];
     if(!infoSheet){ result.error = "No 'Patient Info' sheet found"; return result; }
-    var infoRows = XLSX.utils.sheet_to_json(infoSheet, {header:1, defval:'', raw:false});
+    // raw:true preserves numeric precision (Civil_ID 244020100122 stays a number,
+    // not "2.4402E+11" which raw:false would produce from General-format cells).
+    // Date safety: formatDateCell handles Date objects, ISO strings, D/M/Y strings,
+    // and Excel serial numbers via the dedicated helper below.
+    var infoRows = XLSX.utils.sheet_to_json(infoSheet, {header:1, defval:'', raw:true});
     var hfTypeFlags = {};
     var ynFields = {DM:1,HTN:1,IHD:1,CKD:1,AF:1,CVA:1,Smoker:1,Advanced_HF:1,Advanced_HF_Outcome:1,FH_Cardio:1,Genetics:1,FH_Genetics:1,Obese:1,OSA:1,Obese_OSA:1,Dyslipidemia:1,LostFU:1,Max_GDMT:1,Recovered_LV:1,Strong_HF:1,Adv_HF_Therapy:1,Hemo_Support:1,PVD:1,Lung_Dz:1,Liver_Dz:1};
     var pciVal='', cabgVal='', obeseVal='', osaVal='';
-    infoRows.forEach(function(row){
+    // Look up the original cell to decide whether a numeric value is actually a
+    // date-formatted cell (Excel serial number) — for those, use the .w display text.
+    function _cellSrc(rowIdx, colIdx){
+        var addr = XLSX.utils.encode_cell({r:rowIdx, c:colIdx});
+        var cell = infoSheet[addr];
+        if(!cell) return '';
+        if(cell.t === 'n' && cell.w && /[\/\-]/.test(cell.w)) return cell.w; // date-looking format
+        return cell.v;
+    }
+    infoRows.forEach(function(row, rowIdx){
         var label = (row[0]||'').toString().trim().toLowerCase().replace(/\s+/g,' ');
         var value = row[1];
         if(!label) return;
@@ -6726,7 +6739,7 @@ function parsePerPatientWorkbook(wb, fileName){
             return;
         }
         if(ynFields[mapped]){ result.record[mapped] = normalizeYN(v); return; }
-        if(mapped === 'Last_Admission'){ result.record.Last_Admission = formatDateCell(value); return; }
+        if(mapped === 'Last_Admission'){ result.record.Last_Admission = formatDateCell(_cellSrc(rowIdx, 1)); return; }
         if(mapped === 'Admissions'){
             var an = parseFloat(v);
             result.record.Admissions = isNaN(an) ? v : String(Math.round(an));
@@ -6754,16 +6767,28 @@ function parsePerPatientWorkbook(wb, fileName){
     var visitSheetName = wb.SheetNames.filter(function(n){ return n.toLowerCase().indexOf('progress')!==-1 || n.toLowerCase().indexOf('visit')!==-1 || n.toLowerCase().indexOf('note')!==-1; })[0];
     if(visitSheetName){
         var visitSheet = wb.Sheets[visitSheetName];
-        var vRows = XLSX.utils.sheet_to_json(visitSheet, {header:1, defval:'', raw:false});
+        // raw:true to keep numeric values precise. The date header row is read separately
+        // below using each cell's .w (Excel-formatted) text so D/M/Y strings stay intact.
+        var vRows = XLSX.utils.sheet_to_json(visitSheet, {header:1, defval:'', raw:true});
         if(vRows.length > 1){
-            // Visit dates are in row 1, columns C onward (index 2+)
-            var headerRow = vRows[0] || [];
+            // Visit dates are in row 1, columns C onward (index 2+).
+            // For each header cell, prefer the formatted text (.w) over the raw value (.v)
+            // — Excel serial-number dates render as numbers like 46143 in .v but display as
+            // "05/01/26" in .w, which is what the user typed.
             var visitCols = []; // [{colIdx, date}]
-            for(var c = 2; c < headerRow.length; c++){
-                var dt = headerRow[c];
-                if(dt !== null && dt !== undefined && String(dt).trim() !== ''){
-                    visitCols.push({colIdx: c, date: formatDateCell(dt)});
-                }
+            for(var c = 2; c < 200; c++){ // 200 = safe upper bound for visit columns
+                var addr = XLSX.utils.encode_cell({r:0, c:c});
+                var cell = visitSheet[addr];
+                if(!cell) continue;
+                // Skip cells with no useful content
+                var rawV = cell.v;
+                if(rawV === null || rawV === undefined || String(rawV).trim() === '') continue;
+                // Prefer formatted text when the cell is a date-formatted number; else use raw
+                var src;
+                if(cell.t === 'n' && cell.w){ src = cell.w; }       // date-formatted number — use display text
+                else if(cell.t === 's'){ src = cell.v; }            // string — use as-is
+                else { src = (cell.w || cell.v); }                  // fallback
+                visitCols.push({colIdx: c, date: formatDateCell(src)});
             }
             // Resolve missing years (e.g. "29/12" with no year) using chronological context
             var rawDateList = visitCols.map(function(v){ return v.date; });
