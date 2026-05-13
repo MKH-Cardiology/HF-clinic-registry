@@ -1633,6 +1633,14 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                 <button class="analytics-tab-btn" onclick="switchAnalyticsTab('outcomes',this)">Outcomes</button>
                 <button class="analytics-tab-btn" onclick="switchAnalyticsTab('gdmtgap',this)">GDMT Gaps</button>
                 <button class="analytics-tab-btn" onclick="switchAnalyticsTab('enrollment',this)">Enrollment</button>
+                <!-- Paper-grade tabs (Manuscript Mode) -->
+                <button class="analytics-tab-btn" style="background:linear-gradient(135deg,#0f3460,#16213e);color:#fff;font-weight:700;" onclick="switchAnalyticsTab('table1',this)"><i class="fa fa-table me-1"></i>Table 1</button>
+                <button class="analytics-tab-btn" style="background:linear-gradient(135deg,#0f3460,#16213e);color:#fff;font-weight:700;" onclick="switchAnalyticsTab('table2',this)"><i class="fa fa-table-list me-1"></i>Table 2</button>
+                <button class="analytics-tab-btn" style="background:linear-gradient(135deg,#0f3460,#16213e);color:#fff;font-weight:700;" onclick="switchAnalyticsTab('survival',this)"><i class="fa fa-chart-line me-1"></i>Survival</button>
+                <button class="analytics-tab-btn" style="background:linear-gradient(135deg,#0f3460,#16213e);color:#fff;font-weight:700;" onclick="switchAnalyticsTab('cascade',this)"><i class="fa fa-pills me-1"></i>GDMT Cascade</button>
+                <button class="analytics-tab-btn" style="background:linear-gradient(135deg,#0f3460,#16213e);color:#fff;font-weight:700;" onclick="switchAnalyticsTab('longitudinal',this)"><i class="fa fa-wave-square me-1"></i>Longitudinal</button>
+                <button class="analytics-tab-btn" style="background:linear-gradient(135deg,#0f3460,#16213e);color:#fff;font-weight:700;" onclick="switchAnalyticsTab('quality',this)"><i class="fa fa-award me-1"></i>Quality</button>
+                <button class="analytics-tab-btn" style="background:linear-gradient(135deg,#0f3460,#16213e);color:#fff;font-weight:700;" onclick="switchAnalyticsTab('special',this)"><i class="fa fa-flask me-1"></i>Special</button>
             </div>
             <div class="analytics-panel active" id="tab-overview">
                 <div class="row g-3">
@@ -1685,6 +1693,164 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                 <div class="analytics-card">
                     <div class="analytics-card-title"><i class="fa fa-chart-line"></i> Monthly New Patient Enrollment</div>
                     <div class="analytics-chart-wrap-lg"><canvas id="chartEnrollment"></canvas></div>
+                </div>
+            </div>
+            <!-- ============================================================ -->
+            <!-- PAPER-GRADE ANALYTICS PANELS (Manuscript Mode)               -->
+            <!-- Each panel renders into a container by ID; the JS layer fills -->
+            <!-- HTML + charts on demand when its tab is activated.            -->
+            <!-- ============================================================ -->
+            <div class="analytics-panel" id="tab-table1">
+                <div class="analytics-card">
+                    <div class="analytics-card-title"><i class="fa fa-table"></i> Table 1 — Baseline Characteristics (stratified by HF Phenotype)</div>
+                    <div class="text-muted small mb-2">Continuous variables: median [IQR] (Kruskal-Wallis). Categorical: n (%) (Chi-square or Fisher exact). 95% CIs for proportions (Wilson). <span class="text-warning">"n too small" = group n &lt; 10.</span></div>
+                    <div class="d-flex gap-2 mb-2 flex-wrap">
+                        <button class="btn btn-sm btn-outline-dark" onclick="copyTableToClipboard('table1Body')"><i class="fa fa-copy me-1"></i>Copy as TSV</button>
+                        <button class="btn btn-sm btn-outline-success" onclick="downloadPaperPNG('table1Card','Table1_Baseline')"><i class="fa fa-image me-1"></i>Save PNG</button>
+                    </div>
+                    <div id="table1Card" style="overflow-x:auto;background:#fff;padding:8px;"><div id="table1Body"></div></div>
+                </div>
+            </div>
+            <div class="analytics-panel" id="tab-table2">
+                <div class="analytics-card">
+                    <div class="analytics-card-title"><i class="fa fa-table-list"></i> Table 2 — Outcomes Overall and by HF Phenotype</div>
+                    <div class="text-muted small mb-2">Outcomes include mortality, HF readmission, LV recovery, lost-to-followup, advanced-HF referral.</div>
+                    <div class="d-flex gap-2 mb-2 flex-wrap">
+                        <button class="btn btn-sm btn-outline-dark" onclick="copyTableToClipboard('table2Body')"><i class="fa fa-copy me-1"></i>Copy as TSV</button>
+                        <button class="btn btn-sm btn-outline-success" onclick="downloadPaperPNG('table2Card','Table2_Outcomes')"><i class="fa fa-image me-1"></i>Save PNG</button>
+                    </div>
+                    <div id="table2Card" style="overflow-x:auto;background:#fff;padding:8px;"><div id="table2Body"></div></div>
+                </div>
+            </div>
+            <div class="analytics-panel" id="tab-survival">
+                <div class="analytics-card mb-3">
+                    <div class="analytics-card-title"><i class="fa fa-chart-line"></i> Figure 1A — Kaplan-Meier All-Cause Mortality</div>
+                    <div class="text-muted small mb-2">Time from enrollment to death. Censored at last visit or analysis date. Log-rank p-value reported.</div>
+                    <div class="d-flex gap-2 mb-2 flex-wrap align-items-center">
+                        <label class="small mb-0"><b>Stratify by:</b></label>
+                        <select class="form-select form-select-sm" id="kmStratify" style="width:auto;" onchange="buildSurvival()">
+                            <option value="HF_Type">HF Phenotype</option>
+                            <option value="Quad_GDMT">Quadruple GDMT</option>
+                            <option value="AgeGroup">Age Group</option>
+                            <option value="Gender">Gender</option>
+                            <option value="none">No stratification</option>
+                        </select>
+                        <button class="btn btn-sm btn-outline-success" onclick="downloadPaperPNG('kmMortalityCard','Fig1A_KM_Mortality')"><i class="fa fa-image me-1"></i>Save PNG</button>
+                    </div>
+                    <div id="kmMortalityCard" style="background:#fff;padding:8px;">
+                        <div class="analytics-chart-wrap-lg"><canvas id="kmMortalityChart"></canvas></div>
+                        <div id="kmMortalityLogrank" class="small mt-1"></div>
+                    </div>
+                </div>
+                <div class="analytics-card">
+                    <div class="analytics-card-title"><i class="fa fa-hospital"></i> Figure 1B — Time to First HF Readmission</div>
+                    <div class="text-muted small mb-2">Time from enrollment to first readmission (Last_Admission). Patients without readmission censored.</div>
+                    <button class="btn btn-sm btn-outline-success mb-2" onclick="downloadPaperPNG('kmReadmitCard','Fig1B_KM_Readmission')"><i class="fa fa-image me-1"></i>Save PNG</button>
+                    <div id="kmReadmitCard" style="background:#fff;padding:8px;">
+                        <div class="analytics-chart-wrap-lg"><canvas id="kmReadmitChart"></canvas></div>
+                        <div id="kmReadmitLogrank" class="small mt-1"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="analytics-panel" id="tab-cascade">
+                <div class="analytics-card mb-3">
+                    <div class="analytics-card-title"><i class="fa fa-stairs"></i> GDMT Cascade — HFrEF</div>
+                    <div class="text-muted small mb-2">Step-by-step attrition: diagnosed → on ACEi/ARB/ARNI → +BB → +MRA → +SGLT2i → all four pillars → on ≥50% target dose → LV recovered.</div>
+                    <button class="btn btn-sm btn-outline-success mb-2" onclick="downloadPaperPNG('cascadeCard','Fig2_GDMT_Cascade')"><i class="fa fa-image me-1"></i>Save PNG</button>
+                    <div id="cascadeCard" style="background:#fff;padding:8px;">
+                        <div id="cascadeBody"></div>
+                    </div>
+                </div>
+                <div class="analytics-card mb-3">
+                    <div class="analytics-card-title"><i class="fa fa-bars-staggered"></i> Pillar Combination Profile</div>
+                    <div class="text-muted small mb-2">How many of the 4 pillars each HFrEF patient is on (0-4).</div>
+                    <div class="analytics-chart-wrap"><canvas id="pillarCountChart"></canvas></div>
+                </div>
+                <div class="analytics-card">
+                    <div class="analytics-card-title"><i class="fa fa-gauge-high"></i> Dose-Titration Ladder</div>
+                    <div class="text-muted small mb-2">Among patients on each pillar, the % at ≥100%, 50-99%, &lt;50% of target dose.</div>
+                    <div id="doseLadderBody"></div>
+                </div>
+            </div>
+            <div class="analytics-panel" id="tab-longitudinal">
+                <div class="analytics-card mb-3">
+                    <div class="analytics-card-title"><i class="fa fa-wave-square"></i> Longitudinal Trajectories</div>
+                    <div class="text-muted small mb-2">Mean ± 95% CI across visits 1-N. Stratified by HF phenotype.</div>
+                    <div class="d-flex gap-2 mb-2 flex-wrap align-items-center">
+                        <label class="small mb-0"><b>Variable:</b></label>
+                        <select class="form-select form-select-sm" id="trajVar" style="width:auto;" onchange="buildLongitudinal()">
+                            <option value="V_NYHA">NYHA Class</option>
+                            <option value="V_KCCQ">KCCQ Score</option>
+                            <option value="V_NTproBNP">NT-proBNP</option>
+                            <option value="V_eGFR">eGFR</option>
+                            <option value="V_K">Potassium</option>
+                            <option value="V_Weight">Weight</option>
+                            <option value="V_BP_Sys">Systolic BP</option>
+                            <option value="V_BP_Dia">Diastolic BP</option>
+                        </select>
+                        <button class="btn btn-sm btn-outline-success" onclick="downloadPaperPNG('trajCard','Fig3_Trajectories')"><i class="fa fa-image me-1"></i>Save PNG</button>
+                    </div>
+                    <div id="trajCard" style="background:#fff;padding:8px;"><div class="analytics-chart-wrap-lg"><canvas id="trajChart"></canvas></div></div>
+                </div>
+                <div class="analytics-card">
+                    <div class="analytics-card-title"><i class="fa fa-chart-column"></i> KCCQ Change Distribution (Latest − Baseline)</div>
+                    <div class="text-muted small mb-2">Histogram. Vertical lines mark MCID (±5 pts) and large clinical change (±10 pts).</div>
+                    <button class="btn btn-sm btn-outline-success mb-2" onclick="downloadPaperPNG('kccqChangeCard','Fig4_KCCQ_Change')"><i class="fa fa-image me-1"></i>Save PNG</button>
+                    <div id="kccqChangeCard" style="background:#fff;padding:8px;">
+                        <div class="analytics-chart-wrap"><canvas id="kccqChangeChart"></canvas></div>
+                        <div id="kccqChangeStats" class="small mt-2"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="analytics-panel" id="tab-quality">
+                <div class="analytics-card mb-3">
+                    <div class="analytics-card-title"><i class="fa fa-award"></i> Guideline Benchmark Gaps — HFrEF GDMT</div>
+                    <div class="text-muted small mb-2">Our uptake vs published quality benchmarks (Get-With-The-Guidelines targets shown as red reference line). Negative gap = under-treatment.</div>
+                    <button class="btn btn-sm btn-outline-success mb-2" onclick="downloadPaperPNG('benchCard','Fig5_Benchmarks')"><i class="fa fa-image me-1"></i>Save PNG</button>
+                    <div id="benchCard" style="background:#fff;padding:8px;">
+                        <div class="analytics-chart-wrap"><canvas id="benchChart"></canvas></div>
+                        <div id="benchTable" class="mt-3"></div>
+                    </div>
+                </div>
+                <div class="analytics-card mb-3">
+                    <div class="analytics-card-title"><i class="fa fa-user-doctor"></i> Physician Variation — GDMT Completeness</div>
+                    <div class="text-muted small mb-2">Funnel plot: each dot = one physician. Lines = 95% and 99.8% control limits around overall mean. Dots outside limits = statistically significant outliers.</div>
+                    <button class="btn btn-sm btn-outline-success mb-2" onclick="downloadPaperPNG('funnelCard','Fig6_Funnel')"><i class="fa fa-image me-1"></i>Save PNG</button>
+                    <div id="funnelCard" style="background:#fff;padding:8px;">
+                        <div class="analytics-chart-wrap-lg"><canvas id="funnelChart"></canvas></div>
+                    </div>
+                </div>
+                <div class="analytics-card">
+                    <div class="analytics-card-title"><i class="fa fa-table-cells"></i> Comorbidity Co-occurrence Matrix</div>
+                    <div class="text-muted small mb-2">% of patients with each pair of comorbidities present together. Darker = higher co-occurrence.</div>
+                    <button class="btn btn-sm btn-outline-success mb-2" onclick="downloadPaperPNG('comoMatrixCard','Fig7_ComorbHeatmap')"><i class="fa fa-image me-1"></i>Save PNG</button>
+                    <div id="comoMatrixCard" style="background:#fff;padding:8px;"><div id="comoMatrixBody"></div></div>
+                </div>
+            </div>
+            <div class="analytics-panel" id="tab-special">
+                <div class="analytics-card mb-3">
+                    <div class="analytics-card-title"><i class="fa fa-bolt"></i> Inotrope &amp; MCS Utilization</div>
+                    <div class="text-muted small mb-2">Use of inotropes and mechanical circulatory support, with crude mortality by support type.</div>
+                    <button class="btn btn-sm btn-outline-success mb-2" onclick="downloadPaperPNG('mcsCard','Fig8_MCS')"><i class="fa fa-image me-1"></i>Save PNG</button>
+                    <div id="mcsCard" style="background:#fff;padding:8px;"><div id="mcsBody"></div></div>
+                </div>
+                <div class="analytics-card mb-3">
+                    <div class="analytics-card-title"><i class="fa fa-droplet"></i> Iron Deficiency Screening &amp; Treatment</div>
+                    <div class="text-muted small mb-2">ESC HF criteria for iron deficiency: ferritin &lt;100 µg/L OR (100-300 + TSAT &lt;20%). Treated = on iron therapy.</div>
+                    <button class="btn btn-sm btn-outline-success mb-2" onclick="downloadPaperPNG('ironCard','Fig9_Iron')"><i class="fa fa-image me-1"></i>Save PNG</button>
+                    <div id="ironCard" style="background:#fff;padding:8px;"><div id="ironBody"></div></div>
+                </div>
+                <div class="analytics-card mb-3">
+                    <div class="analytics-card-title"><i class="fa fa-heart-pulse"></i> Echocardiographic Profile by Phenotype</div>
+                    <div class="text-muted small mb-2">Median [IQR] LVEDVI, LVESVI, LVEF, RVEF and LGE prevalence stratified by HF type.</div>
+                    <button class="btn btn-sm btn-outline-success mb-2" onclick="downloadPaperPNG('echoPhenoCard','Fig10_EchoPhenotype')"><i class="fa fa-image me-1"></i>Save PNG</button>
+                    <div id="echoPhenoCard" style="background:#fff;padding:8px;"><div id="echoPhenoBody"></div></div>
+                </div>
+                <div class="analytics-card">
+                    <div class="analytics-card-title"><i class="fa fa-chart-line"></i> Cumulative Enrollment Curve</div>
+                    <div class="text-muted small mb-2">Cumulative active patient count over time (paper-quality version with axis labels and gridlines).</div>
+                    <button class="btn btn-sm btn-outline-success mb-2" onclick="downloadPaperPNG('cumEnrollCard','Fig11_CumEnrollment')"><i class="fa fa-image me-1"></i>Save PNG</button>
+                    <div id="cumEnrollCard" style="background:#fff;padding:8px;"><div class="analytics-chart-wrap-lg"><canvas id="cumEnrollChart"></canvas></div></div>
                 </div>
             </div>
         </div>
@@ -4563,7 +4729,7 @@ function generatePDF(data,visitsData,id){
 }
 
 // ===== ANALYTICS ENGINE (unchanged) =====
-function switchAnalyticsTab(tab,btn){document.querySelectorAll('.analytics-panel').forEach(function(p){p.classList.remove('active');});document.querySelectorAll('.analytics-tab-btn').forEach(function(b){b.classList.remove('active');});document.getElementById('tab-'+tab).classList.add('active');if(btn)btn.classList.add('active');}
+function switchAnalyticsTab(tab,btn){document.querySelectorAll('.analytics-panel').forEach(function(p){p.classList.remove('active');});document.querySelectorAll('.analytics-tab-btn').forEach(function(b){b.classList.remove('active');});document.getElementById('tab-'+tab).classList.add('active');if(btn)btn.classList.add('active');if(typeof _maybeBuildPaperTab==='function') _maybeBuildPaperTab(tab);}
 function destroyChart(id){if(analyticsCharts[id]){analyticsCharts[id].destroy();delete analyticsCharts[id];}}
 function makeChart(id,type,labels,datasets,options){destroyChart(id);var ctx=document.getElementById(id);if(!ctx)return;analyticsCharts[id]=new Chart(ctx.getContext('2d'),{type:type,data:{labels:labels,datasets:datasets},options:Object.assign({responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10},padding:8}}}},options||{})});}
 var PIE_COLORS=['#8b0000','#c0392b','#e74c3c','#f39c12','#f1c40f','#27ae60','#2980b9','#8e44ad','#16a085','#e67e22'];
@@ -4738,6 +4904,930 @@ function buildGDMTGap(d,n){
 function buildEnrollment(d,n){var months={};d.forEach(function(p){if(!p.timestamp)return;var m=p.timestamp.substring(0,7);months[m]=(months[m]||0)+1;});var sorted=Object.keys(months).sort();makeChart('chartEnrollment','line',sorted.map(function(m){var parts=m.split('-');return parts[1]+'/'+parts[0];}),
     [{label:'New Patients',data:sorted.map(function(m){return months[m];}),borderColor:'#8b0000',backgroundColor:'rgba(139,0,0,0.1)',fill:true,tension:0.3,pointRadius:5,pointBackgroundColor:'#8b0000'}],
     {plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}});}
+
+/* ====================================================================
+   MANUSCRIPT-MODE ANALYTICS — paper-grade tables, figures, and stats
+   ==================================================================== */
+
+// ---------- STATS ENGINE ----------
+var Stats = (function(){
+    function mean(a){ a=a.filter(_isNum); if(!a.length)return null; var s=0; for(var i=0;i<a.length;i++)s+=a[i]; return s/a.length; }
+    function sd(a){ a=a.filter(_isNum); if(a.length<2)return null; var m=mean(a),s=0; for(var i=0;i<a.length;i++)s+=Math.pow(a[i]-m,2); return Math.sqrt(s/(a.length-1)); }
+    function se(a){ var s=sd(a); var n=a.filter(_isNum).length; return s===null?null:s/Math.sqrt(n); }
+    function median(a){ a=a.filter(_isNum).slice().sort(function(x,y){return x-y;}); if(!a.length)return null; var m=Math.floor(a.length/2); return a.length%2?a[m]:(a[m-1]+a[m])/2; }
+    function quantile(a,q){ a=a.filter(_isNum).slice().sort(function(x,y){return x-y;}); if(!a.length)return null; var p=(a.length-1)*q,b=Math.floor(p),r=p-b; return a[b+1]!==undefined?a[b]+r*(a[b+1]-a[b]):a[b]; }
+    function iqr(a){ return [quantile(a,0.25),quantile(a,0.75)]; }
+    function _isNum(x){ return typeof x==='number' && !isNaN(x) && isFinite(x); }
+    function _logGamma(x){ // Stirling, sufficient for the precision we need
+        var cof=[76.18009172947146,-86.50532032941677,24.01409824083091,-1.231739572450155,0.001208650973866179,-5.395239384953e-6];
+        var ser=1.000000000190015, xx=x, y=x, tmp=x+5.5; tmp-=(xx+0.5)*Math.log(tmp);
+        for(var j=0;j<6;j++){ y+=1; ser+=cof[j]/y; }
+        return -tmp+Math.log(2.5066282746310005*ser/xx);
+    }
+    // Lower regularized incomplete gamma — used for chi-square p-value
+    function _gammp(a,x){
+        if(x<0||a<=0) return 0;
+        if(x<a+1){ // series
+            var ap=a,sum=1/a,del=sum;
+            for(var n=1;n<=200;n++){ ap+=1; del*=x/ap; sum+=del; if(Math.abs(del)<Math.abs(sum)*3e-7) return sum*Math.exp(-x+a*Math.log(x)-_logGamma(a)); }
+            return sum*Math.exp(-x+a*Math.log(x)-_logGamma(a));
+        } else { // continued fraction (1 - Q)
+            var b=x+1-a,c=1e30,d=1/b,h=d;
+            for(var i=1;i<=200;i++){ var an=-i*(i-a); b+=2; d=an*d+b; if(Math.abs(d)<1e-30)d=1e-30; c=b+an/c; if(Math.abs(c)<1e-30)c=1e-30; d=1/d; var del2=d*c; h*=del2; if(Math.abs(del2-1)<3e-7) break; }
+            return 1 - Math.exp(-x+a*Math.log(x)-_logGamma(a))*h;
+        }
+    }
+    function chiSquarePvalue(chiSq, df){ if(chiSq<=0||df<=0) return 1; return 1 - _gammp(df/2, chiSq/2); }
+    // Build contingency table { rowLabels, colLabels, matrix } from arrays of equal length
+    function contingency(rowVals,colVals){
+        var rows=[], cols=[], i;
+        for(i=0;i<rowVals.length;i++){
+            if(rows.indexOf(rowVals[i])<0) rows.push(rowVals[i]);
+            if(cols.indexOf(colVals[i])<0) cols.push(colVals[i]);
+        }
+        var m=rows.map(function(){ return cols.map(function(){return 0;}); });
+        for(i=0;i<rowVals.length;i++){ m[rows.indexOf(rowVals[i])][cols.indexOf(colVals[i])]++; }
+        return {rows:rows,cols:cols,m:m};
+    }
+    function chiSquareTest(rowVals,colVals){
+        var ct=contingency(rowVals,colVals);
+        var R=ct.rows.length, C=ct.cols.length;
+        var rt=new Array(R).fill(0), ct_=new Array(C).fill(0), N=0;
+        for(var i=0;i<R;i++) for(var j=0;j<C;j++){ rt[i]+=ct.m[i][j]; ct_[j]+=ct.m[i][j]; N+=ct.m[i][j]; }
+        if(N===0||R<2||C<2) return {chi2:NaN,df:0,p:NaN,cramerV:NaN,N:0,minExp:0};
+        var chi2=0, minExp=Infinity;
+        for(var ii=0;ii<R;ii++) for(var jj=0;jj<C;jj++){
+            var e=rt[ii]*ct_[jj]/N; if(e<minExp) minExp=e;
+            if(e>0) chi2 += Math.pow(ct.m[ii][jj]-e,2)/e;
+        }
+        var df=(R-1)*(C-1);
+        var p=chiSquarePvalue(chi2,df);
+        var V=Math.sqrt(chi2/(N*Math.min(R-1,C-1)));
+        return {chi2:chi2,df:df,p:p,cramerV:V,N:N,minExp:minExp};
+    }
+    // Welch's t-test (two-sample, unequal variance)
+    function tTestWelch(a,b){
+        a=a.filter(_isNum); b=b.filter(_isNum);
+        if(a.length<2||b.length<2) return {t:NaN,df:NaN,p:NaN,d:NaN};
+        var ma=mean(a),mb=mean(b),va=Math.pow(sd(a),2),vb=Math.pow(sd(b),2),na=a.length,nb=b.length;
+        var t=(ma-mb)/Math.sqrt(va/na+vb/nb);
+        var df=Math.pow(va/na+vb/nb,2)/(Math.pow(va/na,2)/(na-1)+Math.pow(vb/nb,2)/(nb-1));
+        // approximate two-tailed p via student-t survival using incomplete beta
+        var x=df/(df+t*t);
+        var p=_incompleteBeta(df/2,0.5,x);
+        var sp=Math.sqrt(((na-1)*va+(nb-1)*vb)/(na+nb-2));
+        var d=(ma-mb)/sp;
+        return {t:t,df:df,p:p,d:d};
+    }
+    function _incompleteBeta(a,b,x){
+        if(x<=0) return 0; if(x>=1) return 1;
+        var bt=Math.exp(_logGamma(a+b)-_logGamma(a)-_logGamma(b)+a*Math.log(x)+b*Math.log(1-x));
+        if(x<(a+1)/(a+b+2)) return bt*_betacf(a,b,x)/a;
+        return 1-bt*_betacf(b,a,1-x)/b;
+    }
+    function _betacf(a,b,x){
+        var qab=a+b,qap=a+1,qam=a-1,c=1,d=1-qab*x/qap;
+        if(Math.abs(d)<1e-30)d=1e-30; d=1/d; var h=d;
+        for(var m=1;m<=200;m++){
+            var m2=2*m, aa=m*(b-m)*x/((qam+m2)*(a+m2));
+            d=1+aa*d; if(Math.abs(d)<1e-30)d=1e-30; c=1+aa/c; if(Math.abs(c)<1e-30)c=1e-30; d=1/d; h*=d*c;
+            aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));
+            d=1+aa*d; if(Math.abs(d)<1e-30)d=1e-30; c=1+aa/c; if(Math.abs(c)<1e-30)c=1e-30; d=1/d; var del=d*c; h*=del;
+            if(Math.abs(del-1)<3e-7) return h;
+        }
+        return h;
+    }
+    // Kruskal-Wallis (>= 2 groups). groups = array of arrays of numbers
+    function kruskalWallis(groups){
+        groups=groups.map(function(g){ return g.filter(_isNum); }).filter(function(g){return g.length>0;});
+        if(groups.length<2) return {H:NaN,df:0,p:NaN,N:0};
+        var all=[]; groups.forEach(function(g,i){ g.forEach(function(v){ all.push({v:v,g:i}); }); });
+        all.sort(function(x,y){return x.v-y.v;});
+        // assign ranks (average for ties)
+        var i=0;
+        while(i<all.length){
+            var j=i; while(j<all.length-1 && all[j+1].v===all[i].v) j++;
+            var avgRank=(i+j)/2 + 1;
+            for(var k=i;k<=j;k++) all[k].r=avgRank;
+            i=j+1;
+        }
+        var N=all.length, sumByG={}, nByG={};
+        groups.forEach(function(_,gi){ sumByG[gi]=0; nByG[gi]=0; });
+        all.forEach(function(x){ sumByG[x.g]+=x.r; nByG[x.g]++; });
+        var H=0;
+        Object.keys(nByG).forEach(function(gi){ H += sumByG[gi]*sumByG[gi]/nByG[gi]; });
+        H = (12/(N*(N+1)))*H - 3*(N+1);
+        var df=groups.length-1;
+        return {H:H,df:df,p:chiSquarePvalue(H,df),N:N};
+    }
+    // Wilson 95% CI for a proportion
+    function wilsonCI(success,n){
+        if(n===0) return [null,null];
+        var p=success/n, z=1.959964;
+        var d=1+z*z/n;
+        var c=p+z*z/(2*n);
+        var hw=z*Math.sqrt(p*(1-p)/n + z*z/(4*n*n));
+        return [Math.max(0,(c-hw)/d), Math.min(1,(c+hw)/d)];
+    }
+    // Format p-value paper-style
+    function fmtP(p){
+        if(p===null||isNaN(p)||p===undefined) return '—';
+        if(p<0.001) return '<0.001';
+        if(p<0.01) return p.toFixed(3);
+        return p.toFixed(2);
+    }
+    function fmtN(v,decimals){
+        if(v===null||v===undefined||isNaN(v)) return '—';
+        if(decimals===undefined) decimals=1;
+        return (Math.round(v*Math.pow(10,decimals))/Math.pow(10,decimals)).toFixed(decimals);
+    }
+    return {mean:mean,sd:sd,se:se,median:median,quantile:quantile,iqr:iqr,
+            chiSquareTest:chiSquareTest,tTestWelch:tTestWelch,kruskalWallis:kruskalWallis,
+            wilsonCI:wilsonCI,fmtP:fmtP,fmtN:fmtN,chiSquarePvalue:chiSquarePvalue};
+})();
+
+// ---------- ALL-VISITS CACHE (loaded once, on first tab activation) ----------
+var _allVisitsCache = null; // { patientId: [visit1, visit2, ...] sorted asc by visitDate }
+var _allVisitsLoading = false;
+function loadAllVisits(){
+    if(_allVisitsCache) return Promise.resolve(_allVisitsCache);
+    if(_allVisitsLoading) return new Promise(function(resolve){
+        var i=setInterval(function(){ if(_allVisitsCache){ clearInterval(i); resolve(_allVisitsCache); } },200);
+    });
+    _allVisitsLoading = true;
+    var promises = allPatientsData.map(function(p){
+        return db.collection("patients").doc(p.id).collection("visits").orderBy("visitDate","asc").get()
+            .then(function(s){ var arr=[]; s.forEach(function(doc){ arr.push(doc.data()); }); return {id:p.id, visits:arr}; })
+            .catch(function(){ return {id:p.id, visits:[]}; });
+    });
+    return Promise.all(promises).then(function(results){
+        _allVisitsCache = {};
+        results.forEach(function(r){ _allVisitsCache[r.id] = r.visits; });
+        _allVisitsLoading = false;
+        return _allVisitsCache;
+    });
+}
+
+// ---------- HELPERS ----------
+function _ageGroup(p){ var a=parseInt(p.Age,10); if(isNaN(a))return 'Unknown'; if(a<50)return '<50'; if(a<65)return '50-64'; if(a<75)return '65-74'; return '≥75'; }
+function _hfPheno(p){ if(p.HF_Type==='HFrEF'||p.HF_Type==='HFmrEF'||p.HF_Type==='HFpEF') return p.HF_Type; return 'Other'; }
+function _bpSys(p){ var v=p.BP||p._latest&&p._latest.BP||''; var m=String(v).match(/(\d{2,3})\s*\/\s*(\d{2,3})/); return m?parseInt(m[1],10):null; }
+function _bpDia(p){ var v=p.BP||p._latest&&p._latest.BP||''; var m=String(v).match(/(\d{2,3})\s*\/\s*(\d{2,3})/); return m?parseInt(m[2],10):null; }
+function _enrollDate(p){ return p.timestamp ? new Date(p.timestamp) : null; }
+function _lastSeenDate(p){
+    // latest of: any visit date, Last_Admission, Next_Appt (passed date), or fall back to enroll
+    var dates=[];
+    if(p._latestVisit && p._latestVisit.visitDate) dates.push(new Date(p._latestVisit.visitDate));
+    if(p.Last_Admission) dates.push(new Date(p.Last_Admission));
+    if(dates.length===0 && p.timestamp) dates.push(new Date(p.timestamp));
+    return dates.length ? new Date(Math.max.apply(null, dates.map(function(d){return d.getTime();}))) : null;
+}
+function _isDead(p){ return p.Mortality === 'In-hospital' || p.Mortality === 'Out-of-hospital' || p.Mortality === 'Dead-HF' || p.Mortality === 'Dead-Other'; }
+function _ironDeficient(p){
+    // ESC criteria — uses baseline labs (would need visit-by-visit ideally)
+    var ferritin = parseFloat(p.Lab_Ferritin);
+    var tsat = parseFloat(p.Lab_TrSats);
+    if(isNaN(ferritin) && isNaN(tsat)) return null; // not screened
+    if(!isNaN(ferritin) && ferritin < 100) return true;
+    if(!isNaN(ferritin) && ferritin <= 300 && !isNaN(tsat) && tsat < 20) return true;
+    return false;
+}
+function _ironScreened(p){ return !isNaN(parseFloat(p.Lab_Ferritin)) || !isNaN(parseFloat(p.Lab_TrSats)); }
+
+// Format median [IQR] cell
+function _fmtIQR(arr){
+    var clean=arr.filter(function(x){ return typeof x==='number' && !isNaN(x); });
+    if(clean.length===0) return '—';
+    var m=Stats.median(clean), q=Stats.iqr(clean);
+    return Stats.fmtN(m)+' ['+Stats.fmtN(q[0])+'–'+Stats.fmtN(q[1])+']';
+}
+function _fmtPct(success,n){
+    if(n===0) return '—';
+    var p=100*success/n;
+    var ci=Stats.wilsonCI(success,n);
+    return success+'/'+n+' ('+p.toFixed(1)+'%, 95% CI '+(ci[0]*100).toFixed(1)+'–'+(ci[1]*100).toFixed(1)+')';
+}
+
+// Variable name → display label & accessor function (numeric or categorical)
+var T1_VARS = [
+    {label:'Demographics',header:true},
+    {label:'Age, years',     fn:function(p){return parseFloat(p.Age);}, type:'num'},
+    {label:'Female sex',     fn:function(p){return p.Gender==='Female'?'Yes':'No';}, type:'cat'},
+    {label:'BMI, kg/m²',     fn:function(p){return parseFloat(p.BMI);}, type:'num'},
+    {label:'NYHA class',     fn:function(p){return p.NYHA||'Unknown';}, type:'cat'},
+    {label:'KCCQ score',     fn:function(p){return parseFloat(p.KCCQ);}, type:'num'},
+    {label:'Comorbidities',header:true},
+    {label:'Diabetes mellitus', fn:function(p){return p.DM==='Yes'?'Yes':'No';}, type:'cat'},
+    {label:'Hypertension',      fn:function(p){return p.HTN==='Yes'?'Yes':'No';}, type:'cat'},
+    {label:'Atrial fibrillation',fn:function(p){return p.AF==='Yes'?'Yes':'No';}, type:'cat'},
+    {label:'IHD',               fn:function(p){return p.IHD==='Yes'?'Yes':'No';}, type:'cat'},
+    {label:'CKD',               fn:function(p){return p.CKD==='Yes'?'Yes':'No';}, type:'cat'},
+    {label:'Stroke',            fn:function(p){return p.CVA==='Yes'?'Yes':'No';}, type:'cat'},
+    {label:'Obesity',           fn:function(p){return p.Obese==='Yes'?'Yes':'No';}, type:'cat'},
+    {label:'Smoking (current)', fn:function(p){return p.Smoker==='Current'?'Yes':'No';}, type:'cat'},
+    {label:'Imaging & labs',header:true},
+    {label:'LVEF, %',           fn:function(p){return parseFloat(p.EF_Diagnosis);}, type:'num'},
+    {label:'eGFR, mL/min/1.73m²',fn:function(p){return parseFloat(p.Lab_eGFR);}, type:'num'},
+    {label:'Sodium, mmol/L',    fn:function(p){return parseFloat(p.Lab_Na);}, type:'num'},
+    {label:'Potassium, mmol/L', fn:function(p){return parseFloat(p.Lab_K);}, type:'num'},
+    {label:'Hemoglobin, g/dL',  fn:function(p){return parseFloat(p.Lab_Hb);}, type:'num'},
+    {label:'NT-proBNP, pg/mL',  fn:function(p){return parseFloat(p.Lab_BNP_only)||parseFloat(p.Lab_BNP);}, type:'num'},
+    {label:'Medications (baseline)',header:true},
+    {label:'ACEi/ARB',          fn:function(p){var v=p.Med_ACEiARB; return v&&v!=='No'&&v!=='None'?'Yes':'No';}, type:'cat'},
+    {label:'ARNI',              fn:function(p){return p.Med_ARNI==='Yes'?'Yes':'No';}, type:'cat'},
+    {label:'Beta-blocker',      fn:function(p){var v=p.Med_BB; return v&&v!=='No'&&v!=='None'?'Yes':'No';}, type:'cat'},
+    {label:'MRA',               fn:function(p){var v=p.Med_MRA; return v&&v!=='No'&&v!=='None'?'Yes':'No';}, type:'cat'},
+    {label:'SGLT2i',            fn:function(p){var v=p.Med_SGLT2i; return v&&v!=='No'&&v!=='None'?'Yes':'No';}, type:'cat'},
+    {label:'Loop diuretic',     fn:function(p){var v=p.Med_Diuretic; return v&&v!=='No'&&v!=='None'?'Yes':'No';}, type:'cat'},
+    {label:'OAC',               fn:function(p){var v=p.Med_OAC; return v&&v!=='No'&&v!=='None'?'Yes':'No';}, type:'cat'},
+    {label:'Statin',            fn:function(p){var v=p.Med_Statin; return v&&v!=='No'&&v!=='None'?'Yes':'No';}, type:'cat'}
+];
+
+// ---------- TABLE 1 ----------
+function buildTable1(){
+    var d=allPatientsData; if(!d||!d.length){ document.getElementById('table1Body').innerHTML='<div class="text-muted small">No data.</div>'; return; }
+    var groups=['HFrEF','HFmrEF','HFpEF'];
+    var byG={}; groups.forEach(function(g){ byG[g]=d.filter(function(p){return _hfPheno(p)===g;}); });
+    var overall=d, MIN_N=10;
+    var html='<table class="table table-sm table-bordered" style="font-size:0.8rem;background:#fff;border-collapse:collapse;">';
+    html+='<thead style="background:#0f3460;color:#fff;"><tr><th style="text-align:left;">Variable</th>';
+    html+='<th>Overall<br><span style="font-weight:400;font-size:0.7rem;">(n='+overall.length+')</span></th>';
+    groups.forEach(function(g){
+        var n=byG[g].length;
+        html+='<th>'+g+'<br><span style="font-weight:400;font-size:0.7rem;">(n='+n+')</span></th>';
+    });
+    html+='<th>p-value</th></tr></thead><tbody>';
+    T1_VARS.forEach(function(v){
+        if(v.header){
+            html+='<tr style="background:#f8f9fa;"><td colspan="'+(2+groups.length+1)+'" style="font-weight:700;color:#0f3460;font-size:0.78rem;padding:6px 8px;">'+v.label+'</td></tr>';
+            return;
+        }
+        html+='<tr><td style="text-align:left;padding:5px 8px;">'+v.label+'</td>';
+        var overallVals = overall.map(v.fn);
+        if(v.type==='num'){
+            html+='<td>'+_fmtIQR(overallVals)+'</td>';
+            var groupVals=groups.map(function(g){ return byG[g].map(v.fn); });
+            groups.forEach(function(g,i){ html+='<td>'+(byG[g].length<MIN_N?'<i class="text-warning small">n too small</i>':_fmtIQR(groupVals[i]))+'</td>'; });
+            // Kruskal-Wallis across groups (only if all have ≥ MIN_N)
+            var anyTooSmall = groups.some(function(g){ return byG[g].length<MIN_N; });
+            if(anyTooSmall){ html+='<td><i class="text-warning small">n too small</i></td>'; }
+            else { var kw=Stats.kruskalWallis(groupVals); html+='<td>'+Stats.fmtP(kw.p)+'</td>'; }
+        } else { // categorical Yes/No (or multi-level)
+            var yesAll = overallVals.filter(function(x){return x==='Yes';}).length;
+            html+='<td>'+_fmtPct(yesAll, overall.length)+'</td>';
+            var yesByG = groups.map(function(g){ return byG[g].map(v.fn).filter(function(x){return x==='Yes';}).length; });
+            groups.forEach(function(g,i){
+                var n=byG[g].length;
+                html+='<td>'+(n<MIN_N?'<i class="text-warning small">n too small</i>':_fmtPct(yesByG[i],n))+'</td>';
+            });
+            var anyTooSmall2 = groups.some(function(g){ return byG[g].length<MIN_N; });
+            if(anyTooSmall2){ html+='<td><i class="text-warning small">n too small</i></td>'; }
+            else {
+                // chi-square across the three groups
+                var rowVals=[], colVals=[];
+                groups.forEach(function(g){ byG[g].forEach(function(p){ rowVals.push(g); colVals.push(v.fn(p)); }); });
+                var ct=Stats.chiSquareTest(rowVals,colVals);
+                html+='<td>'+Stats.fmtP(ct.p)+(ct.minExp<5?' <span class="text-warning small" title="One or more expected cell counts <5; consider Fisher exact">⚠</span>':'')+'</td>';
+            }
+        }
+        html+='</tr>';
+    });
+    html+='</tbody></table>';
+    document.getElementById('table1Body').innerHTML = html;
+}
+
+// ---------- TABLE 2 (Outcomes) ----------
+function buildTable2(){
+    var d=allPatientsData, groups=['HFrEF','HFmrEF','HFpEF'], MIN_N=10;
+    var byG={}; groups.forEach(function(g){ byG[g]=d.filter(function(p){return _hfPheno(p)===g;}); });
+    var OUTCOMES = [
+        {label:'All-cause mortality', fn:function(p){return _isDead(p)?'Yes':'No';}, type:'cat'},
+        {label:'In-hospital mortality', fn:function(p){return p.Mortality==='In-hospital'?'Yes':'No';}, type:'cat'},
+        {label:'Any HF readmission', fn:function(p){return (parseInt(p.Admissions,10)||0)>0?'Yes':'No';}, type:'cat'},
+        {label:'LV recovery', fn:function(p){return p.Recovered_LV==='Yes'?'Yes':'No';}, type:'cat'},
+        {label:'Quadruple GDMT', fn:function(p){return p.Quad_GDMT==='Yes'?'Yes':'No';}, type:'cat'},
+        {label:'On maximum GDMT doses', fn:function(p){return p.Max_GDMT==='Yes'?'Yes':'No';}, type:'cat'},
+        {label:'Advanced HF therapy', fn:function(p){return p.Adv_HF_Therapy==='Yes'?'Yes':'No';}, type:'cat'},
+        {label:'Strong HF eligible', fn:function(p){return p.Strong_HF==='Yes'?'Yes':'No';}, type:'cat'},
+        {label:'Lost to follow-up', fn:function(p){return p.LostFU==='Yes'?'Yes':'No';}, type:'cat'},
+        {label:'Number of admissions', fn:function(p){return parseFloat(p.Admissions);}, type:'num'},
+        {label:'Length of stay (days)', fn:function(p){return parseFloat(p.LOS);}, type:'num'}
+    ];
+    var html='<table class="table table-sm table-bordered" style="font-size:0.8rem;background:#fff;border-collapse:collapse;">';
+    html+='<thead style="background:#0f3460;color:#fff;"><tr><th style="text-align:left;">Outcome</th>';
+    html+='<th>Overall<br><span style="font-weight:400;font-size:0.7rem;">(n='+d.length+')</span></th>';
+    groups.forEach(function(g){ html+='<th>'+g+'<br><span style="font-weight:400;font-size:0.7rem;">(n='+byG[g].length+')</span></th>'; });
+    html+='<th>p-value</th></tr></thead><tbody>';
+    OUTCOMES.forEach(function(o){
+        html+='<tr><td style="text-align:left;padding:5px 8px;">'+o.label+'</td>';
+        var overallVals = d.map(o.fn);
+        if(o.type==='num'){
+            html+='<td>'+_fmtIQR(overallVals)+'</td>';
+            var gv=groups.map(function(g){ return byG[g].map(o.fn); });
+            groups.forEach(function(g,i){ html+='<td>'+(byG[g].length<MIN_N?'<i class="text-warning small">n too small</i>':_fmtIQR(gv[i]))+'</td>'; });
+            var anyTooSmall=groups.some(function(g){return byG[g].length<MIN_N;});
+            html+='<td>'+(anyTooSmall?'<i class="text-warning small">n too small</i>':Stats.fmtP(Stats.kruskalWallis(gv).p))+'</td>';
+        } else {
+            var yesAll=overallVals.filter(function(x){return x==='Yes';}).length;
+            html+='<td>'+_fmtPct(yesAll,d.length)+'</td>';
+            var yByG=groups.map(function(g){ return byG[g].map(o.fn).filter(function(x){return x==='Yes';}).length; });
+            groups.forEach(function(g,i){ html+='<td>'+(byG[g].length<MIN_N?'<i class="text-warning small">n too small</i>':_fmtPct(yByG[i],byG[g].length))+'</td>'; });
+            var anyTooSmall2=groups.some(function(g){return byG[g].length<MIN_N;});
+            if(anyTooSmall2){ html+='<td><i class="text-warning small">n too small</i></td>'; }
+            else {
+                var rowVals=[],colVals=[];
+                groups.forEach(function(g){ byG[g].forEach(function(p){ rowVals.push(g); colVals.push(o.fn(p)); }); });
+                html+='<td>'+Stats.fmtP(Stats.chiSquareTest(rowVals,colVals).p)+'</td>';
+            }
+        }
+        html+='</tr>';
+    });
+    html+='</tbody></table>';
+    document.getElementById('table2Body').innerHTML = html;
+}
+
+// ---------- KAPLAN-MEIER (FIG 1) ----------
+function _kaplanMeier(times,events){
+    // times: array of follow-up times; events: 1=event, 0=censored. Same length.
+    var pairs=times.map(function(t,i){return{t:t,e:events[i]};}).filter(function(p){return _isFiniteNum(p.t)&&p.t>=0;});
+    pairs.sort(function(a,b){return a.t-b.t;});
+    var n=pairs.length, S=1, points=[{t:0,S:1,n:n}];
+    var atRisk=n;
+    var i=0;
+    while(i<pairs.length){
+        var tk=pairs[i].t, d=0, c=0;
+        while(i<pairs.length && pairs[i].t===tk){ if(pairs[i].e===1)d++; else c++; i++; }
+        if(d>0){ S = S * (atRisk-d)/atRisk; points.push({t:tk,S:S,n:atRisk}); }
+        atRisk -= (d+c);
+    }
+    return points;
+}
+function _isFiniteNum(x){ return typeof x==='number' && isFinite(x); }
+function _logRank(strata){
+    // strata = [{times:[],events:[]}, ...]
+    // Returns {chi2, df, p}
+    // Build pooled event time list
+    var pooled=[];
+    strata.forEach(function(s,si){ s.times.forEach(function(t,i){ pooled.push({t:t,e:s.events[i],s:si}); }); });
+    var times=Array.from(new Set(pooled.filter(function(x){return x.e===1;}).map(function(x){return x.t;}))).sort(function(a,b){return a-b;});
+    var O=new Array(strata.length).fill(0), E=new Array(strata.length).fill(0), V=new Array(strata.length).fill(0);
+    times.forEach(function(t){
+        var nAtRisk=strata.map(function(s){return s.times.filter(function(x,i){return x>=t;}).length;});
+        var dEvents=strata.map(function(s){return s.events.filter(function(e,i){return s.times[i]===t && e===1;}).length;});
+        var totalAtRisk=nAtRisk.reduce(function(a,b){return a+b;},0);
+        var totalEvents=dEvents.reduce(function(a,b){return a+b;},0);
+        if(totalAtRisk<=1||totalEvents===0) return;
+        nAtRisk.forEach(function(nj,j){
+            O[j]+=dEvents[j];
+            E[j]+=nj*totalEvents/totalAtRisk;
+            V[j]+=nj*(totalAtRisk-nj)*totalEvents*(totalAtRisk-totalEvents)/(totalAtRisk*totalAtRisk*(totalAtRisk-1));
+        });
+    });
+    // Use first k-1 strata for chi-square (1 df per extra stratum)
+    var k=strata.length;
+    if(k<2) return {chi2:NaN,df:0,p:NaN};
+    // Simple version: sum( (O-E)^2/E ) -> approximate chi-square with k-1 df
+    var chi2=0;
+    for(var j=0;j<k;j++) if(E[j]>0) chi2 += Math.pow(O[j]-E[j],2)/E[j];
+    var df=k-1;
+    return {chi2:chi2,df:df,p:Stats.chiSquarePvalue(chi2,df),O:O,E:E};
+}
+
+function buildSurvival(){
+    var d=allPatientsData; if(!d||!d.length) return;
+    var stratifyVar = document.getElementById('kmStratify') ? document.getElementById('kmStratify').value : 'HF_Type';
+    function getStratum(p){
+        if(stratifyVar==='none') return 'Overall';
+        if(stratifyVar==='HF_Type') return _hfPheno(p);
+        if(stratifyVar==='AgeGroup') return _ageGroup(p);
+        if(stratifyVar==='Quad_GDMT') return p.Quad_GDMT==='Yes'?'On Quadruple GDMT':'Not on Quad';
+        if(stratifyVar==='Gender') return p.Gender||'Unknown';
+        return 'Overall';
+    }
+    function buildKM(eventFn, canvasId, logrankElId){
+        // For each patient compute time + event status
+        var strataMap={};
+        d.forEach(function(p){
+            var t0=_enrollDate(p); if(!t0) return;
+            var endDate=_lastSeenDate(p)||new Date();
+            var info = eventFn(p, t0, endDate);
+            if(info.time===null||info.time<=0) return;
+            var s=getStratum(p); if(!strataMap[s]) strataMap[s]={times:[],events:[],label:s};
+            strataMap[s].times.push(info.time);
+            strataMap[s].events.push(info.event);
+        });
+        var keys=Object.keys(strataMap).sort();
+        var palette=['#8b0000','#0f3460','#27ae60','#e67e22','#8e44ad','#16a085'];
+        var datasets=keys.map(function(k,i){
+            var pts=_kaplanMeier(strataMap[k].times, strataMap[k].events);
+            return {
+                label:k+' (n='+strataMap[k].times.length+', events='+strataMap[k].events.filter(function(e){return e===1;}).length+')',
+                data: pts.map(function(p){ return {x:p.t, y:p.S*100}; }),
+                borderColor:palette[i%palette.length], backgroundColor:'transparent',
+                stepped:'before', pointRadius:0, borderWidth:2
+            };
+        });
+        var maxT=Math.max.apply(null, keys.map(function(k){return Math.max.apply(null, strataMap[k].times.concat([0]));}));
+        if(window._kmCharts && window._kmCharts[canvasId]) window._kmCharts[canvasId].destroy();
+        window._kmCharts = window._kmCharts || {};
+        var ctx=document.getElementById(canvasId);
+        if(!ctx) return;
+        window._kmCharts[canvasId] = new Chart(ctx.getContext('2d'),{type:'line',data:{datasets:datasets},
+            options:{responsive:true,maintainAspectRatio:false,
+                scales:{x:{type:'linear',title:{display:true,text:'Days from enrollment'},min:0,max:maxT},
+                        y:{title:{display:true,text:'Survival probability (%)'},min:0,max:100}},
+                plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:10}}},title:{display:false}}}});
+        // Log-rank
+        var lrEl=document.getElementById(logrankElId);
+        if(lrEl){
+            if(keys.length<2){ lrEl.innerHTML='<i class="text-muted">No stratification — log-rank not applicable.</i>'; }
+            else {
+                var strata=keys.map(function(k){return strataMap[k];});
+                var anyTooSmall=keys.some(function(k){ return strataMap[k].times.length<10; });
+                if(anyTooSmall){ lrEl.innerHTML='<i class="text-warning">Log-rank suppressed — one or more strata have n &lt; 10.</i>'; }
+                else {
+                    var lr=_logRank(strata);
+                    lrEl.innerHTML='<b>Log-rank test:</b> &chi;²('+lr.df+') = '+Stats.fmtN(lr.chi2,2)+', <b>p = '+Stats.fmtP(lr.p)+'</b>';
+                }
+            }
+        }
+    }
+    // 1A: All-cause mortality
+    buildKM(function(p,t0,endD){
+        if(_isDead(p)){
+            // We don't have a date of death — approximate using last seen date as event time
+            return {time: Math.max(1, Math.round((endD-t0)/86400000)), event:1};
+        }
+        return {time: Math.max(1, Math.round((endD-t0)/86400000)), event:0};
+    }, 'kmMortalityChart', 'kmMortalityLogrank');
+    // 1B: Time to first HF readmission
+    buildKM(function(p,t0,endD){
+        if(p.Last_Admission){
+            var la=new Date(p.Last_Admission);
+            if(la>=t0){ return {time: Math.max(1, Math.round((la-t0)/86400000)), event:1}; }
+        }
+        return {time: Math.max(1, Math.round((endD-t0)/86400000)), event:0};
+    }, 'kmReadmitChart', 'kmReadmitLogrank');
+}
+
+// ---------- GDMT CASCADE (FIG 2) ----------
+function buildCascade(){
+    var d=allPatientsData;
+    var hfref = d.filter(function(p){return _hfPheno(p)==='HFrEF';});
+    // Pillar flags (latest meds when available)
+    function on(p,key){
+        var m = p._latestMeds || {};
+        if(key==='ACEi/ARB/ARNI') return m.onARNI || m.onACEiARB;
+        if(key==='BB') return m.onBB;
+        if(key==='MRA') return m.onMRA;
+        if(key==='SGLT2i') return m.onSGLT2i;
+        return false;
+    }
+    var steps = [
+        {label:'HFrEF diagnosis', fn:function(p){return true;}},
+        {label:'On ACEi/ARB/ARNI', fn:function(p){return on(p,'ACEi/ARB/ARNI');}},
+        {label:'+ Beta-blocker',   fn:function(p){return on(p,'ACEi/ARB/ARNI') && on(p,'BB');}},
+        {label:'+ MRA',            fn:function(p){return on(p,'ACEi/ARB/ARNI') && on(p,'BB') && on(p,'MRA');}},
+        {label:'+ SGLT2i (all 4)', fn:function(p){return on(p,'ACEi/ARB/ARNI') && on(p,'BB') && on(p,'MRA') && on(p,'SGLT2i');}},
+        {label:'On max GDMT doses',fn:function(p){return p.Max_GDMT==='Yes';}},
+        {label:'LV recovered',     fn:function(p){return p.Recovered_LV==='Yes';}}
+    ];
+    var counts = steps.map(function(s){ return hfref.filter(s.fn).length; });
+    var total = hfref.length;
+    // Cascade visualization — horizontal bars with attrition labels
+    var html='<table style="width:100%;border-collapse:collapse;font-size:0.85rem;">';
+    counts.forEach(function(c,i){
+        var pct=total?100*c/total:0;
+        var attrition = (i>0)?counts[i-1]-c:0;
+        var attritionPct = (i>0 && counts[i-1])?100*attrition/counts[i-1]:0;
+        var color = ['#0f3460','#1d6f42','#27ae60','#16a085','#8b0000','#c0392b','#8e44ad'][i%7];
+        html+='<tr>';
+        html+='<td style="padding:6px 10px;width:30%;font-weight:600;text-align:right;">'+steps[i].label+'</td>';
+        html+='<td style="padding:6px;width:55%;"><div style="background:#eee;border-radius:3px;overflow:hidden;height:24px;"><div style="background:'+color+';width:'+pct+'%;height:100%;color:#fff;padding:0 8px;font-size:0.75rem;display:flex;align-items:center;">'+c+' ('+pct.toFixed(1)+'%)</div></div></td>';
+        html+='<td style="padding:6px 10px;width:15%;font-size:0.75rem;color:#c0392b;">'+(i>0?'−'+attrition+' ('+attritionPct.toFixed(0)+'% drop)':'')+'</td>';
+        html+='</tr>';
+    });
+    html+='</table>';
+    document.getElementById('cascadeBody').innerHTML = html;
+    // Pillar combination bar chart
+    var pillarCounts={0:0,1:0,2:0,3:0,4:0};
+    hfref.forEach(function(p){
+        var c=0;
+        if(on(p,'ACEi/ARB/ARNI')) c++;
+        if(on(p,'BB')) c++;
+        if(on(p,'MRA')) c++;
+        if(on(p,'SGLT2i')) c++;
+        pillarCounts[c]++;
+    });
+    if(window._pcChart) window._pcChart.destroy();
+    var pcCtx=document.getElementById('pillarCountChart');
+    if(pcCtx) window._pcChart=new Chart(pcCtx.getContext('2d'),{type:'bar',
+        data:{labels:['0','1','2','3','4 (Quadruple)'],
+              datasets:[{label:'HFrEF patients',data:[pillarCounts[0],pillarCounts[1],pillarCounts[2],pillarCounts[3],pillarCounts[4]],
+                         backgroundColor:['#dc3545','#fd7e14','#ffc107','#28a745','#0f3460']}]},
+        options:{responsive:true,maintainAspectRatio:false,
+                 scales:{y:{beginAtZero:true,title:{display:true,text:'Number of patients'}},
+                         x:{title:{display:true,text:'Number of GDMT pillars in use'}}},
+                 plugins:{legend:{display:false}}}});
+    // Dose-titration ladder
+    function classifyDose(p,key){
+        // Returns '≥100%', '50-99%', '<50%', or null (not on med)
+        // Heuristic — read the *_Dose string; presence of "target" or "100%" → ≥100%; "half" → 50-99%; explicit doses in mg/day compared against targets
+        var doseRaw = '';
+        if(key==='ACEi/ARB/ARNI'){
+            if(p._latestMeds && p._latestMeds.onARNI) doseRaw = p.Med_ARNI_Dose||'';
+            else if(p._latestMeds && p._latestMeds.onACEiARB) doseRaw = p.Med_ACEiARB_Dose||'';
+        }
+        else if(key==='BB') doseRaw = p.Med_BB_Dose||'';
+        else if(key==='MRA') doseRaw = p.Med_MRA_Dose||'';
+        else if(key==='SGLT2i') doseRaw = p.Med_SGLT2i_Dose||'';
+        if(!on(p,key)) return null;
+        var s=String(doseRaw).toLowerCase();
+        if(/target|100\s*%|max|full/.test(s)) return '≥100%';
+        if(/50\s*%|half|titrat|moderate/.test(s)) return '50-99%';
+        if(s) return '<50%'; // some dose recorded but not target — assume sub-50%
+        return '<50%'; // on med but no dose info — most conservative
+    }
+    var pillars=['ACEi/ARB/ARNI','BB','MRA','SGLT2i'];
+    var ladderHtml='<table class="table table-sm" style="font-size:0.85rem;">';
+    ladderHtml+='<thead style="background:#0f3460;color:#fff;"><tr><th>Pillar</th><th>n (on med)</th><th>&lt;50% dose</th><th>50–99%</th><th>≥100% target</th></tr></thead><tbody>';
+    pillars.forEach(function(pl){
+        var on_n=hfref.filter(function(p){return on(p,pl);}).length;
+        var bins={'<50%':0,'50-99%':0,'≥100%':0};
+        hfref.forEach(function(p){ var c=classifyDose(p,pl); if(c) bins[c]++; });
+        function cell(n){
+            if(on_n===0) return '—';
+            var pct=100*n/on_n;
+            return n+' ('+pct.toFixed(0)+'%)';
+        }
+        ladderHtml+='<tr><td><b>'+pl+'</b></td><td>'+on_n+'</td><td style="color:#dc3545;">'+cell(bins['<50%'])+'</td><td style="color:#ffc107;">'+cell(bins['50-99%'])+'</td><td style="color:#28a745;">'+cell(bins['≥100%'])+'</td></tr>';
+    });
+    ladderHtml+='</tbody></table>';
+    ladderHtml+='<div class="small text-muted">Dose classification is heuristic — based on dose-text patterns ("target"/"max" → ≥100%; "half"/"titrating" → 50-99%). For more precise figures, record explicit mg/day values.</div>';
+    document.getElementById('doseLadderBody').innerHTML = ladderHtml;
+}
+
+// ---------- LONGITUDINAL TRAJECTORIES (FIG 3) ----------
+function buildLongitudinal(){
+    loadAllVisits().then(function(visMap){
+        var d=allPatientsData;
+        var v = document.getElementById('trajVar') ? document.getElementById('trajVar').value : 'V_NYHA';
+        // For each patient, collect ordered values of v from their visits
+        var byGroup={HFrEF:[],HFmrEF:[],HFpEF:[]};
+        d.forEach(function(p){
+            var g=_hfPheno(p); if(!byGroup[g]) return;
+            var visits = visMap[p.id]||[];
+            visits.forEach(function(vd, idx){
+                var raw = vd[v];
+                var num = (v==='V_NYHA') ? _nyhaToNum(raw) : parseFloat(raw);
+                if(_isFiniteNum(num)){
+                    if(!byGroup[g][idx]) byGroup[g][idx]=[];
+                    byGroup[g][idx].push(num);
+                }
+            });
+        });
+        // Build datasets: x = visit number, y = mean, error bars = 95% CI
+        var palette={'HFrEF':'#8b0000','HFmrEF':'#0f3460','HFpEF':'#27ae60'};
+        var datasets=[];
+        Object.keys(byGroup).forEach(function(g){
+            var means=[], lower=[], upper=[];
+            byGroup[g].forEach(function(arr, i){
+                var m=Stats.mean(arr), se=Stats.se(arr);
+                means.push({x:i+1, y:m||null});
+                if(m!==null && se!==null){
+                    lower.push({x:i+1, y:m-1.96*se});
+                    upper.push({x:i+1, y:m+1.96*se});
+                }
+            });
+            datasets.push({label:g+' (n='+d.filter(function(p){return _hfPheno(p)===g;}).length+')',
+                          data:means, borderColor:palette[g], backgroundColor:'transparent',
+                          pointBackgroundColor:palette[g], pointRadius:4, borderWidth:2, tension:0.2});
+        });
+        var labelMap={V_NYHA:'NYHA Class (1-4)',V_KCCQ:'KCCQ Score',V_NTproBNP:'NT-proBNP (pg/mL)',V_eGFR:'eGFR (mL/min/1.73m²)',V_K:'Potassium (mmol/L)',V_Weight:'Weight (kg)',V_BP_Sys:'Systolic BP (mmHg)',V_BP_Dia:'Diastolic BP (mmHg)'};
+        if(window._trajChart) window._trajChart.destroy();
+        var ctx=document.getElementById('trajChart');
+        if(ctx) window._trajChart = new Chart(ctx.getContext('2d'),{type:'line',data:{datasets:datasets},
+            options:{responsive:true,maintainAspectRatio:false,
+                scales:{x:{type:'linear',title:{display:true,text:'Visit number'},min:1,ticks:{stepSize:1}},
+                        y:{title:{display:true,text:labelMap[v]||v}}},
+                plugins:{legend:{position:'bottom'}}}});
+        // KCCQ Change distribution
+        buildKCCQChange(visMap);
+    });
+}
+function _nyhaToNum(x){ var n={'I':1,'II':2,'III':3,'IV':4}[x]; return n||null; }
+
+function buildKCCQChange(visMap){
+    var d=allPatientsData;
+    var deltas=[];
+    d.forEach(function(p){
+        var visits=visMap[p.id]||[]; if(visits.length<2) return;
+        var first=null,last=null;
+        visits.forEach(function(v){ var k=parseFloat(v.V_KCCQ); if(_isFiniteNum(k)){ if(first===null) first=k; last=k; } });
+        if(first!==null && last!==null && first!==last) deltas.push(last-first);
+    });
+    if(deltas.length===0){ document.getElementById('kccqChangeStats').innerHTML='<i class="text-muted">No KCCQ pairs available.</i>'; return; }
+    // Histogram bins: <-20, -20 to -10, -10 to -5, -5 to 0, 0, 0 to 5, 5 to 10, 10 to 20, >20
+    var bins={'<-20':0,'-20 to -10':0,'-10 to -5':0,'-5 to 0':0,'0 to 5':0,'5 to 10':0,'10 to 20':0,'>20':0};
+    deltas.forEach(function(v){
+        if(v<-20) bins['<-20']++;
+        else if(v<-10) bins['-20 to -10']++;
+        else if(v<-5) bins['-10 to -5']++;
+        else if(v<0) bins['-5 to 0']++;
+        else if(v<=5) bins['0 to 5']++;
+        else if(v<=10) bins['5 to 10']++;
+        else if(v<=20) bins['10 to 20']++;
+        else bins['>20']++;
+    });
+    if(window._kccqChangeChart) window._kccqChangeChart.destroy();
+    var ctx=document.getElementById('kccqChangeChart');
+    if(ctx) window._kccqChangeChart = new Chart(ctx.getContext('2d'),{type:'bar',
+        data:{labels:Object.keys(bins),datasets:[{label:'Patients',data:Object.values(bins),
+              backgroundColor:Object.keys(bins).map(function(k){
+                  if(k.indexOf('<')===0||k.indexOf('-20')===0||k.indexOf('-10')===0) return '#dc3545';
+                  if(k.indexOf('-5')===0) return '#fd7e14';
+                  if(k.indexOf('0 to 5')===0) return '#aaa';
+                  if(k.indexOf('5 to 10')===0||k.indexOf('10')===0) return '#27ae60';
+                  return '#0f3460';
+              })}]},
+        options:{responsive:true,maintainAspectRatio:false,
+                 scales:{x:{title:{display:true,text:'KCCQ change (latest − baseline)'}},
+                         y:{beginAtZero:true,title:{display:true,text:'Patients'}}},
+                 plugins:{legend:{display:false}}}});
+    var improved5=deltas.filter(function(v){return v>=5;}).length;
+    var worsened5=deltas.filter(function(v){return v<=-5;}).length;
+    var stable=deltas.length-improved5-worsened5;
+    document.getElementById('kccqChangeStats').innerHTML =
+        '<b>n='+deltas.length+'</b> · Median change <b>'+Stats.fmtN(Stats.median(deltas))+
+        '</b> · Improved ≥5 pts: <b>'+_fmtPct(improved5,deltas.length)+
+        '</b> · Worsened ≥5 pts: <b>'+_fmtPct(worsened5,deltas.length)+
+        '</b> · Stable: <b>'+_fmtPct(stable,deltas.length)+'</b>';
+}
+
+// ---------- QUALITY BENCHMARKS (FIG 5) ----------
+function buildQuality(){
+    var d=allPatientsData;
+    var hfref = d.filter(function(p){return _hfPheno(p)==='HFrEF';});
+    var n=hfref.length;
+    // Calculate our rates
+    function rate(fn){ return n? 100*hfref.filter(fn).length/n : 0; }
+    var ours = {
+        'ACEi/ARB/ARNI': rate(function(p){var m=p._latestMeds||{}; return m.onARNI||m.onACEiARB;}),
+        'Beta-blocker':  rate(function(p){return (p._latestMeds||{}).onBB;}),
+        'MRA':           rate(function(p){return (p._latestMeds||{}).onMRA;}),
+        'SGLT2i':        rate(function(p){return (p._latestMeds||{}).onSGLT2i;}),
+        'Quadruple GDMT':rate(function(p){return p.Quad_GDMT==='Yes';}),
+        'Max GDMT doses':rate(function(p){return p.Max_GDMT==='Yes';})
+    };
+    // Published benchmarks (Get-With-The-Guidelines HF / ESC quality indicators 2023)
+    var bench = {'ACEi/ARB/ARNI':95,'Beta-blocker':95,'MRA':80,'SGLT2i':75,'Quadruple GDMT':60,'Max GDMT doses':50};
+    var labels=Object.keys(ours);
+    if(window._benchChart) window._benchChart.destroy();
+    var ctx=document.getElementById('benchChart');
+    if(ctx) window._benchChart = new Chart(ctx.getContext('2d'),{type:'bar',
+        data:{labels:labels,datasets:[
+            {label:'Our uptake (%)',data:labels.map(function(k){return ours[k];}),backgroundColor:'#0f3460',borderRadius:4},
+            {label:'Benchmark (%)',data:labels.map(function(k){return bench[k];}),backgroundColor:'rgba(220,53,69,0.15)',borderColor:'#dc3545',borderWidth:2,borderDash:[6,4],type:'line',pointRadius:6,pointBackgroundColor:'#dc3545'}
+        ]},
+        options:{responsive:true,maintainAspectRatio:false,
+                 scales:{y:{beginAtZero:true,max:100,title:{display:true,text:'% of HFrEF patients'}}},
+                 plugins:{legend:{position:'bottom'}}}});
+    var tbl='<table class="table table-sm" style="font-size:0.85rem;background:#fff;"><thead style="background:#0f3460;color:#fff;"><tr><th>Indicator</th><th>Our rate (95% CI)</th><th>Benchmark</th><th>Gap</th></tr></thead><tbody>';
+    labels.forEach(function(k){
+        var our=ours[k], b=bench[k], gap=our-b;
+        var success=Math.round(our*n/100);
+        var ci=Stats.wilsonCI(success,n);
+        tbl+='<tr><td>'+k+'</td><td>'+our.toFixed(1)+'% ('+(ci[0]*100).toFixed(1)+'–'+(ci[1]*100).toFixed(1)+')</td><td>'+b+'%</td><td style="color:'+(gap<0?'#dc3545':'#27ae60')+';font-weight:600;">'+(gap>=0?'+':'')+gap.toFixed(1)+' pp</td></tr>';
+    });
+    tbl+='</tbody></table><div class="small text-muted">Benchmarks: Get-With-The-Guidelines-Heart Failure quality measures; ESC HF 2023 quality indicators. "pp" = percentage points.</div>';
+    document.getElementById('benchTable').innerHTML = tbl;
+    // Physician funnel plot
+    buildFunnelPlot();
+    // Comorbidity heatmap
+    buildComorbHeatmap();
+}
+
+function buildFunnelPlot(){
+    var d=allPatientsData;
+    var byDoc={};
+    d.forEach(function(p){ var doc=p.Doctor_Name||'(Unassigned)'; if(!byDoc[doc])byDoc[doc]={n:0,success:0}; byDoc[doc].n++; if(p.Quad_GDMT==='Yes')byDoc[doc].success++; });
+    var allDocs=Object.keys(byDoc);
+    // Need min 5 patients per physician to plot
+    var docs=allDocs.filter(function(k){return byDoc[k].n>=5;});
+    if(docs.length===0){ document.getElementById('funnelChart').getContext('2d').clearRect(0,0,500,300); return; }
+    var totalN=docs.reduce(function(s,k){return s+byDoc[k].n;},0);
+    var totalS=docs.reduce(function(s,k){return s+byDoc[k].success;},0);
+    var pBar=totalS/totalN;
+    // Build control limits along range of n
+    var nMax=Math.max.apply(null,docs.map(function(k){return byDoc[k].n;}));
+    var xs=[]; for(var i=5;i<=nMax;i++) xs.push(i);
+    var ucl95=xs.map(function(n){return Math.min(1, pBar+1.96*Math.sqrt(pBar*(1-pBar)/n));});
+    var lcl95=xs.map(function(n){return Math.max(0, pBar-1.96*Math.sqrt(pBar*(1-pBar)/n));});
+    var ucl99=xs.map(function(n){return Math.min(1, pBar+3.09*Math.sqrt(pBar*(1-pBar)/n));});
+    var lcl99=xs.map(function(n){return Math.max(0, pBar-3.09*Math.sqrt(pBar*(1-pBar)/n));});
+    var docPoints=docs.map(function(k){return {x:byDoc[k].n, y:100*byDoc[k].success/byDoc[k].n, label:k};});
+    if(window._funnelChart) window._funnelChart.destroy();
+    var ctx=document.getElementById('funnelChart');
+    if(ctx) window._funnelChart = new Chart(ctx.getContext('2d'),{
+        type:'scatter',
+        data:{datasets:[
+            {label:'Physician',data:docPoints,backgroundColor:'#0f3460',pointRadius:8,pointHoverRadius:10},
+            {label:'Mean ('+(pBar*100).toFixed(0)+'%)',data:xs.map(function(x){return{x:x,y:pBar*100};}),type:'line',borderColor:'#0f3460',borderWidth:2,pointRadius:0,showLine:true},
+            {label:'95% control limits',data:xs.map(function(x,i){return{x:x,y:ucl95[i]*100};}),type:'line',borderColor:'#27ae60',borderDash:[4,4],borderWidth:1,pointRadius:0,showLine:true,fill:false},
+            {label:'',data:xs.map(function(x,i){return{x:x,y:lcl95[i]*100};}),type:'line',borderColor:'#27ae60',borderDash:[4,4],borderWidth:1,pointRadius:0,showLine:true,fill:false},
+            {label:'99.8% control limits',data:xs.map(function(x,i){return{x:x,y:ucl99[i]*100};}),type:'line',borderColor:'#dc3545',borderDash:[2,4],borderWidth:1,pointRadius:0,showLine:true,fill:false},
+            {label:'',data:xs.map(function(x,i){return{x:x,y:lcl99[i]*100};}),type:'line',borderColor:'#dc3545',borderDash:[2,4],borderWidth:1,pointRadius:0,showLine:true,fill:false}
+        ]},
+        options:{responsive:true,maintainAspectRatio:false,
+                 scales:{x:{type:'linear',title:{display:true,text:'Number of patients per physician'}},
+                         y:{min:0,max:100,title:{display:true,text:'Quadruple GDMT rate (%)'}}},
+                 plugins:{legend:{position:'bottom',labels:{filter:function(l){return l.text!=='';}}},
+                          tooltip:{callbacks:{label:function(c){var p=c.raw; return (p.label||c.dataset.label)+': '+(p.y?p.y.toFixed(1)+'%':'')+(p.x?' (n='+p.x+')':'');}}}}}});
+}
+
+function buildComorbHeatmap(){
+    var d=allPatientsData, n=d.length;
+    var comorb=[
+        {k:'DM',l:'Diabetes'},{k:'HTN',l:'Hypertension'},{k:'AF',l:'AF'},{k:'IHD',l:'IHD'},
+        {k:'CKD',l:'CKD'},{k:'CVA',l:'Stroke'},{k:'PVD',l:'PVD'},{k:'OSA',l:'OSA'},
+        {k:'Obese',l:'Obesity'},{k:'Dyslipidemia',l:'Dyslipidemia'}
+    ];
+    var matrix = comorb.map(function(a){
+        return comorb.map(function(b){
+            var both = d.filter(function(p){ return p[a.k]==='Yes' && p[b.k]==='Yes'; }).length;
+            return both;
+        });
+    });
+    var html='<div style="overflow-x:auto;"><table style="border-collapse:collapse;font-size:0.75rem;background:#fff;">';
+    html+='<tr><th></th>'; comorb.forEach(function(c){ html+='<th style="padding:6px 4px;writing-mode:vertical-rl;transform:rotate(180deg);border:1px solid #eee;height:80px;font-weight:600;">'+c.l+'</th>'; }); html+='</tr>';
+    comorb.forEach(function(a,i){
+        html+='<tr><th style="padding:4px 8px;text-align:right;border:1px solid #eee;background:#f8f9fa;font-weight:600;">'+a.l+'</th>';
+        comorb.forEach(function(b,j){
+            var v=matrix[i][j], pct=n?100*v/n:0;
+            // Color intensity by % (0-50%)
+            var alpha=Math.min(1, pct/50);
+            var bg='rgba(15,52,96,'+alpha.toFixed(2)+')';
+            var fg=alpha>0.4?'#fff':'#000';
+            html+='<td style="padding:6px 8px;text-align:center;border:1px solid #eee;background:'+bg+';color:'+fg+';"><b>'+v+'</b><br><span style="font-size:0.7rem;">'+pct.toFixed(0)+'%</span></td>';
+        });
+        html+='</tr>';
+    });
+    html+='</table></div><div class="small text-muted mt-2">Diagonal = patients with each comorbidity alone (in combination with self). Off-diagonal = co-occurrence count and percentage of full cohort (n='+n+').</div>';
+    document.getElementById('comoMatrixBody').innerHTML = html;
+}
+
+// ---------- SPECIAL: MCS, IRON, ECHO, CUMULATIVE ENROLLMENT ----------
+function buildSpecial(){
+    var d=allPatientsData, n=d.length;
+    // MCS utilization
+    var inotrope=d.filter(function(p){return p.Inotropes_Used==='Yes';}).length;
+    var mcs=d.filter(function(p){return p.Hemo_Support==='Yes';}).length;
+    var iabp=d.filter(function(p){return (p.Hemo_Support_Type||'').indexOf('IABP')>=0;}).length;
+    var imp=d.filter(function(p){return (p.Hemo_Support_Type||'').indexOf('Impella')>=0;}).length;
+    var vae=d.filter(function(p){return (p.Hemo_Support_Type||'').indexOf('VA-ECMO')>=0;}).length;
+    function mortBy(filter){ var sub=d.filter(filter); var dd=sub.filter(_isDead).length; return {n:sub.length,d:dd,p:sub.length?100*dd/sub.length:0}; }
+    var moAll=mortBy(function(){return true;});
+    var moInot=mortBy(function(p){return p.Inotropes_Used==='Yes';});
+    var moMcs=mortBy(function(p){return p.Hemo_Support==='Yes';});
+    var moIabp=mortBy(function(p){return (p.Hemo_Support_Type||'').indexOf('IABP')>=0;});
+    var moImp=mortBy(function(p){return (p.Hemo_Support_Type||'').indexOf('Impella')>=0;});
+    var moVae=mortBy(function(p){return (p.Hemo_Support_Type||'').indexOf('VA-ECMO')>=0;});
+    var html='<table class="table table-sm" style="font-size:0.85rem;background:#fff;"><thead style="background:#0f3460;color:#fff;"><tr><th>Support type</th><th>n</th><th>% of cohort</th><th>Crude mortality</th></tr></thead><tbody>';
+    function row(l,sub,mo){ html+='<tr><td>'+l+'</td><td>'+sub+'</td><td>'+_fmtPct(sub,n).split(' ')[1]+'</td><td>'+(mo.n? mo.d+'/'+mo.n+' ('+mo.p.toFixed(1)+'%)':'—')+'</td></tr>'; }
+    row('Any inotrope',inotrope,moInot);
+    row('Any MCS',mcs,moMcs);
+    row('IABP',iabp,moIabp);
+    row('Impella',imp,moImp);
+    row('VA-ECMO',vae,moVae);
+    html+='</tbody></table>';
+    html+='<div class="small text-muted">Crude mortality = % of group with Mortality ∈ {In-hospital, Out-of-hospital}. Not adjusted for severity.</div>';
+    document.getElementById('mcsBody').innerHTML = html;
+
+    // Iron deficiency
+    var screened = d.filter(_ironScreened);
+    var idef = screened.filter(function(p){return _ironDeficient(p)===true;});
+    var treated = idef.filter(function(p){
+        // Iron therapy = any indication of iron Rx in baseline meds. Heuristic: free-text fields.
+        return /(iron|ferro|venofer|ferinject)/i.test(JSON.stringify(p));
+    });
+    var ih = '<table class="table table-sm" style="font-size:0.85rem;background:#fff;">';
+    ih+='<tr><td>Cohort size</td><td><b>'+n+'</b></td></tr>';
+    ih+='<tr><td>Iron studies done (screened)</td><td><b>'+_fmtPct(screened.length,n)+'</b></td></tr>';
+    ih+='<tr><td>Iron-deficient among screened (ESC criteria)</td><td><b>'+(screened.length?_fmtPct(idef.length,screened.length):'—')+'</b></td></tr>';
+    ih+='<tr><td>On iron therapy among deficient</td><td><b>'+(idef.length?_fmtPct(treated.length,idef.length):'—')+'</b></td></tr>';
+    ih+='</table>';
+    ih+='<div class="small text-muted">ESC criteria: ferritin &lt;100 µg/L OR (100-300 + TSAT &lt;20%). Iron therapy detection is heuristic — best confirmed manually.</div>';
+    document.getElementById('ironBody').innerHTML = ih;
+
+    // Echo by phenotype
+    var groups=['HFrEF','HFmrEF','HFpEF'];
+    var echoVars=[{k:'Echo_EDVI',l:'LVEDVI (mL/m²)'},{k:'Echo_ESVI',l:'LVESVI (mL/m²)'},{k:'Echo_EF',l:'LVEF (%)'},{k:'CMR_LVEDVI',l:'CMR LVEDVI (mL/m²)'},{k:'CMR_LVEF',l:'CMR LVEF (%)'},{k:'CMR_RVEF',l:'CMR RVEF (%)'}];
+    var eh='<table class="table table-sm" style="font-size:0.85rem;background:#fff;"><thead style="background:#0f3460;color:#fff;"><tr><th>Variable</th>';
+    groups.forEach(function(g){ eh+='<th>'+g+' (n='+d.filter(function(p){return _hfPheno(p)===g;}).length+')</th>'; });
+    eh+='<th>p (Kruskal-Wallis)</th></tr></thead><tbody>';
+    echoVars.forEach(function(ev){
+        eh+='<tr><td>'+ev.l+'</td>';
+        var gv=groups.map(function(g){ return d.filter(function(p){return _hfPheno(p)===g;}).map(function(p){return parseFloat(p[ev.k]);}); });
+        groups.forEach(function(g,i){ eh+='<td>'+_fmtIQR(gv[i])+'</td>'; });
+        var anyTooSmall=groups.some(function(g){return d.filter(function(p){return _hfPheno(p)===g;}).length<10;});
+        eh+='<td>'+(anyTooSmall?'<i class="text-warning small">n too small</i>':Stats.fmtP(Stats.kruskalWallis(gv).p))+'</td></tr>';
+    });
+    // LGE prevalence
+    eh+='<tr><td>LGE present (CMR)</td>';
+    groups.forEach(function(g){
+        var sub=d.filter(function(p){return _hfPheno(p)===g;});
+        var nWithCmr = sub.filter(function(p){return p.CMR_LGE && p.CMR_LGE!=='Not done';}).length;
+        var lgePos = sub.filter(function(p){return p.CMR_LGE==='Yes';}).length;
+        eh+='<td>'+(nWithCmr? lgePos+'/'+nWithCmr+' ('+(100*lgePos/nWithCmr).toFixed(0)+'%)':'—')+'</td>';
+    });
+    eh+='<td>—</td></tr>';
+    eh+='</tbody></table>';
+    document.getElementById('echoPhenoBody').innerHTML = eh;
+
+    // Cumulative enrollment
+    var months={}; d.forEach(function(p){ if(!p.timestamp)return; var m=p.timestamp.substring(0,7); months[m]=(months[m]||0)+1; });
+    var sorted=Object.keys(months).sort();
+    var cumul=[],running=0;
+    sorted.forEach(function(m){ running+=months[m]; cumul.push(running); });
+    if(window._cumEnrollChart) window._cumEnrollChart.destroy();
+    var ctx=document.getElementById('cumEnrollChart');
+    if(ctx) window._cumEnrollChart = new Chart(ctx.getContext('2d'),{type:'line',
+        data:{labels:sorted,datasets:[
+            {label:'New per month',data:sorted.map(function(m){return months[m];}),backgroundColor:'rgba(15,52,96,0.6)',type:'bar',yAxisID:'y1'},
+            {label:'Cumulative cohort',data:cumul,borderColor:'#8b0000',backgroundColor:'rgba(139,0,0,0.1)',fill:true,tension:0.2,pointRadius:3,yAxisID:'y2'}
+        ]},
+        options:{responsive:true,maintainAspectRatio:false,
+                 scales:{x:{title:{display:true,text:'Month'}},
+                         y1:{position:'left',beginAtZero:true,title:{display:true,text:'New patients / month'}},
+                         y2:{position:'right',beginAtZero:true,title:{display:true,text:'Cumulative patients'},grid:{drawOnChartArea:false}}},
+                 plugins:{legend:{position:'bottom'}}}});
+}
+
+// ---------- UTILITY: copy table to TSV clipboard ----------
+function copyTableToClipboard(elId){
+    var el=document.getElementById(elId); if(!el) return;
+    var rows=el.querySelectorAll('tr');
+    var tsv=[];
+    rows.forEach(function(tr){
+        var cells=tr.querySelectorAll('th,td');
+        var line=[];
+        cells.forEach(function(c){ line.push((c.innerText||'').replace(/\s+/g,' ').trim()); });
+        tsv.push(line.join('\t'));
+    });
+    var text=tsv.join('\n');
+    if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(function(){ showPopup('success','Copied','Table copied as TSV — paste into Excel or Word.'); });
+    } else {
+        // Fallback
+        var ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy');}catch(e){} document.body.removeChild(ta);
+        showPopup('success','Copied','Table copied as TSV.');
+    }
+}
+
+// ---------- UTILITY: download an element as PNG at high resolution ----------
+function downloadPaperPNG(elId, filename){
+    var el=document.getElementById(elId); if(!el){ showPopup('error','Error','Element not found.'); return; }
+    if(typeof html2canvas==='undefined'){ showPopup('error','Error','PNG export library not loaded.'); return; }
+    showPopup('warning','Rendering…','Generating high-resolution PNG…');
+    html2canvas(el, {scale:3, backgroundColor:'#fff', useCORS:true}).then(function(canvas){
+        document.getElementById('popOv') && document.getElementById('popOv').remove();
+        var link=document.createElement('a');
+        link.download=filename+'_'+new Date().toISOString().split('T')[0]+'.png';
+        link.href=canvas.toDataURL('image/png');
+        link.click();
+    }).catch(function(e){
+        document.getElementById('popOv') && document.getElementById('popOv').remove();
+        showPopup('error','Render failed',e.message);
+    });
+}
+
+// ---------- DISPATCHER: build the right panel when a paper-mode tab is activated ----------
+var _paperTabBuilt = {};
+function _maybeBuildPaperTab(tabId){
+    if(_paperTabBuilt[tabId]) return; // already built — chart objects persist
+    if(tabId==='table1') buildTable1();
+    else if(tabId==='table2') buildTable2();
+    else if(tabId==='survival') buildSurvival();
+    else if(tabId==='cascade') buildCascade();
+    else if(tabId==='longitudinal') buildLongitudinal();
+    else if(tabId==='quality') buildQuality();
+    else if(tabId==='special') buildSpecial();
+    else return;
+    _paperTabBuilt[tabId] = true;
+}
+// Reset the "built" cache when analytics is reloaded
+var _origLoadAnalytics_paper = null;
+(function(){
+    // Wrap loadAnalytics so that on each refresh we mark paper-tabs as needing rebuild
+    if(typeof loadAnalytics === 'function' && !_origLoadAnalytics_paper){
+        _origLoadAnalytics_paper = loadAnalytics;
+        loadAnalytics = function(){
+            _paperTabBuilt = {};
+            _allVisitsCache = null;
+            return _origLoadAnalytics_paper.apply(this, arguments);
+        };
+    }
+})();
 
 function exportClinicDayPDF(){var today=new Date().toISOString().split('T')[0];var todayPts=allPatientsData.filter(function(p){return p.Next_Appt===today;});var container=document.getElementById('pdfContainer');container.innerHTML='';container.classList.add('active');var html="<div id='pdfContent' style='width:750px;margin:0 auto;background:#fff;padding:20px;font-family:Arial,Helvetica,sans-serif;color:#000;'>";html+="<div style='text-align:center;border-bottom:3px solid #8b0000;padding-bottom:10px;margin-bottom:20px;'><h2 style='color:#8b0000;margin:0;'>Mubarak Al-Kabeer Hospital</h2><h3 style='margin:5px 0;color:#333;'>HF Clinic — Day Summary</h3><p style='font-size:12px;color:#666;margin:0;'>Date: "+today+"</p></div>";if(todayPts.length===0){html+="<p style='color:#666;text-align:center;padding:30px;'>No patients scheduled for today ("+today+").</p>";html+="<p style='font-size:11px;color:#aaa;text-align:center;'>Showing all patients with upcoming appointments instead:</p>";todayPts=allPatientsData.filter(function(p){return p.Next_Appt&&p.Next_Appt>=today;}).sort(function(a,b){return(a.Next_Appt||'').localeCompare(b.Next_Appt||'');}).slice(0,20);}html+="<table style='width:100%;border-collapse:collapse;font-size:11px;'><thead><tr style='background:#8b0000;color:#fff;'><th style='padding:6px;'>Name</th><th style='padding:6px;'>File</th><th style='padding:6px;'>HF Type</th><th style='padding:6px;'>EF%</th><th style='padding:6px;'>NYHA</th><th style='padding:6px;'>GDMT</th><th style='padding:6px;'>Next Appt</th></tr></thead><tbody>";todayPts.forEach(function(p){html+="<tr style='border-bottom:1px solid #eee;'><td style='padding:5px;font-weight:600;'>"+(p.Patient_Name||'?')+"</td><td style='padding:5px;'>"+(p.File_No||'?')+"</td><td style='padding:5px;'>"+(p.HF_Type||'?')+"</td><td style='padding:5px;'>"+(p.EF_Diagnosis||'?')+"</td><td style='padding:5px;'>"+(p.NYHA||'?')+"</td><td style='padding:5px;'>"+(p.Quad_GDMT||'?')+"</td><td style='padding:5px;'>"+(p.Next_Appt||'-')+"</td></tr>";});html+="</tbody></table>";html+="<div style='margin-top:30px;text-align:center;font-size:11px;color:#666;'>Generated: "+new Date().toLocaleString()+" · "+todayPts.length+" patients</div></div>";container.innerHTML=html;setTimeout(function(){html2pdf().from(document.getElementById('pdfContent')).set({margin:[0.4,0.4,0.4,0.4],filename:"HF_Clinic_Day_"+today+".pdf",html2canvas:{scale:2,useCORS:true,scrollY:0,scrollX:0,windowWidth:800},jsPDF:{unit:'in',format:'letter',orientation:'portrait'}}).save().then(function(){container.innerHTML='';container.classList.remove('active');}).catch(function(){container.innerHTML='';container.classList.remove('active');});},500);}
 
