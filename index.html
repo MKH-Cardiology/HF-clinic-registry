@@ -4286,9 +4286,80 @@ function showTrends(patientId){
     });
 }
 
+// Clear ONLY patient-form fields (not search inputs, not visit list/form, not navigation).
+// Used at the start of editPt to prevent the previously-edited patient's values from
+// leaking into the next patient. Mirrors the field-clearing logic from resetForm() but
+// skips the cross-page side effects (search reset, page navigation, wizard reset).
+function _clearPatientFormFields(){
+    document.querySelectorAll('#hfForm input, #hfForm select, #hfForm textarea').forEach(function(el){
+        if(el.tagName==='SELECT'){ el.selectedIndex=0; }
+        else if(el.type==='checkbox' || el.type==='radio'){ el.checked=false; }
+        else if(el.id && el.id.indexOf('V_')===0){ /* skip visit fields */ }
+        else { el.value=''; }
+    });
+    // Reset visual state of pill toggles, med sub-fields, conditional panels, alerts
+    document.querySelectorAll('.pill-toggle').forEach(function(el){ el.classList.remove('active'); });
+    document.querySelectorAll('.med-sub-fields').forEach(function(el){ el.classList.remove('visible'); });
+    document.querySelectorAll('.clinical-alert').forEach(function(el){ el.classList.remove('visible'); });
+    document.querySelectorAll('.error-msg').forEach(function(el){ el.style.display='none'; });
+    document.querySelectorAll('#medSection7 .phenotype-dim').forEach(function(el){ el.classList.remove('phenotype-dim'); });
+    var rat = document.getElementById('gdmtRationaleSection'); if(rat) rat.style.display='none';
+    // Reset multi-select pill UI states (referrals)
+    if(typeof restoreReferralUI==='function'){
+        try { restoreReferralUI('Referral',''); } catch(e){}
+    }
+    // Reset Advanced HF therapy + inotropes + hemodynamic support multi-selects
+    var _ahft=document.getElementById('Adv_HF_Therapy'); if(_ahft) _ahft.value='No';
+    if(typeof toggleAdvHFTherapy==='function') toggleAdvHFTherapy();
+    var _strHF=document.getElementById('Strong_HF'); if(_strHF) _strHF.value='No';
+    var _ahfOut=document.getElementById('Advanced_HF_Outcome'); if(_ahfOut) _ahfOut.value='No';
+    var _maxg=document.getElementById('Max_GDMT'); if(_maxg) _maxg.value='No';
+    var _rlv=document.getElementById('Recovered_LV'); if(_rlv) _rlv.value='No';
+    var _iu=document.getElementById('Inotropes_Used'); if(_iu) _iu.value='No';
+    var _is=document.getElementById('Inotropes_Selected'); if(_is) _is.value='';
+    var _ipb=document.getElementById('inotropesPickBox'); if(_ipb) _ipb.dataset.built='';
+    if(typeof renderInotropesUI==='function') renderInotropesUI();
+    var _hs=document.getElementById('Hemo_Support'); if(_hs) _hs.value='No';
+    var _hst=document.getElementById('Hemo_Support_Type'); if(_hst) _hst.value='';
+    if(typeof renderHemoSupportUI==='function') renderHemoSupportUI();
+    // Reset multi-checkbox MED options
+    if(typeof MED_FORMULARY === 'object' && typeof MULTI_SELECT_MEDS !== 'undefined'){
+        Object.keys(MED_FORMULARY).forEach(function(medId){
+            if(MULTI_SELECT_MEDS.indexOf(medId)<0) return;
+            var med = MED_FORMULARY[medId];
+            med.options.forEach(function(o){
+                if(o==='None'||o==='No') return;
+                var safeId = medId+'_opt_'+o.replace(/[^a-zA-Z0-9]/g,'');
+                var chk = document.getElementById(safeId+'_chk');
+                if(chk) chk.checked = false;
+                ['_Dose','_DoseCustom','_Freq'].forEach(function(suf){
+                    var fld = document.getElementById(safeId+suf); if(fld) fld.value='';
+                });
+            });
+        });
+    }
+    // Hide all conditional panels
+    var hideIds=['valvularTypeWrap','cmrLGEPctWrap','vCmrLGEPctWrap','walkMetersWrap','rhcDetailsWrap','pciCabgDetailsWrap','ctAngioDetailsWrap','lostFUReasonWrap','lostFUOtherWrap','valveSurgeryDateWrap'];
+    hideIds.forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    // Clear ECG image preview
+    if(typeof clearEcgImage==='function'){
+        try { clearEcgImage('ECG_Image','ECG_Image_File','ecgImagePreview','ecgImageMeta'); } catch(e){}
+    }
+    // Clear ID-validation error states
+    var ci=document.getElementById('Civil_ID'); if(ci) ci.classList.remove('input-error');
+    var fn=document.getElementById('File_No'); if(fn) fn.classList.remove('input-error');
+}
+
 function editPt(id){
     // Always hide the post-save success panel when navigating to edit a patient
     if(typeof _hideSaveSuccessPanel === 'function') _hideSaveSuccessPanel();
+    // Clear all patient-form fields from any previously-edited patient. Without this,
+    // values not present in the new patient's record stay in the form (e.g. Mortality
+    // edited on patient A would persist into patient B's edit screen).
+    _clearPatientFormFields();
+    // Also clear the visit "Add New Visit" form so any half-typed values from a previous
+    // patient session don't carry over.
+    if(typeof clearVisitForm === 'function'){ try { clearVisitForm(); } catch(e){} }
     // Track origin so that on update we can return the user to where they came from
     // (admin/search) without forcing them through the success panel. If a caller has
     // already set window._editOrigin explicitly (e.g. editFromAdmin), respect it;
