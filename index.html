@@ -1225,13 +1225,34 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
         </div>
         </div>
 
-        <!-- STEP 8: Outcomes -->
+        <!-- STEP 8: In-Hospital Complications -->
         <div class="form-step" data-step="8">
+            <div class="section-card sec-comorbid">
+                <div class="section-card-head">
+                    <div class="sc-icon"><i class="fa fa-triangle-exclamation"></i></div>
+                    <div>
+                        <div class="sc-title">8. In-Hospital Complications</div>
+                        <div class="sc-sub">Events during this admission</div>
+                    </div>
+                </div>
+                <div class="section-card-body">
+            <div class="row g-2">
+                <div class="text-muted small mb-1"><i class="fa fa-hand-pointer me-1"></i>Tap any complication that occurred during the hospital stay.</div>
+                <div class="col-12" id="complicationsWrap"></div>
+                <input type="hidden" id="Complications">
+                <div class="col-12 mt-2"><label>Other Complications / Notes</label><input type="text" class="form-control" id="Complications_Other" placeholder="Any other in-hospital complications or details"></div>
+            </div>
+            </div>
+        </div>
+        </div>
+
+        <!-- STEP 9: Outcomes -->
+        <div class="form-step" data-step="9">
             <div class="section-card sec-outcomes">
                 <div class="section-card-head">
                     <div class="sc-icon"><i class="fa fa-flag-checkered"></i></div>
                     <div>
-                        <div class="sc-title">8. Outcomes & Management</div>
+                        <div class="sc-title">9. Outcomes & Management</div>
                         <div class="sc-sub">Plan, referrals, advanced HF</div>
                     </div>
                 </div>
@@ -1285,27 +1306,6 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                 <input type="hidden" id="MAGGIC_Risk">
 
                 <div class="col-12 col-md-12"><label>Management Plan / Notes</label><textarea class="form-control" id="Notes" rows="2"></textarea></div>
-            </div>
-            </div>
-        </div>
-        </div>
-
-        <!-- STEP 9: In-Hospital Complications -->
-        <div class="form-step" data-step="9">
-            <div class="section-card sec-comorbid">
-                <div class="section-card-head">
-                    <div class="sc-icon"><i class="fa fa-triangle-exclamation"></i></div>
-                    <div>
-                        <div class="sc-title">9. In-Hospital Complications</div>
-                        <div class="sc-sub">Events during this admission</div>
-                    </div>
-                </div>
-                <div class="section-card-body">
-            <div class="row g-2">
-                <div class="text-muted small mb-1"><i class="fa fa-hand-pointer me-1"></i>Tap any complication that occurred during the hospital stay.</div>
-                <div class="col-12" id="complicationsWrap"></div>
-                <input type="hidden" id="Complications">
-                <div class="col-12 mt-2"><label>Other Complications / Notes</label><input type="text" class="form-control" id="Complications_Other" placeholder="Any other in-hospital complications or details"></div>
             </div>
             </div>
         </div>
@@ -1946,7 +1946,7 @@ var MED_FORMULARY = {
     // CHANGE 1a: Procorolan separate
     Med_Procorolan: {label:'Procorolan (If)',    options:['None','Procorolan'], doses:{'Procorolan':['5 mg BID','7.5 mg BID']}},
     // CHANGE 1b: CCB separate
-    Med_CCB:        {label:'CCB (Amlodipine)',   options:['None','Amlodipine'], doses:{'Amlodipine':['5 mg OD','10 mg OD']}},
+    Med_CCB:        {label:'CCB',                options:['None','Amlodipine','Nifedipine','Diltiazem','Verapamil','Other CCB'], doses:{'Amlodipine':['5 mg OD','10 mg OD'],'Nifedipine':['30 mg OD','60 mg OD','90 mg OD'],'Diltiazem':['120 mg OD','180 mg OD','240 mg OD','300 mg OD','360 mg OD'],'Verapamil':['40 mg TID','80 mg TID','120 mg BID','180 mg OD','240 mg OD'],'Other CCB':['Other (specify dose)']}},
     Med_Diuretic:   {label:'Diuretics',          options:['None','Furosemide','Metolazone','HCTZ','Furosemide + Metolazone','Furosemide + HCTZ','Metolazone + HCTZ'], doses:{'Furosemide':['20 mg PO OD','40 mg PO OD','40 mg PO BID','80 mg PO OD','80 mg PO BID','120 mg PO OD'],'Metolazone':['2.5 mg PO OD','5 mg PO OD','10 mg PO OD'],'HCTZ':['12.5 mg PO OD','25 mg PO OD','50 mg PO OD'],'Furosemide + Metolazone':['Furo 40 + Metolazone 2.5','Furo 40 + Metolazone 5','Furo 80 + Metolazone 2.5','Furo 80 + Metolazone 5','Furo 80 + Metolazone 10','Furo 120 + Metolazone 5','Furo 120 + Metolazone 10'],'Furosemide + HCTZ':['Furo 40 + HCTZ 12.5','Furo 40 + HCTZ 25','Furo 80 + HCTZ 12.5','Furo 80 + HCTZ 25'],'Metolazone + HCTZ':['Metolazone 2.5 + HCTZ 12.5','Metolazone 5 + HCTZ 25']}},
     Med_Statin:     {label:'Statin',             options:['None','Zocor','Lipitor','Crestor'], doses:{'Zocor':['10 mg PO OD','20 mg PO OD','40 mg PO OD'],'Lipitor':['10 mg PO OD','20 mg PO OD','40 mg PO OD','80 mg PO OD'],'Crestor':['5 mg PO OD','10 mg PO OD','20 mg PO OD','40 mg PO OD']}},
     Med_LipidCombo: {label:'Lipid Combination',  options:['None','Atozet','Zympass','Ezetrol'], doses:{'Atozet':['10/10 mg PO OD','10/20 mg PO OD','10/40 mg PO OD','10/80 mg PO OD'],'Zympass':['5/10 mg PO OD','10/10 mg PO OD','10/20 mg PO OD','20/10 mg PO OD'],'Ezetrol':['10 mg PO OD']}},
@@ -2006,7 +2006,11 @@ var VISIT_MED_GROUPS = [
             {id:'V_Hydralazine', label:'Hydralazine', doses:['','25 mg PO TID','50 mg PO TID','75 mg PO TID']},
             {id:'V_Nitrates',    label:'Nitrates',    doses:['','20 mg PO BID','40 mg PO BID']},
             {id:'V_Procorolan',  label:'Procorolan',  doses:['','5 mg PO BID','7.5 mg PO BID']},
-            {id:'V_Amlodipine',  label:'Amlodipine',  doses:['','5 mg PO OD','10 mg PO OD']}
+            {id:'V_Amlodipine',  label:'Amlodipine (CCB)',  doses:['','5 mg PO OD','10 mg PO OD']},
+            {id:'V_Nifedipine',  label:'Nifedipine (CCB)',  doses:['','30 mg PO OD','60 mg PO OD','90 mg PO OD']},
+            {id:'V_Diltiazem',   label:'Diltiazem (CCB)',   doses:['','120 mg PO OD','180 mg PO OD','240 mg PO OD','300 mg PO OD','360 mg PO OD']},
+            {id:'V_Verapamil',   label:'Verapamil (CCB)',   doses:['','40 mg PO TID','80 mg PO TID','120 mg PO BID','180 mg PO OD','240 mg PO OD']},
+            {id:'V_OtherCCB',    label:'Other CCB',         doses:['']}
         ]
     },
     {
@@ -2686,7 +2690,7 @@ function reorderVisitFormSections(){
 }
 
 // ===== CHANGE 2: WIZARD WITH SHORT LABELS UNDER DOTS =====
-var STEP_LABELS = ['Demo','HF Dx','Signs','Ix','Comorb','Labs','Meds','Outcomes','Complic.','Visits'];
+var STEP_LABELS = ['Demo','HF Dx','Signs','Ix','Comorb','Labs','Meds','Complic.','Outcomes','Visits'];
 
 function buildWizardProgress(){
     var html='';
@@ -7943,12 +7947,11 @@ var PP_MED_MAP = {
     // CCB
     'amlodipine':   {f:'Med_CCB', v:'Amlodipine', vf:'V_Amlodipine'},
     'norvasc':      {f:'Med_CCB', v:'Amlodipine', vf:'V_Amlodipine'},
-    // Note: Nifedipine/Diltiazem/Verapamil are NOT in VISIT_MED_GROUPS; captured at patient level only
-    'nifedipine':   {f:'Med_CCB', v:'Nifedipine'},
-    'adalat':       {f:'Med_CCB', v:'Nifedipine'},
-    'diltiazem':    {f:'Med_CCB', v:'Diltiazem'},
-    'verapamil':    {f:'Med_CCB', v:'Verapamil'},
-    'isoptin':      {f:'Med_CCB', v:'Verapamil'},
+    'nifedipine':   {f:'Med_CCB', v:'Nifedipine', vf:'V_Nifedipine'},
+    'adalat':       {f:'Med_CCB', v:'Nifedipine', vf:'V_Nifedipine'},
+    'diltiazem':    {f:'Med_CCB', v:'Diltiazem',  vf:'V_Diltiazem'},
+    'verapamil':    {f:'Med_CCB', v:'Verapamil',  vf:'V_Verapamil'},
+    'isoptin':      {f:'Med_CCB', v:'Verapamil',  vf:'V_Verapamil'},
     // Diuretics
     'furosemide':  {f:'Med_Diuretic', v:'Furosemide', vf:'V_Furosemide'},
     'lasix':       {f:'Med_Diuretic', v:'Furosemide', vf:'V_Furosemide'},
