@@ -81,10 +81,10 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 .extra-adm-head .ea-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .extra-adm-head .ea-chevron{color:#c0392b;font-size:0.72rem;transition:transform 0.2s}
 .extra-adm-head.expanded .ea-chevron{transform:rotate(180deg)}
-.extra-adm-body{display:none;padding:10px 12px}
+.extra-adm-body{display:none;padding:10px 12px 4px;background:#fdf7f7}
 .extra-adm-body.show{display:block;animation:fadeUp 0.2s ease}
-.extra-adm-body .ea-sec-label{font-size:0.74rem;font-weight:700;color:#8b0000;text-transform:uppercase;letter-spacing:0.03em;margin:10px 0 4px;padding-bottom:3px;border-bottom:1px dashed #e2b6b6}
-.extra-adm-body .ea-sec-label:first-child{margin-top:0}
+.extra-adm-body .field-tint{margin:8px 0}
+.extra-adm-body .field-tint:first-child{margin-top:2px}
 .extra-adm-body label{font-size:0.72rem;color:#6c757d;margin-bottom:2px}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;justify-content:center;align-items:center}
 .modal-box{background:#fff;border-radius:16px;padding:30px 20px;max-width:500px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.4);animation:pop .3s ease;max-height:90vh;overflow-y:auto;}
@@ -3526,20 +3526,25 @@ function toggleGeneticsType(){
 // between admissions. Stored as a JSON array on hidden #Extra_Admissions.
 // Legacy records using {date,dischargeDate,reason} remain fully compatible.
 //
-// Schema — grouped to mirror the main wizard sections. Each field:
-//   k    = JSON key,  l = label,
-//   t    = 'text' | 'num' | 'date' | 'sel' | 'area',
-//   o    = options array (for 'sel'),  w = bootstrap column class,
-//   ph   = placeholder.
+// Schema — grouped to mirror the main wizard sections. Each section renders as
+// a colour-coded collapsible accordion (.field-tint.collapsible), matching the
+// Visits step. Each section: sec=title, icon, tint=palette class. Each field:
+//   k  = JSON key,  l = label,
+//   t  = 'text' | 'num' | 'date' | 'sel' | 'area',
+//   o  = options array (for 'sel'),  w = bootstrap column class,  ph = placeholder.
 var EXTRA_ADM_SCHEMA=[
- {sec:'Admission',icon:'fa-hospital',fields:[
+ {sec:'Admission Details',icon:'fa-hospital',tint:'tint-appt',fields:[
    {k:'date',l:'Admission Date',t:'date',w:'col-6 col-md-3'},
    {k:'dischargeDate',l:'Discharge Date',t:'date',w:'col-6 col-md-3'},
-   {k:'reason',l:'Reason / Notes',t:'text',w:'col-12 col-md-6',ph:'e.g. ADHF, ACS, arrhythmia...'}
+   {k:'reason',l:'Reason / Notes',t:'text',w:'col-12 col-md-6',ph:'e.g. ADHF, ACS, arrhythmia...'},
+   {k:'LOS',l:'Length of Stay (Days)',t:'num',w:'col-6 col-md-3'},
+   {k:'Transfer_Other',l:'Transfer to Other Hospital',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
+   {k:'Transfer_Hospital_Name',l:'Name of Hospital',t:'text',w:'col-12 col-md-6',ph:'e.g. Chest Hospital, Amiri...'}
  ]},
- {sec:'Symptoms, Signs & Vitals',icon:'fa-heart-pulse',fields:[
+ {sec:'Symptoms, Signs & Vitals',icon:'fa-heart-pulse',tint:'tint-vitals',fields:[
    {k:'Height',l:'Height (cm)',t:'num',w:'col-4 col-md-2'},
    {k:'Weight',l:'Weight (kg)',t:'num',w:'col-4 col-md-2'},
+   {k:'BMI',l:'BMI',t:'text',w:'col-4 col-md-2'},
    {k:'Dry_Weight',l:'Dry Weight (kg)',t:'num',w:'col-4 col-md-2'},
    {k:'NYHA',l:'NYHA',t:'sel',o:['','I','II','III','IV','N/A'],w:'col-4 col-md-2'},
    {k:'KCCQ',l:'KCCQ',t:'num',w:'col-4 col-md-2'},
@@ -3553,82 +3558,117 @@ var EXTRA_ADM_SCHEMA=[
    {k:'S3',l:'S3 Gallop',t:'sel',o:['No','Yes'],w:'col-4 col-md-3'},
    {k:'Murmur',l:'Murmur',t:'text',w:'col-8 col-md-3'}
  ]},
- {sec:'Investigations',icon:'fa-magnifying-glass-chart',fields:[
+ {sec:'Investigations & Procedures',icon:'fa-magnifying-glass-chart',tint:'tint-ecg',fields:[
    {k:'ECG_LBBB',l:'ECG LBBB',t:'sel',o:['','No','Yes'],w:'col-6 col-md-3'},
    {k:'ECG_QRS',l:'QRS Duration (ms)',t:'num',w:'col-6 col-md-3'},
-   {k:'ECG_Arrhythmia',l:'Arrhythmia',t:'text',w:'col-6 col-md-3'},
-   {k:'ECG_Pacing',l:'Pacing Rhythm',t:'text',w:'col-6 col-md-3'},
+   {k:'ECG_Arrhythmia',l:'ECG Arrhythmia',t:'text',w:'col-6 col-md-3'},
+   {k:'ECG_Pacing',l:'Pacing Rhythm',t:'text',w:'col-6 col-md-3',ph:'AAI, VVI, DDD, BiV'},
    {k:'ECHO',l:'Echo Details',t:'text',w:'col-12 col-md-6'},
-   {k:'Echo_EDVI',l:'EDVI/EDD',t:'text',w:'col-6 col-md-2'},
-   {k:'Echo_ESVI',l:'ESVI/ESD',t:'text',w:'col-6 col-md-2'},
-   {k:'Echo_EF',l:'EF %',t:'text',w:'col-6 col-md-2'},
+   {k:'Echo_EDVI',l:'Echo EDVI/EDD',t:'text',w:'col-6 col-md-2'},
+   {k:'Echo_ESVI',l:'Echo ESVI/ESD',t:'text',w:'col-6 col-md-2'},
+   {k:'Echo_EF',l:'Echo EF %',t:'text',w:'col-6 col-md-2'},
    {k:'CMR_CT',l:'CMR Details',t:'text',w:'col-12 col-md-6'},
-   {k:'CMR_LVEF',l:'CMR LVEF %',t:'text',w:'col-6 col-md-3'},
+   {k:'CMR_LVEDVI',l:'CMR LVEDVI/EDD',t:'text',w:'col-6 col-md-3'},
+   {k:'CMR_LVESVI',l:'CMR LVESVI/ESD',t:'text',w:'col-6 col-md-3'},
+   {k:'CMR_LVEF',l:'CMR LVEF %',t:'text',w:'col-6 col-md-2'},
+   {k:'CMR_RVEDI',l:'CMR RVEDI',t:'text',w:'col-6 col-md-2'},
+   {k:'CMR_RVEF',l:'CMR RVEF %',t:'text',w:'col-6 col-md-2'},
    {k:'CMR_LGE',l:'CMR LGE',t:'sel',o:['','No','Yes'],w:'col-6 col-md-3'},
+   {k:'CMR_LGE_Pct',l:'CMR LGE %',t:'text',w:'col-6 col-md-3'},
+   {k:'CMR_Others',l:'CMR Others',t:'text',w:'col-12 col-md-6'},
    {k:'CT_Done',l:'CT Angio Performed',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
-   {k:'CT_Angio',l:'CT Angio Findings',t:'text',w:'col-12 col-md-9'},
+   {k:'CT_Angio',l:'CT Angio Findings',t:'text',w:'col-12 col-md-6'},
+   {k:'CT_Calcium',l:'Calcium Score',t:'text',w:'col-6 col-md-3'},
+   {k:'CT_Notes',l:'CT Angio Notes',t:'text',w:'col-12 col-md-9'},
    {k:'CAG_Done',l:'CAG Performed',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
    {k:'CAG_Date',l:'CAG Date',t:'date',w:'col-6 col-md-3'},
-   {k:'CAG_Findings',l:'CAG Findings',t:'text',w:'col-12 col-md-6',ph:'e.g. LAD 80% prox, RCA 90% mid'},
-   {k:'Walk_Meters',l:'6MWT Meters',t:'num',w:'col-6 col-md-3'},
-   {k:'CPET_PeakVO2',l:'CPET Peak VO₂',t:'text',w:'col-6 col-md-3'},
+   {k:'CAG_Access',l:'CAG Access',t:'sel',o:['','Radial','Femoral','Other'],w:'col-6 col-md-3'},
+   {k:'CAG_Findings',l:'CAG Findings (vessels, % stenosis)',t:'text',w:'col-12 col-md-9',ph:'e.g. LM 30%, LAD 80% prox, RCA 90% mid'},
+   {k:'CAG_Notes',l:'CAG Notes',t:'text',w:'col-12'},
+   {k:'Walk_Completed',l:'6MWT Completed',t:'sel',o:['N','Y'],w:'col-6 col-md-3'},
+   {k:'Walk_Meters',l:'6MWT Meters Walked',t:'num',w:'col-6 col-md-3'},
+   {k:'CPET_PeakVO2',l:'CPET Peak VO₂',t:'text',w:'col-6 col-md-3',ph:'ml/kg/min'},
+   {k:'CPET_VEVCO2',l:'CPET VE/VCO₂ Slope',t:'text',w:'col-6 col-md-3'},
+   {k:'CPET_RER',l:'CPET RER',t:'text',w:'col-6 col-md-3'},
+   {k:'CPET_AT',l:'CPET Anaerobic Threshold',t:'text',w:'col-6 col-md-3'},
+   {k:'CPET_VO2HR',l:'CPET VO₂/HR',t:'text',w:'col-6 col-md-3'},
+   {k:'CPET_PetCO2',l:'CPET PetCO₂',t:'text',w:'col-6 col-md-3'},
    {k:'Device_Type',l:'Device Type',t:'sel',o:['','ICD','CRT-P','CRT-D','Pacemaker VVI','Pacemaker DDD'],w:'col-6 col-md-3'},
    {k:'Device_Date',l:'Device Date',t:'date',w:'col-6 col-md-3'},
-   {k:'RHC_Done',l:'Right Heart Cath',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
-   {k:'RHC_PCWP',l:'PCWP (mmHg)',t:'text',w:'col-6 col-md-3'},
-   {k:'RHC_PAP',l:'PAP (S/D/M)',t:'text',w:'col-6 col-md-3'},
-   {k:'InHospital_Procedures',l:'Procedures Performed',t:'text',w:'col-12 col-md-6',ph:'CAG/PCI, Devices, Ablations...'},
+   {k:'RHC_Done',l:'Right Heart Cath Performed',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
+   {k:'RHC_CI',l:'RHC C.I (L/min/m²)',t:'text',w:'col-6 col-md-3'},
+   {k:'RHC_RAP',l:'RHC RAP (mmHg)',t:'text',w:'col-6 col-md-3'},
+   {k:'RHC_RVP',l:'RHC RVP (S/D/ED)',t:'text',w:'col-6 col-md-3'},
+   {k:'RHC_PCWP',l:'RHC PCWP (mmHg)',t:'text',w:'col-6 col-md-3'},
+   {k:'RHC_PAP',l:'RHC PAP (S/D/M)',t:'text',w:'col-6 col-md-3'},
+   {k:'RHC_PVR',l:'RHC PVR (Woods)',t:'text',w:'col-6 col-md-3'},
+   {k:'RHC_PAPi',l:'RHC PAPi',t:'text',w:'col-6 col-md-3'},
+   {k:'RHC_LV',l:'RHC LV (S/D/ED)',t:'text',w:'col-6 col-md-3'},
+   {k:'RHC_MVO2',l:'RHC MVO₂ Sat (%)',t:'text',w:'col-6 col-md-3'},
+   {k:'InHospital_Procedures',l:'Procedures Performed',t:'text',w:'col-12 col-md-6',ph:'CAG/PCI, Devices, Ablations, Pericardiocentesis...'},
+   {k:'InHospital_Procedures_Other',l:'Other Procedure (specify)',t:'text',w:'col-12 col-md-6'},
    {k:'InHospital_Procedures_Notes',l:'Procedure Notes',t:'area',w:'col-12'},
    {k:'Investigations_Other',l:'Other Investigations / Notes',t:'area',w:'col-12'}
  ]},
- {sec:'In-Hospital Labs',icon:'fa-vials',fields:[
+ {sec:'In-Hospital Labs',icon:'fa-vials',tint:'tint-renal',fields:[
    {k:'Lab_HbA1c',l:'HbA1c (%)',t:'text',w:'col-6 col-md-3'},
-   {k:'Lab_Gluc',l:'Fasting Glucose',t:'text',w:'col-6 col-md-3'},
-   {k:'Lab_Urea',l:'Urea Adm',t:'text',w:'col-6 col-md-3'},
-   {k:'Lab_Creat',l:'Creatinine Adm',t:'text',w:'col-6 col-md-3'},
-   {k:'Lab_Na',l:'Na Adm',t:'text',w:'col-6 col-md-3'},
-   {k:'Lab_K',l:'K Adm',t:'text',w:'col-6 col-md-3'},
-   {k:'Lab_Creat_Disch',l:'Creatinine Disch',t:'text',w:'col-6 col-md-3'},
-   {k:'Lab_Na_Disch',l:'Na Disch',t:'text',w:'col-6 col-md-3'},
-   {k:'Lab_K_Disch',l:'K Disch',t:'text',w:'col-6 col-md-3'},
-   {k:'Lab_BNP',l:'NT-proBNP Adm',t:'text',w:'col-6 col-md-3'},
-   {k:'Lab_BNP_Disch',l:'NT-proBNP Disch',t:'text',w:'col-6 col-md-3'},
-   {k:'Lab_Iron',l:'Serum Iron',t:'text',w:'col-6 col-md-3'},
-   {k:'Lab_Ferritin',l:'Ferritin',t:'text',w:'col-6 col-md-3'},
-   {k:'Lab_TrSats',l:'TSAT (%)',t:'text',w:'col-6 col-md-3'},
-   {k:'Lab_Hb',l:'Hb Adm',t:'text',w:'col-6 col-md-3'},
-   {k:'Lab_Hb_Disch',l:'Hb Disch',t:'text',w:'col-6 col-md-3'},
-   {k:'Lab_TSH',l:'TSH',t:'text',w:'col-6 col-md-3'},
-   {k:'Lab_LDL',l:'LDL',t:'text',w:'col-6 col-md-3'},
-   {k:'Lab_AlbCreat',l:'Albumin/Creatinine Ratio',t:'text',w:'col-6 col-md-3'}
+   {k:'Lab_Gluc',l:'Fasting Glucose (mmol/L)',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_Urea',l:'Urea Adm (mmol/L)',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_Creat',l:'Creatinine Adm (µmol/L)',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_eGFR',l:'eGFR Adm',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_Na',l:'Na Adm (mmol/L)',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_K',l:'K Adm (mmol/L)',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_Urea_Disch',l:'Urea Disch (mmol/L)',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_Creat_Disch',l:'Creatinine Disch (µmol/L)',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_eGFR_Disch',l:'eGFR Disch',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_Na_Disch',l:'Na Disch (mmol/L)',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_K_Disch',l:'K Disch (mmol/L)',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_BNP',l:'NT-proBNP Adm (pg/mL)',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_BNP_Disch',l:'NT-proBNP Disch (pg/mL)',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_BNP_only',l:'BNP Adm (pg/mL)',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_BNP_only_Disch',l:'BNP Disch (pg/mL)',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_Iron',l:'Serum Iron (µmol/L)',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_Ferritin',l:'Ferritin (µg/L)',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_TrSats',l:'Transferrin Sat / TSAT (%)',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_Hb',l:'Hb Adm (g/dL)',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_Hb_Disch',l:'Hb Disch (g/dL)',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_WBC',l:'WBC (×10⁹/L)',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_Plt',l:'Platelets (×10⁹/L)',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_TSH',l:'TSH (mIU/L)',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_FreeT4',l:'Free T4 (pmol/L)',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_TotalChol',l:'Total Cholesterol (mmol/L)',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_LDL',l:'LDL (mmol/L)',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_HDL',l:'HDL (mmol/L)',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_TG',l:'Triglycerides (mmol/L)',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_AlbCreat',l:'Albumin/Creatinine Ratio (mg/g)',t:'text',w:'col-6 col-md-3'}
  ]},
- {sec:'In-Hospital Management',icon:'fa-pills',fields:[
+ {sec:'In-Hospital Management & Medications',icon:'fa-pills',tint:'tint-meds',fields:[
    {k:'Cardioversion',l:'Cardioversion',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
    {k:'Cardioversion_Type',l:'Cardioversion Type',t:'sel',o:['','Medical','DC','Medical + DC'],w:'col-6 col-md-3'},
-   {k:'Cardioversion_Notes',l:'Cardioversion Notes',t:'text',w:'col-12 col-md-6'},
+   {k:'Cardioversion_Notes',l:'Cardioversion Notes',t:'text',w:'col-12 col-md-6',ph:'Drug, energy, attempts, outcome...'},
    {k:'Inotropes_Used',l:'Inotropes Used?',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
-   {k:'Inotropes_Selected',l:'Inotrope(s)',t:'text',w:'col-12 col-md-9',ph:'Dobutamine, Milrinone, Levophed...'},
+   {k:'Inotropes_Selected',l:'Inotrope(s) & Max Doses',t:'text',w:'col-12 col-md-9',ph:'Dobutamine, Dopamine, Milrinone, Simdax, Levophed, Adrenaline, Vasopressin...'},
    {k:'Hemo_Support',l:'Haemodynamic Support?',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
    {k:'Hemo_Support_Type',l:'MCS Type(s)',t:'text',w:'col-12 col-md-9',ph:'IABP, Impella, VA-ECMO...'},
-   {k:'Med_Changes',l:'Medication Changes / GDMT This Admission',t:'area',w:'col-12',ph:'GDMT initiated/up-titrated, diuretics, other changes...'}
+   {k:'Med_Changes',l:'Medications / GDMT This Admission',t:'area',w:'col-12',ph:'ARNI, SGLT2i, BB, MRA, ACEi/ARB, diuretics, statin, OAC, antiplatelet, doses, up-titration...'}
  ]},
- {sec:'In-Hospital Complications',icon:'fa-triangle-exclamation',fields:[
+ {sec:'In-Hospital Complications',icon:'fa-triangle-exclamation',tint:'tint-bnp',fields:[
    {k:'Complications',l:'Complications',t:'text',w:'col-12 col-md-8',ph:'AKI, arrhythmia, infection, cardiogenic shock...'},
-   {k:'Bleeding_Transfusion',l:'Bleeding req. Transfusion',t:'sel',o:['No','Yes'],w:'col-6 col-md-4'},
+   {k:'Bleeding_Transfusion',l:'Bleeding req. Blood Transfusion',t:'sel',o:['No','Yes'],w:'col-6 col-md-4'},
    {k:'Bleeding_Units',l:'Units Transfused',t:'num',w:'col-6 col-md-3'},
-   {k:'Bleeding_Site',l:'Bleeding Site / Notes',t:'text',w:'col-12 col-md-5'},
+   {k:'Bleeding_Site',l:'Bleeding Site / Notes',t:'text',w:'col-12 col-md-5',ph:'e.g. GI, access site...'},
    {k:'Complications_Other',l:'Other Complications / Notes',t:'text',w:'col-12'}
  ]},
- {sec:'Outcomes & Management',icon:'fa-flag-checkered',fields:[
+ {sec:'Outcomes & Management',icon:'fa-flag-checkered',tint:'tint-plan',fields:[
    {k:'Quad_GDMT',l:'Quadruple GDMT?',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
-   {k:'Max_GDMT',l:'Max GDMT Doses?',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
+   {k:'Max_GDMT',l:'On Maximum GDMT Doses?',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
    {k:'Recovered_LV',l:'Recovered LV?',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
    {k:'Mortality',l:'Mortality',t:'sel',o:['Alive','In-hospital','Out-of-hospital'],w:'col-6 col-md-3'},
    {k:'Advanced_HF_Outcome',l:'Advanced HF?',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
    {k:'Strong_HF',l:'Strong HF eligible?',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
    {k:'Adv_HF_Therapy',l:'Advanced HF Therapy?',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
-   {k:'Adv_HF_Therapy_Type',l:'Therapy Type',t:'text',w:'col-6 col-md-3',ph:'LVAD, RVDS, Transplant'},
-   {k:'Referral',l:'Referral(s)',t:'text',w:'col-12 col-md-6',ph:'EP, Nephrology, Cardiac Rehab...'},
+   {k:'Adv_HF_Therapy_Type',l:'Therapy Type',t:'text',w:'col-6 col-md-3',ph:'LVAD, RVDS, Heart Transplant'},
+   {k:'Referral',l:'Referral(s)',t:'text',w:'col-12 col-md-6',ph:'EP, Obesity, Sleep, DM/Endocrine, Nephrology, Cardiac Rehab, Dietician...'},
    {k:'Notes',l:'Management Plan / Notes',t:'area',w:'col-12'}
  ]}
 ];
@@ -3667,7 +3707,8 @@ function _extraFieldHtml(idx, f){
     return h+'</div>';
 }
 
-// Render one collapsible admission card.
+// Render one admission as a card whose sections are colour-coded collapsible
+// accordions (.field-tint.collapsible), matching the Visits step look.
 function _extraAdmCardHtml(adm, idx){
     var num=idx+2; // first admission is #1 (the main Section-3 block)
     var summary=[];
@@ -3683,15 +3724,29 @@ function _extraAdmCardHtml(adm, idx){
     h+='<i class="fa fa-chevron-down ea-chevron"></i></span>';
     h+='</div>';
     h+='<div class="extra-adm-body" id="extraAdmBody'+idx+'">';
-    EXTRA_ADM_SCHEMA.forEach(function(grp){
-        h+='<h6 class="ea-sec-label"><i class="fa '+grp.icon+' me-1"></i>'+grp.sec+'</h6>';
-        h+='<div class="row g-2 mb-1">';
+    EXTRA_ADM_SCHEMA.forEach(function(grp,gi){
+        // Count filled fields for the header badge
+        var filled=0;
+        grp.fields.forEach(function(f){
+            var v=adm[f.k];
+            if(v!=null && String(v).trim()!=='' && String(v)!=='No' && String(v)!=='N') filled++;
+        });
+        var gid='eaSec_'+idx+'_'+gi;
+        // First section (Admission Details) starts expanded; rest collapsed.
+        var expanded=(gi===0);
+        h+='<div class="field-tint collapsible '+(grp.tint||'')+(expanded?' expanded':'')+'" id="'+gid+'">';
+        h+='<div class="ft-head" onclick="toggleExtraAdmSection(\''+gid+'\')">';
+        h+='<i class="fa '+grp.icon+'"></i><span>'+grp.sec+'</span>';
+        h+='<i class="fa fa-chevron-right ft-chev ms-auto"></i>';
+        h+='<span class="ft-filled'+(filled>0?' has-data':'')+'">'+filled+' filled</span>';
+        h+='</div>';
+        h+='<div class="ft-body"><div class="row g-2">';
         grp.fields.forEach(function(f){
             var copy={};for(var p in f){copy[p]=f[p];}
             copy._val=(adm[f.k]!=null?adm[f.k]:'');
             h+=_extraFieldHtml(idx,copy);
         });
-        h+='</div>';
+        h+='</div></div></div>';
     });
     h+='</div></div>';
     return h;
@@ -3706,12 +3761,18 @@ function _renderExtraAdmissions(){
     arr.forEach(function(adm,idx){ html+=_extraAdmCardHtml(adm,idx); });
     wrap.innerHTML=html;
 }
+// Expand/collapse a whole admission card.
 function toggleExtraAdmission(idx){
     var body=document.getElementById('extraAdmBody'+idx);
     if(!body)return;
     var card=body.closest('.extra-adm-card');
     var open=body.classList.toggle('show');
     if(card){ var head=card.querySelector('.extra-adm-head'); if(head) head.classList.toggle('expanded',open); }
+}
+// Expand/collapse a single colour-coded section inside an admission card.
+function toggleExtraAdmSection(gid){
+    var sec=document.getElementById(gid);
+    if(sec) sec.classList.toggle('expanded');
 }
 function addExtraAdmission(){
     var arr=_readExtraAdmissions();
@@ -3747,6 +3808,33 @@ function updateExtraAdmission(idx, field, value){
                 card.textContent=s.length?s.join(' · '):'(no details yet)';
             }
         }
+        // Refresh the "n filled" badge for the section this field belongs to
+        _refreshExtraAdmBadge(idx, field);
+    }
+}
+// Recompute and update the filled-count badge for whichever section owns `field`.
+function _refreshExtraAdmBadge(idx, field){
+    var arr=_readExtraAdmissions();
+    if(!(idx>=0 && idx<arr.length)) return;
+    var adm=arr[idx];
+    for(var gi=0; gi<EXTRA_ADM_SCHEMA.length; gi++){
+        var grp=EXTRA_ADM_SCHEMA[gi];
+        var owns=grp.fields.some(function(f){return f.k===field;});
+        if(!owns) continue;
+        var filled=0;
+        grp.fields.forEach(function(f){
+            var v=adm[f.k];
+            if(v!=null && String(v).trim()!=='' && String(v)!=='No' && String(v)!=='N') filled++;
+        });
+        var sec=document.getElementById('eaSec_'+idx+'_'+gi);
+        if(sec){
+            var badge=sec.querySelector('.ft-filled');
+            if(badge){
+                badge.textContent=filled+' filled';
+                badge.classList.toggle('has-data', filled>0);
+            }
+        }
+        break;
     }
 }
 function restoreExtraAdmissions(savedJson){
