@@ -69,6 +69,23 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 .form-control,.form-select{border-radius:6px;font-size:.85rem;padding:4px 8px}
 .btn-medical{background:var(--primary);color:#fff;font-weight:bold;width:100%;padding:12px;border:none;border-radius:8px}
 .btn-visit{background:#17a2b8;color:#fff;font-weight:bold}
+.next-appt-card{background:#fff5f5;border:1px solid #f1c6c6;border-left:5px solid #8b0000;border-radius:10px;padding:14px 16px;box-shadow:0 2px 10px rgba(139,0,0,0.08)}
+.next-appt-card-head{display:flex;align-items:center;gap:8px;font-weight:700;color:#8b0000;font-size:0.95rem;margin-bottom:10px;padding-bottom:8px;border-bottom:1px dashed #e2b6b6}
+.next-appt-card-head i{font-size:1rem}
+.extra-adm-card{background:#fff;border:1px solid #e3b9b9;border-left:4px solid #c0392b;border-radius:8px;margin-top:10px;overflow:hidden;box-shadow:0 1px 5px rgba(192,57,43,0.08)}
+.extra-adm-head{display:flex;align-items:center;gap:8px;padding:9px 12px;background:#fdf0f0;cursor:pointer;user-select:none;transition:background 0.15s}
+.extra-adm-head:hover{background:#fbe4e4}
+.extra-adm-head.expanded{background:#f6dada;border-bottom:1px solid #c0392b}
+.extra-adm-head .ea-title{font-weight:700;color:#8b0000;font-size:0.84rem;flex-shrink:0}
+.extra-adm-head .ea-summary{font-size:0.74rem;color:#6c757d;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.extra-adm-head .ea-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.extra-adm-head .ea-chevron{color:#c0392b;font-size:0.72rem;transition:transform 0.2s}
+.extra-adm-head.expanded .ea-chevron{transform:rotate(180deg)}
+.extra-adm-body{display:none;padding:10px 12px}
+.extra-adm-body.show{display:block;animation:fadeUp 0.2s ease}
+.extra-adm-body .ea-sec-label{font-size:0.74rem;font-weight:700;color:#8b0000;text-transform:uppercase;letter-spacing:0.03em;margin:10px 0 4px;padding-bottom:3px;border-bottom:1px dashed #e2b6b6}
+.extra-adm-body .ea-sec-label:first-child{margin-top:0}
+.extra-adm-body label{font-size:0.72rem;color:#6c757d;margin-bottom:2px}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;justify-content:center;align-items:center}
 .modal-box{background:#fff;border-radius:16px;padding:30px 20px;max-width:500px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.4);animation:pop .3s ease;max-height:90vh;overflow-y:auto;}
 @keyframes pop{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
@@ -1631,24 +1648,31 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                     <input type="hidden" id="V_Vacc_Pneumococcal_Year">
                     <input type="hidden" id="V_Vacc_COVID_Year">
                     <input type="hidden" id="V_Vacc_Other">
-                    <div class="col-12"><hr class="my-2"></div>
-                    <h6 class="col-12 text-danger fw-bold"><i class="fa fa-calendar-alt"></i> Next Appointment</h6>
-                    <div class="col-12 col-md-4">
-                        <label class="text-danger fw-bold">Next Appointment Date</label>
-                        <input type="date" class="form-control border-danger" id="Next_Appt">
+                </div>
+                <!-- ===== NEXT APPOINTMENT — standalone card at end of visit section ===== -->
+                <div class="next-appt-card mt-3">
+                    <div class="next-appt-card-head">
+                        <i class="fa fa-calendar-alt"></i>
+                        <span>Next Appointment</span>
                     </div>
-                    <div class="col-12 col-md-8">
-                        <label class="text-muted">Notes (optional)</label>
-                        <input type="text" class="form-control" id="Next_Appt_Notes" placeholder="e.g. clinic name, reason, special instructions...">
+                    <div class="row g-2">
+                        <div class="col-12 col-md-4">
+                            <label class="text-danger fw-bold">Next Appointment Date</label>
+                            <input type="date" class="form-control border-danger" id="Next_Appt">
+                        </div>
+                        <div class="col-12 col-md-8">
+                            <label class="text-muted">Notes (optional)</label>
+                            <input type="text" class="form-control" id="Next_Appt_Notes" placeholder="e.g. clinic name, reason, special instructions...">
+                        </div>
                     </div>
-                    <div class="col-12 mt-3">
-                        <button type="button" id="visitSaveBtn" class="btn btn-visit w-100" onclick="saveVisit()">
-                            <i class="fa fa-plus-circle"></i> ADD VISIT TO PATIENT RECORD
-                        </button>
-                        <button type="button" id="visitCancelBtn" class="btn btn-outline-secondary w-100 mt-2" onclick="cancelEditVisit()" style="display:none;">
-                            <i class="fa fa-times"></i> Cancel Edit
-                        </button>
-                    </div>
+                </div>
+                <div class="mt-3">
+                    <button type="button" id="visitSaveBtn" class="btn btn-visit w-100" onclick="saveVisit()">
+                        <i class="fa fa-plus-circle"></i> ADD VISIT TO PATIENT RECORD
+                    </button>
+                    <button type="button" id="visitCancelBtn" class="btn btn-outline-secondary w-100 mt-2" onclick="cancelEditVisit()" style="display:none;">
+                        <i class="fa fa-times"></i> Cancel Edit
+                    </button>
                 </div>
             </div>
             </div>
@@ -3041,9 +3065,10 @@ function buildVaccBlock(){
             html+='</div>';
         } else {
             html+='<div class="d-flex gap-2 mt-1 align-items-center flex-wrap">';
-            html+='<select class="form-select form-select-sm" style="max-width:110px;" id="vacc_'+v.id+'_yn" onchange="onVaccYNChange(\''+v.id+'\')"><option value="No">No</option><option value="Yes">Yes</option></select>';
+            html+='<button type="button" class="btn btn-sm btn-outline-success vacc-toggle-btn" id="vacc_'+v.id+'_yn" data-vacc-state="No" onclick="onVaccToggle(\''+v.id+'\')"><i class="fa fa-syringe me-1"></i>Not Given</button>';
             html+='<input type="date" class="form-control form-control-sm" style="max-width:170px;display:none;" id="vacc_'+v.id+'_date" onchange="onVaccDateChange(\''+v.id+'\')">';
             html+='</div>';
+            html+='<small class="text-muted d-block mt-1" style="font-size:0.7rem;">Tap to mark given; tap again to clear.</small>';
             if(prior){
                 html+='<small class="text-muted d-block mt-1">Last dose: '+_fmtVaccDate(prior)+' — suppression expired, due again.</small>';
             }
@@ -3063,34 +3088,47 @@ function onVaccNotesChange(){
     if(inp&&hid)hid.value=inp.value;
 }
 
-// When Yes/No changes, reveal the date picker and default the date to today.
-function onVaccYNChange(id){
-    var yn=document.getElementById('vacc_'+id+'_yn');
+// Toggle handler for the vaccination button. First tap -> Given (reveals date,
+// defaults to today). Second tap -> clears back to Not Given (removes date).
+function onVaccToggle(id){
+    var btn=document.getElementById('vacc_'+id+'_yn');
     var dt=document.getElementById('vacc_'+id+'_date');
-    if(!yn||!dt)return;
-    if(yn.value==='Yes'){
-        dt.style.display='';
-        if(!dt.value)dt.value=new Date().toISOString().split('T')[0];
-    } else {
+    if(!btn||!dt)return;
+    var nowYes=(btn.getAttribute('data-vacc-state')==='Yes');
+    if(nowYes){
+        // Currently Given -> clear it
+        btn.setAttribute('data-vacc-state','No');
+        btn.classList.remove('btn-success');
+        btn.classList.add('btn-outline-success');
+        btn.innerHTML='<i class="fa fa-syringe me-1"></i>Not Given';
         dt.style.display='none';
         dt.value='';
+    } else {
+        // Currently Not Given -> mark Given
+        btn.setAttribute('data-vacc-state','Yes');
+        btn.classList.add('btn-success');
+        btn.classList.remove('btn-outline-success');
+        btn.innerHTML='<i class="fa fa-circle-check me-1"></i>Given';
+        dt.style.display='';
+        if(!dt.value)dt.value=new Date().toISOString().split('T')[0];
     }
     onVaccDateChange(id);
 }
 
-// Mirror the visible Yes/No + date into the hidden persistence fields.
+// Mirror the visible toggle + date into the hidden persistence fields.
 function onVaccDateChange(id){
-    var yn=document.getElementById('vacc_'+id+'_yn');
+    var btn=document.getElementById('vacc_'+id+'_yn');
     var dt=document.getElementById('vacc_'+id+'_date');
     var hYN=document.getElementById('V_Vacc_'+id);
     var hDT=document.getElementById('V_Vacc_'+id+'_Date');
-    if(hYN)hYN.value=(yn&&yn.value==='Yes')?'Yes':'No';
-    if(hDT)hDT.value=(yn&&yn.value==='Yes')?(dt?dt.value:''):'';
+    var isYes=(btn&&btn.getAttribute('data-vacc-state')==='Yes');
+    if(hYN)hYN.value=isYes?'Yes':'No';
+    if(hDT)hDT.value=isYes?(dt?dt.value:''):'';
     // Keep legacy *_Year field in sync for backward-compatible exports/alerts
     var hYr=document.getElementById('V_Vacc_'+id+'_Year');
     if(hYr){
         var iso=(dt&&dt.value)||'';
-        hYr.value=(yn&&yn.value==='Yes'&&iso)?iso.slice(0,4):'';
+        hYr.value=(isYes&&iso)?iso.slice(0,4):'';
     }
 }
 
@@ -3099,14 +3137,22 @@ function syncVaccFromHidden(){
     VACCINES.forEach(function(v){
         var hYN=document.getElementById('V_Vacc_'+v.id);
         var hDT=document.getElementById('V_Vacc_'+v.id+'_Date');
-        var yn=document.getElementById('vacc_'+v.id+'_yn');
+        var btn=document.getElementById('vacc_'+v.id+'_yn');
         var dt=document.getElementById('vacc_'+v.id+'_date');
-        if(!yn||!dt)return; // covered (read-only) — nothing to sync
-        yn.value=(hYN&&hYN.value==='Yes')?'Yes':'No';
-        if(yn.value==='Yes'){
+        if(!btn||!dt)return; // covered (read-only) — nothing to sync
+        var isYes=(hYN&&hYN.value==='Yes');
+        if(isYes){
+            btn.setAttribute('data-vacc-state','Yes');
+            btn.classList.add('btn-success');
+            btn.classList.remove('btn-outline-success');
+            btn.innerHTML='<i class="fa fa-circle-check me-1"></i>Given';
             dt.style.display='';
             dt.value=(hDT&&hDT.value)||'';
         } else {
+            btn.setAttribute('data-vacc-state','No');
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-outline-success');
+            btn.innerHTML='<i class="fa fa-syringe me-1"></i>Not Given';
             dt.style.display='none';
             dt.value='';
         }
@@ -3472,8 +3518,121 @@ function toggleGeneticsType(){
     else{wrap.style.display='none';var n=document.getElementById('Genetics_Type');if(n)n.value='';}
 }
 
-// ===== EXTRA IN-HOSPITAL ADMISSIONS =====
-// Stored as JSON array on hidden #Extra_Admissions: [{date:'', dischargeDate:'', reason:''}, ...]
+// ===== EXTRA IN-HOSPITAL ADMISSIONS (FULL RECORD) =====
+// Each extra admission is a complete admission record covering the same field
+// set as Sections 3–9 of the main form (Symptoms/Signs, Investigations, Labs,
+// Management, Complications, Outcomes). Patient-level data (Comorbidities,
+// Genetics, Family History) is intentionally excluded — it does not change
+// between admissions. Stored as a JSON array on hidden #Extra_Admissions.
+// Legacy records using {date,dischargeDate,reason} remain fully compatible.
+//
+// Schema — grouped to mirror the main wizard sections. Each field:
+//   k    = JSON key,  l = label,
+//   t    = 'text' | 'num' | 'date' | 'sel' | 'area',
+//   o    = options array (for 'sel'),  w = bootstrap column class,
+//   ph   = placeholder.
+var EXTRA_ADM_SCHEMA=[
+ {sec:'Admission',icon:'fa-hospital',fields:[
+   {k:'date',l:'Admission Date',t:'date',w:'col-6 col-md-3'},
+   {k:'dischargeDate',l:'Discharge Date',t:'date',w:'col-6 col-md-3'},
+   {k:'reason',l:'Reason / Notes',t:'text',w:'col-12 col-md-6',ph:'e.g. ADHF, ACS, arrhythmia...'}
+ ]},
+ {sec:'Symptoms, Signs & Vitals',icon:'fa-heart-pulse',fields:[
+   {k:'Height',l:'Height (cm)',t:'num',w:'col-4 col-md-2'},
+   {k:'Weight',l:'Weight (kg)',t:'num',w:'col-4 col-md-2'},
+   {k:'Dry_Weight',l:'Dry Weight (kg)',t:'num',w:'col-4 col-md-2'},
+   {k:'NYHA',l:'NYHA',t:'sel',o:['','I','II','III','IV','N/A'],w:'col-4 col-md-2'},
+   {k:'KCCQ',l:'KCCQ',t:'num',w:'col-4 col-md-2'},
+   {k:'Symptoms',l:'Symptoms',t:'text',w:'col-12 col-md-8',ph:'Dyspnea, palpitations, fatigue, chest pain, syncope...'},
+   {k:'Pulse',l:'Pulse',t:'text',w:'col-4 col-md-2'},
+   {k:'BP',l:'BP',t:'text',w:'col-4 col-md-2',ph:'120/80'},
+   {k:'SpO2',l:'SpO2 (%)',t:'num',w:'col-4 col-md-2'},
+   {k:'Edema',l:'Edema',t:'sel',o:['No','Yes'],w:'col-4 col-md-2'},
+   {k:'JVP',l:'JVP',t:'sel',o:['Normal','Raised'],w:'col-4 col-md-2'},
+   {k:'Rales',l:'Rales',t:'sel',o:['No','Yes'],w:'col-4 col-md-2'},
+   {k:'S3',l:'S3 Gallop',t:'sel',o:['No','Yes'],w:'col-4 col-md-3'},
+   {k:'Murmur',l:'Murmur',t:'text',w:'col-8 col-md-3'}
+ ]},
+ {sec:'Investigations',icon:'fa-magnifying-glass-chart',fields:[
+   {k:'ECG_LBBB',l:'ECG LBBB',t:'sel',o:['','No','Yes'],w:'col-6 col-md-3'},
+   {k:'ECG_QRS',l:'QRS Duration (ms)',t:'num',w:'col-6 col-md-3'},
+   {k:'ECG_Arrhythmia',l:'Arrhythmia',t:'text',w:'col-6 col-md-3'},
+   {k:'ECG_Pacing',l:'Pacing Rhythm',t:'text',w:'col-6 col-md-3'},
+   {k:'ECHO',l:'Echo Details',t:'text',w:'col-12 col-md-6'},
+   {k:'Echo_EDVI',l:'EDVI/EDD',t:'text',w:'col-6 col-md-2'},
+   {k:'Echo_ESVI',l:'ESVI/ESD',t:'text',w:'col-6 col-md-2'},
+   {k:'Echo_EF',l:'EF %',t:'text',w:'col-6 col-md-2'},
+   {k:'CMR_CT',l:'CMR Details',t:'text',w:'col-12 col-md-6'},
+   {k:'CMR_LVEF',l:'CMR LVEF %',t:'text',w:'col-6 col-md-3'},
+   {k:'CMR_LGE',l:'CMR LGE',t:'sel',o:['','No','Yes'],w:'col-6 col-md-3'},
+   {k:'CT_Done',l:'CT Angio Performed',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
+   {k:'CT_Angio',l:'CT Angio Findings',t:'text',w:'col-12 col-md-9'},
+   {k:'CAG_Done',l:'CAG Performed',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
+   {k:'CAG_Date',l:'CAG Date',t:'date',w:'col-6 col-md-3'},
+   {k:'CAG_Findings',l:'CAG Findings',t:'text',w:'col-12 col-md-6',ph:'e.g. LAD 80% prox, RCA 90% mid'},
+   {k:'Walk_Meters',l:'6MWT Meters',t:'num',w:'col-6 col-md-3'},
+   {k:'CPET_PeakVO2',l:'CPET Peak VO₂',t:'text',w:'col-6 col-md-3'},
+   {k:'Device_Type',l:'Device Type',t:'sel',o:['','ICD','CRT-P','CRT-D','Pacemaker VVI','Pacemaker DDD'],w:'col-6 col-md-3'},
+   {k:'Device_Date',l:'Device Date',t:'date',w:'col-6 col-md-3'},
+   {k:'RHC_Done',l:'Right Heart Cath',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
+   {k:'RHC_PCWP',l:'PCWP (mmHg)',t:'text',w:'col-6 col-md-3'},
+   {k:'RHC_PAP',l:'PAP (S/D/M)',t:'text',w:'col-6 col-md-3'},
+   {k:'InHospital_Procedures',l:'Procedures Performed',t:'text',w:'col-12 col-md-6',ph:'CAG/PCI, Devices, Ablations...'},
+   {k:'InHospital_Procedures_Notes',l:'Procedure Notes',t:'area',w:'col-12'},
+   {k:'Investigations_Other',l:'Other Investigations / Notes',t:'area',w:'col-12'}
+ ]},
+ {sec:'In-Hospital Labs',icon:'fa-vials',fields:[
+   {k:'Lab_HbA1c',l:'HbA1c (%)',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_Gluc',l:'Fasting Glucose',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_Urea',l:'Urea Adm',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_Creat',l:'Creatinine Adm',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_Na',l:'Na Adm',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_K',l:'K Adm',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_Creat_Disch',l:'Creatinine Disch',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_Na_Disch',l:'Na Disch',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_K_Disch',l:'K Disch',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_BNP',l:'NT-proBNP Adm',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_BNP_Disch',l:'NT-proBNP Disch',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_Iron',l:'Serum Iron',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_Ferritin',l:'Ferritin',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_TrSats',l:'TSAT (%)',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_Hb',l:'Hb Adm',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_Hb_Disch',l:'Hb Disch',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_TSH',l:'TSH',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_LDL',l:'LDL',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_AlbCreat',l:'Albumin/Creatinine Ratio',t:'text',w:'col-6 col-md-3'}
+ ]},
+ {sec:'In-Hospital Management',icon:'fa-pills',fields:[
+   {k:'Cardioversion',l:'Cardioversion',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
+   {k:'Cardioversion_Type',l:'Cardioversion Type',t:'sel',o:['','Medical','DC','Medical + DC'],w:'col-6 col-md-3'},
+   {k:'Cardioversion_Notes',l:'Cardioversion Notes',t:'text',w:'col-12 col-md-6'},
+   {k:'Inotropes_Used',l:'Inotropes Used?',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
+   {k:'Inotropes_Selected',l:'Inotrope(s)',t:'text',w:'col-12 col-md-9',ph:'Dobutamine, Milrinone, Levophed...'},
+   {k:'Hemo_Support',l:'Haemodynamic Support?',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
+   {k:'Hemo_Support_Type',l:'MCS Type(s)',t:'text',w:'col-12 col-md-9',ph:'IABP, Impella, VA-ECMO...'},
+   {k:'Med_Changes',l:'Medication Changes / GDMT This Admission',t:'area',w:'col-12',ph:'GDMT initiated/up-titrated, diuretics, other changes...'}
+ ]},
+ {sec:'In-Hospital Complications',icon:'fa-triangle-exclamation',fields:[
+   {k:'Complications',l:'Complications',t:'text',w:'col-12 col-md-8',ph:'AKI, arrhythmia, infection, cardiogenic shock...'},
+   {k:'Bleeding_Transfusion',l:'Bleeding req. Transfusion',t:'sel',o:['No','Yes'],w:'col-6 col-md-4'},
+   {k:'Bleeding_Units',l:'Units Transfused',t:'num',w:'col-6 col-md-3'},
+   {k:'Bleeding_Site',l:'Bleeding Site / Notes',t:'text',w:'col-12 col-md-5'},
+   {k:'Complications_Other',l:'Other Complications / Notes',t:'text',w:'col-12'}
+ ]},
+ {sec:'Outcomes & Management',icon:'fa-flag-checkered',fields:[
+   {k:'Quad_GDMT',l:'Quadruple GDMT?',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
+   {k:'Max_GDMT',l:'Max GDMT Doses?',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
+   {k:'Recovered_LV',l:'Recovered LV?',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
+   {k:'Mortality',l:'Mortality',t:'sel',o:['Alive','In-hospital','Out-of-hospital'],w:'col-6 col-md-3'},
+   {k:'Advanced_HF_Outcome',l:'Advanced HF?',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
+   {k:'Strong_HF',l:'Strong HF eligible?',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
+   {k:'Adv_HF_Therapy',l:'Advanced HF Therapy?',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
+   {k:'Adv_HF_Therapy_Type',l:'Therapy Type',t:'text',w:'col-6 col-md-3',ph:'LVAD, RVDS, Transplant'},
+   {k:'Referral',l:'Referral(s)',t:'text',w:'col-12 col-md-6',ph:'EP, Nephrology, Cardiac Rehab...'},
+   {k:'Notes',l:'Management Plan / Notes',t:'area',w:'col-12'}
+ ]}
+];
+
 function _readExtraAdmissions(){
     try {
         var raw=(document.getElementById('Extra_Admissions')||{}).value||'[]';
@@ -3485,35 +3644,89 @@ function _writeExtraAdmissions(arr){
     var hid=document.getElementById('Extra_Admissions');
     if(hid) hid.value=JSON.stringify(arr||[]);
 }
+function _esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+// Build the HTML for a single field within an extra-admission card.
+function _extraFieldHtml(idx, f){
+    var val=f._val||'';
+    var oc="updateExtraAdmission("+idx+",'"+f.k+"',this.value)";
+    var h='<div class="'+f.w+'"><label>'+f.l+'</label>';
+    if(f.t==='sel'){
+        h+='<select class="form-select" onchange="'+oc+'">';
+        f.o.forEach(function(opt){
+            h+='<option value="'+_esc(opt)+'"'+(String(val)===String(opt)?' selected':'')+'>'+(opt===''?'Select...':_esc(opt))+'</option>';
+        });
+        h+='</select>';
+    } else if(f.t==='area'){
+        h+='<textarea class="form-control" rows="2"'+(f.ph?' placeholder="'+_esc(f.ph)+'"':'')+' oninput="'+oc+'">'+_esc(val)+'</textarea>';
+    } else {
+        var typ=(f.t==='date')?'date':(f.t==='num')?'number':'text';
+        var im=(f.t==='num')?' inputmode="numeric"':'';
+        h+='<input type="'+typ+'" class="form-control"'+im+(f.ph?' placeholder="'+_esc(f.ph)+'"':'')+' value="'+_esc(val)+'" '+(f.t==='date'?'onchange':'oninput')+'="'+oc+'">';
+    }
+    return h+'</div>';
+}
+
+// Render one collapsible admission card.
+function _extraAdmCardHtml(adm, idx){
+    var num=idx+2; // first admission is #1 (the main Section-3 block)
+    var summary=[];
+    if(adm.date) summary.push(adm.date);
+    if(adm.reason) summary.push(adm.reason);
+    var summaryTxt=summary.length?summary.join(' · '):'(no details yet)';
+    var h='<div class="extra-adm-card" data-extra-idx="'+idx+'">';
+    h+='<div class="extra-adm-head" onclick="toggleExtraAdmission('+idx+')">';
+    h+='<span class="ea-title"><i class="fa fa-hospital me-1"></i>Admission #'+num+'</span>';
+    h+='<span class="ea-summary">'+_esc(summaryTxt)+'</span>';
+    h+='<span class="ea-actions">';
+    h+='<button type="button" class="btn btn-sm btn-outline-danger" onclick="event.stopPropagation();removeExtraAdmission('+idx+')"><i class="fa fa-times"></i></button>';
+    h+='<i class="fa fa-chevron-down ea-chevron"></i></span>';
+    h+='</div>';
+    h+='<div class="extra-adm-body" id="extraAdmBody'+idx+'">';
+    EXTRA_ADM_SCHEMA.forEach(function(grp){
+        h+='<h6 class="ea-sec-label"><i class="fa '+grp.icon+' me-1"></i>'+grp.sec+'</h6>';
+        h+='<div class="row g-2 mb-1">';
+        grp.fields.forEach(function(f){
+            var copy={};for(var p in f){copy[p]=f[p];}
+            copy._val=(adm[f.k]!=null?adm[f.k]:'');
+            h+=_extraFieldHtml(idx,copy);
+        });
+        h+='</div>';
+    });
+    h+='</div></div>';
+    return h;
+}
+
 function _renderExtraAdmissions(){
     var wrap=document.getElementById('extraAdmissionsWrap');
     if(!wrap)return;
     var arr=_readExtraAdmissions();
     if(arr.length===0){ wrap.innerHTML=''; return; }
     var html='';
-    arr.forEach(function(adm,idx){
-        var num=idx+2; // first admission is #1 (Admission_Date), extras start at #2
-        html+='<div class="row g-2 mt-2 p-2" style="background:#fff;border:1px dashed #c0392b;border-radius:6px;" data-extra-idx="'+idx+'">';
-        html+='<div class="col-12 d-flex align-items-center justify-content-between" style="margin-bottom:4px;">';
-        html+='<span class="fw-bold" style="color:#8b0000;font-size:0.85rem;"><i class="fa fa-hospital me-1"></i>Admission #'+num+'</span>';
-        html+='<button type="button" class="btn btn-sm btn-outline-danger" onclick="removeExtraAdmission('+idx+')"><i class="fa fa-times me-1"></i>Remove</button>';
-        html+='</div>';
-        html+='<div class="col-6 col-md-3"><label>Admission Date</label><input type="date" class="form-control" data-extra-field="date" value="'+(adm.date||'')+'" onchange="updateExtraAdmission('+idx+',\'date\',this.value)"></div>';
-        html+='<div class="col-6 col-md-3"><label>Discharge Date</label><input type="date" class="form-control" data-extra-field="dischargeDate" value="'+(adm.dischargeDate||'')+'" onchange="updateExtraAdmission('+idx+',\'dischargeDate\',this.value)"></div>';
-        html+='<div class="col-12 col-md-6"><label>Reason / Notes</label><input type="text" class="form-control" data-extra-field="reason" value="'+(adm.reason||'').replace(/"/g,'&quot;')+'" oninput="updateExtraAdmission('+idx+',\'reason\',this.value)"></div>';
-        html+='</div>';
-    });
+    arr.forEach(function(adm,idx){ html+=_extraAdmCardHtml(adm,idx); });
     wrap.innerHTML=html;
+}
+function toggleExtraAdmission(idx){
+    var body=document.getElementById('extraAdmBody'+idx);
+    if(!body)return;
+    var card=body.closest('.extra-adm-card');
+    var open=body.classList.toggle('show');
+    if(card){ var head=card.querySelector('.extra-adm-head'); if(head) head.classList.toggle('expanded',open); }
 }
 function addExtraAdmission(){
     var arr=_readExtraAdmissions();
     arr.push({date:'', dischargeDate:'', reason:''});
     _writeExtraAdmissions(arr);
     _renderExtraAdmissions();
+    // Auto-expand the newly added card
+    var newIdx=arr.length-1;
+    var body=document.getElementById('extraAdmBody'+newIdx);
+    if(body){ body.classList.add('show'); var hd=body.closest('.extra-adm-card'); if(hd){var h=hd.querySelector('.extra-adm-head'); if(h)h.classList.add('expanded');} }
 }
 function removeExtraAdmission(idx){
     var arr=_readExtraAdmissions();
     if(idx>=0 && idx<arr.length){
+        if(typeof window!=='undefined' && window.confirm && !window.confirm('Remove Admission #'+(idx+2)+'? All its data will be deleted.')) return;
         arr.splice(idx,1);
         _writeExtraAdmissions(arr);
         _renderExtraAdmissions();
@@ -3524,6 +3737,16 @@ function updateExtraAdmission(idx, field, value){
     if(idx>=0 && idx<arr.length){
         arr[idx][field]=value;
         _writeExtraAdmissions(arr);
+        // Keep the collapsed-header summary current for date/reason changes
+        if(field==='date'||field==='reason'){
+            var card=document.querySelector('.extra-adm-card[data-extra-idx="'+idx+'"] .ea-summary');
+            if(card){
+                var s=[];
+                if(arr[idx].date)s.push(arr[idx].date);
+                if(arr[idx].reason)s.push(arr[idx].reason);
+                card.textContent=s.length?s.join(' · '):'(no details yet)';
+            }
+        }
     }
 }
 function restoreExtraAdmissions(savedJson){
@@ -5590,7 +5813,25 @@ function generateExcel(data,visitsData,id){
     pr.push(["MUBARAK AL-KABEER HOSPITAL - HEART FAILURE REGISTRY"]);
     pr.push(["Patient Name:",data.Patient_Name||'']);pr.push(["Civil ID:",data.Civil_ID||'']);pr.push(["File No:",data.File_No||'']);pr.push(["Age:",data.Age||'']);pr.push(["Gender:",data.Gender||'']);pr.push(["Nationality:",data.Nationality||'']);pr.push(["Mobile:",data.Mobile||'']);pr.push(["Doctor:",data.Doctor_Name||'']);pr.push([]);
     var sections=[{name:'HF DIAGNOSIS',fields:['HF_Type','HF_Type_Other','EF_Diagnosis','Advanced_HF','HF_Cause','Other_Cardio','Valvular_Disease','Valvular_Type','Admissions','Last_Admission','LOS','Transfer_Other','Transfer_Hospital_Name']},{name:'IN-HOSPITAL ADMISSION',fields:['Admission_Date','Admission_Discharge_Date','Admission_Reason','Extra_Admissions']},{name:'SYMPTOMS & SIGNS (ON ADMISSION)',fields:['Height','Weight','BMI','Dry_Weight','NYHA','KCCQ','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur']},{name:'INVESTIGATIONS',fields:['ECG_LBBB','ECG_QRS','ECG_Arrhythmia','ECG_Pacing','ECHO','Echo_EDVI','Echo_ESVI','Echo_EF','CMR_CT','CMR_LVEDVI','CMR_LVESVI','CMR_LVEF','CMR_RVEDI','CMR_RVEF','CMR_LGE','CMR_LGE_Pct','CMR_Others','CT_Done','CT_Angio','CT_Calcium','CT_Notes','CAG_Done','CAG_Date','CAG_Access','CAG_Findings','CAG_Notes','Walk_Completed','Walk_Meters','CPET_PeakVO2','CPET_VEVCO2','CPET_RER','CPET_AT','CPET_VO2HR','CPET_PetCO2','Device_Type','Device_Date','RHC_Done','RHC_CI','RHC_RAP','RHC_RVP','RHC_PCWP','RHC_PAP','RHC_PVR','RHC_PAPi','RHC_LV','RHC_MVO2','InHospital_Procedures','InHospital_Procedures_Other','InHospital_Procedures_Notes','Investigations_Other']},{name:'COMORBIDITIES',fields:['DM','HTN','AF','IHD','PCI_CABG','PCI_CABG_Date','PCI_CABG_Details','CKD','Dialysis','CVA','PVD','Smoker','Obese','OSA','Dyslipidemia','Valve_Surgery','Valve_Surgery_Date','Lung_Dz','Liver_Dz','Thyroid_Dz','FH_Cardio','Genetics','Genetics_Type','Comorbid_Others']},{name:'IN-HOSPITAL LABS',fields:['Lab_HbA1c','Lab_Gluc','Lab_Urea','Lab_Creat','Lab_eGFR','Lab_Na','Lab_K','Lab_Urea_Disch','Lab_Creat_Disch','Lab_eGFR_Disch','Lab_Na_Disch','Lab_K_Disch','Lab_BNP','Lab_BNP_Disch','Lab_BNP_only','Lab_BNP_only_Disch','Lab_Iron','Lab_Ferritin','Lab_TrSats','Lab_Hb','Lab_Hb_Disch','Lab_WBC','Lab_Plt','Lab_TSH','Lab_FreeT4','Lab_TotalChol','Lab_LDL','Lab_HDL','Lab_TG','Lab_AlbCreat']},{name:'IN-HOSPITAL MGMT (CARDIOVERSION, INOTROPES & MCS)',fields:['Cardioversion','Cardioversion_Type','Cardioversion_Notes','Inotropes_Used','Inotropes_Selected','Inotrope_Dobutamine_MaxDose','Inotrope_Dopamine_MaxDose','Inotrope_Milrinone_MaxDose','Inotrope_Simdax_MaxDose','Inotrope_Levophed_MaxDose','Inotrope_Adrenaline_MaxDose','Inotrope_Vasopressin_MaxDose','Hemo_Support','Hemo_Support_Type']},{name:'MEDICATIONS',fields:['Med_ARNI','Med_ARNI_Dose','Med_SGLT2i','Med_SGLT2i_Dose','Med_GLP1','Med_BB','Med_BB_Dose','Med_MRA','Med_MRA_Dose','Med_ACEiARB','Med_ACEiARB_Dose','Med_Vasodilator','Med_Procorolan','Med_Procorolan_Dose','Med_CCB','Med_CCB_Dose','Med_Diuretic','Med_Statin','Med_LipidCombo','Med_Ezetrol','Med_PCSK9','Med_Fibrate','Med_Omega3','Med_Nicotine','Med_Antiplat','Med_OAC','Med_Arrhythmia','Med_Digoxin','Med_K_Chelator','Med_Others']},{name:'IN-HOSPITAL COMPLICATIONS',fields:['Complications','Bleeding_Transfusion','Bleeding_Units','Bleeding_Site','Complications_Other']},{name:'OUTCOMES & FOLLOW-UP',fields:['Quad_GDMT','Max_GDMT','Recovered_LV','Mortality','LostFU','LostFU_Reason','LostFU_Other','Advanced_HF_Outcome','Strong_HF','Adv_HF_Therapy','Adv_HF_Therapy_Type','Referral','Referral_Other','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt','Next_Appt_Notes']}];
-    sections.forEach(function(sec){pr.push([sec.name]);sec.fields.forEach(function(f){pr.push([f.replace(/_/g," ").replace(/Lab /g,"").replace(/Med /g,""),data[f]||'-']);});pr.push([]);});
+    sections.forEach(function(sec){pr.push([sec.name]);sec.fields.forEach(function(f){
+        if(f==='Extra_Admissions'){
+            var _exarr=[];try{_exarr=JSON.parse(data[f]||'[]');}catch(e){_exarr=[];}
+            if(Array.isArray(_exarr)&&_exarr.length){
+                _exarr.forEach(function(adm,ei){
+                    pr.push(['--- Additional Admission #'+(ei+2)+' ---']);
+                    if(typeof EXTRA_ADM_SCHEMA!=='undefined'){
+                        EXTRA_ADM_SCHEMA.forEach(function(grp){grp.fields.forEach(function(fl){
+                            var v=adm[fl.k];if(v!=null&&String(v).trim()!=='')pr.push([fl.l,v]);
+                        });});
+                    } else {
+                        Object.keys(adm).forEach(function(k){if(adm[k])pr.push([k,adm[k]]);});
+                    }
+                });
+            }
+        } else {
+            pr.push([f.replace(/_/g," ").replace(/Lab /g,"").replace(/Med /g,""),data[f]||'-']);
+        }
+    });pr.push([]);});
     var ws1=XLSX.utils.aoa_to_sheet(pr);XLSX.utils.book_append_sheet(wb,ws1,"Patient Info");
     if(visitsData.length>0){var vr=[];vr.push(["VISIT HISTORY"]);vr.push([]);visitsData.forEach(function(visit,idx){vr.push(["Visit #"+(visitsData.length-idx),"Date: "+visit.visitDate,"Type: "+visit.visitType]);var vFields=['V_Fatigue','V_NYHA','V_KCCQ','V_Edema','V_Pulse','V_BP','V_SpO2','V_Weight','V_JVP','V_Rales','V_S3','V_LBBB','V_QRS','V_Arrhythmia','V_Pacing_ECG','V_Pacing_Mode','V_Holter_Done','V_Holter_Date','V_Holter_Duration','V_Holter_MaxHR','V_Holter_MinHR','V_Holter_AvgHR','V_Holter_Arrhythmia','V_Holter_Findings','V_EF_Change','V_Echo_EDVI','V_Echo_ESVI','V_Echo_EF','V_Echo_Other','V_CMR_LVEDVI','V_CMR_LVESVI','V_CMR_LVEF','V_CMR_RVEDI','V_CMR_RVEF','V_CMR_LGE','V_CMR_LGE_Pct','V_CMR_Others','V_Walk_Completed','V_Walk_Meters','V_CPET_PeakVO2','V_CPET_VEVCO2','V_CPET_RER','V_CPET_AT','V_CPET_VO2HR','V_CPET_PetCO2','V_RHC_Done','V_RHC_CI','V_RHC_RAP','V_RHC_RVP','V_RHC_PCWP','V_RHC_PAP','V_RHC_PVR','V_RHC_PAPi','V_RHC_LV','V_RHC_MVO2','V_HbA1c','V_Gluc','V_Urea','V_Creat','V_eGFR','V_Na','V_K','V_BNP','V_NTproBNP','V_INR','V_Iron','V_Transferrin','V_Ferritin','V_WBC','V_Hb','V_Plt','V_TSH','V_FreeT4','V_TotalChol','V_LDL','V_HDL','V_TG','V_Vacc_Influenza','V_Vacc_Influenza_Date','V_Vacc_Pneumococcal','V_Vacc_Pneumococcal_Date','V_Vacc_COVID','V_Vacc_COVID_Date','V_Vacc_RSV','V_Vacc_RSV_Date','V_Vacc_Notes','V_Vacc_Influenza_Year','V_Vacc_Pneumococcal_Year','V_Vacc_COVID_Year','V_Vacc_Other'];VISIT_MED_LIST.forEach(function(m){vFields.push(m.id);vFields.push(m.id+'_Status');vFields.push(m.id+'_Custom');vFields.push(m.id+'_Freq');});vFields.push('V_AdverseEffects','V_Compliance','V_ComplianceNotes','V_Adverse','V_Plan','V_Others','V_Referral','V_Referral_Other','Next_Appt_Notes');vFields.forEach(function(f){var val=visit[f];if(val&&val.toString().trim()!=='')vr.push([f.replace('V_','').replace(/_/g,' '),val]);});vr.push([]);});var ws2=XLSX.utils.aoa_to_sheet(vr);XLSX.utils.book_append_sheet(wb,ws2,"Visits");}
     XLSX.writeFile(wb,"HF_Registry_"+(data.File_No||'unknown')+"_"+(data.Patient_Name||'patient')+".xlsx");showPopup("success","Excel Exported!","File downloaded successfully.");
@@ -5604,7 +5845,24 @@ function generatePDF(data,visitsData,id){
     html+="<div style='text-align:center;border-bottom:3px solid #8b0000;padding-bottom:10px;margin-bottom:20px;'><h2 style='color:#8b0000;margin:0;'>Mubarak Al-Kabeer Hospital</h2><h3 style='margin:5px 0;color:#333;'>Heart Failure Clinic Registry</h3></div>";
     html+="<h3 style='color:#333;'>Patient: "+(data.Patient_Name||'Unknown')+" | File: "+(data.File_No||'N/A')+"</h3>";
     var sections=[{name:'Demographics',fields:['Patient_Name','Civil_ID','File_No','Age','Gender','Nationality','Mobile','Doctor_Name','Referred_From','Referred_From_Other']},{name:'HF Diagnosis',fields:['HF_Type','HF_Type_Other','EF_Diagnosis','Advanced_HF','HF_Cause','Other_Cardio','Valvular_Disease','Valvular_Type','Admissions','Last_Admission','LOS','Transfer_Other','Transfer_Hospital_Name']},{name:'In-Hospital Admission',fields:['Admission_Date','Admission_Discharge_Date','Admission_Reason','Extra_Admissions']},{name:'Symptoms & Signs (On Admission)',fields:['Height','Weight','BMI','Dry_Weight','NYHA','KCCQ','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur']},{name:'Investigations',fields:['ECG_LBBB','ECG_QRS','ECG_Arrhythmia','ECG_Pacing','ECHO','Echo_EDVI','Echo_ESVI','Echo_EF','CMR_CT','CMR_LVEDVI','CMR_LVESVI','CMR_LVEF','CMR_RVEDI','CMR_RVEF','CMR_LGE','CMR_LGE_Pct','CMR_Others','CT_Done','CT_Angio','CT_Calcium','CT_Notes','CAG_Done','CAG_Date','CAG_Access','CAG_Findings','CAG_Notes','Walk_Completed','Walk_Meters','CPET_PeakVO2','CPET_VEVCO2','CPET_RER','CPET_AT','CPET_VO2HR','CPET_PetCO2','Device_Type','Device_Date','RHC_Done','RHC_CI','RHC_RAP','RHC_RVP','RHC_PCWP','RHC_PAP','RHC_PVR','RHC_PAPi','RHC_LV','RHC_MVO2','InHospital_Procedures','InHospital_Procedures_Other','InHospital_Procedures_Notes','Investigations_Other']},{name:'Comorbidities',fields:['DM','HTN','AF','IHD','PCI_CABG','PCI_CABG_Date','PCI_CABG_Details','CKD','Dialysis','CVA','PVD','Smoker','Obese','OSA','Dyslipidemia','Valve_Surgery','Valve_Surgery_Date','Lung_Dz','Liver_Dz','Thyroid_Dz','FH_Cardio','Genetics','Genetics_Type','Comorbid_Others']},{name:'In-Hospital Labs',fields:['Lab_HbA1c','Lab_Gluc','Lab_Urea','Lab_Creat','Lab_eGFR','Lab_Na','Lab_K','Lab_Urea_Disch','Lab_Creat_Disch','Lab_eGFR_Disch','Lab_Na_Disch','Lab_K_Disch','Lab_BNP','Lab_BNP_Disch','Lab_BNP_only','Lab_BNP_only_Disch','Lab_Iron','Lab_Ferritin','Lab_TrSats','Lab_Hb','Lab_Hb_Disch','Lab_WBC','Lab_Plt','Lab_TSH','Lab_FreeT4','Lab_TotalChol','Lab_LDL','Lab_HDL','Lab_TG','Lab_AlbCreat']},{name:'In-Hospital Mgmt (Cardioversion, Inotropes & MCS)',fields:['Cardioversion','Cardioversion_Type','Cardioversion_Notes','Inotropes_Used','Inotropes_Selected','Inotrope_Dobutamine_MaxDose','Inotrope_Dopamine_MaxDose','Inotrope_Milrinone_MaxDose','Inotrope_Simdax_MaxDose','Inotrope_Levophed_MaxDose','Inotrope_Adrenaline_MaxDose','Inotrope_Vasopressin_MaxDose','Hemo_Support','Hemo_Support_Type']},{name:'Medications',fields:['Med_ARNI','Med_ARNI_Dose','Med_SGLT2i','Med_SGLT2i_Dose','Med_GLP1','Med_BB','Med_BB_Dose','Med_MRA','Med_MRA_Dose','Med_ACEiARB','Med_ACEiARB_Dose','Med_Vasodilator','Med_Procorolan','Med_Procorolan_Dose','Med_CCB','Med_CCB_Dose','Med_Diuretic','Med_Statin','Med_LipidCombo','Med_Ezetrol','Med_PCSK9','Med_Fibrate','Med_Omega3','Med_Nicotine','Med_Antiplat','Med_OAC','Med_Arrhythmia','Med_Digoxin','Med_K_Chelator','Med_Others']},{name:'In-Hospital Complications',fields:['Complications','Bleeding_Transfusion','Bleeding_Units','Bleeding_Site','Complications_Other']},{name:'Outcomes & Follow-up',fields:['Quad_GDMT','Max_GDMT','Recovered_LV','Mortality','LostFU','LostFU_Reason','LostFU_Other','Advanced_HF_Outcome','Strong_HF','Adv_HF_Therapy','Adv_HF_Therapy_Type','Referral','Referral_Other','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt','Next_Appt_Notes']}];
-    sections.forEach(function(sec){html+="<h4 style='background:#f0f0f0;padding:8px;margin-top:15px;color:#8b0000;'>"+sec.name+"</h4><table style='width:100%;border-collapse:collapse;font-size:12px;'>";sec.fields.forEach(function(f){var val=data[f]||'-',label=f.replace(/_/g," ").replace(/Lab /g,"").replace(/Med /g,"");html+="<tr style='border-bottom:1px solid #ddd;'><td style='width:40%;padding:6px;background:#fafafa;font-weight:bold;'>"+label+"</td><td style='padding:6px;'>"+val+"</td></tr>";});html+="</table>";});
+    sections.forEach(function(sec){html+="<h4 style='background:#f0f0f0;padding:8px;margin-top:15px;color:#8b0000;'>"+sec.name+"</h4><table style='width:100%;border-collapse:collapse;font-size:12px;'>";sec.fields.forEach(function(f){
+        if(f==='Extra_Admissions'){
+            var _exarr=[];try{_exarr=JSON.parse(data[f]||'[]');}catch(e){_exarr=[];}
+            if(Array.isArray(_exarr)&&_exarr.length){
+                _exarr.forEach(function(adm,ei){
+                    html+="<tr><td colspan='2' style='padding:6px;background:#fdf0f0;font-weight:bold;color:#8b0000;'>Additional Admission #"+(ei+2)+"</td></tr>";
+                    if(typeof EXTRA_ADM_SCHEMA!=='undefined'){
+                        EXTRA_ADM_SCHEMA.forEach(function(grp){grp.fields.forEach(function(fl){
+                            var v=adm[fl.k];if(v!=null&&String(v).trim()!=='')
+                                html+="<tr style='border-bottom:1px solid #ddd;'><td style='width:40%;padding:6px;background:#fafafa;font-weight:bold;'>"+fl.l+"</td><td style='padding:6px;'>"+v+"</td></tr>";
+                        });});
+                    }
+                });
+            }
+        } else {
+            var val=data[f]||'-',label=f.replace(/_/g," ").replace(/Lab /g,"").replace(/Med /g,"");html+="<tr style='border-bottom:1px solid #ddd;'><td style='width:40%;padding:6px;background:#fafafa;font-weight:bold;'>"+label+"</td><td style='padding:6px;'>"+val+"</td></tr>";
+        }
+    });html+="</table>";});
     if(visitsData.length>0){html+="<div style='page-break-before:always;'></div><h3 style='color:#8b0000;margin-top:20px;'>Visit History & Follow-ups</h3>";
     var mf=VISIT_MED_LIST.map(function(m){return m.id;});
     visitsData.forEach(function(visit,idx){html+="<div style='border:2px solid #17a2b8;margin:15px 0;padding:15px;border-radius:8px;'><h4 style='color:#17a2b8;margin-top:0;'>Visit #"+(visitsData.length-idx)+": "+visit.visitDate+" ("+visit.visitType+")</h4>";
