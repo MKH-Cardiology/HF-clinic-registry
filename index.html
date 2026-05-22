@@ -398,7 +398,6 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 .sec-meds          {--section-accent:#c0392b;--section-accent-dark:#8b0000;--section-tint:#fdebe9;}
 .sec-outcomes      {--section-accent:#0a4a8c;--section-accent-dark:#063060;--section-tint:#e8f1fa;}
 .sec-visits        {--section-accent:#17a2b8;--section-accent-dark:#0e7480;--section-tint:#e6f7fa;}
-.sec-nextappt      {--section-accent:#c0392b;--section-accent-dark:#8b0000;--section-tint:#fdebe9;}
 
 /* Hide the old plain section-title (we replace it with section-card-head) */
 .form-step .section-title{display:none;}
@@ -778,6 +777,7 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 
 <div class="container mt-3 mb-5" style="padding-bottom:80px;">
 
+```
 <div class="card p-3 border-top border-4 border-danger shadow">
     <div class="d-flex justify-content-between align-items-center mb-2">
         <h6 class="text-secondary fw-bold mb-0">Search Patient</h6>
@@ -789,7 +789,9 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
     </div>
     <div id="searchResults" class="mt-3"></div>
 </div>
+```
 
+```
 <div class="card p-3 border-top border-4 border-danger">
     <h4 class="mb-1 text-dark fw-bold" id="formTitle">New Patient Entry</h4>
 
@@ -1411,7 +1413,7 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                     <div class="sc-icon"><i class="fa fa-calendar-check"></i></div>
                     <div>
                         <div class="sc-title">10. Visits & Follow-ups</div>
-                        <div class="sc-sub">Visit history and follow-up</div>
+                        <div class="sc-sub">History and next appointment</div>
                     </div>
                 </div>
                 <div class="section-card-body">
@@ -1629,35 +1631,17 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                     <input type="hidden" id="V_Vacc_Pneumococcal_Year">
                     <input type="hidden" id="V_Vacc_COVID_Year">
                     <input type="hidden" id="V_Vacc_Other">
-                </div>
-            </div>
-
-            <!-- ===== NEXT APPOINTMENT — separate card (distinct from vaccination) ===== -->
-            <div class="section-card sec-nextappt mt-3">
-                <div class="section-card-head">
-                    <div class="sc-icon"><i class="fa fa-calendar-alt"></i></div>
-                    <div>
-                        <div class="sc-title">Next Appointment</div>
-                        <div class="sc-sub">Schedule the patient's next clinic visit</div>
+                    <div class="col-12"><hr class="my-2"></div>
+                    <h6 class="col-12 text-danger fw-bold"><i class="fa fa-calendar-alt"></i> Next Appointment</h6>
+                    <div class="col-12 col-md-4">
+                        <label class="text-danger fw-bold">Next Appointment Date</label>
+                        <input type="date" class="form-control border-danger" id="Next_Appt">
                     </div>
-                </div>
-                <div class="section-card-body">
-                    <div class="row g-2">
-                        <div class="col-12 col-md-4">
-                            <label class="text-danger fw-bold">Next Appointment Date</label>
-                            <input type="date" class="form-control border-danger" id="Next_Appt">
-                        </div>
-                        <div class="col-12 col-md-8">
-                            <label class="text-muted">Notes (optional)</label>
-                            <input type="text" class="form-control" id="Next_Appt_Notes" placeholder="e.g. clinic name, reason, special instructions...">
-                        </div>
+                    <div class="col-12 col-md-8">
+                        <label class="text-muted">Notes (optional)</label>
+                        <input type="text" class="form-control" id="Next_Appt_Notes" placeholder="e.g. clinic name, reason, special instructions...">
                     </div>
-                </div>
-            </div>
-
-            <div class="visit-section">
-                <div class="row g-2">
-                    <div class="col-12 mt-2">
+                    <div class="col-12 mt-3">
                         <button type="button" id="visitSaveBtn" class="btn btn-visit w-100" onclick="saveVisit()">
                             <i class="fa fa-plus-circle"></i> ADD VISIT TO PATIENT RECORD
                         </button>
@@ -1678,6 +1662,7 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
         </div>
     </div>
 </div>
+```
 
 </div>
 
@@ -5068,25 +5053,6 @@ function generateCardHTML(data, id, latestVisit){
             // For inotropes section, only show if Inotropes_Used is Yes
             if(f.indexOf('Inotropes_')===0 && (snap.Inotropes_Used||'No')!=='Yes') return;
             if(isEmptyField(val)) return;
-            // ----- Special formatting -----
-            // Extra_Admissions stored as JSON array — render as a small list
-            if(f === 'Extra_Admissions'){
-                var arr=[];
-                try { arr = JSON.parse(val||'[]'); } catch(e){ arr=[]; }
-                if(!Array.isArray(arr) || arr.length===0) return;
-                var listHtml='<ul class="mb-0 ps-3" style="font-size:0.82rem;">';
-                arr.forEach(function(adm,i){
-                    var parts=[];
-                    if(adm.date) parts.push('<strong>'+_escHtml(adm.date)+'</strong>');
-                    if(adm.dischargeDate) parts.push('→ '+_escHtml(adm.dischargeDate));
-                    if(adm.reason) parts.push(_escHtml(adm.reason));
-                    listHtml+='<li>#'+(i+2)+': '+parts.join(' &middot; ')+'</li>';
-                });
-                listHtml+='</ul>';
-                filledInSection++;
-                rows += "<tr><th>Additional Admissions</th><td>"+listHtml+"</td></tr>";
-                return;
-            }
             filledInSection++;
             var l = f.replace(/_/g," ").replace(/Lab /g,"").replace(/Med /g,"").replace(/ECG /g,"ECG ");
             rows += "<tr><th>"+_escHtml(l)+"</th><td>"+_escHtml(val)+"</td></tr>";
@@ -8458,19 +8424,11 @@ var PP_MED_MAP = {
     'fibrates':     {f:'Med_Fibrate',    v:'Fibrates', vf:'V_Fibrates'},
     'omacor':       {f:'Med_Omega3',     v:'Omacor',   vf:'V_Omacor'},
     // Anti-arrhythmics
-    'cordarone':            {f:'Med_Arrhythmia', v:'Cordarone (oral)',     vf:'V_Cordarone'},
-    'cordarone oral':       {f:'Med_Arrhythmia', v:'Cordarone (oral)',     vf:'V_Cordarone'},
-    'cordarone (oral)':     {f:'Med_Arrhythmia', v:'Cordarone (oral)',     vf:'V_Cordarone'},
-    'cordarone infusion':   {f:'Med_Arrhythmia', v:'Cordarone (infusion)', vf:'V_CordaroneInfusion'},
-    'cordarone (infusion)': {f:'Med_Arrhythmia', v:'Cordarone (infusion)', vf:'V_CordaroneInfusion'},
-    'cordarone iv':         {f:'Med_Arrhythmia', v:'Cordarone (infusion)', vf:'V_CordaroneInfusion'},
-    'amiodarone':           {f:'Med_Arrhythmia', v:'Cordarone (oral)',     vf:'V_Cordarone'},
-    'amiodarone iv':        {f:'Med_Arrhythmia', v:'Cordarone (infusion)', vf:'V_CordaroneInfusion'},
-    'flecainide':           {f:'Med_Arrhythmia', v:'Flecainide',           vf:'V_Flecainide'},
-    'sotalol':              {f:'Med_Arrhythmia', v:'Sotalol',              vf:'V_Sotalol'},
-    'propafenone':          {f:'Med_Arrhythmia', v:'Propafenone',          vf:'V_Propafenone'},
-    'digoxin':              {f:'Med_Digoxin',    v:'Digoxin',              vf:'V_Digoxin'},
-    'lanoxin':              {f:'Med_Digoxin',    v:'Digoxin',              vf:'V_Digoxin'},
+    'cordarone':   {f:'Med_Arrhythmia', v:'Cordarone',   vf:'V_Cordarone'},
+    'amiodarone':  {f:'Med_Arrhythmia', v:'Cordarone',   vf:'V_Cordarone'},
+    'flecainide':  {f:'Med_Arrhythmia', v:'Flecainide',  vf:'V_Flecainide'},
+    'sotalol':     {f:'Med_Arrhythmia', v:'Sotalol',     vf:'V_Sotalol'},
+    'propafenone': {f:'Med_Arrhythmia', v:'Propafenone', vf:'V_Propafenone'},
     // K chelators
     'veltassa':    {f:'Med_K_Chelator', v:'Veltassa', vf:'V_Veltassa'},
     'lokelma':     {f:'Med_K_Chelator', v:'Lokelma',  vf:'V_Lokelma'},
