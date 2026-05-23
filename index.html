@@ -935,6 +935,35 @@ img,canvas,table,svg{max-width:100%;}
     .login-field input,#searchInput{font-size:16px!important;}
 }
 
+/* ---------- EXTRA-ADMISSION CARD — OVERFLOW FIX ----------
+   Adding another admission nests an extra .section-card whose inner red
+   mini-strip contains a Bootstrap .row inside a padded box. The nested
+   row's negative gutter margins escape the box and push total width past
+   100vw, making the whole page zoom out (narrow look + accent strips
+   trailing off the right edge). These rules contain every nested layer. */
+.extra-adm-card,
+.extra-adm-card *{box-sizing:border-box;}
+.extra-adm-card{max-width:100%;overflow:hidden;}
+.extra-adm-card .section-card{max-width:100%;overflow:hidden;}
+.extra-adm-card .section-card-body{max-width:100%;overflow-x:hidden;}
+/* the inline-styled red mini-strip is itself a .row — its own negative
+   gutter must not escape, and the .row nested inside it must reset margins */
+.extra-adm-card [id^="eaSec_"]{margin-left:0!important;margin-right:0!important;max-width:100%;}
+.extra-adm-card [id^="eaSec_"] .row{margin-left:0;margin-right:0;}
+.extra-adm-card [id$="_body"] > .row{margin-left:0;margin-right:0;}
+.extra-adm-card .field-tint{max-width:100%;overflow:hidden;}
+.extra-adm-card .field-tint .row{margin-left:0;margin-right:0;}
+
+@media (max-width:767px){
+    /* tighter nested padding so columns keep usable width on phones */
+    .extra-adm-card .section-card-body{padding:10px 9px 9px;}
+    .extra-adm-card [id^="eaSec_"]{padding:10px!important;}
+    .extra-adm-card .field-tint{padding:9px 10px 8px;}
+    .extra-adm-card .admission-accordion-wrap{padding-left:0;padding-right:0;}
+    /* cols inside extra-admission rows get small internal gutter only */
+    .extra-adm-card .row.g-2{--bs-gutter-x:0.5rem;}
+}
+
 </style>
 
 </head>
@@ -1996,6 +2025,24 @@ img,canvas,table,svg{max-width:100%;}
                     <div class="col-12 col-md-6"><label>Patient Complaints / Symptoms</label><textarea class="form-control" id="V_Adverse" rows="2"></textarea></div>
                     <div class="col-12 col-md-6"><label>Plan / Recommendations</label><textarea class="form-control" id="V_Plan" rows="2"></textarea></div>
                     <div class="col-12"><label>Other Notes</label><textarea class="form-control" id="V_Others" rows="2"></textarea></div>
+                    <div class="col-12"><hr class="my-2"></div>
+                    <!-- ===== VISIT OUTCOMES & MANAGEMENT (mirrors admission Step-3 Outcomes section) ===== -->
+                    <h6 class="col-12 text-secondary"><i class="fa fa-flag-checkered"></i> Outcomes &amp; Management</h6>
+                    <div class="col-6 col-md-3"><label>Quadruple GDMT?</label><select class="form-select" id="V_Quad_GDMT"><option>No</option><option>Yes</option></select></div>
+                    <div class="col-6 col-md-3"><label>On Maximum GDMT Doses?</label><select class="form-select" id="V_Max_GDMT"><option>No</option><option>Yes</option></select></div>
+                    <div class="col-6 col-md-3"><label>Recovered LV?</label><select class="form-select" id="V_Recovered_LV" onchange="toggleVisitRecoveredLVType()"><option>No</option><option>Yes</option></select></div>
+                    <div class="col-6 col-md-3" id="vRecoveredLVTypeWrap" style="display:none;"><label>Recovery Type</label><select class="form-select" id="V_Recovered_LV_Type"><option value="">Select...</option><option>Fully recovered</option><option>Partially recovered</option></select></div>
+                    <div class="col-6 col-md-3"><label>Mortality</label><select class="form-select" id="V_Mortality"><option>Alive</option><option>In-hospital</option><option>Out-of-hospital</option></select></div>
+                    <div class="col-6 col-md-3"><label>Lost to Follow-up</label><select class="form-select" id="V_LostFU" onchange="toggleVisitLostFU()"><option>No</option><option>Yes</option></select></div>
+                    <div class="col-6 col-md-3" id="vLostFUReasonWrap" style="display:none;"><label>Reason</label><select class="form-select" id="V_LostFU_Reason" onchange="toggleVisitLostFU()"><option value="">Select...</option><option>Travel back home</option><option>Others</option></select></div>
+                    <div class="col-12 col-md-6" id="vLostFUOtherWrap" style="display:none;"><label>Specify (Others)</label><input type="text" class="form-control" id="V_LostFU_Other"></div>
+                    <div class="col-12"><hr class="my-2"></div>
+                    <h6 class="col-12 text-secondary m-0"><i class="fa fa-heart-circle-bolt"></i> Advanced HF</h6>
+                    <div class="col-6 col-md-3"><label class="fw-bold text-danger">Advanced HF?</label><select class="form-select border-danger" id="V_Advanced_HF_Outcome"><option>No</option><option>Yes</option></select></div>
+                    <div class="col-6 col-md-3"><label class="fw-bold text-danger">Strong HF eligible?</label><select class="form-select border-danger" id="V_Strong_HF"><option>No</option><option>Yes</option></select></div>
+                    <div class="col-6 col-md-3"><label class="fw-bold text-danger">Advanced HF Therapy?</label><select class="form-select border-danger" id="V_Adv_HF_Therapy" onchange="toggleVisitAdvHFTherapy()"><option>No</option><option>Yes</option></select></div>
+                    <div class="col-12 col-md-6" id="vAdvHFTherapyWrap" style="display:none;"><label class="fw-bold text-danger">Therapy Type</label><input type="text" class="form-control" id="V_Adv_HF_Therapy_Type" placeholder="e.g. LVAD, RVDS, Heart Transplant"></div>
+                    <div class="col-12 col-md-12"><label>Management Plan / Notes</label><textarea class="form-control" id="V_Outcome_Notes" rows="2" placeholder="Outcome-related management plan / notes for this visit..."></textarea></div>
                     <div class="col-12"><hr class="my-2"></div>
                     <h6 class="col-12 text-secondary"><i class="fa fa-share-from-square"></i> Referral(s)</h6>
                     <div class="col-12">
@@ -5514,6 +5561,54 @@ function toggleAdvHFTherapy(){
     }
 }
 
+// ===== VISIT OUTCOMES & MANAGEMENT — conditional sub-field handlers =====
+// Mirror the admission-level toggles (toggleRecoveredLVType / toggleLostFU /
+// toggleAdvHFTherapy) for the per-visit Outcomes section. All fields use the
+// V_ prefix so save/load/edit/clear are handled generically by existing code.
+function toggleVisitRecoveredLVType(){
+    var sel=document.getElementById('V_Recovered_LV');
+    var wrap=document.getElementById('vRecoveredLVTypeWrap');
+    if(!sel||!wrap) return;
+    if(sel.value==='Yes'){
+        wrap.style.display='block';
+    } else {
+        wrap.style.display='none';
+        var t=document.getElementById('V_Recovered_LV_Type'); if(t) t.value='';
+    }
+}
+function toggleVisitLostFU(){
+    var sel=document.getElementById('V_LostFU');
+    var rWrap=document.getElementById('vLostFUReasonWrap');
+    var oWrap=document.getElementById('vLostFUOtherWrap');
+    var rSel=document.getElementById('V_LostFU_Reason');
+    var oTxt=document.getElementById('V_LostFU_Other');
+    if(!sel||!rWrap) return;
+    if(sel.value==='Yes'){
+        rWrap.style.display='block';
+        if(rSel&&rSel.value==='Others'){
+            if(oWrap)oWrap.style.display='block';
+        } else {
+            if(oWrap)oWrap.style.display='none';
+            if(oTxt)oTxt.value='';
+        }
+    } else {
+        rWrap.style.display='none';
+        if(oWrap)oWrap.style.display='none';
+        if(rSel)rSel.value='';
+        if(oTxt)oTxt.value='';
+    }
+}
+function toggleVisitAdvHFTherapy(){
+    var v=(document.getElementById('V_Adv_HF_Therapy')||{}).value;
+    var w=document.getElementById('vAdvHFTherapyWrap');
+    if(!w) return;
+    if(v==='Yes'){ w.style.display='block'; }
+    else {
+        w.style.display='none';
+        var t=document.getElementById('V_Adv_HF_Therapy_Type'); if(t) t.value='';
+    }
+}
+
 // ===== HEMODYNAMIC (MECHANICAL CIRCULATORY) SUPPORT (Section 7) =====
 var HEMO_SUPPORT_LIST = ['IABP','Impella','VA-ECMO'];
 function renderHemoSupportUI(){
@@ -6152,6 +6247,10 @@ function editVisit(visitId){
     // Restore visit Pacing-in-ECG conditional + Holter conditional fields
     if(typeof toggleVisitPacingMode==='function')toggleVisitPacingMode();
     if(typeof toggleVisitHolter==='function')toggleVisitHolter();
+    // Restore visit Outcomes & Management conditional fields
+    if(typeof toggleVisitRecoveredLVType==='function')toggleVisitRecoveredLVType();
+    if(typeof toggleVisitLostFU==='function')toggleVisitLostFU();
+    if(typeof toggleVisitAdvHFTherapy==='function')toggleVisitAdvHFTherapy();
     // Restore visit comorbidity pills from the V_<id> hidden selects
     if(typeof syncVisitPillsFromData==='function') syncVisitPillsFromData();
     // Restore visit Comorbidities sub-UI (PCI/CABG buttons, valve intervention block, genetics)
@@ -6304,7 +6403,7 @@ function clearVisitForm(){
     // Reset edit mode UI
     editingVisitId = null;
     // Hide visit conditional panels (including new Pacing-mode, Holter, comorbid wraps)
-    var vHide=['vCmrLGEPctWrap','vWalkMetersWrap','vRhcDetailsWrap','vPacingModeWrap','vHolterDateWrap','vHolterDurationWrap','vHolterMaxHRWrap','vHolterMinHRWrap','vHolterAvgHRWrap','vHolterArrhythmiaWrap','vHolterFindingsWrap','vPciCabgDetailsWrap','vValveInterventionWrap','vValveRepairDateWrap','vValveReplaceTypeWrap','vValveReplaceDateWrap','vValvePercutaneousWrap','vValveMVClipDateWrap','vValveTVClipDateWrap','vValveTAVIDateWrap','vGeneticsTypeWrap'];
+    var vHide=['vCmrLGEPctWrap','vWalkMetersWrap','vRhcDetailsWrap','vPacingModeWrap','vHolterDateWrap','vHolterDurationWrap','vHolterMaxHRWrap','vHolterMinHRWrap','vHolterAvgHRWrap','vHolterArrhythmiaWrap','vHolterFindingsWrap','vPciCabgDetailsWrap','vValveInterventionWrap','vValveRepairDateWrap','vValveReplaceTypeWrap','vValveReplaceDateWrap','vValvePercutaneousWrap','vValveMVClipDateWrap','vValveTVClipDateWrap','vValveTAVIDateWrap','vGeneticsTypeWrap','vRecoveredLVTypeWrap','vLostFUReasonWrap','vLostFUOtherWrap','vAdvHFTherapyWrap'];
     vHide.forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='none';});
     // Reset visit comorbidity pills + outline buttons
     document.querySelectorAll('#vPillComorbidities .pill-toggle').forEach(function(p){p.classList.remove('active');});
@@ -6408,7 +6507,8 @@ function buildVisitDetailHTML(v){
         {name:'ECG / Echo',        fields:[['LBBB','V_LBBB'],['QRS','V_QRS'],['Arrhythmia','V_Arrhythmia'],['Pacing in ECG','V_Pacing_ECG'],['Pacing Mode','V_Pacing_Mode'],['EF Change','V_EF_Change'],['Echo Other','V_Echo_Other']]},
         {name:'Holter Results',    fields:[['Holter Done','V_Holter_Done'],['Date','V_Holter_Date'],['Duration (h)','V_Holter_Duration'],['Max HR','V_Holter_MaxHR'],['Min HR','V_Holter_MinHR'],['Avg HR','V_Holter_AvgHR'],['Arrhythmia Burden','V_Holter_Arrhythmia'],['Findings','V_Holter_Findings']]},
         {name:'Labs',              fields:[['HbA1c','V_HbA1c'],['Glucose','V_Gluc'],['Urea','V_Urea'],['Creat','V_Creat'],['eGFR','V_eGFR'],['Na','V_Na'],['K','V_K'],['BNP','V_BNP'],['NT-proBNP','V_NTproBNP'],['INR','V_INR'],['Iron','V_Iron'],['Ferritin','V_Ferritin'],['Transferrin','V_Transferrin'],['Hb','V_Hb'],['WBC','V_WBC'],['Plt','V_Plt'],['TSH','V_TSH'],['FreeT4','V_FreeT4'],['Total Chol','V_TotalChol'],['LDL','V_LDL'],['HDL','V_HDL'],['Triglycerides','V_TG']]},
-        {name:'Assessment & Plan', fields:[['Adverse Effects (Meds)','V_AdverseEffects'],['Compliance','V_Compliance'],['Compliance Notes','V_ComplianceNotes'],['Patient Complaints','V_Adverse'],['Plan','V_Plan'],['Notes','V_Others'],['Referral','V_Referral'],['Next Appt Notes','Next_Appt_Notes']]}
+        {name:'Assessment & Plan', fields:[['Adverse Effects (Meds)','V_AdverseEffects'],['Compliance','V_Compliance'],['Compliance Notes','V_ComplianceNotes'],['Patient Complaints','V_Adverse'],['Plan','V_Plan'],['Notes','V_Others'],['Referral','V_Referral'],['Next Appt Notes','Next_Appt_Notes']]},
+        {name:'Outcomes & Management', fields:[['Quadruple GDMT','V_Quad_GDMT'],['On Maximum GDMT','V_Max_GDMT'],['Recovered LV','V_Recovered_LV'],['Recovery Type','V_Recovered_LV_Type'],['Mortality','V_Mortality'],['Lost to Follow-up','V_LostFU'],['LTFU Reason','V_LostFU_Reason'],['LTFU Specify','V_LostFU_Other'],['Advanced HF','V_Advanced_HF_Outcome'],['Strong HF Eligible','V_Strong_HF'],['Advanced HF Therapy','V_Adv_HF_Therapy'],['Therapy Type','V_Adv_HF_Therapy_Type'],['Management Plan / Notes','V_Outcome_Notes']]}
     ];
     var html='<table>';
     sections.forEach(function(sec){
@@ -7238,7 +7338,7 @@ function generateExcel(data,visitsData,id){
         }
     });pr.push([]);});
     var ws1=XLSX.utils.aoa_to_sheet(pr);XLSX.utils.book_append_sheet(wb,ws1,"Patient Info");
-    if(visitsData.length>0){var vr=[];vr.push(["VISIT HISTORY"]);vr.push([]);visitsData.forEach(function(visit,idx){vr.push(["Visit #"+(visitsData.length-idx),"Date: "+visit.visitDate,"Type: "+visit.visitType]);var vFields=['V_Fatigue','V_NYHA','V_KCCQ','V_Edema','V_Pulse','V_BP','V_SpO2','V_Weight','V_JVP','V_Rales','V_S3','V_LBBB','V_QRS','V_Arrhythmia','V_Pacing_ECG','V_Pacing_Mode','V_Holter_Done','V_Holter_Date','V_Holter_Duration','V_Holter_MaxHR','V_Holter_MinHR','V_Holter_AvgHR','V_Holter_Arrhythmia','V_Holter_Findings','V_EF_Change','V_Echo_EDVI','V_Echo_ESVI','V_Echo_EF','V_Echo_Other','V_CMR_LVEDVI','V_CMR_LVESVI','V_CMR_LVEF','V_CMR_RVEDI','V_CMR_RVEF','V_CMR_LGE','V_CMR_LGE_Pct','V_CMR_Others','V_Walk_Completed','V_Walk_Meters','V_CPET_PeakVO2','V_CPET_VEVCO2','V_CPET_RER','V_CPET_AT','V_CPET_VO2HR','V_CPET_PetCO2','V_RHC_Done','V_RHC_CI','V_RHC_RAP','V_RHC_RVP','V_RHC_PCWP','V_RHC_PAP','V_RHC_PVR','V_RHC_PAPi','V_RHC_LV','V_RHC_MVO2','V_HbA1c','V_Gluc','V_Urea','V_Creat','V_eGFR','V_Na','V_K','V_BNP','V_NTproBNP','V_INR','V_Iron','V_Transferrin','V_Ferritin','V_WBC','V_Hb','V_Plt','V_TSH','V_FreeT4','V_TotalChol','V_LDL','V_HDL','V_TG','V_Vacc_Influenza','V_Vacc_Influenza_Date','V_Vacc_Pneumococcal','V_Vacc_Pneumococcal_Date','V_Vacc_COVID','V_Vacc_COVID_Date','V_Vacc_RSV','V_Vacc_RSV_Date','V_Vacc_Notes','V_Vacc_Influenza_Year','V_Vacc_Pneumococcal_Year','V_Vacc_COVID_Year','V_Vacc_Other'];VISIT_MED_LIST.forEach(function(m){vFields.push(m.id);vFields.push(m.id+'_Status');vFields.push(m.id+'_Custom');vFields.push(m.id+'_Freq');});vFields.push('V_AdverseEffects','V_Compliance','V_ComplianceNotes','V_Adverse','V_Plan','V_Others','V_Referral','V_Referral_Other','Next_Appt_Notes');vFields.forEach(function(f){var val=visit[f];if(val&&val.toString().trim()!=='')vr.push([f.replace('V_','').replace(/_/g,' '),val]);});vr.push([]);});var ws2=XLSX.utils.aoa_to_sheet(vr);XLSX.utils.book_append_sheet(wb,ws2,"Visits");}
+    if(visitsData.length>0){var vr=[];vr.push(["VISIT HISTORY"]);vr.push([]);visitsData.forEach(function(visit,idx){vr.push(["Visit #"+(visitsData.length-idx),"Date: "+visit.visitDate,"Type: "+visit.visitType]);var vFields=['V_Fatigue','V_NYHA','V_KCCQ','V_Edema','V_Pulse','V_BP','V_SpO2','V_Weight','V_JVP','V_Rales','V_S3','V_LBBB','V_QRS','V_Arrhythmia','V_Pacing_ECG','V_Pacing_Mode','V_Holter_Done','V_Holter_Date','V_Holter_Duration','V_Holter_MaxHR','V_Holter_MinHR','V_Holter_AvgHR','V_Holter_Arrhythmia','V_Holter_Findings','V_EF_Change','V_Echo_EDVI','V_Echo_ESVI','V_Echo_EF','V_Echo_Other','V_CMR_LVEDVI','V_CMR_LVESVI','V_CMR_LVEF','V_CMR_RVEDI','V_CMR_RVEF','V_CMR_LGE','V_CMR_LGE_Pct','V_CMR_Others','V_Walk_Completed','V_Walk_Meters','V_CPET_PeakVO2','V_CPET_VEVCO2','V_CPET_RER','V_CPET_AT','V_CPET_VO2HR','V_CPET_PetCO2','V_RHC_Done','V_RHC_CI','V_RHC_RAP','V_RHC_RVP','V_RHC_PCWP','V_RHC_PAP','V_RHC_PVR','V_RHC_PAPi','V_RHC_LV','V_RHC_MVO2','V_HbA1c','V_Gluc','V_Urea','V_Creat','V_eGFR','V_Na','V_K','V_BNP','V_NTproBNP','V_INR','V_Iron','V_Transferrin','V_Ferritin','V_WBC','V_Hb','V_Plt','V_TSH','V_FreeT4','V_TotalChol','V_LDL','V_HDL','V_TG','V_Vacc_Influenza','V_Vacc_Influenza_Date','V_Vacc_Pneumococcal','V_Vacc_Pneumococcal_Date','V_Vacc_COVID','V_Vacc_COVID_Date','V_Vacc_RSV','V_Vacc_RSV_Date','V_Vacc_Notes','V_Vacc_Influenza_Year','V_Vacc_Pneumococcal_Year','V_Vacc_COVID_Year','V_Vacc_Other'];VISIT_MED_LIST.forEach(function(m){vFields.push(m.id);vFields.push(m.id+'_Status');vFields.push(m.id+'_Custom');vFields.push(m.id+'_Freq');});vFields.push('V_AdverseEffects','V_Compliance','V_ComplianceNotes','V_Adverse','V_Plan','V_Others','V_Referral','V_Referral_Other','Next_Appt_Notes','V_Quad_GDMT','V_Max_GDMT','V_Recovered_LV','V_Recovered_LV_Type','V_Mortality','V_LostFU','V_LostFU_Reason','V_LostFU_Other','V_Advanced_HF_Outcome','V_Strong_HF','V_Adv_HF_Therapy','V_Adv_HF_Therapy_Type','V_Outcome_Notes');vFields.forEach(function(f){var val=visit[f];if(val&&val.toString().trim()!=='')vr.push([f.replace('V_','').replace(/_/g,' '),val]);});vr.push([]);});var ws2=XLSX.utils.aoa_to_sheet(vr);XLSX.utils.book_append_sheet(wb,ws2,"Visits");}
     XLSX.writeFile(wb,"HF_Registry_"+(data.File_No||'unknown')+"_"+(data.Patient_Name||'patient')+".xlsx");showPopup("success","Excel Exported!","File downloaded successfully.");
 }
 
@@ -7271,7 +7371,7 @@ function generatePDF(data,visitsData,id){
     if(visitsData.length>0){html+="<div style='page-break-before:always;'></div><h3 style='color:#8b0000;margin-top:20px;'>Visit History & Follow-ups</h3>";
     var mf=VISIT_MED_LIST.map(function(m){return m.id;});
     visitsData.forEach(function(visit,idx){html+="<div style='border:2px solid #17a2b8;margin:15px 0;padding:15px;border-radius:8px;'><h4 style='color:#17a2b8;margin-top:0;'>Visit #"+(visitsData.length-idx)+": "+visit.visitDate+" ("+visit.visitType+")</h4>";
-    var vs=[{name:'Symptoms',fields:['V_Fatigue','V_NYHA','V_KCCQ','V_Edema']},{name:'Signs/Vitals',fields:['V_Pulse','V_BP','V_SpO2','V_Weight','V_JVP','V_Rales','V_S3']},{name:'ECG',fields:['V_LBBB','V_QRS','V_Arrhythmia','V_Pacing_ECG','V_Pacing_Mode']},{name:'Holter',fields:['V_Holter_Done','V_Holter_Date','V_Holter_Duration','V_Holter_MaxHR','V_Holter_MinHR','V_Holter_AvgHR','V_Holter_Arrhythmia','V_Holter_Findings']},{name:'Labs',fields:['V_HbA1c','V_Gluc','V_Urea','V_Creat','V_eGFR','V_Na','V_K','V_BNP','V_NTproBNP','V_INR','V_Iron','V_Transferrin','V_Ferritin','V_WBC','V_Hb','V_Plt','V_TSH','V_FreeT4','V_TotalChol','V_LDL','V_HDL','V_TG']},{name:'F/U Echo',fields:['V_EF_Change','V_Echo_EDVI','V_Echo_ESVI','V_Echo_EF','V_Echo_Other']},{name:'F/U CMR',fields:['V_CMR_LVEDVI','V_CMR_LVESVI','V_CMR_LVEF','V_CMR_RVEDI','V_CMR_RVEF','V_CMR_LGE','V_CMR_LGE_Pct','V_CMR_Others']},{name:'F/U 6MWT',fields:['V_Walk_Completed','V_Walk_Meters']},{name:'F/U CPET',fields:['V_CPET_PeakVO2','V_CPET_VEVCO2','V_CPET_RER','V_CPET_AT','V_CPET_VO2HR','V_CPET_PetCO2']},{name:'F/U Right Heart Cath',fields:['V_RHC_Done','V_RHC_CI','V_RHC_RAP','V_RHC_RVP','V_RHC_PCWP','V_RHC_PAP','V_RHC_PVR','V_RHC_PAPi','V_RHC_LV','V_RHC_MVO2']},{name:'Medications',fields:mf},{name:'Vaccinations',fields:['V_Vacc_Influenza','V_Vacc_Influenza_Date','V_Vacc_Pneumococcal','V_Vacc_Pneumococcal_Date','V_Vacc_COVID','V_Vacc_COVID_Date','V_Vacc_RSV','V_Vacc_RSV_Date','V_Vacc_Notes','V_Vacc_Influenza_Year','V_Vacc_Pneumococcal_Year','V_Vacc_COVID_Year','V_Vacc_Other']},{name:'Next Appointment',fields:['Next_Appt_Notes']},{name:'Plan',fields:['V_AdverseEffects','V_Compliance','V_ComplianceNotes','V_Adverse','V_Plan','V_Others','V_Referral','V_Referral_Other']}];
+    var vs=[{name:'Symptoms',fields:['V_Fatigue','V_NYHA','V_KCCQ','V_Edema']},{name:'Signs/Vitals',fields:['V_Pulse','V_BP','V_SpO2','V_Weight','V_JVP','V_Rales','V_S3']},{name:'ECG',fields:['V_LBBB','V_QRS','V_Arrhythmia','V_Pacing_ECG','V_Pacing_Mode']},{name:'Holter',fields:['V_Holter_Done','V_Holter_Date','V_Holter_Duration','V_Holter_MaxHR','V_Holter_MinHR','V_Holter_AvgHR','V_Holter_Arrhythmia','V_Holter_Findings']},{name:'Labs',fields:['V_HbA1c','V_Gluc','V_Urea','V_Creat','V_eGFR','V_Na','V_K','V_BNP','V_NTproBNP','V_INR','V_Iron','V_Transferrin','V_Ferritin','V_WBC','V_Hb','V_Plt','V_TSH','V_FreeT4','V_TotalChol','V_LDL','V_HDL','V_TG']},{name:'F/U Echo',fields:['V_EF_Change','V_Echo_EDVI','V_Echo_ESVI','V_Echo_EF','V_Echo_Other']},{name:'F/U CMR',fields:['V_CMR_LVEDVI','V_CMR_LVESVI','V_CMR_LVEF','V_CMR_RVEDI','V_CMR_RVEF','V_CMR_LGE','V_CMR_LGE_Pct','V_CMR_Others']},{name:'F/U 6MWT',fields:['V_Walk_Completed','V_Walk_Meters']},{name:'F/U CPET',fields:['V_CPET_PeakVO2','V_CPET_VEVCO2','V_CPET_RER','V_CPET_AT','V_CPET_VO2HR','V_CPET_PetCO2']},{name:'F/U Right Heart Cath',fields:['V_RHC_Done','V_RHC_CI','V_RHC_RAP','V_RHC_RVP','V_RHC_PCWP','V_RHC_PAP','V_RHC_PVR','V_RHC_PAPi','V_RHC_LV','V_RHC_MVO2']},{name:'Medications',fields:mf},{name:'Vaccinations',fields:['V_Vacc_Influenza','V_Vacc_Influenza_Date','V_Vacc_Pneumococcal','V_Vacc_Pneumococcal_Date','V_Vacc_COVID','V_Vacc_COVID_Date','V_Vacc_RSV','V_Vacc_RSV_Date','V_Vacc_Notes','V_Vacc_Influenza_Year','V_Vacc_Pneumococcal_Year','V_Vacc_COVID_Year','V_Vacc_Other']},{name:'Next Appointment',fields:['Next_Appt_Notes']},{name:'Plan',fields:['V_AdverseEffects','V_Compliance','V_ComplianceNotes','V_Adverse','V_Plan','V_Others','V_Referral','V_Referral_Other']},{name:'Outcomes & Management',fields:['V_Quad_GDMT','V_Max_GDMT','V_Recovered_LV','V_Recovered_LV_Type','V_Mortality','V_LostFU','V_LostFU_Reason','V_LostFU_Other','V_Advanced_HF_Outcome','V_Strong_HF','V_Adv_HF_Therapy','V_Adv_HF_Therapy_Type','V_Outcome_Notes']}];
     vs.forEach(function(vsec){var hd=false;vsec.fields.forEach(function(vf){if(visit[vf]&&visit[vf].toString().trim()!=='')hd=true;});if(!hd)return;
     html+="<h5 style='margin:10px 0 5px 0;color:#555;'>"+vsec.name+"</h5><table style='width:100%;border-collapse:collapse;font-size:11px;margin-bottom:10px;'>";
     vsec.fields.forEach(function(vf){var val=visit[vf];if(val&&val.toString().trim()!==''){html+="<tr style='border-bottom:1px solid #eee;'><td style='width:40%;padding:4px;background:#f5f5f5;'>"+vf.replace('V_','').replace(/_/g,' ')+"</td><td style='padding:4px;'>"+val+"</td></tr>";}});html+="</table>";});html+="</div>";});}
