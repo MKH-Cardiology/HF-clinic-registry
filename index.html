@@ -91,6 +91,9 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 .extra-adm-body label{font-size:0.72rem;color:#6c757d;margin-bottom:2px}
 .ea-multi{display:flex;flex-wrap:wrap;gap:6px;padding:6px;border:1px solid #ced4da;border-radius:6px;background:#fff}
 .ea-multi .btn{font-size:0.76rem;padding:3px 10px}
+.admission-accordion-wrap .field-tint{margin-bottom:10px}
+.admission-accordion-wrap .field-tint:last-child{margin-bottom:0}
+.admission-accordion-wrap .ft-body{padding-top:8px}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;justify-content:center;align-items:center}
 .modal-box{background:#fff;border-radius:16px;padding:30px 20px;max-width:500px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.4);animation:pop .3s ease;max-height:90vh;overflow-y:auto;}
 @keyframes pop{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
@@ -911,17 +914,25 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
         </div>
         </div>
 
-        <!-- STEP 3: Symptoms & Signs -->
+        <!-- STEP 3: In-Hospital Admission (merged old sections 3-9) -->
         <div class="form-step" data-step="3">
-            <div class="section-card sec-vitals">
+            <div class="section-card sec-investigations">
                 <div class="section-card-head">
-                    <div class="sc-icon"><i class="fa fa-heart-pulse"></i></div>
+                    <div class="sc-icon"><i class="fa fa-hospital"></i></div>
                     <div>
-                        <div class="sc-title">3. Symptoms, Signs & Vitals</div>
-                        <div class="sc-sub">On admission</div>
+                        <div class="sc-title">3. In-Hospital Admission</div>
+                        <div class="sc-sub">Index admission — expand each section to fill in</div>
                     </div>
                 </div>
                 <div class="section-card-body">
+            <div class="admission-accordion-wrap">
+              <div class="field-tint collapsible tint-vitals expanded" id="admPanel3">
+                <div class="ft-head" onclick="toggleAdmPanel('admPanel3')">
+                  <i class="fa fa-heart-pulse"></i><span>Symptoms, Signs & Vitals</span>
+                  <i class="fa fa-chevron-right ft-chev ms-auto"></i>
+                </div>
+                <div class="ft-body">
+
             <!-- ===== IN-HOSPITAL ADMISSION BLOCK ===== -->
             <div class="row g-2 mb-3" style="background:#fff5f5;border-left:4px solid #8b0000;border-radius:8px;padding:12px;margin:0 0 12px 0;">
                 <div class="col-12 d-flex align-items-center justify-content-between flex-wrap gap-2" style="margin-bottom:4px;">
@@ -964,21 +975,15 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                 <i class="fa fa-weight-scale"></i>
                 <div><strong>Obesity Clinic Referral:</strong> BMI &gt; 30 — consider referral to MKH Obesity Clinic for weight-management evaluation. Counsel on weight loss, lifestyle modification, and consider GLP-1 agonist therapy if HFpEF/HFmrEF.</div>
             </div>
-            </div>
-        </div>
-        </div>
-
-        <!-- STEP 4: Investigations -->
-        <div class="form-step" data-step="4">
-            <div class="section-card sec-investigations">
-                <div class="section-card-head">
-                    <div class="sc-icon"><i class="fa fa-magnifying-glass-chart"></i></div>
-                    <div>
-                        <div class="sc-title">4. Investigations & Procedures</div>
-                        <div class="sc-sub">ECG, Echo, CMR, CT, RHC, CPET</div>
-                    </div>
                 </div>
-                <div class="section-card-body">
+              </div>
+              <div class="field-tint collapsible tint-ecg" id="admPanel4">
+                <div class="ft-head" onclick="toggleAdmPanel('admPanel4')">
+                  <i class="fa fa-magnifying-glass-chart"></i><span>Investigations & Procedures</span>
+                  <i class="fa fa-chevron-right ft-chev ms-auto"></i>
+                </div>
+                <div class="ft-body">
+
             <div class="row g-2">
                 <h6 class="col-12 text-secondary m-0"><i class="fa fa-heartbeat"></i> ECG</h6>
                 <div class="col-6 col-md-3"><label>LBBB</label><select class="form-select" id="ECG_LBBB" onchange="checkCRTIndication()"><option value="">Select...</option><option>No</option><option>Yes</option></select></div>
@@ -1120,21 +1125,15 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                 <i class="fa fa-bolt"></i>
                 <div><strong>CRT/ICD Consideration:</strong> <span id="alertCRTText"></span></div>
             </div>
-            </div>
-        </div>
-        </div>
-
-        <!-- STEP 5: Comorbidities -->
-        <div class="form-step" data-step="5">
-            <div class="section-card sec-comorbid">
-                <div class="section-card-head">
-                    <div class="sc-icon"><i class="fa fa-notes-medical"></i></div>
-                    <div>
-                        <div class="sc-title">5. Comorbidities</div>
-                        <div class="sc-sub">Risk factors and co-conditions</div>
-                    </div>
                 </div>
-                <div class="section-card-body">
+              </div>
+              <div class="field-tint collapsible tint-bnp" id="admPanel5">
+                <div class="ft-head" onclick="toggleAdmPanel('admPanel5')">
+                  <i class="fa fa-notes-medical"></i><span>Comorbidities</span>
+                  <i class="fa fa-chevron-right ft-chev ms-auto"></i>
+                </div>
+                <div class="ft-body">
+
             <div class="pill-group" id="pillComorbidities"></div>
             <div style="display:none;">
                 <select id="DM" onchange="calcMAGGIC()"><option>No</option><option>Yes</option></select>
@@ -1180,21 +1179,15 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                 <div class="col-12"><label>Other Comorbidities</label><input type="text" class="form-control" id="Comorbid_Others" placeholder="Any other co-conditions not listed above"></div>
                 <input type="hidden" id="FH_Genetics">
             </div>
-            </div>
-        </div>
-        </div>
-
-        <!-- STEP 6: Labs -->
-        <div class="form-step" data-step="6">
-            <div class="section-card sec-labs">
-                <div class="section-card-head">
-                    <div class="sc-icon"><i class="fa fa-vials"></i></div>
-                    <div>
-                        <div class="sc-title">6. In-Hospital Labs</div>
-                        <div class="sc-sub">Kuwait SI units</div>
-                    </div>
                 </div>
-                <div class="section-card-body">
+              </div>
+              <div class="field-tint collapsible tint-renal" id="admPanel6">
+                <div class="ft-head" onclick="toggleAdmPanel('admPanel6')">
+                  <i class="fa fa-vials"></i><span>In-Hospital Labs</span>
+                  <i class="fa fa-chevron-right ft-chev ms-auto"></i>
+                </div>
+                <div class="ft-body">
+
             <div class="row g-2">
                 <h6 class="col-12 text-secondary m-0"><i class="fa fa-vial"></i> Glycemic</h6>
                 <div class="col-6 col-md-3"><label>HbA1c (%)</label><input type="text" class="form-control" id="Lab_HbA1c" inputmode="decimal"></div>
@@ -1273,21 +1266,15 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                 <i class="fa fa-tint"></i>
                 <div><strong>Iron Deficiency Flagged (ESC Criteria):</strong> Ferritin &lt;100, or 100–299 with TSAT &lt;20%. Consider IV iron.</div>
             </div>
-            </div>
-        </div>
-        </div>
-
-        <!-- STEP 7: Medications -->
-        <div class="form-step" data-step="7">
-            <div class="section-card sec-meds">
-                <div class="section-card-head">
-                    <div class="sc-icon"><i class="fa fa-pills"></i></div>
-                    <div>
-                        <div class="sc-title">7. In-Hospital Management & Medications</div>
-                        <div class="sc-sub">GDMT and supportive therapy</div>
-                    </div>
                 </div>
-                <div class="section-card-body">
+              </div>
+              <div class="field-tint collapsible tint-meds" id="admPanel7">
+                <div class="ft-head" onclick="toggleAdmPanel('admPanel7')">
+                  <i class="fa fa-pills"></i><span>In-Hospital Management & Medications</span>
+                  <i class="fa fa-chevron-right ft-chev ms-auto"></i>
+                </div>
+                <div class="ft-body">
+
             <div class="clinical-alert alert-info-soft" id="alertPhenotype" style="margin-bottom:10px;">
                 <i class="fa fa-info-circle"></i>
                 <div id="alertPhenotypeText">Select HF Type in Step 2 for phenotype-specific guidance.</div>
@@ -1338,21 +1325,15 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                 <h6 class="text-danger" style="font-size:0.78rem;"><i class="fa fa-clipboard-question me-1"></i> GDMT Gap Rationale (HFrEF)</h6>
                 <div class="row g-2" id="gdmtRationaleFields"></div>
             </div>
-            </div>
-        </div>
-        </div>
-
-        <!-- STEP 8: In-Hospital Complications -->
-        <div class="form-step" data-step="8">
-            <div class="section-card sec-comorbid">
-                <div class="section-card-head">
-                    <div class="sc-icon"><i class="fa fa-triangle-exclamation"></i></div>
-                    <div>
-                        <div class="sc-title">8. In-Hospital Complications</div>
-                        <div class="sc-sub">Events during this admission</div>
-                    </div>
                 </div>
-                <div class="section-card-body">
+              </div>
+              <div class="field-tint collapsible tint-bnp" id="admPanel8">
+                <div class="ft-head" onclick="toggleAdmPanel('admPanel8')">
+                  <i class="fa fa-triangle-exclamation"></i><span>In-Hospital Complications</span>
+                  <i class="fa fa-chevron-right ft-chev ms-auto"></i>
+                </div>
+                <div class="ft-body">
+
             <div class="row g-2">
                 <div class="text-muted small mb-1"><i class="fa fa-hand-pointer me-1"></i>Tap any complication that occurred during the hospital stay.</div>
                 <div class="col-12" id="complicationsWrap"></div>
@@ -1368,21 +1349,15 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                 </div>
                 <div class="col-12 mt-2"><label>Other Complications / Notes</label><input type="text" class="form-control" id="Complications_Other" placeholder="Any other in-hospital complications or details"></div>
             </div>
-            </div>
-        </div>
-        </div>
-
-        <!-- STEP 9: Outcomes -->
-        <div class="form-step" data-step="9">
-            <div class="section-card sec-outcomes">
-                <div class="section-card-head">
-                    <div class="sc-icon"><i class="fa fa-flag-checkered"></i></div>
-                    <div>
-                        <div class="sc-title">9. Outcomes & Management</div>
-                        <div class="sc-sub">Plan, referrals, advanced HF</div>
-                    </div>
                 </div>
-                <div class="section-card-body">
+              </div>
+              <div class="field-tint collapsible tint-plan" id="admPanel9">
+                <div class="ft-head" onclick="toggleAdmPanel('admPanel9')">
+                  <i class="fa fa-flag-checkered"></i><span>Outcomes & Management</span>
+                  <i class="fa fa-chevron-right ft-chev ms-auto"></i>
+                </div>
+                <div class="ft-body">
+
             <div class="row g-2">
                 <div class="col-6 col-md-3"><label>Quadruple GDMT?</label><select class="form-select" id="Quad_GDMT"><option>No</option><option>Yes</option></select></div>
                 <div class="col-6 col-md-3"><label>On Maximum GDMT Doses?</label><select class="form-select" id="Max_GDMT"><option>No</option><option>Yes</option></select></div>
@@ -1433,31 +1408,42 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 
                 <div class="col-12 col-md-12"><label>Management Plan / Notes</label><textarea class="form-control" id="Notes" rows="2"></textarea></div>
             </div>
+                </div>
+              </div>
+              <!-- ===== ADDITIONAL ADMISSIONS PANEL ===== -->
+              <div class="field-tint collapsible tint-appt" id="admPanelExtra">
+                <div class="ft-head" onclick="toggleAdmPanel('admPanelExtra')">
+                  <i class="fa fa-hospital-user"></i><span>Additional Admissions</span>
+                  <i class="fa fa-chevron-right ft-chev ms-auto"></i>
+                </div>
+                <div class="ft-body">
+                  <div class="extra-adm-section">
+                    <div class="extra-adm-section-head">
+                      <span><i class="fa fa-hospital me-1"></i>Additional In-Hospital Admissions</span>
+                      <button type="button" class="btn btn-sm btn-outline-primary" id="addAdmissionBtn" onclick="addExtraAdmission()"><i class="fa fa-plus me-1"></i>Add Another Admission</button>
+                    </div>
+                    <div class="extra-adm-section-hint">The panels above record Admission #1. Add any further admissions for this patient here — each is a full admission record.</div>
+                    <div id="extraAdmissionsWrap"></div>
+                    <input type="hidden" id="Extra_Admissions" value="[]">
+                  </div>
+                </div>
+              </div>
+            </div>
+            </div>
             </div>
         </div>
-        </div>
 
-        <!-- STEP 10: Visits -->
-        <div class="form-step" data-step="10">
+        <!-- STEP 4: Visits -->
+        <div class="form-step" data-step="4">
             <div class="section-card sec-visits">
                 <div class="section-card-head">
                     <div class="sc-icon"><i class="fa fa-calendar-check"></i></div>
                     <div>
-                        <div class="sc-title">10. Visits & Follow-ups</div>
+                        <div class="sc-title">4. Visits & Follow-ups</div>
                         <div class="sc-sub">History and next appointment</div>
                     </div>
                 </div>
                 <div class="section-card-body">
-            <!-- ===== ADDITIONAL IN-HOSPITAL ADMISSIONS (before visit history) ===== -->
-            <div class="extra-adm-section mb-3">
-                <div class="extra-adm-section-head">
-                    <span><i class="fa fa-hospital me-1"></i>Additional In-Hospital Admissions</span>
-                    <button type="button" class="btn btn-sm btn-outline-primary" id="addAdmissionBtn" onclick="addExtraAdmission()"><i class="fa fa-plus me-1"></i>Add Another Admission</button>
-                </div>
-                <div class="extra-adm-section-hint">Admission #1 is recorded in Sections 3–9. Add any further admissions for this patient here — each is a full admission record.</div>
-                <div id="extraAdmissionsWrap"></div>
-                <input type="hidden" id="Extra_Admissions" value="[]">
-            </div>
             <!-- Collapsible visit history -->
             <div id="visitHistory" class="visit-history-list mb-3"></div>
             <div class="visit-section">
@@ -2096,7 +2082,7 @@ var weightChartInst = null, kccqChartInst = null, ntproChartInst = null;
 var analyticsCharts = {};
 var allPatientsData = [];
 var currentWizardStep = 1;
-var TOTAL_STEPS = 10;
+var TOTAL_STEPS = 4;
 
 // ===== CHANGE 1: Separate Procorolan & CCB from Med_Misc =====
 var MED_FORMULARY = {
@@ -2774,7 +2760,7 @@ function applyFieldTints(){
 // Lightweight groups (Visit Date, Symptoms, Signs/Vitals, ECG, Next Appt) stay open.
 function applyVisitAccordions(){
     try {
-        var step9 = document.querySelector('.form-step[data-step="10"] .visit-section > .row.g-2');
+        var step9 = document.querySelector('.form-step[data-step="4"] .visit-section > .row.g-2');
         if(!step9) return;
         // Collapsed-by-default labels (substring match)
         var collapsibleLabels = ['F/U Echo','F/U CMR','F/U 6 Minute','F/U CPET','F/U Right Side','Iron Studies','CBC','Thyroid','Lipid','Urine','HF Vaccinations','Medications (Doses)','Assessment & Plan','Referral'];
@@ -2860,7 +2846,7 @@ function reorderVisitFormSections(){
 }
 
 // ===== CHANGE 2: WIZARD WITH SHORT LABELS UNDER DOTS =====
-var STEP_LABELS = ['Demo','HF Dx','Signs','Ix','Comorb','Labs','Meds','Complic.','Outcomes','Visits'];
+var STEP_LABELS = ['Demo','HF Dx','Admission','Visits'];
 
 function buildWizardProgress(){
     var html='';
@@ -3909,6 +3895,11 @@ function toggleExtraAdmission(idx){
 // Expand/collapse a single colour-coded section inside an admission card.
 function toggleExtraAdmSection(gid){
     var sec=document.getElementById(gid);
+    if(sec) sec.classList.toggle('expanded');
+}
+// Expand/collapse a panel in the merged Step-3 In-Hospital Admission accordion.
+function toggleAdmPanel(pid){
+    var sec=document.getElementById(pid);
     if(sec) sec.classList.toggle('expanded');
 }
 // Toggle one option of a multi-select field; stores comma-joined value.
