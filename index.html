@@ -88,9 +88,7 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 .extra-adm-body.show{display:block;animation:fadeUp 0.2s ease}
 .extra-adm-body .field-tint{margin:8px 0}
 .extra-adm-body .field-tint:first-child{margin-top:2px}
-.extra-adm-body label{font-size:0.72rem;color:#6c757d;margin-bottom:2px}
-.ea-multi{display:flex;flex-wrap:wrap;gap:6px;padding:6px;border:1px solid #ced4da;border-radius:6px;background:#fff}
-.ea-multi .btn{font-size:0.76rem;padding:3px 10px}
+.ea-multi{display:flex;flex-wrap:wrap;gap:6px}
 .admission-accordion-wrap .field-tint{margin-bottom:10px}
 .admission-accordion-wrap .field-tint:last-child{margin-bottom:0}
 .admission-accordion-wrap .ft-body{padding-top:8px}
@@ -3820,13 +3818,16 @@ function _extraFieldHtml(idx, f){
         });
         h+='</select>';
     } else if(f.t==='multi'){
-        // Multi-select toggle-button group. Value stored comma-joined.
+        // Multi-select rendered as checkboxes in a bordered box — identical
+        // look to Admission #1's symptom/referral multi-selects.
         var picked=String(val||'').split(',').map(function(s){return s.trim();}).filter(Boolean);
-        h+='<div class="ea-multi" data-ea-multi="'+f.k+'">';
+        h+=' <small class="text-muted" style="font-size:0.7rem;">(multi-select)</small>';
+        h+='<div class="d-flex gap-3 flex-wrap p-2" style="border:1px solid #ced4da;border-radius:6px;background:#fff;">';
         f.o.forEach(function(opt){
             var on=picked.indexOf(opt)>=0;
-            h+='<button type="button" class="btn btn-sm '+(on?'btn-primary':'btn-outline-primary')+'" '
-              +'onclick="toggleExtraAdmMulti('+idx+',\''+f.k+'\',\''+_esc(opt).replace(/'/g,"\\'")+'\',this)">'+_esc(opt)+'</button>';
+            h+='<label class="d-inline-flex align-items-center gap-1 mb-0" style="font-size:0.85rem;cursor:pointer;">'
+              +'<input type="checkbox" class="form-check-input"'+(on?' checked':'')+' '
+              +'onchange="toggleExtraAdmMulti('+idx+',\''+f.k+'\',\''+_esc(opt).replace(/'/g,"\\'")+'\',this)"> '+_esc(opt)+'</label>';
         });
         h+='</div>';
     } else if(f.t==='area'){
@@ -3937,11 +3938,7 @@ function toggleExtraAdmMulti(idx, field, opt, btn){
     if(pos>=0) picked.splice(pos,1); else picked.push(opt);
     arr[idx][field]=picked.join(', ');
     _writeExtraAdmissions(arr);
-    if(btn){
-        var on=picked.indexOf(opt)>=0;
-        btn.classList.toggle('btn-primary',on);
-        btn.classList.toggle('btn-outline-primary',!on);
-    }
+    // Checkbox shows its own state via `checked` — no class toggling needed.
     // A multi-select can itself be a gate controller (e.g. Procedures -> Other)
     _maybeRerenderGatedSection(idx, field);
     _refreshExtraAdmBadge(idx, field);
