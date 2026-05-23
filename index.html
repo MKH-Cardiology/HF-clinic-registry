@@ -935,32 +935,48 @@ img,canvas,table,svg{max-width:100%;}
     .login-field input,#searchInput{font-size:16px!important;}
 }
 
-/* ---------- EXTRA-ADMISSION CARD — OVERFLOW FIX ----------
-   Adding another admission nests an extra .section-card whose inner red
-   mini-strip contains a Bootstrap .row inside a padded box. The nested
-   row's negative gutter margins escape the box and push total width past
-   100vw, making the whole page zoom out (narrow look + accent strips
-   trailing off the right edge). These rules contain every nested layer. */
+/* ---------- EXTRA-ADMISSION CARD — STRIP REMOVAL & WIDTH FIX ----------
+   "Add Another Admission" nests an extra card several layers deep. Each
+   layer drew its own coloured LEFT-ACCENT strip (.section-card::before 5px,
+   the red mini-strip border-left 4px, every .field-tint border-left 3px).
+   Stacked together with padding, the card rendered wider than the viewport,
+   so the whole page zoomed out — the narrow look with coloured lines
+   trailing down the side. Fix: drop every accent strip inside the extra
+   card and hard-bound the card to the viewport width. */
+
+/* kill the absolutely-positioned 5px accent bar on the nested section-card */
+.extra-adm-card .section-card::before{display:none!important;}
+/* flatten every left-accent border inside the extra card */
+.extra-adm-card .section-card,
+.extra-adm-card .field-tint,
+.extra-adm-card [id^="eaSec_"]{border-left:0!important;}
+.extra-adm-card .visit-section,
+.extra-adm-card [style*="border-left"]{border-left:0!important;}
+
+/* hard-bound every layer to the viewport so nothing can overflow sideways */
 .extra-adm-card,
+.extra-adm-card .section-card,
+.extra-adm-card .section-card-body,
+.extra-adm-card .admission-accordion-wrap,
+.extra-adm-card .field-tint,
+.extra-adm-card [id^="eaSec_"]{
+    max-width:100%!important;
+    overflow-x:hidden;
+    box-sizing:border-box;
+}
 .extra-adm-card *{box-sizing:border-box;}
-.extra-adm-card{max-width:100%;overflow:hidden;}
-.extra-adm-card .section-card{max-width:100%;overflow:hidden;}
-.extra-adm-card .section-card-body{max-width:100%;overflow-x:hidden;}
-/* the inline-styled red mini-strip is itself a .row — its own negative
-   gutter must not escape, and the .row nested inside it must reset margins */
-.extra-adm-card [id^="eaSec_"]{margin-left:0!important;margin-right:0!important;max-width:100%;}
-.extra-adm-card [id^="eaSec_"] .row{margin-left:0;margin-right:0;}
-.extra-adm-card [id$="_body"] > .row{margin-left:0;margin-right:0;}
-.extra-adm-card .field-tint{max-width:100%;overflow:hidden;}
-.extra-adm-card .field-tint .row{margin-left:0;margin-right:0;}
+
+/* neutralise Bootstrap .row negative gutter margins at every nesting level
+   inside the extra card (they were escaping their padded containers) */
+.extra-adm-card .row{margin-left:0!important;margin-right:0!important;}
+.extra-adm-card [id^="eaSec_"]{margin-left:0!important;margin-right:0!important;}
 
 @media (max-width:767px){
-    /* tighter nested padding so columns keep usable width on phones */
+    /* tighter nested padding so the columns keep usable width on phones */
     .extra-adm-card .section-card-body{padding:10px 9px 9px;}
     .extra-adm-card [id^="eaSec_"]{padding:10px!important;}
     .extra-adm-card .field-tint{padding:9px 10px 8px;}
     .extra-adm-card .admission-accordion-wrap{padding-left:0;padding-right:0;}
-    /* cols inside extra-admission rows get small internal gutter only */
     .extra-adm-card .row.g-2{--bs-gutter-x:0.5rem;}
 }
 
