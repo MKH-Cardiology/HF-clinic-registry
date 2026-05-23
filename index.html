@@ -3946,9 +3946,42 @@ function toggleExtraAdmMulti(idx, field, opt, btn){
     _maybeRerenderGatedSection(idx, field);
     _refreshExtraAdmBadge(idx, field);
 }
+// Map schema keys whose Admission #1 DOM id differs from the schema key.
+// (Admission #1 aggregates the symptom checkboxes into the legacy hidden
+//  field 'Fatigue'; the schema multi-select stores them under 'Symptoms'.)
+var EXTRA_ADM_KEY_ALIAS={ date:'Admission_Date', dischargeDate:'Admission_Discharge_Date', reason:'Admission_Reason', Symptoms:'Fatigue' };
+
+// Harvest Admission #1 (the Step-3 panels) into a plain object keyed by schema key.
+function _harvestAdmissionOne(){
+    var rec={};
+    EXTRA_ADM_SCHEMA.forEach(function(grp){
+        grp.fields.forEach(function(f){
+            var domId=EXTRA_ADM_KEY_ALIAS[f.k]||f.k;
+            var el=document.getElementById(domId);
+            if(el && el.value!=null && String(el.value).trim()!=='') rec[f.k]=el.value;
+        });
+    });
+    return rec;
+}
+
+// Add a new admission. Per request, this DUPLICATES the previous admission's
+// data: it copies from the last extra admission if any exist, otherwise from
+// Admission #1 (the Step-3 panels). The new card opens ready to edit.
 function addExtraAdmission(){
     var arr=_readExtraAdmissions();
-    arr.push({date:'', dischargeDate:'', reason:''});
+    var source;
+    if(arr.length>0){
+        // copy the most recent extra admission
+        source=JSON.parse(JSON.stringify(arr[arr.length-1]));
+    } else {
+        // copy Admission #1 from the Step-3 panels
+        source=_harvestAdmissionOne();
+    }
+    // Carry over all values; clear the admission-identifying dates so the new
+    // record is clearly a fresh admission (reason is kept as a starting point).
+    source.date='';
+    source.dischargeDate='';
+    arr.push(source);
     _writeExtraAdmissions(arr);
     _renderExtraAdmissions();
     var newIdx=arr.length-1;
