@@ -1546,12 +1546,94 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                     <div class="col-4 col-md-2"><label>S3</label><select class="form-select" id="V_S3"><option>N</option><option>Y</option></select></div>
                     <div class="col-8 col-md-4"><label>Murmur</label><input type="text" class="form-control" id="V_Murmur" placeholder="e.g. ESM at apex, grade 3/6"></div>
                     <div class="col-12"><hr class="my-2"></div>
-                    <!-- ===== VISIT COMORBIDITIES ===== -->
+                    <!-- ===== VISIT COMORBIDITIES (mirrors admission structure) ===== -->
                     <h6 class="col-12 text-secondary"><i class="fa fa-notes-medical"></i> Comorbidities <small class="text-muted fw-normal">(tap to toggle)</small></h6>
                     <div class="col-12">
                         <div class="pill-group" id="vPillComorbidities"></div>
                     </div>
-                    <div class="col-12 col-md-6"><label>Other Comorbidities</label><input type="text" class="form-control" id="V_Comorbid_Others" placeholder="Any other co-conditions"></div>
+                    <!-- IHD Type + PCI/CABG (multi-select buttons) -->
+                    <div class="col-12 col-md-6"><label>IHD Type</label><select class="form-select" id="V_IHD"><option>No</option><option>STEMI</option><option>NSTEMI</option></select></div>
+                    <div class="col-12 col-md-6">
+                        <label>PCI / CABG <small class="text-muted" style="font-size:0.7rem;">(multi-select — tap to toggle)</small></label>
+                        <div class="d-flex gap-2 flex-wrap p-2" id="vPciCabgBox" style="border:1px solid #ced4da;border-radius:6px;background:#fff;">
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-vpcicabg="PCI" onclick="toggleVPCICABGOpt('PCI')">PCI</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-vpcicabg="CABG" onclick="toggleVPCICABGOpt('CABG')">CABG</button>
+                        </div>
+                        <input type="hidden" id="V_PCI_CABG">
+                    </div>
+                    <div class="col-12" id="vPciCabgDetailsWrap" style="display:none;">
+                        <div class="row g-2 p-2 mt-1" style="background:#fff5f5;border-left:3px solid #8b0000;border-radius:6px;">
+                            <div class="col-12 col-md-4"><label class="text-danger fw-bold">Date of Procedure(s)</label><input type="date" class="form-control" id="V_PCI_CABG_Date"></div>
+                            <div class="col-12 col-md-8"><label class="text-danger fw-bold">Procedure Details (vessels, stents, grafts, etc.)</label><input type="text" class="form-control" id="V_PCI_CABG_Details" placeholder="e.g. LAD DES x1, RCA POBA; LIMA-LAD, SVG-OM"></div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6"><label>Smoking Status</label><select class="form-select" id="V_Smoker"><option>Never</option><option>Current</option><option>Former</option></select></div>
+                    <!-- ===== VALVE INTERVENTION (mirrors admission) ===== -->
+                    <div class="col-12 col-md-6">
+                        <label>Valve Intervention</label>
+                        <select class="form-select" id="V_Valve_Intervention" onchange="toggleVisitValveInterventionBlock()">
+                            <option>No</option><option>Yes</option>
+                        </select>
+                    </div>
+                    <div class="col-12" id="vValveInterventionWrap" style="display:none;">
+                        <div class="row g-2 p-2 mt-1" style="background:#fff5f5;border-left:3px solid #8b0000;border-radius:6px;">
+                            <!-- Surgical Repair -->
+                            <div class="col-12">
+                                <label class="text-danger fw-bold mb-1"><i class="fa fa-scalpel me-1"></i>Surgical Repair <small class="text-muted fw-normal">(multi-select — tap to toggle)</small></label>
+                                <div class="d-flex gap-2 flex-wrap p-2" id="vValveRepairBox" style="border:1px solid #ced4da;border-radius:6px;background:#fff;">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" data-vvalverepair="Aortic" onclick="toggleVisitValveRepairOpt('Aortic')">Aortic</button>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" data-vvalverepair="Mitral" onclick="toggleVisitValveRepairOpt('Mitral')">Mitral</button>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" data-vvalverepair="Tricuspid" onclick="toggleVisitValveRepairOpt('Tricuspid')">Tricuspid</button>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" data-vvalverepair="Pulmonary" onclick="toggleVisitValveRepairOpt('Pulmonary')">Pulmonary</button>
+                                </div>
+                                <input type="hidden" id="V_Valve_Repair_Valves">
+                            </div>
+                            <div class="col-12 col-md-4" id="vValveRepairDateWrap" style="display:none;">
+                                <label>Surgical Repair Date</label>
+                                <input type="date" class="form-control" id="V_Valve_Repair_Date">
+                            </div>
+                            <!-- Surgical Replacement -->
+                            <div class="col-12">
+                                <label class="text-danger fw-bold mb-1"><i class="fa fa-scalpel me-1"></i>Surgical Replacement <small class="text-muted fw-normal">(multi-select — tap to toggle)</small></label>
+                                <div class="d-flex gap-2 flex-wrap p-2" id="vValveReplaceBox" style="border:1px solid #ced4da;border-radius:6px;background:#fff;">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" data-vvalvereplace="Aortic" onclick="toggleVisitValveReplaceOpt('Aortic')">Aortic</button>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" data-vvalvereplace="Mitral" onclick="toggleVisitValveReplaceOpt('Mitral')">Mitral</button>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" data-vvalvereplace="Tricuspid" onclick="toggleVisitValveReplaceOpt('Tricuspid')">Tricuspid</button>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" data-vvalvereplace="Pulmonary" onclick="toggleVisitValveReplaceOpt('Pulmonary')">Pulmonary</button>
+                                </div>
+                                <input type="hidden" id="V_Valve_Replace_Valves">
+                            </div>
+                            <div class="col-12 col-md-4" id="vValveReplaceTypeWrap" style="display:none;">
+                                <label>Prosthesis Type</label>
+                                <select class="form-select" id="V_Valve_Replace_Type"><option value="">Select...</option><option>Metallic</option><option>Bioprosthetic</option></select>
+                            </div>
+                            <div class="col-12 col-md-4" id="vValveReplaceDateWrap" style="display:none;">
+                                <label>Surgical Replacement Date</label>
+                                <input type="date" class="form-control" id="V_Valve_Replace_Date">
+                            </div>
+                            <!-- Percutaneous -->
+                            <div class="col-12 col-md-4">
+                                <label>Percutaneous Procedure</label>
+                                <select class="form-select" id="V_Valve_Percutaneous" onchange="toggleVisitValvePercutaneousBlock()"><option>No</option><option>Yes</option></select>
+                            </div>
+                            <div class="col-12" id="vValvePercutaneousWrap" style="display:none;">
+                                <div class="row g-2 p-2 mt-1" style="background:#fffbe6;border-left:3px solid #c5a000;border-radius:6px;">
+                                    <div class="col-6 col-md-3"><label>MV Clip</label><select class="form-select" id="V_Valve_MVClip" onchange="toggleClipDate('V_Valve_MVClip','vValveMVClipDateWrap','V_Valve_MVClip_Date')"><option>No</option><option>Yes</option></select></div>
+                                    <div class="col-6 col-md-3" id="vValveMVClipDateWrap" style="display:none;"><label>MV Clip Date</label><input type="date" class="form-control" id="V_Valve_MVClip_Date"></div>
+                                    <div class="col-6 col-md-3"><label>TV Clip</label><select class="form-select" id="V_Valve_TVClip" onchange="toggleClipDate('V_Valve_TVClip','vValveTVClipDateWrap','V_Valve_TVClip_Date')"><option>No</option><option>Yes</option></select></div>
+                                    <div class="col-6 col-md-3" id="vValveTVClipDateWrap" style="display:none;"><label>TV Clip Date</label><input type="date" class="form-control" id="V_Valve_TVClip_Date"></div>
+                                    <div class="col-6 col-md-3"><label>TAVI</label><select class="form-select" id="V_Valve_TAVI" onchange="toggleClipDate('V_Valve_TAVI','vValveTAVIDateWrap','V_Valve_TAVI_Date')"><option>No</option><option>Yes</option></select></div>
+                                    <div class="col-6 col-md-3" id="vValveTAVIDateWrap" style="display:none;"><label>TAVI Date</label><input type="date" class="form-control" id="V_Valve_TAVI_Date"></div>
+                                    <div class="col-12 col-md-6"><label>Other Percutaneous Procedures</label><input type="text" class="form-control" id="V_Valve_Percutaneous_Other" placeholder="Specify..."></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-3"><label>Thyroid Disease</label><select class="form-select" id="V_Thyroid_Dz"><option>No</option><option>Hyperthyroid</option><option>Hypothyroid</option></select></div>
+                    <div class="col-12 col-md-3"><label>Family History (Cardio)</label><select class="form-select" id="V_FH_Cardio"><option>No</option><option>Yes</option></select></div>
+                    <div class="col-12 col-md-3"><label>Genetics</label><select class="form-select" id="V_Genetics" onchange="toggleVisitGeneticsType()"><option>No</option><option>Yes</option></select></div>
+                    <div class="col-12 col-md-6" id="vGeneticsTypeWrap" style="display:none;"><label>Type of Gene</label><input type="text" class="form-control" id="V_Genetics_Type" placeholder="e.g. MYH7, LMNA, TTN, MYBPC3..."></div>
+                    <div class="col-12"><label>Other Comorbidities</label><input type="text" class="form-control" id="V_Comorbid_Others" placeholder="Any other co-conditions"></div>
                     <!-- Hidden mirrors for each visit comorbidity (pill toggles write Yes/No here) -->
                     <div style="display:none;">
                         <select id="V_DM"><option>No</option><option>Yes</option></select>
@@ -3012,6 +3094,132 @@ function syncVisitPillsFromData(){
             if(sel.value==='Yes') pill.classList.add('active'); else pill.classList.remove('active');
         }
     });
+}
+
+// ===== Visit PCI/CABG (multi-select buttons, mirrors admission) =====
+function toggleVPCICABGOpt(opt){
+    var hidden=document.getElementById('V_PCI_CABG');
+    if(!hidden) return;
+    var picked=String(hidden.value||'').split(',').map(function(s){return s.trim();}).filter(Boolean);
+    var pos=picked.indexOf(opt);
+    var btn=document.querySelector('#vPciCabgBox button[data-vpcicabg="'+opt+'"]');
+    if(pos>=0){
+        picked.splice(pos,1);
+        if(btn){btn.classList.remove('btn-primary');btn.classList.add('btn-outline-primary');}
+    } else {
+        picked.push(opt);
+        if(btn){btn.classList.remove('btn-outline-primary');btn.classList.add('btn-primary');}
+    }
+    hidden.value=picked.join(', ');
+    var wrap=document.getElementById('vPciCabgDetailsWrap');
+    if(wrap) wrap.style.display = picked.length ? 'block' : 'none';
+    if(!picked.length){
+        ['V_PCI_CABG_Date','V_PCI_CABG_Details'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
+    }
+}
+
+// ===== Visit Valve Intervention (mirrors admission's block) =====
+function toggleVisitValveInterventionBlock(){
+    var sel=document.getElementById('V_Valve_Intervention');
+    var wrap=document.getElementById('vValveInterventionWrap');
+    if(!sel||!wrap) return;
+    if(sel.value==='Yes'){
+        wrap.style.display='block';
+    } else {
+        wrap.style.display='none';
+        ['V_Valve_Repair_Valves','V_Valve_Repair_Date','V_Valve_Replace_Valves','V_Valve_Replace_Type','V_Valve_Replace_Date',
+         'V_Valve_Percutaneous','V_Valve_MVClip','V_Valve_MVClip_Date','V_Valve_TVClip','V_Valve_TVClip_Date',
+         'V_Valve_TAVI','V_Valve_TAVI_Date','V_Valve_Percutaneous_Other'].forEach(function(id){
+            var el=document.getElementById(id); if(el) el.value = (el.tagName==='SELECT' ? (el.options[0]?el.options[0].value:'') : '');
+        });
+        document.querySelectorAll('#vValveRepairBox button, #vValveReplaceBox button').forEach(function(b){
+            b.classList.remove('btn-primary');b.classList.add('btn-outline-primary');
+        });
+        var pw=document.getElementById('vValvePercutaneousWrap'); if(pw) pw.style.display='none';
+        ['vValveMVClipDateWrap','vValveTVClipDateWrap','vValveTAVIDateWrap','vValveRepairDateWrap','vValveReplaceTypeWrap','vValveReplaceDateWrap'].forEach(function(id){
+            var w=document.getElementById(id); if(w) w.style.display='none';
+        });
+    }
+}
+function toggleVisitValvePercutaneousBlock(){
+    var sel=document.getElementById('V_Valve_Percutaneous');
+    var wrap=document.getElementById('vValvePercutaneousWrap');
+    if(!sel||!wrap) return;
+    wrap.style.display = (sel.value==='Yes') ? 'block' : 'none';
+    if(sel.value!=='Yes'){
+        ['V_Valve_MVClip','V_Valve_TVClip','V_Valve_TAVI'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='No';});
+        ['V_Valve_MVClip_Date','V_Valve_TVClip_Date','V_Valve_TAVI_Date','V_Valve_Percutaneous_Other'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
+        ['vValveMVClipDateWrap','vValveTVClipDateWrap','vValveTAVIDateWrap'].forEach(function(id){var w=document.getElementById(id);if(w)w.style.display='none';});
+    }
+}
+function toggleVisitValveRepairOpt(opt){
+    _toggleValveButtonGroup('V_Valve_Repair_Valves','vValveRepairBox','vvalverepair',opt);
+    var wrap=document.getElementById('vValveRepairDateWrap');
+    if(wrap) wrap.style.display = (document.getElementById('V_Valve_Repair_Valves').value ? 'block' : 'none');
+}
+function toggleVisitValveReplaceOpt(opt){
+    _toggleValveButtonGroup('V_Valve_Replace_Valves','vValveReplaceBox','vvalvereplace',opt);
+    var hasAny = !!document.getElementById('V_Valve_Replace_Valves').value;
+    var tw=document.getElementById('vValveReplaceTypeWrap');
+    var dw=document.getElementById('vValveReplaceDateWrap');
+    if(tw) tw.style.display = hasAny ? 'block' : 'none';
+    if(dw) dw.style.display = hasAny ? 'block' : 'none';
+}
+function toggleVisitGeneticsType(){
+    var sel=document.getElementById('V_Genetics');
+    var wrap=document.getElementById('vGeneticsTypeWrap');
+    if(!sel||!wrap) return;
+    if(sel.value==='Yes'){
+        wrap.style.display='block';
+    } else {
+        wrap.style.display='none';
+        var t=document.getElementById('V_Genetics_Type'); if(t) t.value='';
+    }
+}
+// Re-paint all visit comorbidity UI after a saved visit is loaded.
+function restoreVisitComorbidUI(){
+    // PCI/CABG buttons
+    var pciH=document.getElementById('V_PCI_CABG');
+    var pciPicks=pciH ? String(pciH.value||'').split(',').map(function(s){return s.trim();}).filter(Boolean) : [];
+    document.querySelectorAll('#vPciCabgBox button').forEach(function(b){
+        var v=b.getAttribute('data-vpcicabg');
+        if(pciPicks.indexOf(v)>=0){b.classList.remove('btn-outline-primary');b.classList.add('btn-primary');}
+        else{b.classList.remove('btn-primary');b.classList.add('btn-outline-primary');}
+    });
+    var pdw=document.getElementById('vPciCabgDetailsWrap'); if(pdw) pdw.style.display = pciPicks.length ? 'block' : 'none';
+    // Valve intervention wrap
+    var vi=document.getElementById('V_Valve_Intervention');
+    var viw=document.getElementById('vValveInterventionWrap');
+    if(viw) viw.style.display = (vi && vi.value==='Yes') ? 'block' : 'none';
+    // Valve repair/replace buttons
+    function paint(hiddenId, boxId, dataAttr){
+        var h=document.getElementById(hiddenId);
+        if(!h) return;
+        var picks=String(h.value||'').split(',').map(function(s){return s.trim();}).filter(Boolean);
+        document.querySelectorAll('#'+boxId+' button').forEach(function(b){
+            var v=b.getAttribute('data-'+dataAttr);
+            if(picks.indexOf(v)>=0){b.classList.remove('btn-outline-primary');b.classList.add('btn-primary');}
+            else{b.classList.remove('btn-primary');b.classList.add('btn-outline-primary');}
+        });
+    }
+    paint('V_Valve_Repair_Valves','vValveRepairBox','vvalverepair');
+    paint('V_Valve_Replace_Valves','vValveReplaceBox','vvalvereplace');
+    var hasRep=!!(document.getElementById('V_Valve_Repair_Valves')||{}).value;
+    var rdw=document.getElementById('vValveRepairDateWrap'); if(rdw) rdw.style.display = hasRep ? 'block' : 'none';
+    var hasReplace=!!(document.getElementById('V_Valve_Replace_Valves')||{}).value;
+    ['vValveReplaceTypeWrap','vValveReplaceDateWrap'].forEach(function(id){
+        var w=document.getElementById(id); if(w) w.style.display = hasReplace ? 'block' : 'none';
+    });
+    // Percutaneous block
+    var pc=document.getElementById('V_Valve_Percutaneous');
+    var pw=document.getElementById('vValvePercutaneousWrap'); if(pw) pw.style.display = (pc && pc.value==='Yes') ? 'block' : 'none';
+    [['V_Valve_MVClip','vValveMVClipDateWrap'],['V_Valve_TVClip','vValveTVClipDateWrap'],['V_Valve_TAVI','vValveTAVIDateWrap']].forEach(function(pair){
+        var s=document.getElementById(pair[0]); var w=document.getElementById(pair[1]);
+        if(s && w) w.style.display = (s.value==='Yes') ? 'block' : 'none';
+    });
+    // Genetics type
+    var g=document.getElementById('V_Genetics');
+    var gw=document.getElementById('vGeneticsTypeWrap'); if(gw) gw.style.display = (g && g.value==='Yes') ? 'block' : 'none';
 }
 
 function togglePill(el){
@@ -5634,6 +5842,8 @@ function editVisit(visitId){
     if(typeof toggleVisitHolter==='function')toggleVisitHolter();
     // Restore visit comorbidity pills from the V_<id> hidden selects
     if(typeof syncVisitPillsFromData==='function') syncVisitPillsFromData();
+    // Restore visit Comorbidities sub-UI (PCI/CABG buttons, valve intervention block, genetics)
+    if(typeof restoreVisitComorbidUI==='function') restoreVisitComorbidUI();
     // Rebuild the vaccination block. Suppression must EXCLUDE the visit being
     // edited (so its own dose doesn't lock its own inputs), then sync the
     // visible Yes/No + date controls from the hidden V_Vacc_* fields.
@@ -5781,9 +5991,14 @@ function clearVisitForm(){
     }
     // Reset edit mode UI
     editingVisitId = null;
-    // Hide visit conditional panels (including new Pacing-mode and Holter wraps)
-    var vHide=['vCmrLGEPctWrap','vWalkMetersWrap','vRhcDetailsWrap','vPacingModeWrap','vHolterDateWrap','vHolterDurationWrap','vHolterMaxHRWrap','vHolterMinHRWrap','vHolterAvgHRWrap','vHolterArrhythmiaWrap','vHolterFindingsWrap'];
+    // Hide visit conditional panels (including new Pacing-mode, Holter, comorbid wraps)
+    var vHide=['vCmrLGEPctWrap','vWalkMetersWrap','vRhcDetailsWrap','vPacingModeWrap','vHolterDateWrap','vHolterDurationWrap','vHolterMaxHRWrap','vHolterMinHRWrap','vHolterAvgHRWrap','vHolterArrhythmiaWrap','vHolterFindingsWrap','vPciCabgDetailsWrap','vValveInterventionWrap','vValveRepairDateWrap','vValveReplaceTypeWrap','vValveReplaceDateWrap','vValvePercutaneousWrap','vValveMVClipDateWrap','vValveTVClipDateWrap','vValveTAVIDateWrap','vGeneticsTypeWrap'];
     vHide.forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='none';});
+    // Reset visit comorbidity pills + outline buttons
+    document.querySelectorAll('#vPillComorbidities .pill-toggle').forEach(function(p){p.classList.remove('active');});
+    document.querySelectorAll('#vPciCabgBox button, #vValveRepairBox button, #vValveReplaceBox button').forEach(function(b){
+        b.classList.remove('btn-primary'); b.classList.add('btn-outline-primary');
+    });
     var saveBtn = document.getElementById("visitSaveBtn");
     if(saveBtn) saveBtn.innerHTML = '<i class="fa fa-plus-circle"></i> ADD VISIT TO PATIENT RECORD';
     var cancelBtn = document.getElementById("visitCancelBtn");
