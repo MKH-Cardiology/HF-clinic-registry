@@ -1220,12 +1220,12 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                         </div>
                         <div class="col-12" id="valvePercutaneousWrap" style="display:none;">
                             <div class="row g-2 p-2 mt-1" style="background:#fffbe6;border-left:3px solid #c5a000;border-radius:6px;">
-                                <div class="col-6 col-md-3"><label>MV Clip</label><select class="form-select" id="Valve_MVClip"><option>No</option><option>Yes</option></select></div>
-                                <div class="col-6 col-md-3"><label>MV Clip Date</label><input type="date" class="form-control" id="Valve_MVClip_Date"></div>
-                                <div class="col-6 col-md-3"><label>TV Clip</label><select class="form-select" id="Valve_TVClip"><option>No</option><option>Yes</option></select></div>
-                                <div class="col-6 col-md-3"><label>TV Clip Date</label><input type="date" class="form-control" id="Valve_TVClip_Date"></div>
-                                <div class="col-6 col-md-3"><label>TAVI</label><select class="form-select" id="Valve_TAVI"><option>No</option><option>Yes</option></select></div>
-                                <div class="col-6 col-md-3"><label>TAVI Date</label><input type="date" class="form-control" id="Valve_TAVI_Date"></div>
+                                <div class="col-6 col-md-3"><label>MV Clip</label><select class="form-select" id="Valve_MVClip" onchange="toggleClipDate('Valve_MVClip','valveMVClipDateWrap','Valve_MVClip_Date')"><option>No</option><option>Yes</option></select></div>
+                                <div class="col-6 col-md-3" id="valveMVClipDateWrap" style="display:none;"><label>MV Clip Date</label><input type="date" class="form-control" id="Valve_MVClip_Date"></div>
+                                <div class="col-6 col-md-3"><label>TV Clip</label><select class="form-select" id="Valve_TVClip" onchange="toggleClipDate('Valve_TVClip','valveTVClipDateWrap','Valve_TVClip_Date')"><option>No</option><option>Yes</option></select></div>
+                                <div class="col-6 col-md-3" id="valveTVClipDateWrap" style="display:none;"><label>TV Clip Date</label><input type="date" class="form-control" id="Valve_TVClip_Date"></div>
+                                <div class="col-6 col-md-3"><label>TAVI</label><select class="form-select" id="Valve_TAVI" onchange="toggleClipDate('Valve_TAVI','valveTAVIDateWrap','Valve_TAVI_Date')"><option>No</option><option>Yes</option></select></div>
+                                <div class="col-6 col-md-3" id="valveTAVIDateWrap" style="display:none;"><label>TAVI Date</label><input type="date" class="form-control" id="Valve_TAVI_Date"></div>
                                 <div class="col-12 col-md-6"><label>Other Percutaneous Procedures</label><input type="text" class="form-control" id="Valve_Percutaneous_Other" placeholder="Specify..."></div>
                             </div>
                         </div>
@@ -4644,6 +4644,20 @@ function toggleValvePercutaneousBlock(){
     if(sel.value!=='Yes'){
         ['Valve_MVClip','Valve_TVClip','Valve_TAVI'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='No';});
         ['Valve_MVClip_Date','Valve_TVClip_Date','Valve_TAVI_Date','Valve_Percutaneous_Other'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
+        ['valveMVClipDateWrap','valveTVClipDateWrap','valveTAVIDateWrap'].forEach(function(id){var w=document.getElementById(id);if(w)w.style.display='none';});
+    }
+}
+// Show a Yes/No-gated date field only when its parent select is "Yes".
+// Used for MV Clip, TV Clip, TAVI date wrappers inside the percutaneous block.
+function toggleClipDate(selId, wrapId, dateId){
+    var sel=document.getElementById(selId);
+    var wrap=document.getElementById(wrapId);
+    if(!sel||!wrap) return;
+    if(sel.value==='Yes'){
+        wrap.style.display='block';
+    } else {
+        wrap.style.display='none';
+        var d=document.getElementById(dateId); if(d) d.value='';
     }
 }
 // Multi-select toggle for surgical-repair valve buttons (Aortic/Mitral/Tricuspid/Pulmonary).
@@ -4719,6 +4733,11 @@ function restoreValveInterventionUI(){
     });
     var pc=document.getElementById('Valve_Percutaneous');
     var pw=document.getElementById('valvePercutaneousWrap'); if(pw) pw.style.display = (pc && pc.value==='Yes') ? 'block' : 'none';
+    // And each Yes/No-gated date wrap inside the percutaneous block
+    [['Valve_MVClip','valveMVClipDateWrap'],['Valve_TVClip','valveTVClipDateWrap'],['Valve_TAVI','valveTAVIDateWrap']].forEach(function(pair){
+        var s=document.getElementById(pair[0]); var w=document.getElementById(pair[1]);
+        if(s && w) w.style.display = (s.value==='Yes') ? 'block' : 'none';
+    });
 }
 // Show/hide the free-text "Specify Cause" when the admission isn't HF-related.
 function toggleAdmissionCause(){
