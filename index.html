@@ -998,6 +998,22 @@ img,canvas,table,svg{max-width:100%;}
     .container,.container-fluid{max-width:100vw;overflow-x:hidden;}
 }
 
+/* ---------- REMOVE ALL LEFT-ACCENT SIDE STRIPS (global) ----------
+   Per request: drop the coloured vertical accent bars that ran down the left
+   edge of every section card, collapsible panel, and tinted box. The header
+   tint band still carries the section colour, so identity is preserved. */
+.section-card::before{display:none!important;}
+.section-card{border-left:0!important;}
+.field-tint{border-left:0!important;}
+.visit-section{border-left:0!important;}
+.next-appt-card{border-left:0!important;}
+.clickable-tab{border-left:0!important;}
+.edu-step{border-left:0!important;}
+/* inline-styled red mini-strips inside the admission blocks */
+[style*="border-left:4px solid #8b0000"]{border-left:0!important;}
+[style*="border-left:3px solid #8b0000"]{border-left:0!important;}
+[style*="border-left:3px solid #c5a000"]{border-left:0!important;}
+
 </style>
 
 </head>
@@ -1122,8 +1138,8 @@ img,canvas,table,svg{max-width:100%;}
                 <div class="col-6 col-md-3"><label>Name *</label><input type="text" class="form-control" id="Patient_Name"></div>
                 <div class="col-6 col-md-3"><label>Civil ID * (12 digits)</label><input type="text" class="form-control" id="Civil_ID" inputmode="numeric" pattern="[0-9]*" maxlength="12" oninput="validateCivilID(this)" onkeypress="return isNumberKey(event)"><small class="error-msg" id="civilError">Must be exactly 12 digits</small></div>
                 <div class="col-6 col-md-3"><label>File No * (6 digits)</label><input type="text" class="form-control" id="File_No" inputmode="numeric" pattern="[0-9]*" maxlength="6" oninput="validateFileNo(this)" onkeypress="return isNumberKey(event)"><small class="error-msg" id="fileError">Must be exactly 6 digits</small></div>
-                <div class="col-4 col-md-2"><label>Age</label><input type="number" class="form-control" id="Age" inputmode="numeric" oninput="calcBaselineEGFR(); calcMAGGIC(); calcEGFR();"></div>
-                <div class="col-4 col-md-2"><label>Gender</label><select class="form-select" id="Gender" onchange="calcBaselineEGFR(); calcMAGGIC(); calcEGFR();"><option value="">Select...</option><option>Male</option><option>Female</option></select></div>
+                <div class="col-4 col-md-2"><label>Age</label><input type="number" class="form-control" id="Age" inputmode="numeric" oninput="calcBaselineEGFR(); calcMAGGIC(); calcEGFR(); if(typeof _recalcAllExtraAdmDerived==='function')_recalcAllExtraAdmDerived();"></div>
+                <div class="col-4 col-md-2"><label>Gender</label><select class="form-select" id="Gender" onchange="calcBaselineEGFR(); calcMAGGIC(); calcEGFR(); if(typeof _recalcAllExtraAdmDerived==='function')_recalcAllExtraAdmDerived();"><option value="">Select...</option><option>Male</option><option>Female</option></select></div>
                 <div class="col-4 col-md-4"><label>Nationality</label><input type="text" class="form-control" id="Nationality"></div>
                 <div class="col-12 col-md-4"><label>Mobile *</label><input type="tel" class="form-control" id="Mobile" inputmode="tel" required><small class="error-msg" id="mobileError">Mobile number is required</small></div>
                 <div class="col-12 col-md-4"><label>Referred From</label><select class="form-select" id="Referred_From" onchange="toggleReferredFromOther()"><option value="">Select...</option><option>Medical Ward</option><option>OPD</option><option>ER / A&amp;E</option><option>Other Hospital</option><option>Self / Walk-in</option><option>Other</option></select></div>
@@ -4318,7 +4334,7 @@ var EXTRA_ADM_SCHEMA=[
  {sec:'Symptoms, Signs & Vitals',icon:'fa-heart-pulse',tint:'tint-vitals',fields:[
    {k:'Height',l:'Height (cm)',t:'num',w:'col-4 col-md-2'},
    {k:'Weight',l:'Weight (kg)',t:'num',w:'col-4 col-md-2'},
-   {k:'BMI',l:'BMI',t:'text',w:'col-4 col-md-2'},
+   {k:'BMI',l:'BMI',t:'text',w:'col-4 col-md-2',_derived:true},
    {k:'Dry_Weight',l:'Dry Weight (kg)',t:'num',w:'col-4 col-md-2'},
    {k:'NYHA',l:'NYHA',t:'sel',o:['','I','II','III','IV','N/A'],w:'col-4 col-md-2'},
    {k:'KCCQ',l:'KCCQ',t:'num',w:'col-4 col-md-2'},
@@ -4465,13 +4481,13 @@ var EXTRA_ADM_SCHEMA=[
    {k:'_sub_RFT_Adm',t:'subhead',l:'Renal Function (RFT) — On Admission',i:'fa-tint'},
    {k:'Lab_Urea',l:'Urea Adm (mmol/L)',t:'text',w:'col-6 col-md-3'},
    {k:'Lab_Creat',l:'Creatinine Adm (µmol/L)',t:'text',w:'col-6 col-md-3'},
-   {k:'Lab_eGFR',l:'eGFR Adm',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_eGFR',l:'eGFR Adm',t:'text',w:'col-6 col-md-3',_derived:true},
    {k:'Lab_Na',l:'Na Adm (mmol/L)',t:'text',w:'col-6 col-md-3'},
    {k:'Lab_K',l:'K Adm (mmol/L)',t:'text',w:'col-6 col-md-3'},
    {k:'_sub_RFT_Disch',t:'subhead',l:'Renal Function (RFT) — On Discharge',i:'fa-tint'},
    {k:'Lab_Urea_Disch',l:'Urea Disch (mmol/L)',t:'text',w:'col-6 col-md-3'},
    {k:'Lab_Creat_Disch',l:'Creatinine Disch (µmol/L)',t:'text',w:'col-6 col-md-3'},
-   {k:'Lab_eGFR_Disch',l:'eGFR Disch',t:'text',w:'col-6 col-md-3'},
+   {k:'Lab_eGFR_Disch',l:'eGFR Disch',t:'text',w:'col-6 col-md-3',_derived:true},
    {k:'Lab_Na_Disch',l:'Na Disch (mmol/L)',t:'text',w:'col-6 col-md-3'},
    {k:'Lab_K_Disch',l:'K Disch (mmol/L)',t:'text',w:'col-6 col-md-3'},
    {k:'_sub_BNP',t:'subhead',l:'NT-proBNP & BNP',i:'fa-heartbeat'},
@@ -4636,6 +4652,7 @@ function _backfillExtraAdmGates(adm){
 function _extraFieldHtml(idx, f, adm){
     var val=f._val||'';
     var oc="updateExtraAdmission("+idx+",'"+f.k+"',this.value)";
+    var fid="ea_"+idx+"_"+f.k;   // stable id so derived calcs (BMI/eGFR) can target the input
     var out='';
 
     // Inline subsection header (sub: prepend) — emitted as a sibling h6 row.
@@ -4667,9 +4684,9 @@ function _extraFieldHtml(idx, f, adm){
         return out;
     }
 
-    out+='<div class="'+f.w+'"><label>'+_esc(f.l)+'</label>';
+    out+='<div class="'+f.w+'"><label>'+_esc(f.l)+(f._derived?' <span class="auto-badge"><i class="fa fa-lock"></i> Auto</span>':'')+'</label>';
     if(f.t==='sel'){
-        out+='<select class="form-select" onchange="'+oc+'">';
+        out+='<select class="form-select" id="'+fid+'" onchange="'+oc+'">';
         f.o.forEach(function(opt){
             out+='<option value="'+_esc(opt)+'"'+(String(val)===String(opt)?' selected':'')+'>'+(opt===''?'Select...':_esc(opt))+'</option>';
         });
@@ -4704,11 +4721,14 @@ function _extraFieldHtml(idx, f, adm){
         });
         out+='</div>';
     } else if(f.t==='area'){
-        out+='<textarea class="form-control" rows="2"'+(f.ph?' placeholder="'+_esc(f.ph)+'"':'')+' oninput="'+oc+'">'+_esc(val)+'</textarea>';
+        out+='<textarea class="form-control" id="'+fid+'" rows="2"'+(f.ph?' placeholder="'+_esc(f.ph)+'"':'')+' oninput="'+oc+'">'+_esc(val)+'</textarea>';
     } else {
         var typ=(f.t==='date')?'date':(f.t==='num')?'number':'text';
         var im=(f.t==='num')?' inputmode="numeric"':'';
-        out+='<input type="'+typ+'" class="form-control"'+im+(f.ph?' placeholder="'+_esc(f.ph)+'"':'')+' value="'+_esc(val)+'" '+(f.t==='date'?'onchange':'oninput')+'="'+oc+'">';
+        // Derived fields (BMI, eGFR) are auto-computed — render readonly with a tinted bg.
+        var ro=f._derived?' readonly':'';
+        var roCls=f._derived?' bg-light text-success fw-bold':'';
+        out+='<input type="'+typ+'" class="form-control'+roCls+'" id="'+fid+'"'+im+ro+(f.ph?' placeholder="'+_esc(f.ph)+'"':'')+' value="'+_esc(val)+'" '+(f.t==='date'?'onchange':'oninput')+'="'+oc+'">';
     }
     out+='</div>';
     return out;
@@ -4852,6 +4872,8 @@ function _renderExtraAdmissions(){
     var html='';
     arr.forEach(function(adm,idx){ html+=_extraAdmCardHtml(adm,idx); });
     wrap.innerHTML=html;
+    // Populate derived BMI / eGFR fields from saved data on (re)render.
+    if(typeof _recalcAllExtraAdmDerived==='function') _recalcAllExtraAdmDerived();
 }
 // Expand/collapse a whole admission card.
 function toggleExtraAdmission(idx){
@@ -4992,11 +5014,62 @@ function updateExtraAdmission(idx, field, value){
                 card.textContent=s.length?s.join(' · '):'(repeat admission — fill in below)';
             }
         }
+        // Auto-calc derived fields (BMI / eGFR) when an input they depend on changes.
+        if(field==='Height'||field==='Weight'||field==='Lab_Creat'||field==='Lab_Creat_Disch'){
+            _calcExtraAdmDerived(idx);
+        }
         // If this field gates other fields, re-render its section so gated
         // fields appear/disappear immediately (smart conditional behaviour).
         _maybeRerenderGatedSection(idx, field);
         _refreshExtraAdmBadge(idx, field);
     }
+}
+
+// ===== EXTRA-ADMISSION DERIVED FIELDS — BMI & eGFR auto-calc =====
+// Mirrors the main admission's calcBMI / calcBaselineEGFR. BMI uses the extra
+// admission's own Height/Weight; eGFR (CKD-EPI 2021) uses the extra admission's
+// own creatinine plus the patient-level Age/Gender from Step 1. Results are
+// written into the extra-admission data array AND the readonly DOM inputs.
+function _calcExtraAdmEGFR(creat, age, gender){
+    var c=parseFloat(creat);
+    if(!age||!gender||!c||isNaN(c)) return '';
+    var cr=c/88.4, k=(gender==='Female')?0.7:0.9, a=(gender==='Female')?-0.244:-0.302;
+    if(cr>k) a=-1.200;
+    return String(Math.round(142*Math.pow(cr/k,a)*Math.pow(0.9938,age)*(gender==='Female'?1.012:1)));
+}
+function _calcExtraAdmDerived(idx){
+    var arr=_readExtraAdmissions();
+    if(!(idx>=0 && idx<arr.length)) return;
+    var adm=arr[idx];
+    var changed=false;
+
+    // --- BMI ---
+    var h=parseFloat(adm.Height), w=parseFloat(adm.Weight);
+    var bmi=(h&&w)?(w/((h/100)*(h/100))).toFixed(1):'';
+    if(adm.BMI!==bmi){ adm.BMI=bmi; changed=true; }
+    var bmiEl=document.getElementById('ea_'+idx+'_BMI');
+    if(bmiEl) bmiEl.value=bmi;
+
+    // --- eGFR (needs patient-level Age + Gender from Step 1) ---
+    var age=parseFloat((document.getElementById('Age')||{}).value);
+    var gender=(document.getElementById('Gender')||{}).value;
+    var egfrAdm=_calcExtraAdmEGFR(adm.Lab_Creat, age, gender);
+    if(adm.Lab_eGFR!==egfrAdm){ adm.Lab_eGFR=egfrAdm; changed=true; }
+    var egEl=document.getElementById('ea_'+idx+'_Lab_eGFR');
+    if(egEl) egEl.value=egfrAdm;
+
+    var egfrDisch=_calcExtraAdmEGFR(adm.Lab_Creat_Disch, age, gender);
+    if(adm.Lab_eGFR_Disch!==egfrDisch){ adm.Lab_eGFR_Disch=egfrDisch; changed=true; }
+    var egdEl=document.getElementById('ea_'+idx+'_Lab_eGFR_Disch');
+    if(egdEl) egdEl.value=egfrDisch;
+
+    if(changed) _writeExtraAdmissions(arr);
+}
+// Recompute derived fields for every rendered extra admission — call after a
+// full re-render or when patient Age/Gender change.
+function _recalcAllExtraAdmDerived(){
+    var arr=_readExtraAdmissions();
+    for(var i=0;i<arr.length;i++){ _calcExtraAdmDerived(i); }
 }
 // If `field` is a gate controller for any field in its section, rebuild that
 // section's body. When a controller switches to a non-matching value, the now-
