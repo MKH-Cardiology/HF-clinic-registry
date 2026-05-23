@@ -732,6 +732,79 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
     letter-spacing:0.02em;
 }
 
+/* ===== EDUCATION PAGE ===== */
+#pageEducation{display:none;}
+#pageEducation.active{display:block;}
+.edu-header{background:linear-gradient(135deg,#143d2b 0%,#1d5c41 50%,#0e7c52 100%);color:#fff;padding:22px 0 18px;border-radius:0 0 15px 15px;position:relative;}
+.edu-header h2{font-family:'Crimson Pro',serif;letter-spacing:0.03em;}
+.edu-hub-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.edu-hub-card{background:#fff;border-radius:14px;padding:16px 14px;box-shadow:0 3px 14px rgba(0,0,0,0.08);cursor:pointer;transition:transform 0.18s,box-shadow 0.18s;border:1px solid #eee;position:relative;overflow:hidden;}
+.edu-hub-card:active{transform:scale(0.97);}
+.edu-hub-card:hover{transform:translateY(-3px);box-shadow:0 8px 22px rgba(0,0,0,0.13);}
+.edu-hub-card .edu-hub-ico{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;color:#fff;margin-bottom:10px;}
+.edu-hub-card h6{font-family:'Crimson Pro',serif;font-weight:700;font-size:1rem;margin:0 0 3px;color:#1a2e22;}
+.edu-hub-card p{font-size:0.72rem;color:#6c757d;margin:0;line-height:1.35;}
+.edu-hub-card .edu-hub-tag{position:absolute;top:10px;right:10px;font-size:0.58rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;padding:2px 7px;border-radius:10px;}
+.edu-cat-title{font-size:0.72rem;font-weight:700;color:#0e7c52;text-transform:uppercase;letter-spacing:0.09em;margin:20px 0 10px;display:flex;align-items:center;gap:7px;}
+.edu-cat-title::after{content:"";flex:1;height:1px;background:#d6e8df;}
+.edu-back-bar{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.edu-back-btn{background:#0e7c52;border:none;color:#fff;font-size:0.78rem;font-weight:600;padding:7px 14px;border-radius:20px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
+.edu-back-btn:active{transform:scale(0.96);}
+.edu-detail{display:none;}
+.edu-detail.active{display:block;}
+.edu-doc-title{font-family:'Crimson Pro',serif;font-weight:700;font-size:1.3rem;color:#143d2b;margin:0;}
+.edu-doc-sub{font-size:0.76rem;color:#6c757d;margin:2px 0 0;}
+/* stepwise flow */
+.edu-step{background:#fff;border-radius:12px;border-left:4px solid #0e7c52;box-shadow:0 2px 10px rgba(0,0,0,0.06);padding:13px 15px 13px 14px;margin-bottom:12px;position:relative;}
+.edu-step-num{position:absolute;left:-15px;top:13px;width:28px;height:28px;border-radius:50%;background:#0e7c52;color:#fff;font-weight:700;font-size:0.85rem;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(14,124,82,0.4);}
+.edu-step{margin-left:16px;}
+.edu-step h6{font-weight:700;font-size:0.92rem;color:#143d2b;margin:0 0 6px;}
+.edu-step .edu-step-body{font-size:0.83rem;color:#333;line-height:1.5;}
+.edu-step .edu-step-body ul{margin:5px 0 0;padding-left:18px;}
+.edu-step .edu-step-body li{margin-bottom:3px;}
+.edu-pill{display:inline-block;font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:10px;margin:2px 4px 2px 0;}
+.edu-pill-red{background:#fde8e8;color:#b30000;}
+.edu-pill-amber{background:#fff3cd;color:#8a6100;}
+.edu-pill-green{background:#d8f3e3;color:#0e7c52;}
+.edu-pill-blue{background:#e0ecf9;color:#0f3460;}
+.edu-callout{border-radius:10px;padding:10px 13px;font-size:0.8rem;margin:10px 0;display:flex;gap:9px;align-items:flex-start;line-height:1.45;}
+.edu-callout i{margin-top:2px;flex-shrink:0;}
+.edu-callout-danger{background:#fdeaea;border:1px solid #f3c2c2;color:#7a1414;}
+.edu-callout-warn{background:#fff7e0;border:1px solid #f0dca0;color:#6b5210;}
+.edu-callout-info{background:#e7f1fb;border:1px solid #c2d8ef;color:#123a5e;}
+.edu-callout-key{background:#e3f5ec;border:1px solid #b3ddc6;color:#0c5a3c;}
+.edu-tbl{width:100%;border-collapse:collapse;font-size:0.78rem;margin:8px 0;}
+.edu-tbl th{background:#143d2b;color:#fff;padding:7px 8px;text-align:left;font-weight:600;}
+.edu-tbl td{padding:6px 8px;border-bottom:1px solid #e6e6e6;vertical-align:top;}
+.edu-tbl tr:nth-child(even) td{background:#f4f9f6;}
+.edu-mini-title{font-size:0.74rem;font-weight:700;color:#0e7c52;text-transform:uppercase;letter-spacing:0.06em;margin:18px 0 8px;}
+.edu-card-plain{background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.06);padding:14px;margin-bottom:12px;}
+/* trial / news cards */
+.edu-trial{background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.06);padding:13px 15px;margin-bottom:11px;border-top:3px solid #0e7c52;}
+.edu-trial h6{font-weight:700;font-size:0.9rem;color:#143d2b;margin:0 0 2px;}
+.edu-trial .edu-trial-meta{font-size:0.68rem;color:#0e7c52;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;}
+.edu-trial p{font-size:0.81rem;color:#333;margin:0;line-height:1.48;}
+.edu-trial .edu-trial-take{background:#f4f9f6;border-radius:8px;padding:7px 10px;font-size:0.78rem;margin-top:8px;color:#0c5a3c;}
+.edu-accordion{background:#fff;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:9px;overflow:hidden;}
+.edu-acc-head{padding:11px 14px;font-weight:700;font-size:0.86rem;color:#143d2b;cursor:pointer;display:flex;justify-content:space-between;align-items:center;}
+.edu-acc-head i{transition:transform 0.2s;color:#0e7c52;}
+.edu-acc-head.open i{transform:rotate(180deg);}
+.edu-acc-body{display:none;padding:0 14px 13px;font-size:0.82rem;color:#333;line-height:1.5;}
+.edu-acc-body.open{display:block;}
+.edu-disclaimer{font-size:0.68rem;color:#9aa0a6;text-align:center;margin:18px 0 6px;line-height:1.5;}
+.edu-dose-tbl td{font-size:0.79rem;}
+.edu-dose-target{display:inline-block;background:#e3f5ec;color:#0c5a3c;font-weight:700;padding:2px 8px;border-radius:8px;}
+.edu-news-btn{width:100%;background:linear-gradient(135deg,#0e7c52,#143d2b);color:#fff;border:none;border-radius:10px;padding:12px;font-size:0.86rem;font-weight:700;cursor:pointer;margin-top:8px;box-shadow:0 4px 14px rgba(14,124,82,0.3);transition:transform 0.15s;}
+.edu-news-btn:active{transform:scale(0.98);}
+.edu-news-modal{display:none;position:fixed;inset:0;background:rgba(10,20,15,0.6);z-index:3000;align-items:flex-start;justify-content:center;padding:40px 14px;overflow-y:auto;}
+.edu-news-card{background:#fff;border-radius:16px;width:100%;max-width:440px;padding:18px;box-shadow:0 12px 40px rgba(0,0,0,0.3);}
+.edu-news-head{display:flex;justify-content:space-between;align-items:center;font-family:'Crimson Pro',serif;font-weight:700;font-size:1.05rem;color:#143d2b;border-bottom:2px solid #e3f5ec;padding-bottom:9px;margin-bottom:8px;}
+.edu-news-head button{background:none;border:none;font-size:1.1rem;color:#6c757d;cursor:pointer;line-height:1;}
+.edu-news-note{font-size:0.76rem;color:#6c757d;margin:0 0 12px;}
+.edu-news-link{display:flex;align-items:center;gap:11px;background:#f4f9f6;border:1px solid #d6e8df;border-radius:10px;padding:11px 13px;margin-bottom:8px;text-decoration:none;color:#143d2b;font-size:0.84rem;font-weight:600;transition:background 0.15s;}
+.edu-news-link:hover{background:#e3f5ec;}
+.edu-news-link i{color:#0e7c52;flex-shrink:0;}
+
 </style>
 
 </head>
@@ -794,6 +867,7 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
         <div class="header-nav-btns">
             <button class="header-nav-btn active-nav" onclick="goToMain()"><i class="fa fa-user-plus me-1"></i>Registry</button>
             <button class="header-nav-btn" onclick="goToClinic()"><i class="fa fa-hospital me-1"></i>Clinic</button>
+            <button class="header-nav-btn" onclick="goToEducation()"><i class="fa fa-graduation-cap me-1"></i>Education</button>
             <button class="header-nav-btn" onclick="showAnalyticsLogin()"><i class="fa fa-chart-pie me-1"></i>Analytics</button>
         </div>
     </div>
@@ -1889,6 +1963,7 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
         <div class="header-nav-btns">
             <button class="header-nav-btn" onclick="goToMain()"><i class="fa fa-user-plus me-1"></i>Registry</button>
             <button class="header-nav-btn active-nav"><i class="fa fa-hospital me-1"></i>Clinic</button>
+            <button class="header-nav-btn" onclick="goToEducation()"><i class="fa fa-graduation-cap me-1"></i>Education</button>
             <button class="header-nav-btn" onclick="showAnalyticsLogin()"><i class="fa fa-chart-pie me-1"></i>Analytics</button>
         </div>
     </div>
@@ -2217,6 +2292,117 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
     </div>
 </div>
 
+<div id="pageEducation" class="page">
+    <div class="edu-header text-center">
+        <button class="btn btn-light btn-sm position-absolute top-0 start-0 m-2" onclick="goToMain()"><i class="fa fa-arrow-left me-1"></i>Back</button>
+        <i class="fa-solid fa-graduation-cap fa-3x mb-1"></i>
+        <h2 class="fw-bold mb-0">HF Education Hub</h2>
+        <p class="mb-0" style="font-size:0.8rem;color:rgba(255,255,255,0.75);">Stepwise approaches · Practice points · Evidence</p>
+        <div class="header-nav-btns">
+            <button class="header-nav-btn" onclick="goToMain()"><i class="fa fa-user-plus me-1"></i>Registry</button>
+            <button class="header-nav-btn" onclick="goToClinic()"><i class="fa fa-hospital me-1"></i>Clinic</button>
+            <button class="header-nav-btn active-nav"><i class="fa fa-graduation-cap me-1"></i>Education</button>
+            <button class="header-nav-btn" onclick="showAnalyticsLogin()"><i class="fa fa-chart-pie me-1"></i>Analytics</button>
+        </div>
+    </div>
+
+    <div class="container mt-3 mb-5" style="padding-bottom:80px;">
+
+        <!-- ===== HUB (card grid) ===== -->
+        <div id="eduHub">
+            <div class="edu-callout edu-callout-info" style="margin-top:4px;">
+                <i class="fa fa-circle-info"></i>
+                <div>Quick, bedside-ready playbooks for the HF clinic and CCU. Tap any card to open a stepwise guide. Always individualise to your patient.</div>
+            </div>
+
+            <div class="edu-cat-title"><i class="fa fa-bolt"></i> Troubleshooting GDMT</div>
+            <div class="edu-hub-grid">
+                <div class="edu-hub-card" onclick="openEduDoc('hyperk')">
+                    <div class="edu-hub-ico" style="background:linear-gradient(135deg,#b30000,#7a1414);"><i class="fa fa-triangle-exclamation"></i></div>
+                    <h6>Hyperkalaemia</h6>
+                    <p>Stepwise management without abandoning RAASi / MRA.</p>
+                </div>
+                <div class="edu-hub-card" onclick="openEduDoc('creat')">
+                    <div class="edu-hub-ico" style="background:linear-gradient(135deg,#c47f00,#8a6100);"><i class="fa fa-arrow-trend-up"></i></div>
+                    <h6>Rising Creatinine</h6>
+                    <p>When eGFR drops after starting/up-titrating HF meds.</p>
+                </div>
+                <div class="edu-hub-card" onclick="openEduDoc('hypotension')">
+                    <div class="edu-hub-ico" style="background:linear-gradient(135deg,#0f3460,#16213e);"><i class="fa fa-gauge-simple-low"></i></div>
+                    <h6>Low Blood Pressure</h6>
+                    <p>Tolerating GDMT in the hypotensive patient.</p>
+                </div>
+                <div class="edu-hub-card" onclick="openEduDoc('initiation')">
+                    <div class="edu-hub-ico" style="background:linear-gradient(135deg,#0e7c52,#143d2b);"><i class="fa fa-stairs"></i></div>
+                    <h6>Starting the 4 Pillars</h6>
+                    <p>Rapid sequencing & up-titration of GDMT in HFrEF.</p>
+                </div>
+            </div>
+
+            <div class="edu-cat-title"><i class="fa fa-droplet"></i> Decompensation & Volume</div>
+            <div class="edu-hub-grid">
+                <div class="edu-hub-card" onclick="openEduDoc('congestion')">
+                    <div class="edu-hub-ico" style="background:linear-gradient(135deg,#1565c0,#0d47a1);"><i class="fa fa-water"></i></div>
+                    <h6>Diuretic Resistance</h6>
+                    <p>Escalating decongestion in the volume-overloaded patient.</p>
+                </div>
+                <div class="edu-hub-card" onclick="openEduDoc('iron')">
+                    <div class="edu-hub-ico" style="background:linear-gradient(135deg,#8a6100,#5c4100);"><i class="fa fa-d"></i></div>
+                    <h6>Iron Deficiency</h6>
+                    <p>When and how to give IV iron in HF.</p>
+                </div>
+                <div class="edu-hub-card" onclick="openEduDoc('worsening')">
+                    <div class="edu-hub-ico" style="background:linear-gradient(135deg,#b30000,#5c0000);"><i class="fa fa-heart-crack"></i></div>
+                    <h6>Worsening HF Visit</h6>
+                    <p>Structured approach to the patient who feels worse.</p>
+                </div>
+                <div class="edu-hub-card" onclick="openEduDoc('hfpef')">
+                    <div class="edu-hub-ico" style="background:linear-gradient(135deg,#6a1b9a,#4a148c);"><i class="fa fa-heart-pulse"></i></div>
+                    <h6>HFpEF Pathway</h6>
+                    <p>Diagnosis & treatment of preserved-EF heart failure.</p>
+                </div>
+            </div>
+
+            <div class="edu-cat-title"><i class="fa fa-heart-circle-bolt"></i> Critical Care & Advanced HF</div>
+            <div class="edu-hub-grid">
+                <div class="edu-hub-card" onclick="openEduDoc('cshock')">
+                    <div class="edu-hub-ico" style="background:linear-gradient(135deg,#8a0000,#3d0000);"><i class="fa fa-heart-circle-bolt"></i></div>
+                    <h6>Cardiogenic Shock</h6>
+                    <p>SCAI-staged stepwise management & escalation.</p>
+                </div>
+                <div class="edu-hub-card" onclick="openEduDoc('mcs')">
+                    <div class="edu-hub-ico" style="background:linear-gradient(135deg,#4a148c,#1a0533);"><i class="fa fa-gears"></i></div>
+                    <h6>MCS & Transplant</h6>
+                    <p>Who is a candidate for mechanical support & transplant.</p>
+                </div>
+            </div>
+
+            <div class="edu-cat-title"><i class="fa fa-flask"></i> Evidence & Updates</div>
+            <div class="edu-hub-grid">
+                <div class="edu-hub-card" onclick="openEduDoc('trials')">
+                    <div class="edu-hub-ico" style="background:linear-gradient(135deg,#0e7c52,#0a5c3d);"><i class="fa fa-vial-circle-check"></i></div>
+                    <h6>Landmark Trials</h6>
+                    <p>The evidence behind every GDMT pillar.</p>
+                </div>
+                <div class="edu-hub-card" onclick="openEduDoc('news')">
+                    <div class="edu-hub-ico" style="background:linear-gradient(135deg,#1d5c41,#0e7c52);"><i class="fa fa-newspaper"></i></div>
+                    <h6>What's New</h6>
+                    <p>Recent guideline updates & emerging therapies.</p>
+                </div>
+            </div>
+
+            <div class="edu-disclaimer">
+                Educational reference only — not a substitute for clinical judgement or local protocol.<br>
+                Based on 2021 ESC HF Guidelines &amp; 2023 Focused Update, and 2022 AHA/ACC/HFSA HF Guideline.
+            </div>
+        </div>
+
+        <!-- ===== DETAIL CONTAINER ===== -->
+        <div id="eduDetail"></div>
+
+    </div>
+</div>
+
 <!-- CHART MODAL -->
 
 <div id="chartModal" class="modal-overlay d-none">
@@ -2431,7 +2617,7 @@ auth.onAuthStateChanged(function(user) {
     } else {
         document.getElementById('pageLogin').style.display = 'flex';
         document.body.classList.add('login-active');
-        ['pageMain','pageAdmin','pageAnalytics','pageClinic'].forEach(function(p){var el=document.getElementById(p);if(el)el.classList.remove('active');});
+        ['pageMain','pageAdmin','pageAnalytics','pageClinic','pageEducation'].forEach(function(p){var el=document.getElementById(p);if(el)el.classList.remove('active');});
     }
 });
 
@@ -2517,7 +2703,7 @@ function doLogin() {
 }
 function doLogout(){if(confirm('Sign out of HF Registry?'))auth.signOut();}
 
-function goToMain(){['pageAdmin','pageAnalytics','pageClinic'].forEach(function(p){var el=document.getElementById(p);if(el)el.classList.remove('active');});document.getElementById('pageMain').classList.add('active');showStickySave();if(typeof loadMainAlerts==='function')loadMainAlerts();}
+function goToMain(){['pageAdmin','pageAnalytics','pageClinic','pageEducation'].forEach(function(p){var el=document.getElementById(p);if(el)el.classList.remove('active');});document.getElementById('pageMain').classList.add('active');showStickySave();if(typeof loadMainAlerts==='function')loadMainAlerts();}
 
 // ========== MAIN PAGE ALERTS (Upcoming / Overdue / Vaccinations / Calendar) ==========
 var _mainAlertsData={upcoming:[],overdue:[],vacc:[],apptByDay:{}};
@@ -2783,9 +2969,9 @@ function selectCalendarDay(dateStr){
     }
     renderApptCalendar();
 }
-function goToAdmin(){['pageMain','pageAnalytics','pageClinic'].forEach(function(p){var el=document.getElementById(p);if(el)el.classList.remove('active');});document.getElementById('pageAdmin').classList.add('active');hideStickySave();loadAdmin();}
-function goToAnalytics(){['pageMain','pageAdmin','pageClinic'].forEach(function(p){var el=document.getElementById(p);if(el)el.classList.remove('active');});document.getElementById('pageAnalytics').classList.add('active');hideStickySave();loadAnalytics();}
-function goToClinic(){['pageMain','pageAdmin','pageAnalytics'].forEach(function(p){var el=document.getElementById(p);if(el)el.classList.remove('active');});document.getElementById('pageClinic').classList.add('active');hideStickySave();if(typeof loadClinicCache==='function')loadClinicCache();if(typeof loadMainAlerts==='function')loadMainAlerts();// default tab is calendar
+function goToAdmin(){['pageMain','pageAnalytics','pageClinic','pageEducation'].forEach(function(p){var el=document.getElementById(p);if(el)el.classList.remove('active');});document.getElementById('pageAdmin').classList.add('active');hideStickySave();loadAdmin();}
+function goToAnalytics(){['pageMain','pageAdmin','pageClinic','pageEducation'].forEach(function(p){var el=document.getElementById(p);if(el)el.classList.remove('active');});document.getElementById('pageAnalytics').classList.add('active');hideStickySave();loadAnalytics();}
+function goToClinic(){['pageMain','pageAdmin','pageAnalytics','pageEducation'].forEach(function(p){var el=document.getElementById(p);if(el)el.classList.remove('active');});document.getElementById('pageClinic').classList.add('active');hideStickySave();if(typeof loadClinicCache==='function')loadClinicCache();if(typeof loadMainAlerts==='function')loadMainAlerts();// default tab is calendar
 var firstTab=document.querySelector('#pageClinic #mainAlertsTabs .nav-link.active');if(firstTab&&firstTab.getAttribute('onclick')&&firstTab.getAttribute('onclick').indexOf('calendar')>=0){if(typeof showMainAlertsTab==='function')showMainAlertsTab('calendar',firstTab);}}
 function showAdminLogin(){if(prompt("Admin PIN:")==="1234"){window._isAdminSession=true;goToAdmin();}else alert("Wrong PIN");}
 function showAnalyticsLogin(){if(prompt("Analytics PIN (same as Admin):")==="1234"){goToAnalytics();}else alert("Wrong PIN");}
@@ -10659,6 +10845,517 @@ function startPerPatientImport(){
         });
     }
     processNext();
+}
+
+
+
+/* ================= EDUCATION HUB ================= */
+function goToEducation(){
+    ['pageMain','pageAdmin','pageAnalytics','pageClinic','pageEducation'].forEach(function(p){var el=document.getElementById(p);if(el)el.classList.remove('active');});
+    document.getElementById('pageEducation').classList.add('active');
+    if(typeof hideStickySave==='function')hideStickySave();
+    eduShowHub();
+    window.scrollTo(0,0);
+}
+function eduShowHub(){
+    document.getElementById('eduHub').style.display='block';
+    document.getElementById('eduDetail').style.display='none';
+    document.getElementById('eduDetail').innerHTML='';
+    window.scrollTo(0,0);
+}
+function openEduDoc(key){
+    var doc=EDU_DOCS[key];
+    if(!doc)return;
+    document.getElementById('eduHub').style.display='none';
+    var d=document.getElementById('eduDetail');
+    d.style.display='block';
+    d.innerHTML=
+        '<div class="edu-back-bar">'+
+        '<button class="edu-back-btn" onclick="eduShowHub()"><i class="fa fa-arrow-left"></i> All Topics</button>'+
+        '</div>'+
+        '<div class="edu-card-plain" style="border-top:3px solid #0e7c52;">'+
+        '<div class="edu-doc-title">'+doc.title+'</div>'+
+        '<div class="edu-doc-sub">'+doc.sub+'</div></div>'+
+        doc.body;
+    window.scrollTo(0,0);
+}
+function eduToggleAcc(el){
+    var h=el, b=el.nextElementSibling;
+    h.classList.toggle('open'); b.classList.toggle('open');
+}
+
+/* ---- content helpers ---- */
+function eduStep(n,title,body){
+    return '<div class="edu-step"><div class="edu-step-num">'+n+'</div>'+
+           '<h6>'+title+'</h6><div class="edu-step-body">'+body+'</div></div>';
+}
+function eduCallout(type,icon,html){
+    return '<div class="edu-callout edu-callout-'+type+'"><i class="fa '+icon+'"></i><div>'+html+'</div></div>';
+}
+function eduTrial(name,meta,desc,take){
+    return '<div class="edu-trial"><div class="edu-trial-meta">'+meta+'</div>'+
+           '<h6>'+name+'</h6><p>'+desc+'</p>'+
+           (take?'<div class="edu-trial-take"><b>Bottom line:</b> '+take+'</div>':'')+'</div>';
+}
+function eduAcc(title,body){
+    return '<div class="edu-accordion">'+
+           '<div class="edu-acc-head" onclick="eduToggleAcc(this)">'+title+'<i class="fa fa-chevron-down"></i></div>'+
+           '<div class="edu-acc-body">'+body+'</div></div>';
+}
+
+/* ================= CONTENT ================= */
+/* ---- dose-ladder helper ---- */
+function eduDoseLadder(rows){
+    // rows: array of [drug, start, target]
+    var h='<table class="edu-tbl edu-dose-tbl"><tr><th>Drug</th><th>Start dose</th><th>Target dose</th></tr>';
+    rows.forEach(function(r){
+        h+='<tr><td><b>'+r[0]+'</b></td><td>'+r[1]+'</td><td><span class="edu-dose-target">'+r[2]+'</span></td></tr>';
+    });
+    return h+'</table>';
+}
+
+/* ================= CONTENT ================= */
+var EDU_DOCS = {
+
+/* ---------- HYPERKALAEMIA ---------- */
+hyperk:{
+ title:'Hyperkalaemia on RAASi / MRA',
+ sub:'Keep the patient on prognostic therapy \u2014 treat the potassium, don\u2019t reflexively stop the drug.',
+ body:
+  eduCallout('key','fa-key','MRA and ARNI/ACEi/ARB improve survival in HFrEF. Permanent discontinuation for mild\u2013moderate hyperkalaemia is itself associated with worse outcomes. The goal is to <b>enable</b> GDMT, not abandon it.')+
+  '<div class="edu-mini-title">Severity at a glance</div>'+
+  '<table class="edu-tbl"><tr><th>K\u207a (mmol/L)</th><th>Category</th><th>General action</th></tr>'+
+  '<tr><td>5.0\u20135.4</td><td><span class="edu-pill edu-pill-green">Mild</span></td><td>Continue GDMT; dietary advice; recheck.</td></tr>'+
+  '<tr><td>5.5\u20135.9</td><td><span class="edu-pill edu-pill-amber">Moderate</span></td><td>Review meds/diet; consider K\u207a binder to stay on GDMT; recheck in days.</td></tr>'+
+  '<tr><td>\u22656.0</td><td><span class="edu-pill edu-pill-red">Severe</span></td><td>Urgent assessment; ECG; acute treatment; hold offending agents temporarily.</td></tr></table>'+
+  eduCallout('danger','fa-bolt','<b>Emergency / ECG changes</b> (peaked T waves, widened QRS, loss of P, sine wave) or K\u207a \u22656.5 \u2014 treat acutely <b>now</b> with: <b>IV calcium gluconate 10% 10\u201320 mL</b> (or calcium chloride) for membrane stabilisation; <b>insulin 10 units in 25 g dextrose IV</b> &plusmn; <b>nebulised salbutamol 10\u201320 mg</b> to shift K\u207a; plus a measure to remove K\u207a. Do not wait for a confirmatory sample if the patient is symptomatic.')+
+  '<div class="edu-mini-title">Stepwise outpatient approach</div>'+
+  eduStep(1,'Confirm it is real',
+    'Exclude <b>pseudohyperkalaemia</b> \u2014 haemolysed sample, fist-clenching, delayed processing, very high WBC/platelets. If the result is unexpected and the patient is well with a normal ECG, repeat a clean venous sample before acting.')+
+  eduStep(2,'Check an ECG &amp; assess the patient',
+    'Any K\u207a \u22656.0, or symptoms (weakness, palpitations), warrants an ECG. ECG changes \u2192 treat as emergency. Assess volume status, urine output and a cause for the rise.')+
+  eduStep(3,'Hunt for reversible contributors',
+    '<ul>'+
+    '<li><b>Drugs:</b> NSAIDs, trimethoprim, potassium supplements, K\u207a-sparing diuretics, heparin. Stop the non-essential ones first.</li>'+
+    '<li><b>Salt substitutes</b> (KCl-based) &amp; high-potassium diet.</li>'+
+    '<li><b>Volume depletion / AKI</b> \u2014 over-diuresis, poor intake, intercurrent illness.</li>'+
+    '<li><b>Uncontrolled diabetes / acidosis.</b></li></ul>')+
+  eduStep(4,'Decide on the GDMT dose \u2014 a graded response',
+    '<ul>'+
+    '<li><b>K\u207a 5.0\u20135.4:</b> continue ACEi/ARB/ARNI and MRA at current dose. Optimise diet, recheck in 1\u20132 weeks.</li>'+
+    '<li><b>K\u207a 5.5\u20135.9:</b> address contributors; consider <b>halving the MRA</b> (e.g. spironolactone 50 \u2192 25 mg, or 25 \u2192 25 mg alternate-day) <i>or</i> starting a potassium binder to preserve the dose. Recheck in days.</li>'+
+    '<li><b>K\u207a \u22656.0:</b> <b>temporarily hold</b> MRA &plusmn; ACEi/ARB/ARNI, treat actively, then <b>re-challenge once K\u207a \u22645.0</b>. Permanent discontinuation should be the last resort.</li></ul>')+
+  eduStep(5,'Use a potassium binder to keep GDMT on board',
+    'Modern binders lower K\u207a and allow many patients to <b>continue or resume</b> RAASi/MRA. Typical dosing: <b>patiromer 8.4 g once daily</b> (titrate up to 25.2 g OD); <b>sodium zirconium cyclosilicate (SZC) 10 g three times daily for up to 48 h</b> for correction, then <b>5\u201310 g once daily</b> for maintenance. Consider when hyperkalaemia is the only barrier to prognostically important therapy.')+
+  eduStep(6,'Re-challenge &amp; monitor',
+    'After K\u207a normalises, re-introduce/up-titrate GDMT and recheck U&amp;E in ~1\u20132 weeks. Document the plan so the next clinician does not simply leave the drug stopped.')+
+  eduCallout('info','fa-lightbulb','<b>Practice point:</b> SGLT2 inhibitors modestly lower the risk of hyperkalaemia \u2014 a useful reason to ensure the SGLT2i pillar (dapagliflozin/empagliflozin 10 mg OD) is in place when MRA tolerance is marginal.')+
+  '<div class="edu-disclaimer">Doses and thresholds are a general guide \u2014 follow local protocol and renal/electrolyte service advice.</div>'
+},
+
+/* ---------- RISING CREATININE ---------- */
+creat:{
+ title:'Rising Creatinine with HF Medication',
+ sub:'A predictable, often-tolerable rise vs. true kidney injury \u2014 how to tell them apart and what to do.',
+ body:
+  eduCallout('key','fa-key','An early creatinine rise after starting or up-titrating RAASi/ARNI or after effective decongestion is common and <b>frequently benign</b>. A stable, moderate rise is the price of haemodynamically effective therapy \u2014 not a reason to stop it.')+
+  '<div class="edu-mini-title">How much rise is acceptable?</div>'+
+  '<table class="edu-tbl"><tr><th>Change</th><th>Interpretation</th><th>Action</th></tr>'+
+  '<tr><td>Creatinine rise &lt;30% / eGFR fall &lt;~10%</td><td><span class="edu-pill edu-pill-green">Expected</span></td><td>Continue GDMT; recheck.</td></tr>'+
+  '<tr><td>Rise 30\u201350%</td><td><span class="edu-pill edu-pill-amber">Caution</span></td><td>Look for cause; consider dose hold/reduction; recheck in days.</td></tr>'+
+  '<tr><td>Rise &gt;50% or K\u207a high or oligoanuria</td><td><span class="edu-pill edu-pill-red">Investigate</span></td><td>Hold offending agent; assess for AKI; senior/renal input.</td></tr></table>'+
+  '<div class="edu-mini-title">Stepwise approach</div>'+
+  eduStep(1,'Frame the context',
+    'Ask: did this follow <b>RAASi/ARNI initiation or up-titration</b>, <b>aggressive diuresis</b>, or an <b>intercurrent illness</b>? The story usually points to the mechanism.')+
+  eduStep(2,'Assess volume status \u2014 the key fork',
+    '<ul>'+
+    '<li><b>Hypovolaemic / over-diuresed</b> (thirst, postural drop, dry, falling weight): the kidneys are pre-renal \u2192 <b>reduce the loop diuretic</b>, not the RAASi.</li>'+
+    '<li><b>Still congested</b> (raised JVP, oedema, orthopnoea): renal venous congestion drives the rise \u2192 <b>more effective decongestion</b> often <i>improves</i> renal function.</li></ul>')+
+  eduStep(3,'Review nephrotoxic / contributory drugs',
+    'Stop NSAIDs. Check for new ACEi+ARB+MRA stacking, contrast exposure, trimethoprim. Hold metformin / SGLT2i transiently only if a true AKI is evolving.')+
+  eduStep(4,'Exclude bilateral renal artery stenosis',
+    'A <b>steep, early creatinine rise</b> after starting an ACEi/ARB/ARNI \u2014 especially with flash pulmonary oedema or vascular disease \u2014 should prompt consideration of renovascular disease.')+
+  eduStep(5,'Decide on GDMT \u2014 with practical thresholds',
+    '<ul>'+
+    '<li><b>&lt;30% rise, stable, K\u207a acceptable:</b> continue \u2014 this is expected and not harmful.</li>'+
+    '<li><b>30\u201350% rise:</b> correct the cause; if persistent, down-titrate the RAASi/ARNI one step (e.g. sacubitril/valsartan 97/103 \u2192 49/51 mg BID) and recheck in ~1\u20132 weeks.</li>'+
+    '<li><b>&gt;50% rise or AKI:</b> hold the RAASi/ARNI (and recheck the diuretic dose), treat the cause, then re-introduce when renal function settles.</li></ul>')+
+  eduStep(6,'A note on SGLT2 inhibitors',
+    'SGLT2i (dapagliflozin/empagliflozin <b>10 mg once daily</b>) cause a <b>small, early, reversible "dip"</b> in eGFR (haemodynamic), then preserve kidney function long-term. This dip is expected \u2014 <b>do not stop the SGLT2i</b> for it. They can be initiated down to an eGFR around <b>20 mL/min/1.73m\u00b2</b> per current labelling and continued thereafter.')+
+  eduCallout('info','fa-lightbulb','<b>Practice point:</b> "Worsening renal function" during decongestion of a truly congested patient often reflects <i>haemoconcentration</i> and predicts a <b>better</b> outcome \u2014 resist the urge to back off diuresis if the patient is still wet.')+
+  '<div class="edu-disclaimer">Percent thresholds are pragmatic guides; integrate with K\u207a, trajectory and the clinical picture.</div>'
+},
+
+/* ---------- HYPOTENSION ---------- */
+hypotension:{
+ title:'Low Blood Pressure on GDMT',
+ sub:'Tolerating the four pillars when the systolic BP is marginal.',
+ body:
+  eduCallout('key','fa-key','<b>Asymptomatic</b> low BP (even SBP in the 90s) is usually <b>not</b> a reason to withhold prognostic therapy. Treat the symptom, not the number.')+
+  '<div class="edu-mini-title">Stepwise approach</div>'+
+  eduStep(1,'Symptomatic or not?',
+    'Dizziness on standing, fatigue, near-syncope, olig-uria or cool peripheries matter. An isolated low reading in a comfortable patient generally needs <b>no change</b>.')+
+  eduStep(2,'Strip out non-prognostic BP-lowering drugs first',
+    '<ul>'+
+    '<li>Stop/space <b>nitrates</b>, <b>amlodipine/other CCBs</b>, <b>alpha-blockers</b>, non-essential antihypertensives.</li>'+
+    '<li>Re-time agents to avoid stacking peak effects together.</li></ul>')+
+  eduStep(3,'Reassess volume status',
+    'If euvolaemic/dry and over-diuresed \u2192 <b>reduce the loop diuretic</b> (e.g. furosemide 80 \u2192 40 mg OD). Diuretic dose is the most expendable lever; the four pillars are not.')+
+  eduStep(4,'Spread, don\u2019t stop, the pillars',
+    'Separate dosing of ARNI/ACEi, beta-blocker and MRA across the day \u2014 e.g. ARNI in the morning, beta-blocker at night. Often allows all four to continue at a tolerated dose. The ARNI can be reduced to its lowest step (sacubitril/valsartan 24/26 mg BID) rather than stopped.')+
+  eduStep(5,'If still symptomatic \u2014 graded down-titration',
+    'Reduce <b>one</b> agent at a time, by one step. Preserve, where possible, the agents with the clearest survival benefit; avoid removing a whole pillar if a dose reduction will do.')+
+  eduStep(6,'Re-attempt up-titration later',
+    'Hypotension early in titration often improves as the patient compensates. Document a plan to re-challenge at the next visit rather than fixing the lower dose permanently.')+
+  eduCallout('info','fa-lightbulb','<b>Practice point:</b> SGLT2 inhibitors have minimal effect on BP and should almost always be continued at <b>10 mg OD</b> \u2014 they are the easiest pillar to keep on board in the hypotensive patient.')
+},
+
+/* ---------- INITIATION / 4 PILLARS ---------- */
+initiation:{
+ title:'Starting & Sequencing the 4 Pillars (HFrEF)',
+ sub:'Rapid, low-dose, simultaneous-as-possible initiation \u2014 then up-titrate to target.',
+ body:
+  eduCallout('key','fa-key','In HFrEF (LVEF \u226440%), the modern principle is to get a patient on <b>all four pillars at low dose quickly</b> (weeks, not months) and then up-titrate \u2014 rather than maximising one drug before adding the next. Early benefit is large (STRONG-HF).')+
+  '<div class="edu-mini-title">Pillar dosing \u2014 start &amp; target (ESC convention)</div>'+
+  '<div class="edu-mini-title" style="color:#143d2b;margin-top:6px;">RAAS pillar: ARNI (preferred) or ACEi/ARB</div>'+
+  eduDoseLadder([
+    ['Sacubitril/valsartan (ARNI)','24/26 or 49/51 mg BID','97/103 mg BID'],
+    ['Ramipril (ACEi)','2.5 mg BID','5 mg BID'],
+    ['Enalapril (ACEi)','2.5 mg BID','10\u201320 mg BID'],
+    ['Candesartan (ARB)','4\u20138 mg OD','32 mg OD'],
+    ['Valsartan (ARB)','40 mg BID','160 mg BID']
+  ])+
+  '<div class="edu-mini-title" style="color:#143d2b;">Beta-blocker</div>'+
+  eduDoseLadder([
+    ['Bisoprolol','1.25 mg OD','10 mg OD'],
+    ['Carvedilol','3.125 mg BID','25 mg BID (50 mg BID if >85 kg)'],
+    ['Metoprolol succinate','12.5\u201325 mg OD','200 mg OD'],
+    ['Nebivolol','1.25 mg OD','10 mg OD']
+  ])+
+  '<div class="edu-mini-title" style="color:#143d2b;">MRA</div>'+
+  eduDoseLadder([
+    ['Spironolactone','12.5\u201325 mg OD','25\u201350 mg OD'],
+    ['Eplerenone','25 mg OD','50 mg OD']
+  ])+
+  '<div class="edu-mini-title" style="color:#143d2b;">SGLT2 inhibitor (no titration needed)</div>'+
+  eduDoseLadder([
+    ['Dapagliflozin','10 mg OD','10 mg OD'],
+    ['Empagliflozin','10 mg OD','10 mg OD']
+  ])+
+  '<div class="edu-mini-title">A practical sequencing approach</div>'+
+  eduStep(1,'Confirm the phenotype &amp; baseline labs',
+    'LVEF \u226440%. Baseline U&amp;E, eGFR, K\u207a, BP, heart rate, volume status. Identify diabetes/CKD (does not change HF indication for SGLT2i).')+
+  eduStep(2,'Start two pillars early',
+    'A common strategy: begin a <b>beta-blocker + SGLT2 inhibitor</b> first \u2014 both well tolerated, SGLT2i needs no titration. Start the beta-blocker only when the patient is <b>not</b> acutely congested.')+
+  eduStep(3,'Add the RAAS pillar',
+    'Add an <b>ARNI</b> (or ACEi/ARB if ARNI unsuitable). If switching from an ACEi to ARNI, observe a <b>36-hour washout</b> to reduce angioedema risk.')+
+  eduStep(4,'Add the MRA',
+    'Add spironolactone/eplerenone once K\u207a &lt;5.0 and eGFR &gt;30 allow. Recheck U&amp;E within ~1\u20132 weeks of starting or up-titrating.')+
+  eduStep(5,'Up-titrate every 2\u20134 weeks',
+    'Aim for target (or maximum tolerated) doses from the ladders above. Use each visit to push one or two agents up a step, guided by BP, heart rate, K\u207a and renal function.')+
+  eduStep(6,'Re-image &amp; reassess at ~3\u20136 months',
+    'Reassess symptoms and LVEF. Persistent LVEF \u226435% with NYHA II\u2013III on optimal GDMT \u2192 consider <b>device therapy</b> (ICD &plusmn; CRT). Persistent advanced symptoms \u2192 consider <b>advanced-HF referral</b>.')+
+  eduCallout('warn','fa-triangle-exclamation','Start the beta-blocker only in a <b>euvolaemic</b> patient \u2014 introducing it during active congestion can worsen decompensation. The other pillars can usually begin during the index decompensation episode.')+
+  eduCallout('info','fa-lightbulb','<b>Practice point:</b> "Start low, go fast, stay on" \u2014 a patient on four pillars at half-dose generally does better than one on a single pillar at full dose. Note the 2025 NICE update de-emphasises a fixed sequence \u2014 individualise the order to the patient.')
+},
+
+/* ---------- DIURETIC RESISTANCE ---------- */
+congestion:{
+ title:'Diuretic Resistance & Decongestion',
+ sub:'Escalating therapy in the persistently congested patient.',
+ body:
+  eduCallout('key','fa-key','True decongestion \u2014 not just symptom relief \u2014 is the goal of an HF admission. Residual congestion at discharge is one of the strongest predictors of readmission.')+
+  '<div class="edu-mini-title">Stepwise escalation</div>'+
+  eduStep(1,'Confirm congestion &amp; adherence',
+    'JVP, oedema, orthopnoea, weight trend, lung/IVC ultrasound where available. Check <b>adherence</b> and dietary <b>sodium/fluid</b> intake before assuming resistance.')+
+  eduStep(2,'Optimise the loop diuretic',
+    '<ul>'+
+    '<li><b>Dose:</b> ensure the dose crosses the natriuretic threshold. A common IV starting point in decompensation is <b>at least 2.5\u00d7 the usual oral daily dose</b>, given IV.</li>'+
+    '<li><b>Frequency:</b> twice-daily dosing often beats a single large dose.</li>'+
+    '<li><b>Route:</b> gut oedema impairs oral absorption \u2014 switch to <b>IV</b> (furosemide bolus, or infusion e.g. 5\u201320 mg/h after a loading bolus).</li>'+
+    '<li><b>Bumetanide 1 mg \u2248 furosemide 40 mg \u2248 torsemide 20 mg</b> \u2014 torsemide/bumetanide have more reliable oral absorption.</li></ul>')+
+  eduStep(3,'Assess the response objectively',
+    'Track urine output and daily weight. A useful early check is <b>spot urine sodium at ~2 h</b> (a low natriuretic response predicts the need to escalate) and urine output over the first 6 h.')+
+  eduStep(4,'Sequential nephron blockade',
+    'Add a <b>thiazide-type diuretic</b> to block distal sodium reabsorption \u2014 e.g. <b>metolazone 2.5\u20135 mg OD</b>, or IV chlorothiazide where available. Powerful \u2014 monitor K\u207a, Na\u207a and renal function <b>closely</b>; watch for over-diuresis.')+
+  eduStep(5,'Consider adjuncts',
+    'MRA contributes to natriuresis as well as prognosis (spironolactone 25\u201350 mg). <b>Acetazolamide</b> (added to loop diuretic) improved decongestion in the ADVOR trial. SGLT2i also add a mild natriuretic effect. Address hypochloraemia / metabolic alkalosis.')+
+  eduStep(6,'Escalate the setting',
+    'Refractory congestion despite combination therapy \u2192 continuous IV infusion, closer monitoring, and discussion with the HF/advanced team (ultrafiltration in selected cases).')+
+  eduCallout('warn','fa-triangle-exclamation','Sequential nephron blockade can cause rapid, profound electrolyte loss and intravascular depletion. Check U&amp;E within 24\u201348h and titrate carefully.')+
+  eduCallout('info','fa-lightbulb','<b>Practice point:</b> aim to discharge the patient <b>truly decongested</b> and on oral diuretics, with GDMT optimised and an early "vulnerable phase" review booked within 1\u20132 weeks.')
+},
+
+/* ---------- IRON DEFICIENCY ---------- */
+iron:{
+ title:'Iron Deficiency in Heart Failure',
+ sub:'A common, treatable comorbidity \u2014 even without anaemia.',
+ body:
+  eduCallout('key','fa-key','Iron deficiency is common in HF and worsens symptoms, exercise capacity and quality of life \u2014 <b>independent of haemoglobin</b>. It should be actively screened for.')+
+  '<div class="edu-mini-title">Definition (HF-specific)</div>'+
+  '<table class="edu-tbl"><tr><th>Pattern</th><th>Criteria</th></tr>'+
+  '<tr><td>Absolute deficiency</td><td>Ferritin &lt;100 \u00b5g/L</td></tr>'+
+  '<tr><td>Functional deficiency</td><td>Ferritin 100\u2013299 \u00b5g/L <b>and</b> transferrin saturation &lt;20%</td></tr></table>'+
+  '<div class="edu-mini-title">Stepwise approach</div>'+
+  eduStep(1,'Screen routinely',
+    'Check <b>ferritin and transferrin saturation</b> (plus FBC) in all patients with HF \u2014 at diagnosis and periodically, particularly around decompensations.')+
+  eduStep(2,'Confirm the diagnosis',
+    'Apply the HF-specific definition above. Remember ferritin is an acute-phase reactant \u2014 interpret alongside transferrin saturation.')+
+  eduStep(3,'Look for a cause',
+    'Consider GI blood loss and other sources where appropriate, especially with overt anaemia or absolute deficiency \u2014 do not simply replace iron and stop thinking.')+
+  eduStep(4,'Treat with IV iron',
+    'In symptomatic HFrEF/HFmrEF with confirmed iron deficiency, give <b>IV iron</b> \u2014 <b>ferric carboxymaltose</b> (dose by weight and Hb, commonly 500\u20131000 mg per administration, repeated to replete) or <b>ferric derisomaltose</b>. Total dose is calculated from body weight and baseline haemoglobin. Oral iron is generally <b>ineffective</b> in HF.')+
+  eduStep(5,'Reassess &amp; redose',
+    'Recheck iron indices after treatment (commonly at ~3 months, and around decompensations) and re-dose as needed \u2014 iron deficiency frequently recurs.')+
+  eduCallout('info','fa-lightbulb','<b>Practice point:</b> treating iron deficiency targets <b>symptoms and hospitalisation</b>; it is complementary to \u2014 not a substitute for \u2014 the four GDMT pillars.')
+},
+
+/* ---------- WORSENING HF VISIT ---------- */
+worsening:{
+ title:'The Patient Who Feels Worse',
+ sub:'A structured clinic approach to worsening heart failure.',
+ body:
+  eduCallout('key','fa-key','Worsening HF on treatment is a high-risk event. A structured review at the visit prevents missed reversible causes and unnecessary GDMT discontinuation.')+
+  '<div class="edu-mini-title">Stepwise approach</div>'+
+  eduStep(1,'Characterise the deterioration',
+    'New orthopnoea/PND, exertional tolerance, weight change, oedema, palpitations, chest pain, syncope. Compare with the last visit objectively.')+
+  eduStep(2,'Congested, dry, or low-output?',
+    '<ul>'+
+    '<li><b>Wet:</b> raised JVP, oedema, orthopnoea \u2192 decongest (see Diuretic Resistance).</li>'+
+    '<li><b>Dry &amp; hypotensive/fatigued:</b> over-diuresed \u2192 reduce diuretic, reassess.</li>'+
+    '<li><b>Low-output</b> (cool, narrow pulse pressure, oliguria, confusion) \u2192 urgent escalation.</li></ul>')+
+  eduStep(3,'Search for a precipitant',
+    '<ul>'+
+    '<li><b>Adherence</b> &amp; dietary salt/fluid; recent medication changes.</li>'+
+    '<li><b>Arrhythmia</b> \u2014 new AF / fast ventricular rate.</li>'+
+    '<li><b>Ischaemia</b>, uncontrolled hypertension, intercurrent infection, anaemia, thyroid dysfunction.</li>'+
+    '<li><b>Culprit drugs</b> \u2014 NSAIDs, some CCBs (verapamil/diltiazem), glitazones.</li></ul>')+
+  eduStep(4,'Targeted work-up',
+    'ECG, weight, U&amp;E, natriuretic peptides where available, and reassessment of LVEF if the picture has changed. Treat the precipitant directly.')+
+  eduStep(5,'Optimise \u2014 don\u2019t dismantle \u2014 GDMT',
+    'A worsening-HF event is a trigger to <b>up-titrate or complete</b> the four pillars, not to stop them (unless a specific contraindication has emerged). Adjust the diuretic to volume status. Consider adding <b>vericiguat</b> in worsening HFrEF already on GDMT (start 2.5 mg OD, titrate to 10 mg OD).')+
+  eduStep(6,'Safety-net &amp; follow-up',
+    'Clear advice on red-flag symptoms, daily weights, and an <b>early review</b>. Recurrent worsening despite optimal GDMT \u2192 consider advanced-HF referral.')+
+  eduCallout('warn','fa-triangle-exclamation','Recurrent decompensations, escalating diuretic needs, intolerance of GDMT, hypotension or worsening renal function together are "advanced HF" signals \u2014 refer early, while options remain open.')
+},
+
+/* ---------- HFpEF ---------- */
+hfpef:{
+ title:'HFpEF \u2014 Diagnosis & Treatment',
+ sub:'Preserved-EF heart failure: confirm it, then treat the patient and the comorbidities.',
+ body:
+  eduCallout('key','fa-key','HFpEF = symptoms/signs of HF + LVEF \u226550% + objective evidence of cardiac structural/functional abnormality or raised natriuretic peptides. It is a diagnosis that must be <b>positively established</b>, not assumed.')+
+  '<div class="edu-mini-title">Stepwise approach</div>'+
+  eduStep(1,'Confirm the diagnosis',
+    'Symptoms + preserved LVEF + supportive evidence: raised natriuretic peptides, LV hypertrophy / left atrial enlargement, diastolic dysfunction on echo. Use a structured score (e.g. H\u2082FPEF / HFA-PEFF) where there is uncertainty.')+
+  eduStep(2,'Exclude HFpEF mimics',
+    'Actively rule out conditions that masquerade as HFpEF \u2014 e.g. <b>cardiac amyloidosis</b>, constrictive pericarditis, hypertrophic cardiomyopathy, high-output states and significant valve disease. These change management entirely.')+
+  eduStep(3,'Treat congestion',
+    'Loop diuretics titrated to euvolaemia (e.g. furosemide 20\u201340 mg OD, adjusted) \u2014 the most reliable symptomatic intervention in HFpEF.')+
+  eduStep(4,'Start an SGLT2 inhibitor',
+    'An <b>SGLT2 inhibitor</b> (dapagliflozin or empagliflozin <b>10 mg OD</b>) reduces HF hospitalisation/CV death across the LVEF spectrum, including HFpEF \u2014 it is the cornerstone disease-modifying therapy here.')+
+  eduStep(5,'Consider MRA &amp; newer agents',
+    'An MRA may be considered (spironolactone 25\u201350 mg OD), and <b>finerenone</b> has trial evidence in HFmrEF/HFpEF (FINEARTS-HF). In symptomatic patients with LVEF \u226545% and obesity (BMI \u226530), an <b>incretin-based therapy</b> (e.g. tirzepatide / semaglutide) improves symptoms and is now recommended in several 2025 guidelines.')+
+  eduStep(6,'Aggressively manage comorbidities',
+    '<ul>'+
+    '<li><b>Hypertension</b> \u2014 the dominant driver; treat to target.</li>'+
+    '<li><b>Atrial fibrillation</b> \u2014 rate/rhythm control &amp; anticoagulation.</li>'+
+    '<li><b>Obesity</b> \u2014 weight management &amp; incretin therapy where appropriate.</li>'+
+    '<li>Diabetes, CKD, ischaemia, sleep-disordered breathing.</li></ul>')+
+  eduCallout('info','fa-lightbulb','<b>Practice point:</b> in HFpEF, "treating the patient" often means <b>treating the comorbidities</b> \u2014 plus an SGLT2 inhibitor, the right diuretic dose, and (in obese patients) incretin therapy.')
+},
+
+/* ---------- LANDMARK TRIALS ---------- */
+trials:{
+ title:'Landmark Trials Behind GDMT',
+ sub:'The evidence that built \u2014 and is extending \u2014 the pillars.',
+ body:
+  eduCallout('info','fa-circle-info','A condensed, educational overview. For exact populations, endpoints and effect sizes, consult the primary publications and current guidelines.')+
+  '<div class="edu-mini-title">ARNI / RAAS</div>'+
+  eduTrial('PARADIGM-HF','ARNI \u00b7 HFrEF',
+    'Sacubitril/valsartan compared with enalapril in HFrEF.',
+    'ARNI reduced CV death and HF hospitalisation vs. an ACEi \u2014 established ARNI as preferred RAAS therapy in HFrEF.')+
+  eduTrial('PARAGON-HF','ARNI \u00b7 HFpEF',
+    'Sacubitril/valsartan in HF with preserved EF.',
+    'Did not meet its primary endpoint overall, but signalled possible benefit at the lower end of the EF range.')+
+  '<div class="edu-mini-title">SGLT2 inhibitors</div>'+
+  eduTrial('DAPA-HF & EMPEROR-Reduced','SGLT2i \u00b7 HFrEF',
+    'Dapagliflozin and empagliflozin in HFrEF, with and without diabetes.',
+    'Both reduced worsening HF / CV death regardless of diabetes \u2014 made SGLT2i a core HFrEF pillar.')+
+  eduTrial('EMPEROR-Preserved & DELIVER','SGLT2i \u00b7 HFpEF / HFmrEF',
+    'Empagliflozin and dapagliflozin in higher-EF heart failure.',
+    'Reduced HF hospitalisation across mildly-reduced and preserved EF \u2014 extended SGLT2i benefit across the whole EF spectrum.')+
+  '<div class="edu-mini-title">MRA &amp; beta-blockers</div>'+
+  eduTrial('RALES / EMPHASIS-HF','Steroidal MRA \u00b7 HFrEF',
+    'Spironolactone (severe HFrEF) and eplerenone (mild HFrEF).',
+    'MRAs reduce mortality across the HFrEF symptom range \u2014 the third pillar.')+
+  eduTrial('CIBIS-II / MERIT-HF / COPERNICUS','Beta-blocker \u00b7 HFrEF',
+    'Bisoprolol, metoprolol succinate and carvedilol in HFrEF.',
+    'Evidence-based beta-blockers reduce mortality in HFrEF \u2014 a foundational pillar.')+
+  '<div class="edu-mini-title">Newer evidence (2022\u20132025)</div>'+
+  eduTrial('STRONG-HF','Implementation \u00b7 Acute HF',
+    'Rapid up-titration of the four pillars with intensive early follow-up after an acute HF admission.',
+    'High-intensity care reduced 180-day death/HF readmission \u2014 the basis for "start in hospital, up-titrate fast".')+
+  eduTrial('FINEARTS-HF','Non-steroidal MRA \u00b7 HFmrEF/HFpEF',
+    'Finerenone in heart failure with mildly reduced or preserved ejection fraction.',
+    'Reduced total worsening-HF events and CV death \u2014 supports a non-steroidal MRA option in higher-EF HF.')+
+  eduTrial('STEP-HFpEF & SUMMIT','Incretin therapy \u00b7 HFpEF + obesity',
+    'Semaglutide (STEP-HFpEF) and tirzepatide (SUMMIT) in obesity-related HFpEF.',
+    'Improved symptoms, weight and exercise capacity \u2014 incretin therapy is now a recommended option in obese HFpEF.')+
+  eduTrial('VICTORIA & VICTOR','sGC stimulator \u00b7 worsening HFrEF',
+    'Vericiguat in HFrEF, including patients with recent worsening across the risk spectrum.',
+    'Reduces HF hospitalisation / CV death \u2014 an add-on option in worsening HFrEF already on GDMT.')+
+  eduTrial('ADVOR & CLOROTIC','Decongestion adjuncts \u00b7 Acute HF',
+    'Acetazolamide (ADVOR) and hydrochlorothiazide (CLOROTIC) added to loop diuretics in acute HF.',
+    'Combination diuretic strategies improve decongestion \u2014 informs the diuretic-resistance pathway.')+
+  eduCallout('info','fa-lightbulb','<b>Why it matters:</b> the four-pillar regimen is decades of mortality trials converging \u2014 and 2022\u20132025 evidence is now extending disease-modifying therapy into HFpEF and worsening HF.')
+},
+
+/* ---------- WHAT'S NEW ---------- */
+news:{
+ title:'What\u2019s New in Heart Failure',
+ sub:'Recent guideline updates & emerging directions \u2014 reviewed against 2025\u20132026 sources.',
+ body:
+  eduCallout('info','fa-circle-info','A high-level summary for orientation. Always confirm against the latest full guideline text and local protocol before changing practice. Use the <b>Latest HF News</b> button for live sources.')+
+  eduAcc('2025 guideline updates extend therapy into higher-EF HF',
+    'The <b>2025 CCS/CHFS</b> guideline update introduced a structured pharmacologic algorithm for HF with non-reduced EF (LVEF &gt;40%), including SGLT2 inhibitors and \u2014 for symptomatic patients with LVEF \u226545% and BMI \u226530 \u2014 GLP-1 receptor agonist therapy. The <b>2025 NICE</b> update notably <b>moved away from a fixed medication sequence</b> in HFrEF, asking clinicians to individualise drug choice, order, timing and dose to history, frailty, prognosis and preference.')+
+  eduAcc('SGLT2 inhibitors across the whole EF spectrum',
+    'SGLT2 inhibitors are recommended for HF <b>across the entire LVEF range</b> \u2014 HFrEF, HFmrEF and HFpEF \u2014 making them the one pillar that applies regardless of ejection fraction. Standard dose: dapagliflozin or empagliflozin 10 mg once daily.')+
+  eduAcc('Non-steroidal MRA (finerenone) enters higher-EF HF',
+    'Beyond its role in diabetic CKD, <b>FINEARTS-HF</b> showed finerenone reduces worsening-HF events and CV death in HFmrEF/HFpEF \u2014 broadening the MRA conversation beyond classic steroidal agents.')+
+  eduAcc('Incretin-based therapy for obesity-related HFpEF',
+    'Trials of <b>semaglutide (STEP-HFpEF)</b> and <b>tirzepatide (SUMMIT)</b> showed improved symptoms, weight and function in obese patients with HFpEF. Several 2025 guidelines now recommend a GLP-1 / dual GLP-1\u2013GIP agonist in symptomatic HFpEF with obesity.')+
+  eduAcc('Rapid, in-hospital initiation & up-titration (STRONG-HF)',
+    'Emphasis has shifted to starting GDMT <b>during</b> the HF admission and up-titrating quickly afterwards, with a close, structured follow-up in the vulnerable post-discharge phase \u2014 reducing early readmission and death.')+
+  eduAcc('Vericiguat for worsening HFrEF',
+    'The soluble guanylate cyclase stimulator <b>vericiguat</b> (start 2.5 mg OD, titrate to 10 mg OD) is an add-on option in worsening HFrEF on background GDMT \u2014 supported by VICTORIA and the more recent VICTOR analysis.')+
+  eduAcc('Potassium binders to protect GDMT',
+    'Modern potassium binders (patiromer, sodium zirconium cyclosilicate) are increasingly used specifically to <b>keep patients on RAASi/MRA</b> when hyperkalaemia would otherwise force discontinuation.')+
+  eduCallout('warn','fa-triangle-exclamation','Guidance evolves quickly. This summary reflects the 2021 ESC HF Guidelines + 2023 ESC focused update, the 2022 AHA/ACC/HFSA guideline, and 2024\u20132025 trial evidence and regional updates (CCS/CHFS, NICE, JCS/JHFS). Always check for the newest focused update relevant to your region.')+
+  '<div class="edu-mini-title">Live HF news &amp; guideline sources</div>'+
+  '<div class="edu-callout edu-callout-info" style="display:block;">'+
+  '<i class="fa fa-up-right-from-square"></i> <b>Latest HF News</b> opens current, trusted sources in your browser \u2014 this in-app summary cannot self-update, so use the button for the newest material.'+
+  '</div>'+
+  '<button class="edu-news-btn" onclick="eduOpenNews()"><i class="fa fa-newspaper me-1"></i> Open Latest HF News &amp; Guidelines</button>'+
+  '<div class="edu-disclaimer">Opens ESC, AHA and other cardiology sources in a new tab. Content there is owned by those organisations.</div>'
+}
+,
+
+/* ---------- CARDIOGENIC SHOCK ---------- */
+cshock:{
+ title:'Cardiogenic Shock',
+ sub:'SCAI-staged, stepwise management \u2014 match the intensity of support to shock severity.',
+ body:
+  eduCallout('key','fa-key','Cardiogenic shock (CS) is a low-output state causing tissue hypoperfusion and end-organ dysfunction. Mortality is high and time-dependent \u2014 the central principle is <b>early recognition, rapid phenotyping, and escalation matched to SCAI stage</b> at an appropriate level of care.')+
+  '<div class="edu-mini-title">SCAI shock stages (2022 update)</div>'+
+  '<table class="edu-tbl"><tr><th>Stage</th><th>Label</th><th>Picture</th></tr>'+
+  '<tr><td><span class="edu-pill edu-pill-green">A</span></td><td>At risk</td><td>No CS signs, but a substrate (e.g. large MI, decompensated HF).</td></tr>'+
+  '<tr><td><span class="edu-pill edu-pill-green">B</span></td><td>Beginning</td><td>Hypotension or tachycardia, <b>without</b> hypoperfusion.</td></tr>'+
+  '<tr><td><span class="edu-pill edu-pill-amber">C</span></td><td>Classic</td><td>Hypoperfusion needing pharmacologic/mechanical support (cold, oliguria, raised lactate).</td></tr>'+
+  '<tr><td><span class="edu-pill edu-pill-red">D</span></td><td>Deteriorating</td><td>Failing to respond \u2014 needs escalation of support.</td></tr>'+
+  '<tr><td><span class="edu-pill edu-pill-red">E</span></td><td>Extremis</td><td>Circulatory collapse / refractory arrest.</td></tr></table>'+
+  eduCallout('danger','fa-bolt','<b>Lactate and the "golden hour":</b> a rising or non-clearing lactate signals inadequate perfusion and the need to escalate. Serial lactate is one of the most useful bedside markers of whether current support is working.')+
+  '<div class="edu-mini-title">Stepwise approach</div>'+
+  eduStep(1,'Recognise &amp; confirm CS',
+    'Hypotension (SBP &lt;90 mmHg or needing support) <b>plus</b> hypoperfusion \u2014 cool extremities, oliguria, altered mentation, lactate &gt;2 mmol/L. Diagnosis does <b>not</b> require invasive haemodynamics; do not wait for a PA catheter to start treatment.')+
+  eduStep(2,'Identify the cause \u2014 and treat it',
+    '<ul>'+
+    '<li><b>AMI-CS:</b> the commonest cause \u2014 <b>emergency revascularisation</b> (primary PCI) is Class I, irrespective of symptom duration, when CS or ongoing ischaemia is present. Culprit-lesion-only PCI is preferred over routine immediate multivessel PCI.</li>'+
+    '<li><b>HF-CS:</b> acute decompensation of chronic HF \u2014 focus on perfusion, decongestion and GDMT once stabilised.</li>'+
+    '<li><b>Other:</b> mechanical complications of MI (VSD, papillary muscle rupture, free-wall rupture), acute valve failure, myocarditis, RV infarction, arrhythmia, tamponade, PE \u2014 each has a specific, time-critical treatment.</li></ul>')+
+  eduStep(3,'Stabilise &amp; phenotype',
+    '<ul>'+
+    '<li>Early <b>echocardiography</b> \u2014 LV vs RV vs biventricular failure, valve lesions, mechanical complications, tamponade.</li>'+
+    '<li>Assess congestion vs perfusion ("wet/dry, warm/cold"). Cautious fluids only if clearly under-filled \u2014 most CS patients are <b>not</b> volume-responsive.</li>'+
+    '<li>Invasive haemodynamics (PA catheter) help clarify ventricular involvement and guide therapy in unclear or escalating cases.</li></ul>')+
+  eduStep(4,'Vasoactive support \u2014 first-line drugs',
+    '<ul>'+
+    '<li><b>Norepinephrine</b> is the preferred first-line vasopressor (start ~0.05 \u00b5g/kg/min, titrate to a MAP \u2265 ~65 mmHg) \u2014 it caused fewer arrhythmias and lower mortality than dopamine in CS trials.</li>'+
+    '<li>Add an <b>inotrope</b> for low output despite adequate MAP \u2014 <b>dobutamine</b> (2.5\u201310 \u00b5g/kg/min) or <b>milrinone</b> (0.125\u20130.375 \u00b5g/kg/min; renally cleared, more vasodilatory).</li>'+
+    '<li>Use the <b>lowest effective doses</b> for the <b>shortest time</b> \u2014 catecholamines increase myocardial oxygen demand and arrhythmia risk.</li></ul>')+
+  eduStep(5,'Reassess response &amp; decide on escalation',
+    'Within the first hours, reassess MAP, urine output, mentation and <b>lactate clearance</b>. <b>Failure to improve = SCAI stage D</b> \u2192 escalate: do not simply keep climbing the inotrope dose.')+
+  eduStep(6,'Temporary mechanical circulatory support (tMCS)',
+    '<ul>'+
+    '<li><b>IABP:</b> routine use is <b>not</b> recommended in AMI-CS; selective use is reasonable if the patient is not stabilising and other devices are unavailable, or for mechanical complications.</li>'+
+    '<li><b>Microaxial flow pump (Impella):</b> in selected AMI-CS, early use reduced mortality in the DanGer Shock trial \u2014 at the cost of more complications (limb ischaemia, bleeding, haemolysis).</li>'+
+    '<li><b>VA-ECMO:</b> supports both circulation and oxygenation; ECLS-SHOCK showed <b>routine</b> early VA-ECMO in AMI-CS did <b>not</b> improve survival \u2014 reserve for selected patients (e.g. refractory shock, concurrent respiratory failure, arrest). Consider an LV venting strategy.</li>'+
+    '<li>Match device to shock severity, ventricular involvement, and the planned exit strategy.</li></ul>')+
+  eduStep(7,'Define the exit strategy &amp; escalate the setting',
+    'Every tMCS decision needs a destination: <b>bridge to recovery</b>, <b>bridge to decision</b>, <b>bridge to durable LVAD</b>, or <b>bridge to transplant</b>. Refractory or escalating CS should be discussed early with a <b>shock team</b> and, where possible, transferred to a hub centre with surgical MCS and transplant capability.')+
+  eduStep(8,'Supportive ICU care',
+    'Lung-protective ventilation if intubated, careful sedation, treat arrhythmias, renal replacement therapy for refractory AKI/overload, and meticulous attention to the systemic complications of CS (bleeding, infection, hepatic/renal dysfunction).')+
+  eduCallout('warn','fa-triangle-exclamation','<b>Time matters.</b> Outcomes hinge on early recognition, prompt revascularisation in AMI-CS, and early escalation when the patient is not responding. Do not let a stage-D patient sit on rising inotropes \u2014 escalate or transfer.')+
+  eduCallout('info','fa-lightbulb','<b>Practice point:</b> the "shock team" model \u2014 cardiology, interventional, cardiac surgery, intensive care \u2014 with standardised protocols and early transfer pathways is associated with better outcomes than ad-hoc management.')+
+  '<div class="edu-disclaimer">Drawn from the 2025 ACC Expert Consensus on CS, 2024 ISHLT consensus, SCAI staging, and recent trials (IABP-SHOCK II, ECLS-SHOCK, DanGer Shock). Doses are a guide \u2014 follow local ICU/CS protocol.</div>'
+},
+
+/* ---------- MCS & TRANSPLANT CANDIDACY ---------- */
+mcs:{
+ title:'MCS & Heart Transplant \u2014 Who Is a Candidate?',
+ sub:'Selecting patients for mechanical circulatory support and transplantation.',
+ body:
+  eduCallout('key','fa-key','MCS and transplant are options for <b>advanced HF</b> \u2014 patients with severe, persistent symptoms despite optimal GDMT and device therapy. The core questions are: <b>is the heart failure truly advanced and irreversible?</b> and <b>is the rest of the patient suitable to survive and benefit?</b>')+
+  '<div class="edu-mini-title">First: recognise advanced HF (the "I-NEED-HELP" idea)</div>'+
+  'Think advanced HF and refer <b>early</b> when you see: recurrent HF hospitalisations; need for IV inotropes; escalating diuretic requirement; intolerance of GDMT due to hypotension or renal/electrolyte limits; progressive end-organ dysfunction; persistent NYHA III\u2013IV symptoms; or a poor 6-minute walk / peak VO\u2082. Referral <b>before</b> the patient becomes too sick is the single most important step \u2014 late referral closes options.'+
+  '<div class="edu-mini-title">Types of MCS</div>'+
+  '<table class="edu-tbl"><tr><th>Type</th><th>Examples</th><th>Role</th></tr>'+
+  '<tr><td>Temporary MCS</td><td>IABP, Impella, TandemHeart, VA-ECMO</td><td>Acute rescue / bridge-to-decision in cardiogenic shock.</td></tr>'+
+  '<tr><td>Durable LVAD</td><td>Continuous-flow LVAD</td><td>Long-term support \u2014 bridge-to-transplant or destination therapy.</td></tr></table>'+
+  eduCallout('info','fa-circle-info','<b>Durable LVADs are not acute rescue devices.</b> They are implanted electively/semi-electively in a stabilised patient as a long-term strategy \u2014 not dropped in during a crashing arrest.')+
+  '<div class="edu-mini-title">Stepwise candidacy assessment</div>'+
+  eduStep(1,'Confirm advanced HF on optimal therapy',
+    'Severe symptoms (NYHA III\u2013IV) despite maximally tolerated GDMT, appropriate device therapy (CRT/ICD where indicated) and treated reversible factors. Confirm the diagnosis and exclude treatable contributors (ischaemia, valve disease, arrhythmia, non-adherence).')+
+  eduStep(2,'Objective severity assessment',
+    'Cardiopulmonary exercise testing (a low <b>peak VO\u2082</b> is a key transplant-listing criterion), right-heart catheterisation for haemodynamics and pulmonary pressures, repeat imaging, and a validated risk score. Define the trajectory \u2014 stable vs declining.')+
+  eduStep(3,'Define the MCS strategy / intent',
+    '<ul>'+
+    '<li><b>Bridge to transplant (BTT):</b> LVAD to support a transplant-eligible patient until an organ is available.</li>'+
+    '<li><b>Bridge to candidacy:</b> LVAD to improve end-organ function / reversible contraindications so the patient <i>becomes</i> transplant-eligible.</li>'+
+    '<li><b>Destination therapy (DT):</b> durable LVAD as the definitive long-term treatment in a patient not eligible for transplant.</li>'+
+    '<li><b>Bridge to recovery:</b> support with the expectation of myocardial recovery (e.g. some myocarditis).</li></ul>')+
+  eduStep(4,'Assess the right ventricle &amp; other organs',
+    'RV function is critical \u2014 an LVAD unloads the LV but relies on the RV; significant RV failure predicts poor LVAD outcomes. Assess renal, hepatic and pulmonary function, nutritional status and frailty, all of which influence both LVAD and transplant success.')+
+  eduStep(5,'Transplant-specific evaluation',
+    'A formal multidisciplinary transplant work-up assesses cardiac severity, reversibility of pulmonary hypertension, infection/immunology screening, malignancy history, psychosocial support and adherence, and patient understanding/consent.')+
+  eduStep(6,'Multidisciplinary decision &amp; ongoing review',
+    'An advanced-HF / transplant team makes the listing and device decisions. Candidacy is <b>not static</b> \u2014 patients move on and off the list as their condition, comorbidities and circumstances change.')+
+  '<div class="edu-mini-title">Common contraindications to heart transplant</div>'+
+  eduCallout('warn','fa-triangle-exclamation','These are <b>relative</b> and centre-specific \u2014 listed for orientation, not as absolute rules. They typically include: <b>fixed, severe pulmonary hypertension</b> unresponsive to vasodilator testing; <b>active malignancy</b> or recent cancer with significant recurrence risk; active uncontrolled infection; severe irreversible dysfunction of another organ not amenable to combined transplant; severe peripheral/cerebrovascular disease; active substance misuse; inadequate psychosocial support or non-adherence; and advanced age or frailty beyond centre limits. Many are potentially <b>modifiable</b> \u2014 hence "bridge to candidacy".')+
+  eduCallout('key','fa-key','<b>Bottom line:</b> the most actionable message is timing \u2014 <b>refer to an advanced-HF service early</b>, while the patient still has end-organ reserve and the full range of options (LVAD, transplant, or palliative care) remains genuinely open.')+
+  '<div class="edu-disclaimer">Educational overview based on 2021 ESC HF Guidelines + 2023 update, 2022 AHA/ACC/HFSA HF Guideline, and ISHLT guidance. Eligibility criteria are centre-specific \u2014 always defer to the local transplant/MCS programme.</div>'
+}
+
+};
+
+/* ---- open curated live HF news sources ---- */
+function eduOpenNews(){
+    var sources=[
+        {n:'ESC \u2013 Heart Failure Guidelines & updates',u:'https://www.escardio.org/Guidelines/Clinical-Practice-Guidelines/Acute-and-Chronic-Heart-Failure'},
+        {n:'ESC \u2013 All Clinical Practice Guidelines',u:'https://www.escardio.org/Guidelines/Clinical-Practice-Guidelines'},
+        {n:'AHA \u2013 Circulation: Heart Failure',u:'https://www.ahajournals.org/journal/circheartfailure'},
+        {n:'JACC \u2013 Heart Failure',u:'https://www.jacc.org/journal/heart-failure'},
+        {n:'ACC \u2013 Latest in Cardiology (Heart Failure)',u:'https://www.acc.org/Latest-in-Cardiology'},
+        {n:'ESC Heart Failure Association (HFA)',u:'https://www.escardio.org/Sub-specialty-communities/Heart-Failure-Association-of-the-ESC-(HFA)'}
+    ];
+    var box=document.getElementById('eduNewsModal');
+    if(!box){
+        box=document.createElement('div');
+        box.id='eduNewsModal';
+        box.className='edu-news-modal';
+        document.body.appendChild(box);
+    }
+    var inner='<div class="edu-news-card">'+
+        '<div class="edu-news-head"><span><i class="fa fa-newspaper me-1"></i>Latest HF News &amp; Guidelines</span>'+
+        '<button onclick="document.getElementById(\'eduNewsModal\').style.display=\'none\'">\u2715</button></div>'+
+        '<p class="edu-news-note">Tap a source to open it in a new browser tab. These are kept current by the publishing organisations.</p>';
+    sources.forEach(function(s){
+        inner+='<a class="edu-news-link" href="'+s.u+'" target="_blank" rel="noopener noreferrer">'+
+               '<i class="fa fa-up-right-from-square"></i><span>'+s.n+'</span></a>';
+    });
+    inner+='<div class="edu-disclaimer" style="margin-top:10px;">External sites \u2014 content owned by the respective organisations.</div></div>';
+    box.innerHTML=inner;
+    box.style.display='flex';
 }
 
 </script>
