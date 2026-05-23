@@ -936,48 +936,66 @@ img,canvas,table,svg{max-width:100%;}
 }
 
 /* ---------- EXTRA-ADMISSION CARD — STRIP REMOVAL & WIDTH FIX ----------
-   "Add Another Admission" nests an extra card several layers deep. Each
-   layer drew its own coloured LEFT-ACCENT strip (.section-card::before 5px,
-   the red mini-strip border-left 4px, every .field-tint border-left 3px).
-   Stacked together with padding, the card rendered wider than the viewport,
-   so the whole page zoomed out — the narrow look with coloured lines
-   trailing down the side. Fix: drop every accent strip inside the extra
-   card and hard-bound the card to the viewport width. */
+   "Add Another Admission" nests an extra card several layers deep. The root
+   cause of the "narrow screen / coloured lines down the side" bug was a
+   Bootstrap .row used as the red mini-strip container with another .row
+   nested inside its column — the compounded negative gutter margins pushed
+   content past the viewport, so mobile browsers zoomed the whole page out.
+   The builder now uses a plain div (.ea-redstrip) instead of a .row; these
+   rules style it and hard-bound every layer so nothing can overflow. */
+
+/* red mini-strip — plain box, no Bootstrap row, no left-accent strip */
+.ea-redstrip{
+    background:#fff5f5;
+    border-radius:8px;
+    padding:12px;
+    box-sizing:border-box;
+    max-width:100%;
+    overflow-x:hidden;
+}
 
 /* kill the absolutely-positioned 5px accent bar on the nested section-card */
 .extra-adm-card .section-card::before{display:none!important;}
 /* flatten every left-accent border inside the extra card */
 .extra-adm-card .section-card,
 .extra-adm-card .field-tint,
+.extra-adm-card .ea-redstrip,
 .extra-adm-card [id^="eaSec_"]{border-left:0!important;}
-.extra-adm-card .visit-section,
 .extra-adm-card [style*="border-left"]{border-left:0!important;}
 
-/* hard-bound every layer to the viewport so nothing can overflow sideways */
+/* hard-bound every layer so nothing exceeds the viewport width */
 .extra-adm-card,
 .extra-adm-card .section-card,
 .extra-adm-card .section-card-body,
 .extra-adm-card .admission-accordion-wrap,
 .extra-adm-card .field-tint,
+.extra-adm-card .ea-redstrip,
 .extra-adm-card [id^="eaSec_"]{
     max-width:100%!important;
     overflow-x:hidden;
     box-sizing:border-box;
 }
-.extra-adm-card *{box-sizing:border-box;}
+.extra-adm-card *{box-sizing:border-box;min-width:0;}
 
-/* neutralise Bootstrap .row negative gutter margins at every nesting level
-   inside the extra card (they were escaping their padded containers) */
+/* neutralise Bootstrap .row negative gutter margins inside the extra card */
 .extra-adm-card .row{margin-left:0!important;margin-right:0!important;}
-.extra-adm-card [id^="eaSec_"]{margin-left:0!important;margin-right:0!important;}
 
 @media (max-width:767px){
-    /* tighter nested padding so the columns keep usable width on phones */
+    /* tighter nested padding so columns keep usable width on phones */
     .extra-adm-card .section-card-body{padding:10px 9px 9px;}
-    .extra-adm-card [id^="eaSec_"]{padding:10px!important;}
+    .extra-adm-card .ea-redstrip{padding:10px;}
     .extra-adm-card .field-tint{padding:9px 10px 8px;}
     .extra-adm-card .admission-accordion-wrap{padding-left:0;padding-right:0;}
     .extra-adm-card .row.g-2{--bs-gutter-x:0.5rem;}
+}
+
+/* ROOT-LEVEL viewport lock — iOS Safari often ignores overflow-x:hidden on
+   body alone and still widens the layout viewport when a child overflows.
+   Locking width to 100vw at the root stops the page from zooming out. */
+@media (max-width:991px){
+    html{overflow-x:hidden;width:100%;}
+    body{overflow-x:hidden;width:100%;max-width:100vw;position:relative;}
+    .container,.container-fluid{max-width:100vw;overflow-x:hidden;}
 }
 
 </style>
@@ -4780,17 +4798,16 @@ function _extraAdmCardHtml(adm, idx){
     h+='<div class="admission-accordion-wrap">';
 
     // ===== RED MINI-STRIP (Admission Details) =====
-    // Same markup pattern as main lines 935-942, plus optional LOS / Transfer fields.
-    // The fields live in their own inner row keyed by `eaSec_{idx}_0_body` so the
-    // gated re-render path (e.g. Transfer_Other -> Transfer_Hospital_Name) can
-    // safely replace just the fields without wiping the red-strip header.
-    h+='<div class="row g-2 mb-3" '
-       +'style="background:#fff5f5;border-left:4px solid #8b0000;border-radius:8px;padding:12px;margin:0 0 12px 0;" '
-       +'id="eaSec_'+idx+'_0">';
-    h+='<div class="col-12 d-flex align-items-center justify-content-between flex-wrap gap-2" style="margin-bottom:4px;">';
+    // The outer container is a PLAIN div (not a Bootstrap .row). A .row carries
+    // negative side margins from --bs-gutter-x; nesting another .row inside its
+    // column compounded those margins and pushed the card past the viewport on
+    // phones (page zoomed out — the "narrow screen" bug). Plain div + a single
+    // inner .row g-2 keeps all gutters contained.
+    h+='<div class="ea-redstrip mb-3" id="eaSec_'+idx+'_0">';
+    h+='<div class="d-flex align-items-center justify-content-between flex-wrap gap-2" style="margin-bottom:6px;">';
     h+='<h6 class="text-primary fw-bold mb-0" style="font-size:0.95rem;"><i class="fa fa-hospital me-1"></i>In-Hospital Admission</h6>';
     h+='</div>';
-    h+='<div class="col-12" id="eaSec_'+idx+'_0_body"><div class="row g-2">';
+    h+='<div id="eaSec_'+idx+'_0_body"><div class="row g-2">';
     detailsGrp.fields.forEach(function(f){
         if(!_gateOpen(f.gate, adm)) return;
         var copy={};for(var p in f){copy[p]=f[p];}
