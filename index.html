@@ -935,34 +935,50 @@ img,canvas,table,svg{max-width:100%;}
     .login-field input,#searchInput{font-size:16px!important;}
 }
 
-/* ---------- RECLAIM HORIZONTAL WIDTH ON MOBILE ----------
-   On phones the content sat in a narrow column with wide empty margins,
-   because several padding layers stack: .container + .card + .section-card-
-   body + .field-tint + Bootstrap column gutters. These rules trim each layer
-   so the form fields stretch much closer to the screen edges. */
+/* ---------- FULL-WIDTH EDGE-TO-EDGE LAYOUT ON MOBILE ----------
+   On phones the content sat in a narrow column with wide empty margins. This
+   makes the form sections fill the screen: the page container and outer card
+   lose their side padding, and the section panels lose their outline borders,
+   rounded corners and shadows so they run flush to the screen edges. The
+   coloured header bands still mark each section. */
 @media (max-width:767px){
-    .container,.container.mt-3{padding-left:8px!important;padding-right:8px!important;}
-    .card{padding:0.6rem!important;}
-    .section-card-body{padding:9px 8px 8px!important;}
-    .section-card-head{padding:9px 9px 8px!important;}
-    .field-tint{padding:8px 7px 7px!important;}
+    /* page container + outer cards go full-bleed */
+    .container,.container.mt-3{padding-left:4px!important;padding-right:4px!important;}
+    .card{padding:0!important;border-radius:0!important;box-shadow:none!important;
+          margin-left:-4px;margin-right:-4px;}
+    .card.p-3{padding:0!important;}
+
+    /* section cards: drop the outline border, rounding and shadow */
+    .section-card{border:0!important;border-radius:0!important;box-shadow:none!important;
+                  margin-bottom:10px;}
+    .section-card-head{padding:9px 8px 8px!important;}
+    .section-card-body{padding:9px 6px 8px!important;}
+
+    /* collapsible tinted panels: borderless, square, flush */
+    .field-tint{border:0!important;border-radius:0!important;box-shadow:none!important;
+                padding:8px 6px 7px!important;}
     .field-tint > .ft-head{padding-left:0;padding-right:0;}
-    .visit-section{padding:9px 8px!important;}
-    .next-appt-card{padding:11px 9px!important;}
+    .field-tint:hover{box-shadow:none!important;}
+
+    /* misc inner blocks lose their padding too */
+    .visit-section{padding:8px 6px!important;border-radius:0!important;}
+    .next-appt-card{padding:10px 8px!important;border-radius:0!important;}
     .admission-accordion-wrap{padding-left:0!important;padding-right:0!important;}
-    /* slimmer column gutter so paired fields keep more usable width */
-    .section-card-body .row.g-2,.visit-section .row.g-2{--bs-gutter-x:0.45rem;}
-    /* the post-save success panel + extra-admission card */
-    .ssp-body{padding:12px 9px!important;}
-    .ssp-head{padding:12px 11px!important;}
+    .ea-redstrip{border-radius:0!important;}
     .extra-adm-section-head,.extra-adm-section-hint{padding-left:0;padding-right:0;}
+    .ssp-body{padding:11px 7px!important;}
+    .ssp-head{padding:11px 9px!important;}
+
+    /* slimmer column gutter so paired fields keep maximum usable width */
+    .section-card-body .row.g-2,.visit-section .row.g-2,.ea-redstrip .row.g-2{--bs-gutter-x:0.4rem;}
 }
 @media (max-width:575px){
-    .container,.container.mt-3{padding-left:6px!important;padding-right:6px!important;}
-    .card{padding:0.5rem!important;}
-    .section-card-body{padding:8px 6px 7px!important;}
-    .field-tint{padding:7px 6px 6px!important;}
-    .ea-redstrip{padding:8px 7px!important;}
+    .container,.container.mt-3{padding-left:2px!important;padding-right:2px!important;}
+    .card{margin-left:-2px;margin-right:-2px;}
+    .section-card-body{padding:8px 4px 7px!important;}
+    .field-tint{padding:7px 4px 6px!important;}
+    .ea-redstrip{padding:8px 5px!important;}
+    .section-card-head{padding:8px 6px 7px!important;}
 }
 
 /* ---------- EXTRA-ADMISSION CARD — STRIP REMOVAL & WIDTH FIX ----------
