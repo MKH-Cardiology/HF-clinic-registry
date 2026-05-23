@@ -72,22 +72,22 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 .next-appt-card{background:#fff5f5;border:1px solid #f1c6c6;border-left:5px solid #8b0000;border-radius:10px;padding:14px 16px;box-shadow:0 2px 10px rgba(139,0,0,0.08)}
 .next-appt-card-head{display:flex;align-items:center;gap:8px;font-weight:700;color:#8b0000;font-size:0.95rem;margin-bottom:10px;padding-bottom:8px;border-bottom:1px dashed #e2b6b6}
 .next-appt-card-head i{font-size:1rem}
-.extra-adm-section{background:#fff5f5;border:1px solid #e8c4c4;border-radius:10px;padding:12px 14px}
-.extra-adm-section-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;font-weight:700;color:#8b0000;font-size:0.92rem}
-.extra-adm-section-hint{font-size:0.72rem;color:#9a6b6b;margin-top:4px;margin-bottom:2px}
-.extra-adm-card{background:#fff;border:1px solid #e3b9b9;border-left:4px solid #c0392b;border-radius:8px;margin-top:10px;overflow:hidden;box-shadow:0 1px 5px rgba(192,57,43,0.08)}
-.extra-adm-head{display:flex;align-items:center;gap:8px;padding:9px 12px;background:#fdf0f0;cursor:pointer;user-select:none;transition:background 0.15s}
-.extra-adm-head:hover{background:#fbe4e4}
-.extra-adm-head.expanded{background:#f6dada;border-bottom:1px solid #c0392b}
-.extra-adm-head .ea-title{font-weight:700;color:#8b0000;font-size:0.84rem;flex-shrink:0}
-.extra-adm-head .ea-summary{font-size:0.74rem;color:#6c757d;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-.extra-adm-head .ea-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
-.extra-adm-head .ea-chevron{color:#c0392b;font-size:0.72rem;transition:transform 0.2s}
-.extra-adm-head.expanded .ea-chevron{transform:rotate(180deg)}
-.extra-adm-body{display:none;padding:10px 12px 4px;background:#fdf7f7}
-.extra-adm-body.show{display:block;animation:fadeUp 0.2s ease}
-.extra-adm-body .field-tint{margin:8px 0}
-.extra-adm-body .field-tint:first-child{margin-top:2px}
+/* "Additional Admissions" outer container — kept neutral so it doesn't compete
+   with the per-admission section-card chrome rendered inside. */
+.extra-adm-section{background:transparent;border:0;padding:0}
+.extra-adm-section-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;font-weight:700;color:#5c0000;font-size:0.92rem;padding:4px 2px 2px}
+.extra-adm-section-hint{font-size:0.72rem;color:#7a7a7a;margin-top:4px;margin-bottom:10px;padding:0 2px}
+/* Each extra admission now renders as a full .section-card identical to the
+   main Step-3 In-Hospital Admission card. Spacing tweaks only. */
+.extra-adm-card{margin-top:14px}
+.extra-adm-card .section-card{margin-bottom:0}
+.extra-adm-card .section-card-head{cursor:pointer;user-select:none}
+.extra-adm-card .section-card-head .ea-chevron{margin-left:auto;color:var(--section-accent-dark,#0d3f7a);font-size:0.8rem;transition:transform 0.2s}
+.extra-adm-card.expanded .section-card-head .ea-chevron{transform:rotate(180deg)}
+.extra-adm-card .ea-summary{font-size:0.72rem;color:#7a7a7a;font-weight:500;display:block;margin-top:2px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:100%}
+.extra-adm-card .section-card-body{display:none;animation:fadeUp 0.2s ease}
+.extra-adm-card.expanded .section-card-body{display:block}
+.extra-adm-card .ea-remove-btn{margin-left:8px;flex-shrink:0}
 .ea-multi{display:flex;flex-wrap:wrap;gap:6px}
 .admission-accordion-wrap .field-tint{margin-bottom:10px}
 .admission-accordion-wrap .field-tint:last-child{margin-bottom:0}
@@ -3864,27 +3864,81 @@ function _extraSectionFilled(grp, adm){
     return filled;
 }
 
-// Render one admission as a card whose sections are colour-coded collapsible
-// accordions (.field-tint.collapsible), matching the Visits step look.
+// Render one admission so it looks IDENTICAL to Admission #1 (the main Step-3
+// "In-Hospital Admission" section card). Structure mirrors lines 916-1408:
+//   .section-card.sec-investigations
+//      .section-card-head  (icon + "Admission #N" title + sub + remove btn)
+//      .section-card-body
+//         .admission-accordion-wrap
+//            red "In-Hospital Admission" mini-strip  (Admission Details fields)
+//            .field-tint.collapsible.tint-vitals.expanded     (Symptoms/Vitals)
+//            .field-tint.collapsible.tint-ecg                 (Investigations)
+//            .field-tint.collapsible.tint-bnp                 (Comorbidities)
+//            .field-tint.collapsible.tint-renal               (Labs)
+//            .field-tint.collapsible.tint-meds                (Mgmt & Meds)
+//            .field-tint.collapsible.tint-bnp                 (Complications)
+//            .field-tint.collapsible.tint-plan                (Outcomes)
+// Data format (the EXTRA_ADM_SCHEMA keys) is unchanged.
 function _extraAdmCardHtml(adm, idx){
-    var num=idx+2; // first admission is #1 (the main Section-3 block)
+    var num=idx+2; // Admission #1 is the main Step-3 block
     var summary=[];
     if(adm.date) summary.push(adm.date);
     if(adm.reason) summary.push(adm.reason);
-    var summaryTxt=summary.length?summary.join(' · '):'(no details yet)';
-    var h='<div class="extra-adm-card" data-extra-idx="'+idx+'">';
-    h+='<div class="extra-adm-head" onclick="toggleExtraAdmission('+idx+')">';
-    h+='<span class="ea-title"><i class="fa fa-hospital me-1"></i>Admission #'+num+'</span>';
-    h+='<span class="ea-summary">'+_esc(summaryTxt)+'</span>';
-    h+='<span class="ea-actions">';
-    h+='<button type="button" class="btn btn-sm btn-outline-danger" onclick="event.stopPropagation();removeExtraAdmission('+idx+')"><i class="fa fa-times"></i></button>';
-    h+='<i class="fa fa-chevron-down ea-chevron"></i></span>';
+    var summaryTxt=summary.length?summary.join(' · '):'(repeat admission — fill in below)';
+
+    // Section 0 is the "Admission Details" group — rendered as the red mini-strip
+    // up top, exactly like the main admission's lines 935-942 In-Hospital block.
+    var detailsGrp=EXTRA_ADM_SCHEMA[0];
+
+    var h='<div class="extra-adm-card expanded" data-extra-idx="'+idx+'">';
+    h+='<div class="section-card sec-investigations">';
+
+    // Header — matches Step-3 ".section-card-head" exactly (icon + title + sub),
+    // plus a Remove button on the right and a chevron for collapse/expand.
+    h+='<div class="section-card-head" onclick="toggleExtraAdmission('+idx+')">';
+    h+='<div class="sc-icon"><i class="fa fa-hospital"></i></div>';
+    h+='<div style="flex:1;min-width:0;">';
+    h+='<div class="sc-title">'+num+'. In-Hospital Admission</div>';
+    h+='<div class="sc-sub"><span class="ea-summary">'+_esc(summaryTxt)+'</span></div>';
     h+='</div>';
-    h+='<div class="extra-adm-body" id="extraAdmBody'+idx+'">';
-    EXTRA_ADM_SCHEMA.forEach(function(grp,gi){
+    h+='<button type="button" class="btn btn-sm btn-outline-danger ea-remove-btn" '
+       +'onclick="event.stopPropagation();removeExtraAdmission('+idx+')" '
+       +'title="Remove this admission"><i class="fa fa-times"></i></button>';
+    h+='<i class="fa fa-chevron-down ea-chevron"></i>';
+    h+='</div>';
+
+    // Body — identical wrapper to the main admission accordion.
+    h+='<div class="section-card-body" id="extraAdmBody'+idx+'">';
+    h+='<div class="admission-accordion-wrap">';
+
+    // ===== RED MINI-STRIP (Admission Details) =====
+    // Same markup pattern as main lines 935-942, plus optional LOS / Transfer fields.
+    // The fields live in their own inner row keyed by `eaSec_{idx}_0_body` so the
+    // gated re-render path (e.g. Transfer_Other -> Transfer_Hospital_Name) can
+    // safely replace just the fields without wiping the red-strip header.
+    h+='<div class="row g-2 mb-3" '
+       +'style="background:#fff5f5;border-left:4px solid #8b0000;border-radius:8px;padding:12px;margin:0 0 12px 0;" '
+       +'id="eaSec_'+idx+'_0">';
+    h+='<div class="col-12 d-flex align-items-center justify-content-between flex-wrap gap-2" style="margin-bottom:4px;">';
+    h+='<h6 class="text-primary fw-bold mb-0" style="font-size:0.95rem;"><i class="fa fa-hospital me-1"></i>In-Hospital Admission</h6>';
+    h+='</div>';
+    h+='<div class="col-12" id="eaSec_'+idx+'_0_body"><div class="row g-2">';
+    detailsGrp.fields.forEach(function(f){
+        if(!_gateOpen(f.gate, adm)) return;
+        var copy={};for(var p in f){copy[p]=f[p];}
+        copy._val=(adm[f.k]!=null?adm[f.k]:'');
+        h+=_extraFieldHtml(idx,copy);
+    });
+    h+='</div></div>';
+    h+='</div>';
+
+    // ===== COLOUR-CODED COLLAPSIBLE PANELS (sections 1..N) =====
+    // First panel ("Symptoms, Signs & Vitals") opens expanded — same as Admission #1.
+    for(var gi=1; gi<EXTRA_ADM_SCHEMA.length; gi++){
+        var grp=EXTRA_ADM_SCHEMA[gi];
         var filled=_extraSectionFilled(grp, adm);
         var gid='eaSec_'+idx+'_'+gi;
-        var expanded=(gi===0); // Admission Details open; rest collapsed
+        var expanded=(gi===1);
         h+='<div class="field-tint collapsible '+(grp.tint||'')+(expanded?' expanded':'')+'" id="'+gid+'">';
         h+='<div class="ft-head" onclick="toggleExtraAdmSection(\''+gid+'\')">';
         h+='<i class="fa '+grp.icon+'"></i><span>'+grp.sec+'</span>';
@@ -3893,8 +3947,12 @@ function _extraAdmCardHtml(adm, idx){
         h+='</div>';
         h+='<div class="ft-body" id="'+gid+'_body">'+_extraSectionBodyHtml(grp, adm, idx)+'</div>';
         h+='</div>';
-    });
-    h+='</div></div>';
+    }
+
+    h+='</div>'; // .admission-accordion-wrap
+    h+='</div>'; // .section-card-body
+    h+='</div>'; // .section-card
+    h+='</div>'; // .extra-adm-card
     return h;
 }
 
@@ -3913,11 +3971,8 @@ function _renderExtraAdmissions(){
 }
 // Expand/collapse a whole admission card.
 function toggleExtraAdmission(idx){
-    var body=document.getElementById('extraAdmBody'+idx);
-    if(!body)return;
-    var card=body.closest('.extra-adm-card');
-    var open=body.classList.toggle('show');
-    if(card){ var head=card.querySelector('.extra-adm-head'); if(head) head.classList.toggle('expanded',open); }
+    var card=document.querySelector('.extra-adm-card[data-extra-idx="'+idx+'"]');
+    if(card) card.classList.toggle('expanded');
 }
 // Expand/collapse a single colour-coded section inside an admission card.
 function toggleExtraAdmSection(gid){
@@ -3982,8 +4037,8 @@ function addExtraAdmission(){
     _writeExtraAdmissions(arr);
     _renderExtraAdmissions();
     var newIdx=arr.length-1;
-    var body=document.getElementById('extraAdmBody'+newIdx);
-    if(body){ body.classList.add('show'); var hd=body.closest('.extra-adm-card'); if(hd){var h=hd.querySelector('.extra-adm-head'); if(h)h.classList.add('expanded');} }
+    var newCard=document.querySelector('.extra-adm-card[data-extra-idx="'+newIdx+'"]');
+    if(newCard) newCard.classList.add('expanded');
 }
 function removeExtraAdmission(idx){
     var arr=_readExtraAdmissions();
@@ -4005,7 +4060,7 @@ function updateExtraAdmission(idx, field, value){
                 var s=[];
                 if(arr[idx].date)s.push(arr[idx].date);
                 if(arr[idx].reason)s.push(arr[idx].reason);
-                card.textContent=s.length?s.join(' · '):'(no details yet)';
+                card.textContent=s.length?s.join(' · '):'(repeat admission — fill in below)';
             }
         }
         // If this field gates other fields, re-render its section so gated
