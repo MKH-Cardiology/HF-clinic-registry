@@ -2196,6 +2196,20 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                 </div>
             </div>
 
+            <div class="edu-cat-title"><i class="fa fa-heart-circle-bolt"></i> Critical Care & Advanced HF</div>
+            <div class="edu-hub-grid">
+                <div class="edu-hub-card" onclick="openEduDoc('cshock')">
+                    <div class="edu-hub-ico" style="background:linear-gradient(135deg,#8a0000,#3d0000);"><i class="fa fa-heart-circle-bolt"></i></div>
+                    <h6>Cardiogenic Shock</h6>
+                    <p>SCAI-staged stepwise management & escalation.</p>
+                </div>
+                <div class="edu-hub-card" onclick="openEduDoc('mcs')">
+                    <div class="edu-hub-ico" style="background:linear-gradient(135deg,#4a148c,#1a0533);"><i class="fa fa-gears"></i></div>
+                    <h6>MCS & Transplant</h6>
+                    <p>Who is a candidate for mechanical support & transplant.</p>
+                </div>
+            </div>
+
             <div class="edu-cat-title"><i class="fa fa-flask"></i> Evidence & Updates</div>
             <div class="edu-hub-grid">
                 <div class="edu-hub-card" onclick="openEduDoc('trials')">
@@ -3193,6 +3207,92 @@ news:{
   '</div>'+
   '<button class="edu-news-btn" onclick="eduOpenNews()"><i class="fa fa-newspaper me-1"></i> Open Latest HF News &amp; Guidelines</button>'+
   '<div class="edu-disclaimer">Opens ESC, AHA and other cardiology sources in a new tab. Content there is owned by those organisations.</div>'
+}
+,
+
+/* ---------- CARDIOGENIC SHOCK ---------- */
+cshock:{
+ title:'Cardiogenic Shock',
+ sub:'SCAI-staged, stepwise management \u2014 match the intensity of support to shock severity.',
+ body:
+  eduCallout('key','fa-key','Cardiogenic shock (CS) is a low-output state causing tissue hypoperfusion and end-organ dysfunction. Mortality is high and time-dependent \u2014 the central principle is <b>early recognition, rapid phenotyping, and escalation matched to SCAI stage</b> at an appropriate level of care.')+
+  '<div class="edu-mini-title">SCAI shock stages (2022 update)</div>'+
+  '<table class="edu-tbl"><tr><th>Stage</th><th>Label</th><th>Picture</th></tr>'+
+  '<tr><td><span class="edu-pill edu-pill-green">A</span></td><td>At risk</td><td>No CS signs, but a substrate (e.g. large MI, decompensated HF).</td></tr>'+
+  '<tr><td><span class="edu-pill edu-pill-green">B</span></td><td>Beginning</td><td>Hypotension or tachycardia, <b>without</b> hypoperfusion.</td></tr>'+
+  '<tr><td><span class="edu-pill edu-pill-amber">C</span></td><td>Classic</td><td>Hypoperfusion needing pharmacologic/mechanical support (cold, oliguria, raised lactate).</td></tr>'+
+  '<tr><td><span class="edu-pill edu-pill-red">D</span></td><td>Deteriorating</td><td>Failing to respond \u2014 needs escalation of support.</td></tr>'+
+  '<tr><td><span class="edu-pill edu-pill-red">E</span></td><td>Extremis</td><td>Circulatory collapse / refractory arrest.</td></tr></table>'+
+  eduCallout('danger','fa-bolt','<b>Lactate and the "golden hour":</b> a rising or non-clearing lactate signals inadequate perfusion and the need to escalate. Serial lactate is one of the most useful bedside markers of whether current support is working.')+
+  '<div class="edu-mini-title">Stepwise approach</div>'+
+  eduStep(1,'Recognise &amp; confirm CS',
+    'Hypotension (SBP &lt;90 mmHg or needing support) <b>plus</b> hypoperfusion \u2014 cool extremities, oliguria, altered mentation, lactate &gt;2 mmol/L. Diagnosis does <b>not</b> require invasive haemodynamics; do not wait for a PA catheter to start treatment.')+
+  eduStep(2,'Identify the cause \u2014 and treat it',
+    '<ul>'+
+    '<li><b>AMI-CS:</b> the commonest cause \u2014 <b>emergency revascularisation</b> (primary PCI) is Class I, irrespective of symptom duration, when CS or ongoing ischaemia is present. Culprit-lesion-only PCI is preferred over routine immediate multivessel PCI.</li>'+
+    '<li><b>HF-CS:</b> acute decompensation of chronic HF \u2014 focus on perfusion, decongestion and GDMT once stabilised.</li>'+
+    '<li><b>Other:</b> mechanical complications of MI (VSD, papillary muscle rupture, free-wall rupture), acute valve failure, myocarditis, RV infarction, arrhythmia, tamponade, PE \u2014 each has a specific, time-critical treatment.</li></ul>')+
+  eduStep(3,'Stabilise &amp; phenotype',
+    '<ul>'+
+    '<li>Early <b>echocardiography</b> \u2014 LV vs RV vs biventricular failure, valve lesions, mechanical complications, tamponade.</li>'+
+    '<li>Assess congestion vs perfusion ("wet/dry, warm/cold"). Cautious fluids only if clearly under-filled \u2014 most CS patients are <b>not</b> volume-responsive.</li>'+
+    '<li>Invasive haemodynamics (PA catheter) help clarify ventricular involvement and guide therapy in unclear or escalating cases.</li></ul>')+
+  eduStep(4,'Vasoactive support \u2014 first-line drugs',
+    '<ul>'+
+    '<li><b>Norepinephrine</b> is the preferred first-line vasopressor (start ~0.05 \u00b5g/kg/min, titrate to a MAP \u2265 ~65 mmHg) \u2014 it caused fewer arrhythmias and lower mortality than dopamine in CS trials.</li>'+
+    '<li>Add an <b>inotrope</b> for low output despite adequate MAP \u2014 <b>dobutamine</b> (2.5\u201310 \u00b5g/kg/min) or <b>milrinone</b> (0.125\u20130.375 \u00b5g/kg/min; renally cleared, more vasodilatory).</li>'+
+    '<li>Use the <b>lowest effective doses</b> for the <b>shortest time</b> \u2014 catecholamines increase myocardial oxygen demand and arrhythmia risk.</li></ul>')+
+  eduStep(5,'Reassess response &amp; decide on escalation',
+    'Within the first hours, reassess MAP, urine output, mentation and <b>lactate clearance</b>. <b>Failure to improve = SCAI stage D</b> \u2192 escalate: do not simply keep climbing the inotrope dose.')+
+  eduStep(6,'Temporary mechanical circulatory support (tMCS)',
+    '<ul>'+
+    '<li><b>IABP:</b> routine use is <b>not</b> recommended in AMI-CS; selective use is reasonable if the patient is not stabilising and other devices are unavailable, or for mechanical complications.</li>'+
+    '<li><b>Microaxial flow pump (Impella):</b> in selected AMI-CS, early use reduced mortality in the DanGer Shock trial \u2014 at the cost of more complications (limb ischaemia, bleeding, haemolysis).</li>'+
+    '<li><b>VA-ECMO:</b> supports both circulation and oxygenation; ECLS-SHOCK showed <b>routine</b> early VA-ECMO in AMI-CS did <b>not</b> improve survival \u2014 reserve for selected patients (e.g. refractory shock, concurrent respiratory failure, arrest). Consider an LV venting strategy.</li>'+
+    '<li>Match device to shock severity, ventricular involvement, and the planned exit strategy.</li></ul>')+
+  eduStep(7,'Define the exit strategy &amp; escalate the setting',
+    'Every tMCS decision needs a destination: <b>bridge to recovery</b>, <b>bridge to decision</b>, <b>bridge to durable LVAD</b>, or <b>bridge to transplant</b>. Refractory or escalating CS should be discussed early with a <b>shock team</b> and, where possible, transferred to a hub centre with surgical MCS and transplant capability.')+
+  eduStep(8,'Supportive ICU care',
+    'Lung-protective ventilation if intubated, careful sedation, treat arrhythmias, renal replacement therapy for refractory AKI/overload, and meticulous attention to the systemic complications of CS (bleeding, infection, hepatic/renal dysfunction).')+
+  eduCallout('warn','fa-triangle-exclamation','<b>Time matters.</b> Outcomes hinge on early recognition, prompt revascularisation in AMI-CS, and early escalation when the patient is not responding. Do not let a stage-D patient sit on rising inotropes \u2014 escalate or transfer.')+
+  eduCallout('info','fa-lightbulb','<b>Practice point:</b> the "shock team" model \u2014 cardiology, interventional, cardiac surgery, intensive care \u2014 with standardised protocols and early transfer pathways is associated with better outcomes than ad-hoc management.')+
+  '<div class="edu-disclaimer">Drawn from the 2025 ACC Expert Consensus on CS, 2024 ISHLT consensus, SCAI staging, and recent trials (IABP-SHOCK II, ECLS-SHOCK, DanGer Shock). Doses are a guide \u2014 follow local ICU/CS protocol.</div>'
+},
+
+/* ---------- MCS & TRANSPLANT CANDIDACY ---------- */
+mcs:{
+ title:'MCS & Heart Transplant \u2014 Who Is a Candidate?',
+ sub:'Selecting patients for mechanical circulatory support and transplantation.',
+ body:
+  eduCallout('key','fa-key','MCS and transplant are options for <b>advanced HF</b> \u2014 patients with severe, persistent symptoms despite optimal GDMT and device therapy. The core questions are: <b>is the heart failure truly advanced and irreversible?</b> and <b>is the rest of the patient suitable to survive and benefit?</b>')+
+  '<div class="edu-mini-title">First: recognise advanced HF (the "I-NEED-HELP" idea)</div>'+
+  'Think advanced HF and refer <b>early</b> when you see: recurrent HF hospitalisations; need for IV inotropes; escalating diuretic requirement; intolerance of GDMT due to hypotension or renal/electrolyte limits; progressive end-organ dysfunction; persistent NYHA III\u2013IV symptoms; or a poor 6-minute walk / peak VO\u2082. Referral <b>before</b> the patient becomes too sick is the single most important step \u2014 late referral closes options.'+
+  '<div class="edu-mini-title">Types of MCS</div>'+
+  '<table class="edu-tbl"><tr><th>Type</th><th>Examples</th><th>Role</th></tr>'+
+  '<tr><td>Temporary MCS</td><td>IABP, Impella, TandemHeart, VA-ECMO</td><td>Acute rescue / bridge-to-decision in cardiogenic shock.</td></tr>'+
+  '<tr><td>Durable LVAD</td><td>Continuous-flow LVAD</td><td>Long-term support \u2014 bridge-to-transplant or destination therapy.</td></tr></table>'+
+  eduCallout('info','fa-circle-info','<b>Durable LVADs are not acute rescue devices.</b> They are implanted electively/semi-electively in a stabilised patient as a long-term strategy \u2014 not dropped in during a crashing arrest.')+
+  '<div class="edu-mini-title">Stepwise candidacy assessment</div>'+
+  eduStep(1,'Confirm advanced HF on optimal therapy',
+    'Severe symptoms (NYHA III\u2013IV) despite maximally tolerated GDMT, appropriate device therapy (CRT/ICD where indicated) and treated reversible factors. Confirm the diagnosis and exclude treatable contributors (ischaemia, valve disease, arrhythmia, non-adherence).')+
+  eduStep(2,'Objective severity assessment',
+    'Cardiopulmonary exercise testing (a low <b>peak VO\u2082</b> is a key transplant-listing criterion), right-heart catheterisation for haemodynamics and pulmonary pressures, repeat imaging, and a validated risk score. Define the trajectory \u2014 stable vs declining.')+
+  eduStep(3,'Define the MCS strategy / intent',
+    '<ul>'+
+    '<li><b>Bridge to transplant (BTT):</b> LVAD to support a transplant-eligible patient until an organ is available.</li>'+
+    '<li><b>Bridge to candidacy:</b> LVAD to improve end-organ function / reversible contraindications so the patient <i>becomes</i> transplant-eligible.</li>'+
+    '<li><b>Destination therapy (DT):</b> durable LVAD as the definitive long-term treatment in a patient not eligible for transplant.</li>'+
+    '<li><b>Bridge to recovery:</b> support with the expectation of myocardial recovery (e.g. some myocarditis).</li></ul>')+
+  eduStep(4,'Assess the right ventricle &amp; other organs',
+    'RV function is critical \u2014 an LVAD unloads the LV but relies on the RV; significant RV failure predicts poor LVAD outcomes. Assess renal, hepatic and pulmonary function, nutritional status and frailty, all of which influence both LVAD and transplant success.')+
+  eduStep(5,'Transplant-specific evaluation',
+    'A formal multidisciplinary transplant work-up assesses cardiac severity, reversibility of pulmonary hypertension, infection/immunology screening, malignancy history, psychosocial support and adherence, and patient understanding/consent.')+
+  eduStep(6,'Multidisciplinary decision &amp; ongoing review',
+    'An advanced-HF / transplant team makes the listing and device decisions. Candidacy is <b>not static</b> \u2014 patients move on and off the list as their condition, comorbidities and circumstances change.')+
+  '<div class="edu-mini-title">Common contraindications to heart transplant</div>'+
+  eduCallout('warn','fa-triangle-exclamation','These are <b>relative</b> and centre-specific \u2014 listed for orientation, not as absolute rules. They typically include: <b>fixed, severe pulmonary hypertension</b> unresponsive to vasodilator testing; <b>active malignancy</b> or recent cancer with significant recurrence risk; active uncontrolled infection; severe irreversible dysfunction of another organ not amenable to combined transplant; severe peripheral/cerebrovascular disease; active substance misuse; inadequate psychosocial support or non-adherence; and advanced age or frailty beyond centre limits. Many are potentially <b>modifiable</b> \u2014 hence "bridge to candidacy".')+
+  eduCallout('key','fa-key','<b>Bottom line:</b> the most actionable message is timing \u2014 <b>refer to an advanced-HF service early</b>, while the patient still has end-organ reserve and the full range of options (LVAD, transplant, or palliative care) remains genuinely open.')+
+  '<div class="edu-disclaimer">Educational overview based on 2021 ESC HF Guidelines + 2023 update, 2022 AHA/ACC/HFSA HF Guideline, and ISHLT guidance. Eligibility criteria are centre-specific \u2014 always defer to the local transplant/MCS programme.</div>'
 }
 
 };
