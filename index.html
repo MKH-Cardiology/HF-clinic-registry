@@ -935,6 +935,36 @@ img,canvas,table,svg{max-width:100%;}
     .login-field input,#searchInput{font-size:16px!important;}
 }
 
+/* ---------- RECLAIM HORIZONTAL WIDTH ON MOBILE ----------
+   On phones the content sat in a narrow column with wide empty margins,
+   because several padding layers stack: .container + .card + .section-card-
+   body + .field-tint + Bootstrap column gutters. These rules trim each layer
+   so the form fields stretch much closer to the screen edges. */
+@media (max-width:767px){
+    .container,.container.mt-3{padding-left:8px!important;padding-right:8px!important;}
+    .card{padding:0.6rem!important;}
+    .section-card-body{padding:9px 8px 8px!important;}
+    .section-card-head{padding:9px 9px 8px!important;}
+    .field-tint{padding:8px 7px 7px!important;}
+    .field-tint > .ft-head{padding-left:0;padding-right:0;}
+    .visit-section{padding:9px 8px!important;}
+    .next-appt-card{padding:11px 9px!important;}
+    .admission-accordion-wrap{padding-left:0!important;padding-right:0!important;}
+    /* slimmer column gutter so paired fields keep more usable width */
+    .section-card-body .row.g-2,.visit-section .row.g-2{--bs-gutter-x:0.45rem;}
+    /* the post-save success panel + extra-admission card */
+    .ssp-body{padding:12px 9px!important;}
+    .ssp-head{padding:12px 11px!important;}
+    .extra-adm-section-head,.extra-adm-section-hint{padding-left:0;padding-right:0;}
+}
+@media (max-width:575px){
+    .container,.container.mt-3{padding-left:6px!important;padding-right:6px!important;}
+    .card{padding:0.5rem!important;}
+    .section-card-body{padding:8px 6px 7px!important;}
+    .field-tint{padding:7px 6px 6px!important;}
+    .ea-redstrip{padding:8px 7px!important;}
+}
+
 /* ---------- EXTRA-ADMISSION CARD — STRIP REMOVAL & WIDTH FIX ----------
    "Add Another Admission" nests an extra card several layers deep. The root
    cause of the "narrow screen / coloured lines down the side" bug was a
