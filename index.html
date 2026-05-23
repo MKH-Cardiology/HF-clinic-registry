@@ -939,6 +939,8 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                 <div class="col-6 col-md-3"><label>Admission Date</label><input type="date" class="form-control" id="Admission_Date"></div>
                 <div class="col-6 col-md-3"><label>Discharge Date</label><input type="date" class="form-control" id="Admission_Discharge_Date"></div>
                 <div class="col-12 col-md-6"><label>Reason / Notes</label><input type="text" class="form-control" id="Admission_Reason" placeholder="e.g. ADHF, ACS, arrhythmia..."></div>
+                <div class="col-6 col-md-3"><label>Cause of Admission</label><select class="form-select" id="Admission_HF_Related" onchange="toggleAdmissionCause()"><option value="HF related">HF related</option><option value="Other">Other (non-HF)</option></select></div>
+                <div class="col-12 col-md-9" id="admissionCauseWrap" style="display:none;"><label>Specify Cause</label><input type="text" class="form-control" id="Admission_Cause" placeholder="e.g. pneumonia, sepsis, elective procedure..."></div>
             </div>
             <div class="row g-2">
                 <div class="col-4 col-md-2"><label class="text-primary">Height (cm)</label><input type="number" class="form-control border-primary" id="Height" oninput="calcBMI()" inputmode="numeric"></div>
@@ -1168,8 +1170,71 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                     </div>
                 </div>
                 <div class="col-12 col-md-6"><label>Smoking Status</label><select class="form-select" id="Smoker_Visible" onchange="document.getElementById('Smoker').value=this.value;calcMAGGIC()"><option>Never</option><option>Current</option><option>Former</option></select></div>
-                <div class="col-12 col-md-3"><label>Valve Repair / Replacement</label><select class="form-select" id="Valve_Surgery_Visible" onchange="document.getElementById('Valve_Surgery').value=this.value;toggleValveSurgeryDate()"><option>No</option><option>Repair</option><option>Replacement</option></select></div>
-                <div class="col-12 col-md-3" id="valveSurgeryDateWrap" style="display:none;"><label class="text-danger fw-bold">Date of Procedure</label><input type="date" class="form-control" id="Valve_Surgery_Date"></div>
+                <!-- ===== VALVE INTERVENTION BLOCK ===== -->
+                <div class="col-12 col-md-6">
+                    <label>Valve Intervention</label>
+                    <select class="form-select" id="Valve_Intervention" onchange="toggleValveInterventionBlock()">
+                        <option>No</option><option>Yes</option>
+                    </select>
+                </div>
+                <div class="col-12" id="valveInterventionWrap" style="display:none;">
+                    <div class="row g-2 p-2 mt-1" style="background:#fff5f5;border-left:3px solid #8b0000;border-radius:6px;">
+                        <!-- Surgical Repair -->
+                        <div class="col-12">
+                            <label class="text-danger fw-bold mb-1"><i class="fa fa-scalpel me-1"></i>Surgical Repair <small class="text-muted fw-normal">(multi-select — tap to toggle)</small></label>
+                            <div class="d-flex gap-2 flex-wrap p-2" id="valveRepairBox" style="border:1px solid #ced4da;border-radius:6px;background:#fff;">
+                                <button type="button" class="btn btn-sm btn-outline-primary" data-valverepair="Aortic" onclick="toggleValveRepairOpt('Aortic')">Aortic</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary" data-valverepair="Mitral" onclick="toggleValveRepairOpt('Mitral')">Mitral</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary" data-valverepair="Tricuspid" onclick="toggleValveRepairOpt('Tricuspid')">Tricuspid</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary" data-valverepair="Pulmonary" onclick="toggleValveRepairOpt('Pulmonary')">Pulmonary</button>
+                            </div>
+                            <input type="hidden" id="Valve_Repair_Valves">
+                        </div>
+                        <div class="col-12 col-md-4" id="valveRepairDateWrap" style="display:none;">
+                            <label>Surgical Repair Date</label>
+                            <input type="date" class="form-control" id="Valve_Repair_Date">
+                        </div>
+                        <!-- Surgical Replacement -->
+                        <div class="col-12">
+                            <label class="text-danger fw-bold mb-1"><i class="fa fa-scalpel me-1"></i>Surgical Replacement <small class="text-muted fw-normal">(multi-select — tap to toggle)</small></label>
+                            <div class="d-flex gap-2 flex-wrap p-2" id="valveReplaceBox" style="border:1px solid #ced4da;border-radius:6px;background:#fff;">
+                                <button type="button" class="btn btn-sm btn-outline-primary" data-valvereplace="Aortic" onclick="toggleValveReplaceOpt('Aortic')">Aortic</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary" data-valvereplace="Mitral" onclick="toggleValveReplaceOpt('Mitral')">Mitral</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary" data-valvereplace="Tricuspid" onclick="toggleValveReplaceOpt('Tricuspid')">Tricuspid</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary" data-valvereplace="Pulmonary" onclick="toggleValveReplaceOpt('Pulmonary')">Pulmonary</button>
+                            </div>
+                            <input type="hidden" id="Valve_Replace_Valves">
+                        </div>
+                        <div class="col-12 col-md-4" id="valveReplaceTypeWrap" style="display:none;">
+                            <label>Prosthesis Type</label>
+                            <select class="form-select" id="Valve_Replace_Type"><option value="">Select...</option><option>Metallic</option><option>Bioprosthetic</option></select>
+                        </div>
+                        <div class="col-12 col-md-4" id="valveReplaceDateWrap" style="display:none;">
+                            <label>Surgical Replacement Date</label>
+                            <input type="date" class="form-control" id="Valve_Replace_Date">
+                        </div>
+                        <!-- Percutaneous -->
+                        <div class="col-12 col-md-4">
+                            <label>Percutaneous Procedure</label>
+                            <select class="form-select" id="Valve_Percutaneous" onchange="toggleValvePercutaneousBlock()"><option>No</option><option>Yes</option></select>
+                        </div>
+                        <div class="col-12" id="valvePercutaneousWrap" style="display:none;">
+                            <div class="row g-2 p-2 mt-1" style="background:#fffbe6;border-left:3px solid #c5a000;border-radius:6px;">
+                                <div class="col-6 col-md-3"><label>MV Clip</label><select class="form-select" id="Valve_MVClip"><option>No</option><option>Yes</option></select></div>
+                                <div class="col-6 col-md-3"><label>MV Clip Date</label><input type="date" class="form-control" id="Valve_MVClip_Date"></div>
+                                <div class="col-6 col-md-3"><label>TV Clip</label><select class="form-select" id="Valve_TVClip"><option>No</option><option>Yes</option></select></div>
+                                <div class="col-6 col-md-3"><label>TV Clip Date</label><input type="date" class="form-control" id="Valve_TVClip_Date"></div>
+                                <div class="col-6 col-md-3"><label>TAVI</label><select class="form-select" id="Valve_TAVI"><option>No</option><option>Yes</option></select></div>
+                                <div class="col-6 col-md-3"><label>TAVI Date</label><input type="date" class="form-control" id="Valve_TAVI_Date"></div>
+                                <div class="col-12 col-md-6"><label>Other Percutaneous Procedures</label><input type="text" class="form-control" id="Valve_Percutaneous_Other" placeholder="Specify..."></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Legacy hidden Valve_Surgery / Valve_Surgery_Date kept for backward compat (auto-derived) -->
+                <input type="hidden" id="Valve_Surgery_Visible">
+                <input type="hidden" id="valveSurgeryDateWrap">
+                <input type="hidden" id="Valve_Surgery_Date">
                 <div class="col-12 col-md-3"><label>Thyroid Disease</label><select class="form-select" id="Thyroid_Dz"><option>No</option><option>Hyperthyroid</option><option>Hypothyroid</option></select></div>
                 <div class="col-12 col-md-3"><label>Family History (Cardio)</label><select class="form-select" id="FH_Cardio"><option>No</option><option>Yes</option></select></div>
                 <div class="col-12 col-md-3"><label>Genetics</label><select class="form-select" id="Genetics" onchange="toggleGeneticsType()"><option>No</option><option>Yes</option></select></div>
@@ -1359,7 +1424,8 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
             <div class="row g-2">
                 <div class="col-6 col-md-3"><label>Quadruple GDMT?</label><select class="form-select" id="Quad_GDMT"><option>No</option><option>Yes</option></select></div>
                 <div class="col-6 col-md-3"><label>On Maximum GDMT Doses?</label><select class="form-select" id="Max_GDMT"><option>No</option><option>Yes</option></select></div>
-                <div class="col-6 col-md-3"><label>Recovered LV?</label><select class="form-select" id="Recovered_LV"><option>No</option><option>Yes</option></select></div>
+                <div class="col-6 col-md-3"><label>Recovered LV?</label><select class="form-select" id="Recovered_LV" onchange="toggleRecoveredLVType()"><option>No</option><option>Yes</option></select></div>
+                <div class="col-6 col-md-3" id="recoveredLVTypeWrap" style="display:none;"><label>Recovery Type</label><select class="form-select" id="Recovered_LV_Type"><option value="">Select...</option><option>Fully recovered</option><option>Partially recovered</option></select></div>
                 <div class="col-6 col-md-3"><label>Mortality</label><select class="form-select" id="Mortality"><option>Alive</option><option>In-hospital</option><option>Out-of-hospital</option></select></div>
                 <div class="col-6 col-md-3"><label>Lost to Follow-up</label><select class="form-select" id="LostFU" onchange="toggleLostFU()"><option>No</option><option>Yes</option></select></div>
                 <div class="col-6 col-md-3" id="lostFUReasonWrap" style="display:none;"><label>Reason</label><select class="form-select" id="LostFU_Reason" onchange="toggleLostFU()"><option value="">Select...</option><option>Travel back home</option><option>Others</option></select></div>
@@ -1473,11 +1539,34 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
                     <div class="col-4 col-md-2"><label>SpO2 %</label><input type="number" class="form-control" id="V_SpO2" inputmode="numeric"></div>
                     <div class="col-4 col-md-2"><label>Height (cm)</label><input type="number" class="form-control" id="V_Height" oninput="calcVisitBMI()" inputmode="numeric"></div>
                     <div class="col-4 col-md-2"><label>Weight (kg)</label><input type="number" class="form-control" id="V_Weight" oninput="calcVisitBMI()" inputmode="numeric"></div>
+                    <div class="col-4 col-md-2"><label>Dry Weight (kg)</label><input type="number" class="form-control" id="V_Dry_Weight" inputmode="numeric"></div>
                     <div class="col-4 col-md-2"><label class="text-success fw-bold">BMI <span class="auto-badge"><i class="fa fa-lock"></i> Auto</span></label><input type="text" class="form-control bg-light text-success fw-bold" id="V_BMI" readonly></div>
                     <div class="col-4 col-md-2"><label>JVP</label><select class="form-select" id="V_JVP"><option>N</option><option>Raised</option></select></div>
                     <div class="col-4 col-md-2"><label>Pulm. Rales</label><select class="form-select" id="V_Rales"><option>N</option><option>Y</option></select></div>
                     <div class="col-4 col-md-2"><label>S3</label><select class="form-select" id="V_S3"><option>N</option><option>Y</option></select></div>
                     <div class="col-8 col-md-4"><label>Murmur</label><input type="text" class="form-control" id="V_Murmur" placeholder="e.g. ESM at apex, grade 3/6"></div>
+                    <div class="col-12"><hr class="my-2"></div>
+                    <!-- ===== VISIT COMORBIDITIES ===== -->
+                    <h6 class="col-12 text-secondary"><i class="fa fa-notes-medical"></i> Comorbidities <small class="text-muted fw-normal">(tap to toggle)</small></h6>
+                    <div class="col-12">
+                        <div class="pill-group" id="vPillComorbidities"></div>
+                    </div>
+                    <div class="col-12 col-md-6"><label>Other Comorbidities</label><input type="text" class="form-control" id="V_Comorbid_Others" placeholder="Any other co-conditions"></div>
+                    <!-- Hidden mirrors for each visit comorbidity (pill toggles write Yes/No here) -->
+                    <div style="display:none;">
+                        <select id="V_DM"><option>No</option><option>Yes</option></select>
+                        <select id="V_HTN"><option>No</option><option>Yes</option></select>
+                        <select id="V_AF"><option>No</option><option>Yes</option></select>
+                        <select id="V_CKD"><option>No</option><option>Yes</option></select>
+                        <select id="V_Dialysis"><option>No</option><option>Yes</option></select>
+                        <select id="V_CVA"><option>No</option><option>Yes</option></select>
+                        <select id="V_PVD"><option>No</option><option>Yes</option></select>
+                        <select id="V_Obese"><option>No</option><option>Yes</option></select>
+                        <select id="V_OSA"><option>No</option><option>Yes</option></select>
+                        <select id="V_Dyslipidemia"><option>No</option><option>Yes</option></select>
+                        <select id="V_Lung_Dz"><option>No</option><option>Yes</option></select>
+                        <select id="V_Liver_Dz"><option>No</option><option>Yes</option></select>
+                    </div>
                     <div class="col-12"><hr class="my-2"></div>
                     <h6 class="col-12 text-secondary">ECG</h6>
                     <div class="col-4 col-md-3"><label>LBBB</label><select class="form-select" id="V_LBBB"><option>No</option><option>Yes</option></select></div>
@@ -2187,6 +2276,15 @@ var VISIT_MED_GROUPS = [
         ]
     },
     {
+        label: 'Antiplatelets',
+        meds: [
+            {id:'V_ASA',       label:'ASA',         doses:['','75 mg PO OD','81 mg PO OD','100 mg PO OD','150 mg PO OD','300 mg PO OD']},
+            {id:'V_Plavix',    label:'Plavix',      doses:['','75 mg PO OD']},
+            {id:'V_Brilinta',  label:'Brilinta',    doses:['','60 mg PO BID','90 mg PO BID']},
+            {id:'V_Effient',   label:'Effient',     doses:['','5 mg PO OD','10 mg PO OD']}
+        ]
+    },
+    {
         label: 'Lipid Lowering',
         meds: [
             {id:'V_Zocor',    label:'Zocor',    doses:['','10 mg PO OD','20 mg PO OD','40 mg PO OD']},
@@ -2615,6 +2713,7 @@ function hideStickySave(){document.getElementById('stickySaveBar').classList.rem
 function initFormUI(){
     buildWizardProgress();
     buildPillComorbidities();
+    buildVisitPillComorbidities();
     buildMedSection7();
     buildVisitMedDoses();
     buildComplications();
@@ -2889,6 +2988,30 @@ function buildPillComorbidities(){
         html+='<div class="pill-toggle" data-field="'+c.id+'" onclick="togglePill(this)">'+c.label+'</div>';
     });
     document.getElementById('pillComorbidities').innerHTML=html;
+}
+
+// Build the same pill list for visit comorbidities. Pill data-field points at
+// V_<Id> hidden selects (V_DM, V_HTN, etc.) so the existing togglePill +
+// syncPillsFromData helpers handle Yes/No state.
+function buildVisitPillComorbidities(){
+    var box=document.getElementById('vPillComorbidities');
+    if(!box) return;
+    var html='';
+    PILL_COMORBIDITIES.forEach(function(c){
+        html+='<div class="pill-toggle" data-field="V_'+c.id+'" onclick="togglePill(this)">'+c.label+'</div>';
+    });
+    box.innerHTML=html;
+}
+
+// Read the V_<id> selects and apply the .active class to their matching pills.
+function syncVisitPillsFromData(){
+    PILL_COMORBIDITIES.forEach(function(c){
+        var sel=document.getElementById('V_'+c.id);
+        var pill=document.querySelector('#vPillComorbidities .pill-toggle[data-field="V_'+c.id+'"]');
+        if(sel && pill){
+            if(sel.value==='Yes') pill.classList.add('active'); else pill.classList.remove('active');
+        }
+    });
 }
 
 function togglePill(el){
@@ -3586,6 +3709,8 @@ var EXTRA_ADM_SCHEMA=[
    {k:'dischargeDate',l:'Discharge Date',t:'date',w:'col-6 col-md-3'},
    {k:'reason',l:'Reason / Notes',t:'text',w:'col-12 col-md-6',ph:'e.g. ADHF, ACS, arrhythmia...'},
    {k:'LOS',l:'Length of Stay (Days)',t:'num',w:'col-6 col-md-3'},
+   {k:'Admission_HF_Related',l:'Cause of Admission',t:'sel',o:['HF related','Other'],w:'col-6 col-md-3'},
+   {k:'Admission_Cause',l:'Specify Cause',t:'text',w:'col-12 col-md-6',ph:'e.g. pneumonia, sepsis, elective procedure...',gate:{k:'Admission_HF_Related',v:'Other'}},
    {k:'Transfer_Other',l:'Transfer to Other Hospital',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
    {k:'Transfer_Hospital_Name',l:'Name of Hospital',t:'text',w:'col-12 col-md-6',ph:'e.g. Chest Hospital, Amiri...',gate:{k:'Transfer_Other',v:'Yes'}}
  ]},
@@ -3709,8 +3834,23 @@ var EXTRA_ADM_SCHEMA=[
    {k:'PCI_CABG_Details',l:'Procedure Details (vessels, stents, grafts, etc.)',t:'text',w:'col-12 col-md-8',ph:'e.g. LAD DES x1, RCA POBA; LIMA-LAD, SVG-OM',gate:{k:'PCI_CABG',contains:'PCI'}},
    // Detail fields not represented in the pill row
    {k:'Smoker',l:'Smoking Status',t:'sel',o:['Never','Current','Former'],w:'col-12 col-md-6'},
-   {k:'Valve_Surgery',l:'Valve Repair / Replacement',t:'sel',o:['No','Repair','Replacement'],w:'col-12 col-md-3'},
-   {k:'Valve_Surgery_Date',l:'Date of Procedure',t:'date',w:'col-12 col-md-3',gate:{k:'Valve_Surgery',in:['Repair','Replacement']}},
+   {k:'Valve_Intervention',l:'Valve Intervention',t:'sel',o:['No','Yes'],w:'col-12 col-md-3'},
+   // Surgical Repair (valves + date) — gated on Valve_Intervention=Yes
+   {k:'Valve_Repair_Valves',l:'Surgical Repair (valves)',t:'btnmulti',o:['Aortic','Mitral','Tricuspid','Pulmonary'],w:'col-12',gate:{k:'Valve_Intervention',v:'Yes'}},
+   {k:'Valve_Repair_Date',l:'Surgical Repair Date',t:'date',w:'col-6 col-md-3',gate:{k:'Valve_Repair_Valves',notEmpty:true}},
+   // Surgical Replacement (valves + type + date) — gated on Valve_Intervention=Yes
+   {k:'Valve_Replace_Valves',l:'Surgical Replacement (valves)',t:'btnmulti',o:['Aortic','Mitral','Tricuspid','Pulmonary'],w:'col-12',gate:{k:'Valve_Intervention',v:'Yes'}},
+   {k:'Valve_Replace_Type',l:'Prosthesis Type',t:'sel',o:['','Metallic','Bioprosthetic'],w:'col-6 col-md-3',gate:{k:'Valve_Replace_Valves',notEmpty:true}},
+   {k:'Valve_Replace_Date',l:'Surgical Replacement Date',t:'date',w:'col-6 col-md-3',gate:{k:'Valve_Replace_Valves',notEmpty:true}},
+   // Percutaneous procedures — gated on Valve_Intervention=Yes
+   {k:'Valve_Percutaneous',l:'Percutaneous Procedure',t:'sel',o:['No','Yes'],w:'col-6 col-md-3',gate:{k:'Valve_Intervention',v:'Yes'}},
+   {k:'Valve_MVClip',l:'MV Clip',t:'sel',o:['No','Yes'],w:'col-6 col-md-3',gate:{k:'Valve_Percutaneous',v:'Yes'}},
+   {k:'Valve_MVClip_Date',l:'MV Clip Date',t:'date',w:'col-6 col-md-3',gate:{k:'Valve_MVClip',v:'Yes'}},
+   {k:'Valve_TVClip',l:'TV Clip',t:'sel',o:['No','Yes'],w:'col-6 col-md-3',gate:{k:'Valve_Percutaneous',v:'Yes'}},
+   {k:'Valve_TVClip_Date',l:'TV Clip Date',t:'date',w:'col-6 col-md-3',gate:{k:'Valve_TVClip',v:'Yes'}},
+   {k:'Valve_TAVI',l:'TAVI',t:'sel',o:['No','Yes'],w:'col-6 col-md-3',gate:{k:'Valve_Percutaneous',v:'Yes'}},
+   {k:'Valve_TAVI_Date',l:'TAVI Date',t:'date',w:'col-6 col-md-3',gate:{k:'Valve_TAVI',v:'Yes'}},
+   {k:'Valve_Percutaneous_Other',l:'Other Percutaneous Procedures',t:'text',w:'col-12 col-md-6',ph:'Specify...',gate:{k:'Valve_Percutaneous',v:'Yes'}},
    {k:'Thyroid_Dz',l:'Thyroid Disease',t:'sel',o:['No','Hyperthyroid','Hypothyroid'],w:'col-12 col-md-3'},
    {k:'FH_Cardio',l:'Family History (Cardio)',t:'sel',o:['No','Yes'],w:'col-12 col-md-3'},
    {k:'Genetics',l:'Genetics',t:'sel',o:['No','Yes'],w:'col-12 col-md-3'},
@@ -3793,7 +3933,7 @@ var EXTRA_ADM_SCHEMA=[
    {k:'Med_Fibrate',l:'Fibrate',t:'sel',o:['None','Fibrates'],w:'col-6 col-md-3'},
    {k:'Med_Omega3',l:'Omega-3',t:'sel',o:['None','Omacor','Vascepa'],w:'col-6 col-md-3'},
    {k:'Med_Nicotine',l:'Nicotine Patches',t:'sel',o:['None','Nicotine Patch'],w:'col-6 col-md-3'},
-   {k:'Med_Antiplat',l:'Antiplatelets',t:'sel',o:['None','ASA','Plavix','Brilinta','Effient'],w:'col-6 col-md-3'},
+   {k:'Med_Antiplat',l:'Antiplatelets',t:'btnmulti',o:['ASA','Plavix 75','Brilinta 90','Brilinta 60'],w:'col-12'},
    {k:'Med_OAC',l:'OAC',t:'sel',o:['None','Warfarin','Eliquis','Xarelto'],w:'col-6 col-md-3'},
    {k:'Med_Arrhythmia',l:'Anti-arrhythmic',t:'sel',o:['None','Cordarone (oral)','Cordarone (infusion)','Flecainide','Sotalol','Propafenone'],w:'col-6 col-md-3'},
    {k:'Med_Digoxin',l:'Digoxin',t:'sel',o:['None','Digoxin'],w:'col-6 col-md-3'},
@@ -3812,6 +3952,7 @@ var EXTRA_ADM_SCHEMA=[
    {k:'Quad_GDMT',l:'Quadruple GDMT?',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
    {k:'Max_GDMT',l:'On Maximum GDMT Doses?',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
    {k:'Recovered_LV',l:'Recovered LV?',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
+   {k:'Recovered_LV_Type',l:'Recovery Type',t:'sel',o:['','Fully recovered','Partially recovered'],w:'col-6 col-md-3',gate:{k:'Recovered_LV',v:'Yes'}},
    {k:'Mortality',l:'Mortality',t:'sel',o:['Alive','In-hospital','Out-of-hospital'],w:'col-6 col-md-3'},
    {k:'LostFU',l:'Lost to Follow-up',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
    {k:'LostFU_Reason',l:'LTFU Reason',t:'sel',o:['','Travel back home','Others'],w:'col-6 col-md-3',gate:{k:'LostFU',v:'Yes'}},
@@ -3843,6 +3984,9 @@ function _esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g
 function _gateOpen(gate, adm){
     if(!gate) return true;
     var cur=adm[gate.k];
+    if(gate.notEmpty){
+        return cur!=null && String(cur).trim()!=='' && String(cur).trim().toLowerCase()!=='no';
+    }
     if(gate.contains!=null){
         var list=String(cur||'').split(',').map(function(s){return s.trim();});
         return list.indexOf(gate.contains)>=0;
@@ -4084,7 +4228,6 @@ function _extraAdmCardHtml(adm, idx){
         h+='<div class="ft-head" onclick="toggleExtraAdmSection(\''+gid+'\')">';
         h+='<i class="fa '+grp.icon+'"></i><span>'+grp.sec+'</span>';
         h+='<i class="fa fa-chevron-right ft-chev ms-auto"></i>';
-        h+='<span class="ft-filled'+(filled>0?' has-data':'')+'">'+filled+' filled</span>';
         h+='</div>';
         h+='<div class="ft-body" id="'+gid+'_body">'+_extraSectionBodyHtml(grp, adm, idx)+'</div>';
         h+='</div>';
@@ -4466,6 +4609,139 @@ function toggleValveSurgeryDate(){
     }else{
         wrap.style.display='none';
         var d=document.getElementById('Valve_Surgery_Date');if(d)d.value='';
+    }
+}
+// ===== Valve Intervention block (Repair / Replacement / Percutaneous) =====
+// Toggles the master wrap and syncs the legacy Valve_Surgery field so MAGGIC
+// and exports continue to work.
+function toggleValveInterventionBlock(){
+    var sel=document.getElementById('Valve_Intervention');
+    var wrap=document.getElementById('valveInterventionWrap');
+    if(!sel||!wrap) return;
+    if(sel.value==='Yes'){
+        wrap.style.display='block';
+    } else {
+        wrap.style.display='none';
+        // clear nested fields so stale data doesn't bleed into export
+        ['Valve_Repair_Valves','Valve_Repair_Date','Valve_Replace_Valves','Valve_Replace_Type','Valve_Replace_Date',
+         'Valve_Percutaneous','Valve_MVClip','Valve_MVClip_Date','Valve_TVClip','Valve_TVClip_Date',
+         'Valve_TAVI','Valve_TAVI_Date','Valve_Percutaneous_Other'].forEach(function(id){
+            var el=document.getElementById(id); if(el) el.value = (el.tagName==='SELECT' ? (el.options[0]?el.options[0].value:'') : '');
+        });
+        // reset button states
+        document.querySelectorAll('#valveRepairBox button, #valveReplaceBox button').forEach(function(b){
+            b.classList.remove('btn-primary');b.classList.add('btn-outline-primary');
+        });
+        var pw=document.getElementById('valvePercutaneousWrap'); if(pw) pw.style.display='none';
+    }
+    syncValveLegacy();
+}
+function toggleValvePercutaneousBlock(){
+    var sel=document.getElementById('Valve_Percutaneous');
+    var wrap=document.getElementById('valvePercutaneousWrap');
+    if(!sel||!wrap) return;
+    wrap.style.display = (sel.value==='Yes') ? 'block' : 'none';
+    if(sel.value!=='Yes'){
+        ['Valve_MVClip','Valve_TVClip','Valve_TAVI'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='No';});
+        ['Valve_MVClip_Date','Valve_TVClip_Date','Valve_TAVI_Date','Valve_Percutaneous_Other'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
+    }
+}
+// Multi-select toggle for surgical-repair valve buttons (Aortic/Mitral/Tricuspid/Pulmonary).
+function toggleValveRepairOpt(opt){
+    _toggleValveButtonGroup('Valve_Repair_Valves', 'valveRepairBox', 'valverepair', opt);
+    var wrap=document.getElementById('valveRepairDateWrap');
+    if(wrap) wrap.style.display = (document.getElementById('Valve_Repair_Valves').value ? 'block' : 'none');
+    syncValveLegacy();
+}
+// Multi-select toggle for surgical-replacement valve buttons.
+function toggleValveReplaceOpt(opt){
+    _toggleValveButtonGroup('Valve_Replace_Valves', 'valveReplaceBox', 'valvereplace', opt);
+    var hasAny = !!document.getElementById('Valve_Replace_Valves').value;
+    var tw=document.getElementById('valveReplaceTypeWrap');
+    var dw=document.getElementById('valveReplaceDateWrap');
+    if(tw) tw.style.display = hasAny ? 'block' : 'none';
+    if(dw) dw.style.display = hasAny ? 'block' : 'none';
+    syncValveLegacy();
+}
+// Shared button-group toggle helper for the valve sub-pickers.
+function _toggleValveButtonGroup(hiddenId, boxId, dataAttr, opt){
+    var hidden=document.getElementById(hiddenId);
+    if(!hidden) return;
+    var picked=String(hidden.value||'').split(',').map(function(s){return s.trim();}).filter(Boolean);
+    var pos=picked.indexOf(opt);
+    var btn=document.querySelector('#'+boxId+' button[data-'+dataAttr+'="'+opt+'"]');
+    if(pos>=0){
+        picked.splice(pos,1);
+        if(btn){btn.classList.remove('btn-primary');btn.classList.add('btn-outline-primary');}
+    } else {
+        picked.push(opt);
+        if(btn){btn.classList.remove('btn-outline-primary');btn.classList.add('btn-primary');}
+    }
+    hidden.value = picked.join(', ');
+}
+// Sync the legacy Valve_Surgery (No/Repair/Replacement) field from the new
+// granular fields so MAGGIC, exports, and other legacy consumers keep working.
+function syncValveLegacy(){
+    var legacy=document.getElementById('Valve_Surgery');
+    if(!legacy) return;
+    var hasRepair = !!(document.getElementById('Valve_Repair_Valves')||{}).value;
+    var hasReplace = !!(document.getElementById('Valve_Replace_Valves')||{}).value;
+    var v = 'No';
+    if(hasReplace) v = 'Replacement';
+    else if(hasRepair) v = 'Repair';
+    legacy.value = v;
+    if(typeof calcMAGGIC==='function') calcMAGGIC();
+}
+// Re-apply visible button-group states after saved data is restored.
+function restoreValveInterventionUI(){
+    function paint(hiddenId, boxId, dataAttr){
+        var hidden=document.getElementById(hiddenId);
+        if(!hidden) return;
+        var picked=String(hidden.value||'').split(',').map(function(s){return s.trim();}).filter(Boolean);
+        document.querySelectorAll('#'+boxId+' button').forEach(function(b){
+            var v=b.getAttribute('data-'+dataAttr);
+            if(picked.indexOf(v)>=0){b.classList.remove('btn-outline-primary');b.classList.add('btn-primary');}
+            else {b.classList.remove('btn-primary');b.classList.add('btn-outline-primary');}
+        });
+    }
+    paint('Valve_Repair_Valves','valveRepairBox','valverepair');
+    paint('Valve_Replace_Valves','valveReplaceBox','valvereplace');
+    // Apply visibility based on data presence
+    var vi=document.getElementById('Valve_Intervention');
+    if(vi && vi.value==='Yes'){
+        var w=document.getElementById('valveInterventionWrap'); if(w) w.style.display='block';
+    }
+    var hasRep = !!(document.getElementById('Valve_Repair_Valves')||{}).value;
+    var rdw=document.getElementById('valveRepairDateWrap'); if(rdw) rdw.style.display = hasRep ? 'block' : 'none';
+    var hasReplace = !!(document.getElementById('Valve_Replace_Valves')||{}).value;
+    ['valveReplaceTypeWrap','valveReplaceDateWrap'].forEach(function(id){
+        var w=document.getElementById(id); if(w) w.style.display = hasReplace ? 'block' : 'none';
+    });
+    var pc=document.getElementById('Valve_Percutaneous');
+    var pw=document.getElementById('valvePercutaneousWrap'); if(pw) pw.style.display = (pc && pc.value==='Yes') ? 'block' : 'none';
+}
+// Show/hide the free-text "Specify Cause" when the admission isn't HF-related.
+function toggleAdmissionCause(){
+    var sel=document.getElementById('Admission_HF_Related');
+    var wrap=document.getElementById('admissionCauseWrap');
+    if(!sel||!wrap) return;
+    if(sel.value==='Other'){
+        wrap.style.display='block';
+    } else {
+        wrap.style.display='none';
+        var t=document.getElementById('Admission_Cause'); if(t) t.value='';
+    }
+}
+// Show the Recovered_LV_Type detail (Fully/Partially) when Recovered_LV is Yes.
+function toggleRecoveredLVType(){
+    var sel=document.getElementById('Recovered_LV');
+    var wrap=document.getElementById('recoveredLVTypeWrap');
+    if(!sel||!wrap) return;
+    if(sel.value==='Yes'){
+        wrap.style.display='block';
+    } else {
+        wrap.style.display='none';
+        var t=document.getElementById('Recovered_LV_Type'); if(t) t.value='';
     }
 }
 function toggleCTAngioDetails(){
@@ -5337,6 +5613,8 @@ function editVisit(visitId){
     // Restore visit Pacing-in-ECG conditional + Holter conditional fields
     if(typeof toggleVisitPacingMode==='function')toggleVisitPacingMode();
     if(typeof toggleVisitHolter==='function')toggleVisitHolter();
+    // Restore visit comorbidity pills from the V_<id> hidden selects
+    if(typeof syncVisitPillsFromData==='function') syncVisitPillsFromData();
     // Rebuild the vaccination block. Suppression must EXCLUDE the visit being
     // edited (so its own dose doesn't lock its own inputs), then sync the
     // visible Yes/No + date controls from the hidden V_Vacc_* fields.
@@ -6218,6 +6496,9 @@ function editPt(id){
     if(typeof toggleCTAngioDetails==='function')toggleCTAngioDetails();
     if(typeof toggleLostFU==='function')toggleLostFU();
     if(typeof toggleValveSurgeryDate==='function')toggleValveSurgeryDate();
+    if(typeof restoreValveInterventionUI==='function')restoreValveInterventionUI();
+    if(typeof toggleAdmissionCause==='function')toggleAdmissionCause();
+    if(typeof toggleRecoveredLVType==='function')toggleRecoveredLVType();
     // Restore Other Symptoms checkboxes from hidden field
     if(typeof unpackOtherSymptoms==='function')unpackOtherSymptoms();
     // Legacy migration: old single-value Med_Arrhythmia "Cordarone" -> "Cordarone (oral)"
