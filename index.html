@@ -2279,6 +2279,9 @@ img,canvas,table,svg{max-width:100%;}
                 <button class="btn btn-sm btn-primary" onclick="exportAllPatientsSPSS()" title="Download all patients as SPSS-ready CSV (one row per patient)">
                     <i class="fa fa-file-csv me-1"></i>Export All (SPSS / CSV)
                 </button>
+                <button class="btn btn-sm btn-info" onclick="exportAllVisitsSPSS()" title="Download all visits as SPSS-ready long-format CSV (one row per visit, keyed by _PatientID)">
+                    <i class="fa fa-wave-square me-1"></i>Export Visits (SPSS / Long)
+                </button>
                 <button class="btn btn-sm btn-warning" onclick="findDuplicates()" title="Find likely duplicate records and merge them">
                     <i class="fa fa-user-friends me-1"></i>Find &amp; Merge Duplicates
                 </button>
@@ -8088,14 +8091,20 @@ function _logRank(strata){
             V[j]+=nj*(totalAtRisk-nj)*totalEvents*(totalAtRisk-totalEvents)/(totalAtRisk*totalAtRisk*(totalAtRisk-1));
         });
     });
-    // Use first k-1 strata for chi-square (1 df per extra stratum)
+    // Proper log-rank statistic.
+    //  - Two groups (k=2): chi-square on 1 df = (O1-E1)^2 / V1  (V already accumulated above).
+    //  - k>2 groups: fall back to the sum( (O-E)^2/E ) approximation on k-1 df, since a
+    //    fully correct multi-group test needs the covariance matrix (not just diagonal V).
     var k=strata.length;
     if(k<2) return {chi2:NaN,df:0,p:NaN};
-    // Simple version: sum( (O-E)^2/E ) -> approximate chi-square with k-1 df
+    if(k===2){
+        var chi2_2 = V[0]>0 ? Math.pow(O[0]-E[0],2)/V[0] : 0;
+        return {chi2:chi2_2,df:1,p:Stats.chiSquarePvalue(chi2_2,1),O:O,E:E,V:V};
+    }
     var chi2=0;
     for(var j=0;j<k;j++) if(E[j]>0) chi2 += Math.pow(O[j]-E[j],2)/E[j];
     var df=k-1;
-    return {chi2:chi2,df:df,p:Stats.chiSquarePvalue(chi2,df),O:O,E:E};
+    return {chi2:chi2,df:df,p:Stats.chiSquarePvalue(chi2,df),O:O,E:E,V:V};
 }
 
 function buildSurvival(){
@@ -8769,7 +8778,15 @@ function exportAllPatientsSPSS(){
         // Fields to treat as numeric (empty -> blank, else parseFloat)
         var NUMERIC_FIELDS = {
             Age:1,EF_Diagnosis:1,Admissions:1,LOS:1,Height:1,Weight:1,BMI:1,Dry_Weight:1,
-            Pulse:1,SpO2:1,MAGGIC_Score:1,HF_Dur:1
+            Pulse:1,SpO2:1,MAGGIC_Score:1,HF_Dur:1,KCCQ:1,
+            // baseline labs (kept numeric so SPSS reads them as scale, matching the codebook)
+            Lab_HbA1c:1,Lab_Gluc:1,Lab_Urea:1,Lab_Creat:1,Lab_eGFR:1,Lab_Na:1,Lab_K:1,
+            Lab_Urea_Disch:1,Lab_Creat_Disch:1,Lab_eGFR_Disch:1,Lab_Na_Disch:1,Lab_K_Disch:1,
+            Lab_BNP:1,Lab_BNP_Disch:1,Lab_BNP_only:1,Lab_BNP_only_Disch:1,
+            Lab_Iron:1,Lab_Ferritin:1,Lab_TrSats:1,
+            Lab_Hb:1,Lab_Hb_Disch:1,Lab_WBC:1,Lab_Plt:1,
+            Lab_TSH:1,Lab_FreeT4:1,
+            Lab_TotalChol:1,Lab_LDL:1,Lab_HDL:1,Lab_TG:1,Lab_AlbCreat:1
         };
         // Fields with embedded categoricals — keep as text (Mobile, File_No, Civil_ID stored as text to preserve leading zeros)
         var TEXT_ID_FIELDS = {Civil_ID:1,File_No:1,Mobile:1};
@@ -8853,6 +8870,98 @@ function exportAllPatientsSPSS(){
     }).catch(function(e){
         document.getElementById("popOv") && document.getElementById("popOv").remove();
         showPopup("error","Export Failed",e.message);
+    });
+}
+
+/* ===== LONG-FORMAT VISIT EXPORT (SPSS / repeated-measures) =====
+   One row per patient-VISIT. Keyed by _PatientID + VisitSeq so it merges with the
+   patient-level SPSS file (Data > Merge Files > Add Variables, key = _PatientID).
+   Use this for trajectories, mixed models, or time-to-event setups in SPSS. */
+function exportAllVisitsSPSS(){
+    showPopup("warning","Preparing Export","Building long-format visit CSV (one row per visit)...");
+
+    // Analytically useful visit fields. (Free-text/notes deliberately excluded to keep it tidy.)
+    var V_NUMERIC = ['V_KCCQ','V_Pulse','V_SpO2','V_Weight','V_QRS',
+        'V_Echo_EDVI','V_Echo_ESVI','V_Echo_EF','V_CMR_LVEDVI','V_CMR_LVESVI','V_CMR_LVEF','V_CMR_RVEDI','V_CMR_RVEF','V_CMR_LGE_Pct',
+        'V_Walk_Meters','V_CPET_PeakVO2','V_CPET_VEVCO2','V_CPET_RER','V_CPET_AT','V_CPET_VO2HR','V_CPET_PetCO2',
+        'V_RHC_CI','V_RHC_RAP','V_RHC_RVP','V_RHC_PCWP','V_RHC_PAP','V_RHC_PVR','V_RHC_PAPi','V_RHC_MVO2',
+        'V_HbA1c','V_Gluc','V_Urea','V_Creat','V_eGFR','V_Na','V_K','V_BNP','V_NTproBNP','V_INR',
+        'V_Iron','V_Transferrin','V_Ferritin','V_WBC','V_Hb','V_Plt','V_TSH','V_FreeT4',
+        'V_TotalChol','V_LDL','V_HDL','V_TG'];
+    var V_BINARY = ['V_Holter_Done','V_RHC_Done','V_Walk_Completed','V_Quad_GDMT','V_Max_GDMT',
+        'V_Recovered_LV','V_Strong_HF','V_Adv_HF_Therapy'];
+    var V_TEXT = ['V_NYHA','V_Fatigue','V_Edema','V_BP','V_JVP','V_Rales','V_S3','V_LBBB','V_Arrhythmia',
+        'V_Pacing_ECG','V_Pacing_Mode','V_EF_Change','V_Compliance','V_Mortality','V_LostFU',
+        'V_Advanced_HF_Outcome','V_Adv_HF_Therapy_Type','V_Referral'];
+
+    function toBin(v){
+        if(v===undefined||v===null||v==='') return '';
+        var s=String(v).trim().toLowerCase();
+        if(s==='yes'||s==='y'||s==='1'||s==='true') return '1';
+        if(s==='no'||s==='n'||s==='0'||s==='false') return '0';
+        return '';
+    }
+    function toNum(v){
+        if(v===undefined||v===null||v==='') return '';
+        var n=parseFloat(String(v).replace(/[^\d.\-]/g,''));
+        return isNaN(n)?'':n;
+    }
+    function csvEscape(v){
+        if(v===null||v===undefined) return '';
+        var s=String(v);
+        if(s.indexOf(',')!==-1||s.indexOf('"')!==-1||s.indexOf('\n')!==-1) return '"'+s.replace(/"/g,'""')+'"';
+        return s;
+    }
+    function cleanName(f){ return f.replace(/^V_/,''); } // column header without the V_ prefix
+
+    var headers = ['_PatientID','File_No','VisitSeq','VisitDate','VisitType']
+        .concat(V_NUMERIC.map(cleanName))
+        .concat(V_BINARY.map(cleanName))
+        .concat(V_TEXT.map(cleanName));
+    var lines = [headers.join(',')];
+
+    // Pull every patient, then their visits (oldest first so VisitSeq is chronological).
+    db.collection("patients").get().then(function(snap){
+        if(snap.size===0){
+            document.getElementById("popOv") && document.getElementById("popOv").remove();
+            showPopup("error","No Data","Registry is empty.");
+            return Promise.reject(new Error("empty"));
+        }
+        var patients=[];
+        snap.forEach(function(doc){ patients.push({id:doc.id, file:(doc.data().File_No||'')}); });
+
+        var jobs = patients.map(function(p){
+            return db.collection("patients").doc(p.id).collection("visits").orderBy("visitDate","asc").get()
+                .then(function(vs){
+                    var seq=0;
+                    vs.forEach(function(vdoc){
+                        seq++;
+                        var v=vdoc.data();
+                        var row=[ p.id, "'"+p.file, seq, csvEscape(v.visitDate||''), csvEscape(v.visitType||'') ];
+                        V_NUMERIC.forEach(function(f){ row.push(toNum(v[f])); });
+                        V_BINARY.forEach(function(f){ row.push(toBin(v[f])); });
+                        V_TEXT.forEach(function(f){ row.push(csvEscape(v[f]!==undefined?v[f]:'')); });
+                        lines.push(row.join(','));
+                    });
+                })
+                .catch(function(){ /* skip patients whose visits fail to load */ });
+        });
+
+        return Promise.all(jobs).then(function(){
+            var csv='\uFEFF'+lines.join('\r\n');
+            var blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+            var link=document.createElement('a');
+            link.href=URL.createObjectURL(blob);
+            link.download="HF_Registry_SPSS_Visits_Long_"+new Date().toISOString().split('T')[0]+".csv";
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+            document.getElementById("popOv") && document.getElementById("popOv").remove();
+            var nRows=lines.length-1;
+            showPopup("success","Visit Export Ready",
+                nRows+" visit rows (long format) downloaded. In SPSS: merge with the patient file using key _PatientID, or analyze directly as repeated measures sorted by _PatientID then VisitSeq.");
+        });
+    }).catch(function(e){
+        document.getElementById("popOv") && document.getElementById("popOv").remove();
+        if(e && e.message!=='empty') showPopup("error","Export Failed",e.message);
     });
 }
 
