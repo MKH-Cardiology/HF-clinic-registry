@@ -1871,8 +1871,9 @@ img,canvas,table,svg{max-width:100%;}
                     <div class="col-4 col-md-2"><label>Pulm. Rales</label><select class="form-select" id="V_Rales"><option>N</option><option>Y</option></select></div>
                     <div class="col-4 col-md-2"><label>S3</label><select class="form-select" id="V_S3"><option>N</option><option>Y</option></select></div>
                     <div class="col-8 col-md-4"><label>Murmur</label><input type="text" class="form-control" id="V_Murmur" placeholder="e.g. ESM at apex, grade 3/6"></div>
+                    <!-- ===== VISIT COMORBIDITIES (mirrors admission structure) — first visit only ===== -->
+                    <div class="col-12 row g-2 mx-0 px-0" id="vComorbiditiesSection">
                     <div class="col-12"><hr class="my-2"></div>
-                    <!-- ===== VISIT COMORBIDITIES (mirrors admission structure) ===== -->
                     <h6 class="col-12 text-secondary"><i class="fa fa-notes-medical"></i> Comorbidities <small class="text-muted fw-normal">(tap to toggle)</small></h6>
                     <div class="col-12">
                         <div class="pill-group" id="vPillComorbidities"></div>
@@ -1975,6 +1976,7 @@ img,canvas,table,svg{max-width:100%;}
                         <select id="V_Lung_Dz"><option>No</option><option>Yes</option></select>
                         <select id="V_Liver_Dz"><option>No</option><option>Yes</option></select>
                     </div>
+                    </div><!-- /#vComorbiditiesSection -->
                     <div class="col-12"><hr class="my-2"></div>
                     <h6 class="col-12 text-secondary">ECG</h6>
                     <div class="col-4 col-md-3"><label>LBBB</label><select class="form-select" id="V_LBBB"><option>No</option><option>Yes</option></select></div>
@@ -6410,6 +6412,8 @@ function editVisit(visitId){
     if(typeof syncVisitPillsFromData==='function') syncVisitPillsFromData();
     // Restore visit Comorbidities sub-UI (PCI/CABG buttons, valve intervention block, genetics)
     if(typeof restoreVisitComorbidUI==='function') restoreVisitComorbidUI();
+    // First-visit-only: show Comorbidities section only when editing the earliest visit.
+    if(typeof updateVisitComorbiditiesVisibility==='function') updateVisitComorbiditiesVisibility();
     // Rebuild the vaccination block. Suppression must EXCLUDE the visit being
     // edited (so its own dose doesn't lock its own inputs), then sync the
     // visible Yes/No + date controls from the hidden V_Vacc_* fields.
@@ -6542,6 +6546,28 @@ function clearEcgImage(hiddenId,fileId,previewId,metaId){
     var m=document.getElementById(metaId);if(m)m.textContent='';
 }
 
+// ===== Show the visit Comorbidities section ONLY for the first visit =====
+// First visit = the patient has no saved visits yet (when adding), or the
+// visit being edited is the chronologically earliest one on record.
+function updateVisitComorbiditiesVisibility(){
+    var sec = document.getElementById('vComorbiditiesSection');
+    if(!sec) return;
+    var isFirst;
+    if(editingVisitId){
+        // Editing: only show on the earliest (oldest) visit.
+        var earliest = null;
+        (visits||[]).forEach(function(v){
+            var k = v._displayDate || _normalizeDisplayDate(v.visitDate);
+            if(earliest===null || k < earliest.key){ earliest = {id:v.id, key:k}; }
+        });
+        isFirst = earliest ? (earliest.id === editingVisitId) : true;
+    } else {
+        // Adding a new visit: first only if no visits exist yet.
+        isFirst = !visits || visits.length === 0;
+    }
+    sec.style.display = isFirst ? '' : 'none';
+}
+
 function clearVisitForm(){
     document.querySelectorAll('[id^="V_"]').forEach(function(el){if(el.tagName==='SELECT'){el.selectedIndex=0;}else if(el.type==='checkbox'){el.checked=false;}else{el.value="";}});
     document.getElementById("Visit_Date").value="";document.getElementById("Next_Appt").value="";document.getElementById("Visit_Type").value="Routine";
@@ -6575,6 +6601,8 @@ function clearVisitForm(){
     // all existing visits, none excluded).
     _vaccPriorDoses = computeVaccPriorDoses(visits, null);
     buildVaccBlock();
+    // First-visit-only: hide Comorbidities section on follow-up visits.
+    if(typeof updateVisitComorbiditiesVisibility==='function') updateVisitComorbiditiesVisibility();
 }
 
 // ===== CHANGE 4: COLLAPSIBLE VISIT HISTORY =====
@@ -6601,6 +6629,8 @@ function loadVisits(patientId){
             _vaccPriorDoses = computeVaccPriorDoses(visits, editingVisitId||null);
             if(!editingVisitId && typeof buildVaccBlock==='function') buildVaccBlock();
         }
+        // First-visit-only: refresh Comorbidities section visibility now visits are known.
+        if(typeof updateVisitComorbiditiesVisibility==='function') updateVisitComorbiditiesVisibility();
     });
 }
 
