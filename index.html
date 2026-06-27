@@ -1209,12 +1209,12 @@ img,canvas,table,svg{max-width:100%;}
             <div class="row g-2">
                 <div class="col-6 col-md-3"><label class="text-primary fw-bold">Entered By *</label><select class="form-select border-primary" id="Doctor_Name"><option value="">Select...</option><option>Dr Farouk</option><option>Dr Badawy</option><option>Dr Ali</option><option>Dr Hamza</option><option>Dr Ahmed</option></select></div>
                 <div class="col-6 col-md-3"><label>Name *</label><input type="text" class="form-control" id="Patient_Name"></div>
-                <div class="col-6 col-md-3"><label>Civil ID * (12 digits)</label><input type="text" class="form-control" id="Civil_ID" inputmode="numeric" pattern="[0-9]*" maxlength="12" oninput="validateCivilID(this)" onkeypress="return isNumberKey(event)"><small class="error-msg" id="civilError">Must be exactly 12 digits</small></div>
-                <div class="col-6 col-md-3"><label>File No * (6 digits)</label><input type="text" class="form-control" id="File_No" inputmode="numeric" pattern="[0-9]*" maxlength="6" oninput="validateFileNo(this)" onkeypress="return isNumberKey(event)"><small class="error-msg" id="fileError">Must be exactly 6 digits</small></div>
-                <div class="col-4 col-md-2"><label>Age</label><input type="number" class="form-control" id="Age" inputmode="numeric" oninput="calcBaselineEGFR(); calcMAGGIC(); calcEGFR(); if(typeof _recalcAllExtraAdmDerived==='function')_recalcAllExtraAdmDerived();"></div>
+                <div class="col-6 col-md-3"><label>Civil ID * (12 digits)</label><input type="text" class="form-control" id="Civil_ID" inputmode="text" pattern="[0-9]*" maxlength="12" oninput="validateCivilID(this)" onkeypress="return isNumberKey(event)"><small class="error-msg" id="civilError">Must be exactly 12 digits</small></div>
+                <div class="col-6 col-md-3"><label>File No * (6 digits)</label><input type="text" class="form-control" id="File_No" inputmode="text" pattern="[0-9]*" maxlength="6" oninput="validateFileNo(this)" onkeypress="return isNumberKey(event)"><small class="error-msg" id="fileError">Must be exactly 6 digits</small></div>
+                <div class="col-4 col-md-2"><label>Age</label><input type="text" class="form-control" id="Age" inputmode="text" oninput="calcBaselineEGFR(); calcMAGGIC(); calcEGFR(); if(typeof _recalcAllExtraAdmDerived==='function')_recalcAllExtraAdmDerived();"></div>
                 <div class="col-4 col-md-2"><label>Gender</label><select class="form-select" id="Gender" onchange="calcBaselineEGFR(); calcMAGGIC(); calcEGFR(); if(typeof _recalcAllExtraAdmDerived==='function')_recalcAllExtraAdmDerived();"><option value="">Select...</option><option>Male</option><option>Female</option></select></div>
                 <div class="col-4 col-md-4"><label>Nationality</label><select class="form-select" id="Nationality"><option value="">Select...</option></select></div>
-                <div class="col-12 col-md-4"><label>Mobile *</label><input type="tel" class="form-control" id="Mobile" inputmode="tel" required><small class="error-msg" id="mobileError">Mobile number is required</small></div>
+                <div class="col-12 col-md-4"><label>Mobile *</label><input type="text" class="form-control" id="Mobile" inputmode="text" required><small class="error-msg" id="mobileError">Mobile number is required</small></div>
                 <div class="col-12 col-md-4"><label>Referred From</label><select class="form-select" id="Referred_From" onchange="toggleReferredFromOther()"><option value="">Select...</option><option>Medical Ward</option><option>Cardiology Ward</option><option>OPD</option><option>ER / A&amp;E</option><option>Other Hospital</option><option>Self / Walk-in</option><option>Other</option></select></div>
                 <div class="col-12 col-md-4" id="referredFromOtherWrap" style="display:none;"><label>Specify Referral Source</label><input type="text" class="form-control" id="Referred_From_Other" placeholder="Specify..."></div>
             </div>
@@ -1236,7 +1236,7 @@ img,canvas,table,svg{max-width:100%;}
             <div class="row g-2">
                 <div class="col-6 col-md-3"><label>Type of HF</label><select class="form-select" id="HF_Type" onchange="toggleHFTypeOther(); applyPhenotypeEmphasis(); updateGDMTRationale();"><option value="">Select...</option><option>HFrEF</option><option>HFmrEF</option><option>HFpEF</option><option>RT side HF</option><option>Others</option></select></div>
                 <div class="col-6 col-md-3" id="hfTypeOtherWrap" style="display:none;"><label>Specify Other HF Type</label><input type="text" class="form-control" id="HF_Type_Other" placeholder="e.g. mixed, biventricular..."></div>
-                <div class="col-6 col-md-2"><label>EF at Diagnosis (%)</label><input type="number" class="form-control" id="EF_Diagnosis" inputmode="numeric" oninput="calcMAGGIC(); checkCRTIndication();"></div>
+                <div class="col-6 col-md-2"><label>EF at Diagnosis (%)</label><input type="text" class="form-control" id="EF_Diagnosis" inputmode="text" oninput="calcMAGGIC(); checkCRTIndication();"></div>
                 <div class="col-6 col-md-2"><label>Advanced HF</label><select class="form-select" id="Advanced_HF" onchange="syncAdvancedHF('diag')"><option>No</option><option>Yes</option></select></div>
                 <div class="col-6 col-md-3"><label>Cause of HF</label><select class="form-select" id="HF_Cause"><option value="">Select...</option><option>DCM</option><option>ICM</option><option>HCM</option><option>Myocarditis</option><option>ARVD</option><option>PAH</option><option>Others</option></select></div>
                 <div class="col-6 col-md-5"><label>Other Cardiomyopathies</label><input type="text" class="form-control" id="Other_Cardio"></div>
@@ -1255,9 +1255,9 @@ img,canvas,table,svg{max-width:100%;}
                     </div>
                     <input type="hidden" id="Valvular_Type">
                 </div>
-                <div class="col-6 col-md-3"><label>Number of Admissions Last Year</label><input type="number" class="form-control" id="Admissions" inputmode="numeric"></div>
+                <div class="col-6 col-md-3"><label>Number of Admissions Last Year</label><input type="text" class="form-control" id="Admissions" inputmode="text"></div>
                 <div class="col-6 col-md-3"><label>Last Admission Date</label><input type="date" class="form-control" id="Last_Admission"></div>
-                <div class="col-6 col-md-3"><label>Length of Stay (Days)</label><input type="number" class="form-control" id="LOS" inputmode="numeric"></div>
+                <div class="col-6 col-md-3"><label>Length of Stay (Days)</label><input type="text" class="form-control" id="LOS" inputmode="text"></div>
                 <div class="col-12">
                     <label class="form-label mb-1" style="font-size:0.82rem;"><i class="fa fa-camera me-1"></i>ECG Image <small class="text-muted fw-normal">(auto-compressed)</small></label>
                     <div class="d-flex gap-2 align-items-center flex-wrap">
@@ -1310,10 +1310,10 @@ img,canvas,table,svg{max-width:100%;}
                 <div class="col-12 col-md-6" id="transferHospitalWrap" style="display:none;"><label>Name of Hospital</label><input type="text" class="form-control" id="Transfer_Hospital_Name" placeholder="e.g. Chest Hospital, Amiri..."></div>
             </div>
             <div class="row g-2">
-                <div class="col-4 col-md-2"><label class="text-primary">Height (cm)</label><input type="number" class="form-control border-primary" id="Height" oninput="calcBMI();syncVisitHeightFromBaseline(true)" inputmode="numeric"></div>
-                <div class="col-4 col-md-2"><label class="text-primary">Weight (kg)</label><input type="number" class="form-control border-primary" id="Weight" oninput="calcBMI()" inputmode="numeric"></div>
+                <div class="col-4 col-md-2"><label class="text-primary">Height (cm)</label><input type="text" class="form-control border-primary" id="Height" oninput="calcBMI();syncVisitHeightFromBaseline(true)" inputmode="text"></div>
+                <div class="col-4 col-md-2"><label class="text-primary">Weight (kg)</label><input type="text" class="form-control border-primary" id="Weight" oninput="calcBMI()" inputmode="text"></div>
                 <div class="col-4 col-md-2"><label class="text-success fw-bold">BMI <span class="auto-badge"><i class="fa fa-lock"></i> Auto</span></label><input type="text" class="form-control bg-light text-success fw-bold" id="BMI" readonly></div>
-                <div class="col-4 col-md-2"><label>Dry Weight (kg)</label><input type="number" class="form-control" id="Dry_Weight" inputmode="numeric"></div>
+                <div class="col-4 col-md-2"><label>Dry Weight (kg)</label><input type="text" class="form-control" id="Dry_Weight" inputmode="text"></div>
                 <div class="col-4 col-md-2"><label>NYHA Visit</label><select class="form-select" id="NYHA" onchange="calcMAGGIC()"><option value="">Select...</option><option>I</option><option>II</option><option>III</option><option>IV</option><option>N/A</option></select></div>
                 <!-- KCCQ removed from baseline — tracked only in visits -->
                 <input type="hidden" id="KCCQ">
@@ -1329,9 +1329,9 @@ img,canvas,table,svg{max-width:100%;}
                     <input type="text" class="form-control form-control-sm mt-1" id="Sym_Other_Text" placeholder="Other symptoms (specify)" oninput="syncOtherSymptoms()">
                     <input type="hidden" id="Fatigue">
                 </div>
-                <div class="col-4 col-md-2"><label>Pulse</label><input type="text" class="form-control" id="Pulse" inputmode="numeric"></div>
+                <div class="col-4 col-md-2"><label>Pulse</label><input type="text" class="form-control" id="Pulse" inputmode="text"></div>
                 <div class="col-4 col-md-2"><label>BP</label><input type="text" class="form-control" id="BP" placeholder="120/80" oninput="calcMAGGIC()"></div>
-                <div class="col-4 col-md-2"><label>SpO2 (%)</label><input type="number" class="form-control" id="SpO2" inputmode="numeric"></div>
+                <div class="col-4 col-md-2"><label>SpO2 (%)</label><input type="text" class="form-control" id="SpO2" inputmode="text"></div>
                 <div class="col-4 col-md-2"><label>Edema</label><select class="form-select" id="Edema"><option>No</option><option>Yes</option></select></div>
                 <div class="col-4 col-md-2"><label>JVP</label><select class="form-select" id="JVP"><option>Normal</option><option>Raised</option></select></div>
                 <div class="col-4 col-md-2"><label>Rales</label><select class="form-select" id="Rales"><option>No</option><option>Yes</option></select></div>
@@ -1359,7 +1359,7 @@ img,canvas,table,svg{max-width:100%;}
                     <div id="ecgDetailsWrap" style="display:none;">
                         <div class="row g-2 entry-detail-panel">
                             <div class="col-12"><label>LBBB</label><select class="form-select" id="ECG_LBBB" onchange="checkCRTIndication()"><option value="">Select...</option><option>No</option><option>Yes</option></select></div>
-                            <div class="col-12"><label>QRS Duration (ms)</label><input type="number" class="form-control" id="ECG_QRS" inputmode="numeric" placeholder="e.g. 120" oninput="checkCRTIndication()"></div>
+                            <div class="col-12"><label>QRS Duration (ms)</label><input type="text" class="form-control" id="ECG_QRS" inputmode="text" placeholder="e.g. 120" oninput="checkCRTIndication()"></div>
                             <div class="col-12"><label>Arrhythmia</label><input type="text" class="form-control" id="ECG_Arrhythmia" placeholder="Type, if any"></div>
                             <div class="col-12"><label>Pacing Rhythm</label><input type="text" class="form-control" id="ECG_Pacing" placeholder="e.g. AAI, VVI, DDD, BiV"></div>
                         </div>
@@ -1373,10 +1373,10 @@ img,canvas,table,svg{max-width:100%;}
                     <div id="holterDetailsWrap" style="display:none;">
                         <div class="row g-2 entry-detail-panel">
                             <div class="col-12"><label>Date</label><input type="date" class="form-control" id="Holter_Date"></div>
-                            <div class="col-12"><label>Duration (hours)</label><input type="number" class="form-control" id="Holter_Duration" inputmode="numeric" placeholder="e.g. 24, 48, 72"></div>
-                            <div class="col-12"><label>Max HR</label><input type="number" class="form-control" id="Holter_MaxHR" inputmode="numeric"></div>
-                            <div class="col-12"><label>Min HR</label><input type="number" class="form-control" id="Holter_MinHR" inputmode="numeric"></div>
-                            <div class="col-12"><label>Avg HR</label><input type="number" class="form-control" id="Holter_AvgHR" inputmode="numeric"></div>
+                            <div class="col-12"><label>Duration (hours)</label><input type="text" class="form-control" id="Holter_Duration" inputmode="text" placeholder="e.g. 24, 48, 72"></div>
+                            <div class="col-12"><label>Max HR</label><input type="text" class="form-control" id="Holter_MaxHR" inputmode="text"></div>
+                            <div class="col-12"><label>Min HR</label><input type="text" class="form-control" id="Holter_MinHR" inputmode="text"></div>
+                            <div class="col-12"><label>Avg HR</label><input type="text" class="form-control" id="Holter_AvgHR" inputmode="text"></div>
                             <div class="col-12"><label>Arrhythmia Burden / Type</label><input type="text" class="form-control" id="Holter_Arrhythmia" placeholder="e.g. PVCs 5%, NSVT runs, AF burden 30%"></div>
                             <div class="col-12"><label>Findings / Notes</label><textarea class="form-control" id="Holter_Findings" rows="2" placeholder="Symptom-rhythm correlation, conclusion, recommendations..."></textarea></div>
                         </div>
@@ -1392,7 +1392,7 @@ img,canvas,table,svg{max-width:100%;}
                             <div class="col-12"><label>ECHO Details</label><input type="text" class="form-control" id="ECHO"></div>
                             <div class="col-12"><label>EDVI/EDD</label><input type="text" class="form-control" id="Echo_EDVI" placeholder="EDVI/EDD"></div>
                             <div class="col-12"><label>ESVI/ESD</label><input type="text" class="form-control" id="Echo_ESVI" placeholder="ESVI/ESD"></div>
-                            <div class="col-12"><label>EF %</label><input type="text" class="form-control" id="Echo_EF" inputmode="decimal"></div>
+                            <div class="col-12"><label>EF %</label><input type="text" class="form-control" id="Echo_EF" inputmode="text"></div>
                         </div>
                     </div>
                 </div>
@@ -1407,11 +1407,11 @@ img,canvas,table,svg{max-width:100%;}
                             <div class="col-12"><label>CMR Details</label><input type="text" class="form-control" id="CMR_CT"></div>
                             <div class="col-12"><label>LVEDVI/EDD</label><input type="text" class="form-control" id="CMR_LVEDVI" placeholder="LVEDVI/EDD"></div>
                             <div class="col-12"><label>LVESVI/ESD</label><input type="text" class="form-control" id="CMR_LVESVI" placeholder="LVESVI/ESD"></div>
-                            <div class="col-12"><label>LVEF %</label><input type="text" class="form-control" id="CMR_LVEF" inputmode="decimal"></div>
+                            <div class="col-12"><label>LVEF %</label><input type="text" class="form-control" id="CMR_LVEF" inputmode="text"></div>
                             <div class="col-12"><label>RVEDI</label><input type="text" class="form-control" id="CMR_RVEDI"></div>
-                            <div class="col-12"><label>RVEF %</label><input type="text" class="form-control" id="CMR_RVEF" inputmode="decimal"></div>
+                            <div class="col-12"><label>RVEF %</label><input type="text" class="form-control" id="CMR_RVEF" inputmode="text"></div>
                             <div class="col-12"><label>LGE</label><select class="form-select" id="CMR_LGE" onchange="toggleLGEPercent()"><option value="">Select...</option><option>No</option><option>Yes</option></select></div>
-                            <div class="col-12" id="cmrLGEPctWrap" style="display:none;"><label>LGE %</label><input type="text" class="form-control" id="CMR_LGE_Pct" inputmode="decimal"></div>
+                            <div class="col-12" id="cmrLGEPctWrap" style="display:none;"><label>LGE %</label><input type="text" class="form-control" id="CMR_LGE_Pct" inputmode="text"></div>
                             <div class="col-12"><label>CMR Others</label><input type="text" class="form-control" id="CMR_Others"></div>
                         </div>
                     </div>
@@ -1425,7 +1425,7 @@ img,canvas,table,svg{max-width:100%;}
                     <div id="ctAngioDetailsWrap" style="display:none;">
                         <div class="row g-2 entry-detail-panel">
                             <div class="col-12"><label>Findings</label><input type="text" class="form-control" id="CT_Angio"></div>
-                            <div class="col-12"><label>Calcium Score</label><input type="text" class="form-control" id="CT_Calcium" inputmode="decimal"></div>
+                            <div class="col-12"><label>Calcium Score</label><input type="text" class="form-control" id="CT_Calcium" inputmode="text"></div>
                             <div class="col-12"><label>CT Angio Notes</label><input type="text" class="form-control" id="CT_Notes"></div>
                         </div>
                     </div>
@@ -1445,7 +1445,7 @@ img,canvas,table,svg{max-width:100%;}
                             <div class="col-12" id="cagPciDetailsWrap" style="display:none;">
                                 <div class="row g-2 entry-detail-panel">
                                     <div class="col-12"><label>PCI Date</label><input type="date" class="form-control" id="CAG_PCI_Date"></div>
-                                    <div class="col-12"><label>Number of Stents</label><input type="number" class="form-control" id="CAG_Stents_Number" inputmode="numeric" min="0"></div>
+                                    <div class="col-12"><label>Number of Stents</label><input type="text" class="form-control" id="CAG_Stents_Number" inputmode="text" min="0"></div>
                                     <div class="col-12"><label>PCI Details</label><input type="text" class="form-control" id="CAG_PCI_Details" placeholder="vessels, stent type, complications..."></div>
                                 </div>
                             </div>
@@ -1461,7 +1461,7 @@ img,canvas,table,svg{max-width:100%;}
                     <div class="yes-no-field"><label>Completed</label><select class="form-select" id="Walk_Completed" onchange="toggleWalkMeters()"><option>N</option><option>Y</option></select></div>
                     <div id="walkMetersWrap" style="display:none;">
                         <div class="row g-2 entry-detail-panel">
-                            <div class="col-12"><label>Meters Walked</label><input type="number" class="form-control" id="Walk_Meters" inputmode="numeric" oninput="toggleWalkMeters()"></div>
+                            <div class="col-12"><label>Meters Walked</label><input type="text" class="form-control" id="Walk_Meters" inputmode="text" oninput="toggleWalkMeters()"></div>
                         </div>
                     </div>
                     <input type="hidden" id="Walk_Test">
@@ -1491,15 +1491,15 @@ img,canvas,table,svg{max-width:100%;}
                     <div class="yes-no-field"><label>Performed</label><select class="form-select" id="RHC_Done" onchange="toggleRHCDetails()"><option>No</option><option>Yes</option></select></div>
                     <div id="rhcDetailsWrap" style="display:none;">
                         <div class="row g-2 entry-detail-panel">
-                            <div class="col-12"><label>C.I (L/min/m2)</label><input type="text" class="form-control" id="RHC_CI" inputmode="decimal"></div>
-                            <div class="col-12"><label>RAP (mmHg)</label><input type="text" class="form-control" id="RHC_RAP" inputmode="decimal"></div>
+                            <div class="col-12"><label>C.I (L/min/m2)</label><input type="text" class="form-control" id="RHC_CI" inputmode="text"></div>
+                            <div class="col-12"><label>RAP (mmHg)</label><input type="text" class="form-control" id="RHC_RAP" inputmode="text"></div>
                             <div class="col-12"><label>RVP (S/D/ED mmHg)</label><input type="text" class="form-control" id="RHC_RVP" placeholder="S/D/ED"></div>
-                            <div class="col-12"><label>PCWP (mmHg)</label><input type="text" class="form-control" id="RHC_PCWP" inputmode="decimal"></div>
+                            <div class="col-12"><label>PCWP (mmHg)</label><input type="text" class="form-control" id="RHC_PCWP" inputmode="text"></div>
                             <div class="col-12"><label>PAP (S/D/M)</label><input type="text" class="form-control" id="RHC_PAP" placeholder="S/D/M"></div>
-                            <div class="col-12"><label>PVR (Woods)</label><input type="text" class="form-control" id="RHC_PVR" inputmode="decimal"></div>
-                            <div class="col-12"><label>PAPi</label><input type="text" class="form-control" id="RHC_PAPi" inputmode="decimal"></div>
+                            <div class="col-12"><label>PVR (Woods)</label><input type="text" class="form-control" id="RHC_PVR" inputmode="text"></div>
+                            <div class="col-12"><label>PAPi</label><input type="text" class="form-control" id="RHC_PAPi" inputmode="text"></div>
                             <div class="col-12"><label>LV (S/D/ED)</label><input type="text" class="form-control" id="RHC_LV" placeholder="S/D/ED"></div>
-                            <div class="col-12"><label>MVO2 Saturation (%)</label><input type="text" class="form-control" id="RHC_MVO2" inputmode="decimal"></div>
+                            <div class="col-12"><label>MVO2 Saturation (%)</label><input type="text" class="form-control" id="RHC_MVO2" inputmode="text"></div>
                         </div>
                     </div>
                 </div>
@@ -1522,15 +1522,15 @@ img,canvas,table,svg{max-width:100%;}
                         </div></div>
                         <div class="col-12"><label>Pericardiocentesis</label><select class="form-select" id="Proc_Pericardiocentesis_Done" onchange="toggleProcedureDetails('Proc_Pericardiocentesis_Done','procPericardiocentesisWrap',['Proc_Pericardiocentesis_Volume']);syncInHospitalProcedures()"><option>No</option><option>Yes</option></select></div>
                         <div class="col-12" id="procPericardiocentesisWrap" style="display:none;"><div class="row g-2 entry-detail-panel">
-                            <div class="col-12"><label>Volume Removed (mL)</label><input type="number" class="form-control" id="Proc_Pericardiocentesis_Volume" inputmode="numeric" oninput="syncInHospitalProcedures()"></div>
+                            <div class="col-12"><label>Volume Removed (mL)</label><input type="text" class="form-control" id="Proc_Pericardiocentesis_Volume" inputmode="text" oninput="syncInHospitalProcedures()"></div>
                         </div></div>
                         <div class="col-12"><label>Pleural Tapping</label><select class="form-select" id="Proc_Pleural_Tapping_Done" onchange="toggleProcedureDetails('Proc_Pleural_Tapping_Done','procPleuralTappingWrap',['Proc_Pleural_Tapping_Volume']);syncInHospitalProcedures()"><option>No</option><option>Yes</option></select></div>
                         <div class="col-12" id="procPleuralTappingWrap" style="display:none;"><div class="row g-2 entry-detail-panel">
-                            <div class="col-12"><label>Volume Removed (mL)</label><input type="number" class="form-control" id="Proc_Pleural_Tapping_Volume" inputmode="numeric" oninput="syncInHospitalProcedures()"></div>
+                            <div class="col-12"><label>Volume Removed (mL)</label><input type="text" class="form-control" id="Proc_Pleural_Tapping_Volume" inputmode="text" oninput="syncInHospitalProcedures()"></div>
                         </div></div>
                         <div class="col-12"><label>Ascites Tapping</label><select class="form-select" id="Proc_Ascites_Tapping_Done" onchange="toggleProcedureDetails('Proc_Ascites_Tapping_Done','procAscitesTappingWrap',['Proc_Ascites_Tapping_Volume']);syncInHospitalProcedures()"><option>No</option><option>Yes</option></select></div>
                         <div class="col-12" id="procAscitesTappingWrap" style="display:none;"><div class="row g-2 entry-detail-panel">
-                            <div class="col-12"><label>Volume Removed (mL)</label><input type="number" class="form-control" id="Proc_Ascites_Tapping_Volume" inputmode="numeric" oninput="syncInHospitalProcedures()"></div>
+                            <div class="col-12"><label>Volume Removed (mL)</label><input type="text" class="form-control" id="Proc_Ascites_Tapping_Volume" inputmode="text" oninput="syncInHospitalProcedures()"></div>
                         </div></div>
                         <div class="col-12"><label>Other Procedure</label><select class="form-select" id="Proc_Other_Done" onchange="toggleProcedureDetails('Proc_Other_Done','procOtherWrap',['InHospital_Procedures_Other']);syncInHospitalProcedures()"><option>No</option><option>Yes</option></select></div>
                         <div class="col-12" id="procOtherWrap" style="display:none;"><div class="row g-2 entry-detail-panel">
@@ -1688,59 +1688,59 @@ img,canvas,table,svg{max-width:100%;}
 
             <div class="row g-2">
                 <h6 class="col-12 text-secondary m-0"><i class="fa fa-vial"></i> Glycemic</h6>
-                <div class="col-6 col-md-3"><label>HbA1c (%)</label><input type="text" class="form-control" id="Lab_HbA1c" inputmode="decimal"></div>
-                <div class="col-6 col-md-3"><label>Fasting Glucose (mmol/L)</label><input type="text" class="form-control" id="Lab_Gluc" inputmode="decimal"></div>
+                <div class="col-6 col-md-3"><label>HbA1c (%)</label><input type="text" class="form-control" id="Lab_HbA1c" inputmode="text"></div>
+                <div class="col-6 col-md-3"><label>Fasting Glucose (mmol/L)</label><input type="text" class="form-control" id="Lab_Gluc" inputmode="text"></div>
 
                 <div class="col-12"><hr class="my-1"></div>
                 <h6 class="col-12 text-secondary m-0"><i class="fa fa-tint"></i> Renal Function (RFT) — On Admission</h6>
-                <div class="col-6 col-md-3"><label>Urea Adm (mmol/L)</label><input type="text" class="form-control" id="Lab_Urea" inputmode="decimal" oninput="syncBaselineUreaCreat();calcBaselineEGFR();"></div>
-                <div class="col-6 col-md-3"><label>Creatinine Adm (µmol/L)</label><input type="text" class="form-control" id="Lab_Creat" inputmode="decimal" oninput="syncBaselineUreaCreat();calcBaselineEGFR();checkGDMTAlerts();"></div>
+                <div class="col-6 col-md-3"><label>Urea Adm (mmol/L)</label><input type="text" class="form-control" id="Lab_Urea" inputmode="text" oninput="syncBaselineUreaCreat();calcBaselineEGFR();"></div>
+                <div class="col-6 col-md-3"><label>Creatinine Adm (µmol/L)</label><input type="text" class="form-control" id="Lab_Creat" inputmode="text" oninput="syncBaselineUreaCreat();calcBaselineEGFR();checkGDMTAlerts();"></div>
                 <div class="col-6 col-md-3"><label class="text-success fw-bold">eGFR Adm <span class="auto-badge"><i class="fa fa-lock"></i> Auto</span></label><input type="text" class="form-control bg-light text-success fw-bold" id="Lab_eGFR" readonly></div>
-                <div class="col-6 col-md-3"><label>Na Adm (mmol/L)</label><input type="text" class="form-control" id="Lab_Na" inputmode="decimal" oninput="syncBaselineNaK();checkGDMTAlerts()"></div>
-                <div class="col-6 col-md-3"><label>K Adm (mmol/L)</label><input type="text" class="form-control" id="Lab_K" inputmode="decimal" oninput="syncBaselineNaK();checkGDMTAlerts()"></div>
+                <div class="col-6 col-md-3"><label>Na Adm (mmol/L)</label><input type="text" class="form-control" id="Lab_Na" inputmode="text" oninput="syncBaselineNaK();checkGDMTAlerts()"></div>
+                <div class="col-6 col-md-3"><label>K Adm (mmol/L)</label><input type="text" class="form-control" id="Lab_K" inputmode="text" oninput="syncBaselineNaK();checkGDMTAlerts()"></div>
 
                 <h6 class="col-12 text-secondary m-0 mt-2"><i class="fa fa-tint"></i> Renal Function (RFT) — On Discharge</h6>
-                <div class="col-6 col-md-3"><label>Urea Disch (mmol/L)</label><input type="text" class="form-control" id="Lab_Urea_Disch" inputmode="decimal"></div>
-                <div class="col-6 col-md-3"><label>Creatinine Disch (µmol/L)</label><input type="text" class="form-control" id="Lab_Creat_Disch" inputmode="decimal" oninput="calcDischargeEGFR()"></div>
+                <div class="col-6 col-md-3"><label>Urea Disch (mmol/L)</label><input type="text" class="form-control" id="Lab_Urea_Disch" inputmode="text"></div>
+                <div class="col-6 col-md-3"><label>Creatinine Disch (µmol/L)</label><input type="text" class="form-control" id="Lab_Creat_Disch" inputmode="text" oninput="calcDischargeEGFR()"></div>
                 <div class="col-6 col-md-3"><label class="text-success fw-bold">eGFR Disch <span class="auto-badge"><i class="fa fa-lock"></i> Auto</span></label><input type="text" class="form-control bg-light text-success fw-bold" id="Lab_eGFR_Disch" readonly></div>
-                <div class="col-6 col-md-3"><label>Na Disch (mmol/L)</label><input type="text" class="form-control" id="Lab_Na_Disch" inputmode="decimal"></div>
-                <div class="col-6 col-md-3"><label>K Disch (mmol/L)</label><input type="text" class="form-control" id="Lab_K_Disch" inputmode="decimal"></div>
+                <div class="col-6 col-md-3"><label>Na Disch (mmol/L)</label><input type="text" class="form-control" id="Lab_Na_Disch" inputmode="text"></div>
+                <div class="col-6 col-md-3"><label>K Disch (mmol/L)</label><input type="text" class="form-control" id="Lab_K_Disch" inputmode="text"></div>
 
                 <div class="col-12"><hr class="my-1"></div>
                 <h6 class="col-12 text-secondary m-0"><i class="fa fa-heartbeat"></i> NT-proBNP &amp; BNP</h6>
-                <div class="col-6 col-md-3"><label>NT-proBNP Adm (pg/mL)</label><input type="text" class="form-control" id="Lab_BNP" inputmode="decimal"></div>
-                <div class="col-6 col-md-3"><label>NT-proBNP Disch (pg/mL)</label><input type="text" class="form-control" id="Lab_BNP_Disch" inputmode="decimal"></div>
-                <div class="col-6 col-md-3"><label>BNP Adm (pg/mL)</label><input type="text" class="form-control" id="Lab_BNP_only" inputmode="decimal"></div>
-                <div class="col-6 col-md-3"><label>BNP Disch (pg/mL)</label><input type="text" class="form-control" id="Lab_BNP_only_Disch" inputmode="decimal"></div>
+                <div class="col-6 col-md-3"><label>NT-proBNP Adm (pg/mL)</label><input type="text" class="form-control" id="Lab_BNP" inputmode="text"></div>
+                <div class="col-6 col-md-3"><label>NT-proBNP Disch (pg/mL)</label><input type="text" class="form-control" id="Lab_BNP_Disch" inputmode="text"></div>
+                <div class="col-6 col-md-3"><label>BNP Adm (pg/mL)</label><input type="text" class="form-control" id="Lab_BNP_only" inputmode="text"></div>
+                <div class="col-6 col-md-3"><label>BNP Disch (pg/mL)</label><input type="text" class="form-control" id="Lab_BNP_only_Disch" inputmode="text"></div>
 
                 <div class="col-12"><hr class="my-1"></div>
                 <h6 class="col-12 text-secondary m-0"><i class="fa fa-syringe"></i> Iron Studies</h6>
-                <div class="col-6 col-md-3"><label>Serum Iron (µmol/L)</label><input type="text" class="form-control" id="Lab_Iron" inputmode="decimal" oninput="syncBaselineIron()"></div>
-                <div class="col-6 col-md-3"><label>Ferritin (µg/L)</label><input type="text" class="form-control" id="Lab_Ferritin" inputmode="decimal" oninput="syncBaselineIron()"></div>
-                <div class="col-6 col-md-3"><label>Transferrin Sat. / TSAT (%)</label><input type="text" class="form-control" id="Lab_TrSats" inputmode="decimal"></div>
+                <div class="col-6 col-md-3"><label>Serum Iron (µmol/L)</label><input type="text" class="form-control" id="Lab_Iron" inputmode="text" oninput="syncBaselineIron()"></div>
+                <div class="col-6 col-md-3"><label>Ferritin (µg/L)</label><input type="text" class="form-control" id="Lab_Ferritin" inputmode="text" oninput="syncBaselineIron()"></div>
+                <div class="col-6 col-md-3"><label>Transferrin Sat. / TSAT (%)</label><input type="text" class="form-control" id="Lab_TrSats" inputmode="text"></div>
 
                 <div class="col-12"><hr class="my-1"></div>
                 <h6 class="col-12 text-secondary m-0"><i class="fa fa-vials"></i> CBC — Hb on Admission &amp; Discharge</h6>
-                <div class="col-6 col-md-3"><label>Hb Adm (g/dL)</label><input type="text" class="form-control" id="Lab_Hb" inputmode="decimal" oninput="syncBaselineCBC()"></div>
-                <div class="col-6 col-md-3"><label>Hb Disch (g/dL)</label><input type="text" class="form-control" id="Lab_Hb_Disch" inputmode="decimal"></div>
-                <div class="col-4 col-md-2"><label>WBC (×10⁹/L)</label><input type="text" class="form-control" id="Lab_WBC" inputmode="decimal" oninput="syncBaselineCBC()"></div>
-                <div class="col-4 col-md-2"><label>Platelets (×10⁹/L)</label><input type="text" class="form-control" id="Lab_Plt" inputmode="decimal" oninput="syncBaselineCBC()"></div>
+                <div class="col-6 col-md-3"><label>Hb Adm (g/dL)</label><input type="text" class="form-control" id="Lab_Hb" inputmode="text" oninput="syncBaselineCBC()"></div>
+                <div class="col-6 col-md-3"><label>Hb Disch (g/dL)</label><input type="text" class="form-control" id="Lab_Hb_Disch" inputmode="text"></div>
+                <div class="col-4 col-md-2"><label>WBC (×10⁹/L)</label><input type="text" class="form-control" id="Lab_WBC" inputmode="text" oninput="syncBaselineCBC()"></div>
+                <div class="col-4 col-md-2"><label>Platelets (×10⁹/L)</label><input type="text" class="form-control" id="Lab_Plt" inputmode="text" oninput="syncBaselineCBC()"></div>
 
                 <div class="col-12"><hr class="my-1"></div>
                 <h6 class="col-12 text-secondary m-0"><i class="fa fa-flask"></i> Thyroid</h6>
-                <div class="col-6 col-md-3"><label>TSH (mIU/L)</label><input type="text" class="form-control" id="Lab_TSH" inputmode="decimal" oninput="syncBaselineThyroid()"></div>
-                <div class="col-6 col-md-3"><label>Free T4 (pmol/L)</label><input type="text" class="form-control" id="Lab_FreeT4" inputmode="decimal" oninput="syncBaselineThyroid()"></div>
+                <div class="col-6 col-md-3"><label>TSH (mIU/L)</label><input type="text" class="form-control" id="Lab_TSH" inputmode="text" oninput="syncBaselineThyroid()"></div>
+                <div class="col-6 col-md-3"><label>Free T4 (pmol/L)</label><input type="text" class="form-control" id="Lab_FreeT4" inputmode="text" oninput="syncBaselineThyroid()"></div>
 
                 <div class="col-12"><hr class="my-1"></div>
                 <h6 class="col-12 text-secondary m-0"><i class="fa fa-chart-line"></i> Lipids (mmol/L)</h6>
-                <div class="col-4 col-md-2"><label>Total Chol.</label><input type="text" class="form-control" id="Lab_TotalChol" inputmode="decimal" oninput="syncBaselineLipids()"></div>
-                <div class="col-4 col-md-2"><label>LDL</label><input type="text" class="form-control" id="Lab_LDL" inputmode="decimal" oninput="syncBaselineLipids()"></div>
-                <div class="col-4 col-md-2"><label>HDL</label><input type="text" class="form-control" id="Lab_HDL" inputmode="decimal" oninput="syncBaselineLipids()"></div>
-                <div class="col-4 col-md-2"><label>Triglycerides</label><input type="text" class="form-control" id="Lab_TG" inputmode="decimal" oninput="syncBaselineLipids()"></div>
+                <div class="col-4 col-md-2"><label>Total Chol.</label><input type="text" class="form-control" id="Lab_TotalChol" inputmode="text" oninput="syncBaselineLipids()"></div>
+                <div class="col-4 col-md-2"><label>LDL</label><input type="text" class="form-control" id="Lab_LDL" inputmode="text" oninput="syncBaselineLipids()"></div>
+                <div class="col-4 col-md-2"><label>HDL</label><input type="text" class="form-control" id="Lab_HDL" inputmode="text" oninput="syncBaselineLipids()"></div>
+                <div class="col-4 col-md-2"><label>Triglycerides</label><input type="text" class="form-control" id="Lab_TG" inputmode="text" oninput="syncBaselineLipids()"></div>
 
                 <div class="col-12"><hr class="my-1"></div>
                 <h6 class="col-12 text-secondary m-0"><i class="fa fa-droplet"></i> Urine</h6>
-                <div class="col-6 col-md-3"><label>Albumin/Creatinine Ratio (mg/g)</label><input type="text" class="form-control" id="Lab_AlbCreat" inputmode="decimal"></div>
+                <div class="col-6 col-md-3"><label>Albumin/Creatinine Ratio (mg/g)</label><input type="text" class="form-control" id="Lab_AlbCreat" inputmode="text"></div>
                 <div class="col-12"><label>Other Labs</label><input type="text" class="form-control" id="Lab_Others" placeholder="Any other lab results or comments"></div>
 
                 <!-- Hidden mirror fields for backward compatibility with existing functions -->
@@ -1842,7 +1842,7 @@ img,canvas,table,svg{max-width:100%;}
                         <div class="col-12 col-md-5"><label class="fw-bold text-danger"><i class="fa fa-droplet me-1"></i>Bleeding requiring Blood Transfusion</label>
                             <select class="form-select border-danger" id="Bleeding_Transfusion" onchange="toggleBleedingTransfusion()"><option>No</option><option>Yes</option></select>
                         </div>
-                        <div class="col-12 col-md-3" id="bleedingUnitsWrap" style="display:none;"><label>Units Transfused</label><input type="number" class="form-control" id="Bleeding_Units" inputmode="numeric" min="0"></div>
+                        <div class="col-12 col-md-3" id="bleedingUnitsWrap" style="display:none;"><label>Units Transfused</label><input type="text" class="form-control" id="Bleeding_Units" inputmode="text" min="0"></div>
                         <div class="col-12 col-md-4" id="bleedingSiteWrap" style="display:none;"><label>Bleeding Site / Notes</label><input type="text" class="form-control" id="Bleeding_Site" placeholder="e.g. GI, access site..."></div>
                     </div>
                 </div>
@@ -1966,16 +1966,16 @@ img,canvas,table,svg{max-width:100%;}
                         <input type="hidden" id="V_Fatigue">
                     </div>
                     <div class="col-4 col-md-2"><label>NYHA Class</label><select class="form-select" id="V_NYHA"><option value="">Select</option><option>I</option><option>II</option><option>III</option><option>IV</option><option>N/A</option></select></div>
-                    <div class="col-4 col-md-2"><label>KCCQ (0-100)</label><input type="number" class="form-control" id="V_KCCQ" min="0" max="100" inputmode="numeric" placeholder="0-100"></div>
+                    <div class="col-4 col-md-2"><label>KCCQ (0-100)</label><input type="text" class="form-control" id="V_KCCQ" min="0" max="100" inputmode="text" placeholder="0-100"></div>
                     <div class="col-4 col-md-3"><label>Edema</label><select class="form-select" id="V_Edema"><option>No</option><option>Mild feet</option><option>Moderate</option><option>Severe</option></select></div>
                     <div class="col-12"><hr class="my-2"></div>
                     <h6 class="col-12 text-secondary">Signs / Vitals</h6>
-                    <div class="col-4 col-md-2"><label>Pulse</label><input type="text" class="form-control" id="V_Pulse" inputmode="numeric"></div>
+                    <div class="col-4 col-md-2"><label>Pulse</label><input type="text" class="form-control" id="V_Pulse" inputmode="text"></div>
                     <div class="col-4 col-md-2"><label>BP</label><input type="text" class="form-control" id="V_BP" placeholder="120/80"></div>
-                    <div class="col-4 col-md-2"><label>SpO2 %</label><input type="number" class="form-control" id="V_SpO2" inputmode="numeric"></div>
-                    <div class="col-4 col-md-2"><label>Height (cm)</label><input type="number" class="form-control border-primary" id="V_Height" oninput="setFixedHeightFromVisit()" inputmode="numeric"></div>
-                    <div class="col-4 col-md-2"><label>Weight (kg)</label><input type="number" class="form-control" id="V_Weight" oninput="calcVisitBMI()" inputmode="numeric"></div>
-                    <div class="col-4 col-md-2"><label>Dry Weight (kg)</label><input type="number" class="form-control" id="V_Dry_Weight" inputmode="numeric"></div>
+                    <div class="col-4 col-md-2"><label>SpO2 %</label><input type="text" class="form-control" id="V_SpO2" inputmode="text"></div>
+                    <div class="col-4 col-md-2"><label>Height (cm)</label><input type="text" class="form-control border-primary" id="V_Height" oninput="setFixedHeightFromVisit()" inputmode="text"></div>
+                    <div class="col-4 col-md-2"><label>Weight (kg)</label><input type="text" class="form-control" id="V_Weight" oninput="calcVisitBMI()" inputmode="text"></div>
+                    <div class="col-4 col-md-2"><label>Dry Weight (kg)</label><input type="text" class="form-control" id="V_Dry_Weight" inputmode="text"></div>
                     <div class="col-4 col-md-2"><label class="text-success fw-bold">BMI <span class="auto-badge"><i class="fa fa-lock"></i> Auto</span></label><input type="text" class="form-control bg-light text-success fw-bold" id="V_BMI" readonly></div>
                     <div class="col-4 col-md-2"><label>JVP</label><select class="form-select" id="V_JVP"><option>N</option><option>Raised</option></select></div>
                     <div class="col-4 col-md-2"><label>Pulm. Rales</label><select class="form-select" id="V_Rales"><option>N</option><option>Y</option></select></div>
@@ -2025,7 +2025,7 @@ img,canvas,table,svg{max-width:100%;}
                         <div id="vProcPCIWrap" style="display:none;">
                             <div class="row g-2 entry-detail-panel">
                                 <div class="col-12"><label>PCI Date</label><input type="date" class="form-control" id="V_Proc_PCI_Date" oninput="syncVisitProcedures()"></div>
-                                <div class="col-12"><label>Number of Stents</label><input type="number" class="form-control" id="V_Proc_PCI_Stents_Number" inputmode="numeric" oninput="syncVisitProcedures()"></div>
+                                <div class="col-12"><label>Number of Stents</label><input type="text" class="form-control" id="V_Proc_PCI_Stents_Number" inputmode="text" oninput="syncVisitProcedures()"></div>
                                 <div class="col-12"><label>PCI Details</label><input type="text" class="form-control" id="V_Proc_PCI_Details" placeholder="e.g. LAD DES x1, RCA POBA" oninput="syncVisitProcedures()"></div>
                             </div>
                         </div>
@@ -2058,11 +2058,11 @@ img,canvas,table,svg{max-width:100%;}
                         <input type="text" id="V_PCI_CABG_Date">
                         <input type="text" id="V_PCI_CABG_Details">
                         <select id="V_Proc_Pericardiocentesis_Done"><option>No</option><option>Yes</option></select>
-                        <input type="number" id="V_Proc_Pericardiocentesis_Volume">
+                        <input inputmode="text" type="text" id="V_Proc_Pericardiocentesis_Volume">
                         <select id="V_Proc_Pleural_Tapping_Done"><option>No</option><option>Yes</option></select>
-                        <input type="number" id="V_Proc_Pleural_Tapping_Volume">
+                        <input inputmode="text" type="text" id="V_Proc_Pleural_Tapping_Volume">
                         <select id="V_Proc_Ascites_Tapping_Done"><option>No</option><option>Yes</option></select>
-                        <input type="number" id="V_Proc_Ascites_Tapping_Volume">
+                        <input inputmode="text" type="text" id="V_Proc_Ascites_Tapping_Volume">
                         <select id="V_Proc_Other_Done"><option>No</option><option>Yes</option></select>
                         <input type="text" id="V_Proc_Other">
                     </div>
@@ -2152,7 +2152,7 @@ img,canvas,table,svg{max-width:100%;}
                         <div id="vEcgDetailsWrap" style="display:none;">
                             <div class="row g-2 entry-detail-panel">
                                 <div class="col-12"><label>LBBB</label><select class="form-select" id="V_LBBB"><option>No</option><option>Yes</option></select></div>
-                                <div class="col-12"><label>QRS Width (ms)</label><input type="text" class="form-control" id="V_QRS" inputmode="numeric"></div>
+                                <div class="col-12"><label>QRS Width (ms)</label><input type="text" class="form-control" id="V_QRS" inputmode="text"></div>
                                 <div class="col-12"><label>Arrhythmia</label><input type="text" class="form-control" id="V_Arrhythmia"></div>
                                 <div class="col-12"><label>Pacing in ECG</label><select class="form-select" id="V_Pacing_ECG" onchange="toggleVisitPacingMode()"><option>No</option><option>Yes</option></select></div>
                                 <div class="col-12" id="vPacingModeWrap" style="display:none;"><label>Pacing Mode</label><input type="text" class="form-control" id="V_Pacing_Mode" placeholder="e.g. AAI, VVI, DDD, BiV"></div>
@@ -2173,10 +2173,10 @@ img,canvas,table,svg{max-width:100%;}
                         <div id="vHolterDetailsWrap" style="display:none;">
                             <div class="row g-2 entry-detail-panel">
                                 <div class="col-12" id="vHolterDateWrap" style="display:none;"><label>Date</label><input type="date" class="form-control" id="V_Holter_Date"></div>
-                                <div class="col-12" id="vHolterDurationWrap" style="display:none;"><label>Duration (hours)</label><input type="number" class="form-control" id="V_Holter_Duration" inputmode="numeric" placeholder="e.g. 24, 48, 72"></div>
-                                <div class="col-12" id="vHolterMaxHRWrap" style="display:none;"><label>Max HR</label><input type="number" class="form-control" id="V_Holter_MaxHR" inputmode="numeric"></div>
-                                <div class="col-12" id="vHolterMinHRWrap" style="display:none;"><label>Min HR</label><input type="number" class="form-control" id="V_Holter_MinHR" inputmode="numeric"></div>
-                                <div class="col-12" id="vHolterAvgHRWrap" style="display:none;"><label>Avg HR</label><input type="number" class="form-control" id="V_Holter_AvgHR" inputmode="numeric"></div>
+                                <div class="col-12" id="vHolterDurationWrap" style="display:none;"><label>Duration (hours)</label><input type="text" class="form-control" id="V_Holter_Duration" inputmode="text" placeholder="e.g. 24, 48, 72"></div>
+                                <div class="col-12" id="vHolterMaxHRWrap" style="display:none;"><label>Max HR</label><input type="text" class="form-control" id="V_Holter_MaxHR" inputmode="text"></div>
+                                <div class="col-12" id="vHolterMinHRWrap" style="display:none;"><label>Min HR</label><input type="text" class="form-control" id="V_Holter_MinHR" inputmode="text"></div>
+                                <div class="col-12" id="vHolterAvgHRWrap" style="display:none;"><label>Avg HR</label><input type="text" class="form-control" id="V_Holter_AvgHR" inputmode="text"></div>
                                 <div class="col-12" id="vHolterArrhythmiaWrap" style="display:none;"><label>Arrhythmia Burden / Type</label><input type="text" class="form-control" id="V_Holter_Arrhythmia" placeholder="e.g. PVCs 5%, NSVT runs, AF burden 30%"></div>
                                 <div class="col-12" id="vHolterFindingsWrap" style="display:none;"><label>Findings / Notes</label><textarea class="form-control" id="V_Holter_Findings" rows="2" placeholder="Symptom-rhythm correlation, conclusion, recommendations..."></textarea></div>
                             </div>
@@ -2192,7 +2192,7 @@ img,canvas,table,svg{max-width:100%;}
                                 <div class="col-12"><label>Change in EF</label><input type="text" class="form-control" id="V_EF_Change"></div>
                                 <div class="col-12"><label>EDVI/EDD</label><input type="text" class="form-control" id="V_Echo_EDVI" placeholder="EDVI/EDD"></div>
                                 <div class="col-12"><label>ESVI/ESD</label><input type="text" class="form-control" id="V_Echo_ESVI" placeholder="ESVI/ESD"></div>
-                                <div class="col-12"><label>EF %</label><input type="text" class="form-control" id="V_Echo_EF" inputmode="decimal"></div>
+                                <div class="col-12"><label>EF %</label><input type="text" class="form-control" id="V_Echo_EF" inputmode="text"></div>
                                 <div class="col-12"><label>Other Echo Findings</label><input type="text" class="form-control" id="V_Echo_Other"></div>
                             </div>
                         </div>
@@ -2206,11 +2206,11 @@ img,canvas,table,svg{max-width:100%;}
                             <div class="row g-2 entry-detail-panel">
                                 <div class="col-12"><label>LVEDVI/EDD</label><input type="text" class="form-control" id="V_CMR_LVEDVI" placeholder="LVEDVI/EDD"></div>
                                 <div class="col-12"><label>LVESVI/ESD</label><input type="text" class="form-control" id="V_CMR_LVESVI" placeholder="LVESVI/ESD"></div>
-                                <div class="col-12"><label>LVEF %</label><input type="text" class="form-control" id="V_CMR_LVEF" inputmode="decimal"></div>
+                                <div class="col-12"><label>LVEF %</label><input type="text" class="form-control" id="V_CMR_LVEF" inputmode="text"></div>
                                 <div class="col-12"><label>RVEDI</label><input type="text" class="form-control" id="V_CMR_RVEDI"></div>
-                                <div class="col-12"><label>RVEF %</label><input type="text" class="form-control" id="V_CMR_RVEF" inputmode="decimal"></div>
+                                <div class="col-12"><label>RVEF %</label><input type="text" class="form-control" id="V_CMR_RVEF" inputmode="text"></div>
                                 <div class="col-12"><label>LGE</label><select class="form-select" id="V_CMR_LGE" onchange="toggleVisitLGEPercent()"><option value="">Select...</option><option>No</option><option>Yes</option></select></div>
-                                <div class="col-12" id="vCmrLGEPctWrap" style="display:none;"><label>LGE %</label><input type="text" class="form-control" id="V_CMR_LGE_Pct" inputmode="decimal"></div>
+                                <div class="col-12" id="vCmrLGEPctWrap" style="display:none;"><label>LGE %</label><input type="text" class="form-control" id="V_CMR_LGE_Pct" inputmode="text"></div>
                                 <div class="col-12"><label>CMR Others</label><input type="text" class="form-control" id="V_CMR_Others"></div>
                             </div>
                         </div>
@@ -2223,7 +2223,7 @@ img,canvas,table,svg{max-width:100%;}
                         <div class="yes-no-field"><label>Completed</label><select class="form-select" id="V_Walk_Completed" onchange="toggleVisitWalkMeters()"><option>N</option><option>Y</option></select></div>
                         <div id="vWalkMetersWrap" style="display:none;">
                             <div class="row g-2 entry-detail-panel">
-                                <div class="col-12"><label>Meters Walked</label><input type="number" class="form-control" id="V_Walk_Meters" inputmode="numeric"></div>
+                                <div class="col-12"><label>Meters Walked</label><input type="text" class="form-control" id="V_Walk_Meters" inputmode="text"></div>
                             </div>
                         </div>
                     </div>
@@ -2252,15 +2252,15 @@ img,canvas,table,svg{max-width:100%;}
                         <div class="yes-no-field"><label>Performed</label><select class="form-select" id="V_RHC_Done" onchange="toggleVisitRHCDetails()"><option>No</option><option>Yes</option></select></div>
                         <div id="vRhcDetailsWrap" style="display:none;">
                             <div class="row g-2 entry-detail-panel">
-                                <div class="col-12"><label>C.I (L/min/m2)</label><input type="text" class="form-control" id="V_RHC_CI" inputmode="decimal"></div>
-                                <div class="col-12"><label>RAP (mmHg)</label><input type="text" class="form-control" id="V_RHC_RAP" inputmode="decimal"></div>
+                                <div class="col-12"><label>C.I (L/min/m2)</label><input type="text" class="form-control" id="V_RHC_CI" inputmode="text"></div>
+                                <div class="col-12"><label>RAP (mmHg)</label><input type="text" class="form-control" id="V_RHC_RAP" inputmode="text"></div>
                                 <div class="col-12"><label>RVP (S/D/ED mmHg)</label><input type="text" class="form-control" id="V_RHC_RVP" placeholder="S/D/ED"></div>
-                                <div class="col-12"><label>PCWP (mmHg)</label><input type="text" class="form-control" id="V_RHC_PCWP" inputmode="decimal"></div>
+                                <div class="col-12"><label>PCWP (mmHg)</label><input type="text" class="form-control" id="V_RHC_PCWP" inputmode="text"></div>
                                 <div class="col-12"><label>PAP (S/D/M)</label><input type="text" class="form-control" id="V_RHC_PAP" placeholder="S/D/M"></div>
-                                <div class="col-12"><label>PVR (Woods)</label><input type="text" class="form-control" id="V_RHC_PVR" inputmode="decimal"></div>
-                                <div class="col-12"><label>PAPi</label><input type="text" class="form-control" id="V_RHC_PAPi" inputmode="decimal"></div>
+                                <div class="col-12"><label>PVR (Woods)</label><input type="text" class="form-control" id="V_RHC_PVR" inputmode="text"></div>
+                                <div class="col-12"><label>PAPi</label><input type="text" class="form-control" id="V_RHC_PAPi" inputmode="text"></div>
                                 <div class="col-12"><label>LV (S/D/ED)</label><input type="text" class="form-control" id="V_RHC_LV" placeholder="S/D/ED"></div>
-                                <div class="col-12"><label>MVO2 Saturation (%)</label><input type="text" class="form-control" id="V_RHC_MVO2" inputmode="decimal"></div>
+                                <div class="col-12"><label>MVO2 Saturation (%)</label><input type="text" class="form-control" id="V_RHC_MVO2" inputmode="text"></div>
                             </div>
                         </div>
                     </div>
@@ -2278,7 +2278,7 @@ img,canvas,table,svg{max-width:100%;}
                                 <div class="col-12" id="vCagPciDetailsWrap" style="display:none;">
                                     <div class="row g-2 entry-detail-panel">
                                         <div class="col-12"><label>PCI Date</label><input type="date" class="form-control" id="V_CAG_PCI_Date"></div>
-                                        <div class="col-12"><label>Number of Stents</label><input type="number" class="form-control" id="V_CAG_Stents_Number" inputmode="numeric" min="0"></div>
+                                        <div class="col-12"><label>Number of Stents</label><input type="text" class="form-control" id="V_CAG_Stents_Number" inputmode="text" min="0"></div>
                                         <div class="col-12"><label>PCI Details</label><input type="text" class="form-control" id="V_CAG_PCI_Details" placeholder="vessels, stent type, complications..."></div>
                                     </div>
                                 </div>
@@ -2289,46 +2289,46 @@ img,canvas,table,svg{max-width:100%;}
                     <h6 class="col-12 text-secondary"><i class="fa fa-flask"></i> Visit Labs <small class="text-muted fw-normal">— Kuwait SI units</small></h6>
 
                     <h6 class="col-12 text-secondary m-0" style="font-size:0.78rem;"><i class="fa fa-vial"></i> Glycemic</h6>
-                    <div class="col-6 col-md-3"><label>HbA1c (%)</label><input type="text" class="form-control" id="V_HbA1c" inputmode="decimal"></div>
-                    <div class="col-6 col-md-3"><label>Fasting Glucose (mmol/L)</label><input type="text" class="form-control" id="V_Gluc" inputmode="decimal"></div>
+                    <div class="col-6 col-md-3"><label>HbA1c (%)</label><input type="text" class="form-control" id="V_HbA1c" inputmode="text"></div>
+                    <div class="col-6 col-md-3"><label>Fasting Glucose (mmol/L)</label><input type="text" class="form-control" id="V_Gluc" inputmode="text"></div>
 
                     <div class="col-12"><hr class="my-1"></div>
                     <h6 class="col-12 text-secondary m-0" style="font-size:0.78rem;"><i class="fa fa-tint"></i> Renal &amp; Electrolytes</h6>
-                    <div class="col-6 col-md-3"><label>Urea (mmol/L)</label><input type="text" class="form-control" id="V_Urea" inputmode="decimal"></div>
-                    <div class="col-6 col-md-3"><label>Creatinine (µmol/L)</label><input type="text" class="form-control" id="V_Creat" inputmode="decimal" oninput="calcEGFR()"></div>
+                    <div class="col-6 col-md-3"><label>Urea (mmol/L)</label><input type="text" class="form-control" id="V_Urea" inputmode="text"></div>
+                    <div class="col-6 col-md-3"><label>Creatinine (µmol/L)</label><input type="text" class="form-control" id="V_Creat" inputmode="text" oninput="calcEGFR()"></div>
                     <div class="col-6 col-md-3"><label class="text-success fw-bold">eGFR (ml/min/1.73m²) <span class="auto-badge"><i class="fa fa-lock"></i> Auto</span></label><input type="text" class="form-control bg-light text-success fw-bold" id="V_eGFR" readonly></div>
-                    <div class="col-6 col-md-3"><label>Sodium / Na (mmol/L)</label><input type="text" class="form-control" id="V_Na" inputmode="decimal"></div>
-                    <div class="col-6 col-md-3"><label>Potassium / K (mmol/L)</label><input type="text" class="form-control" id="V_K" inputmode="decimal" oninput="checkVisitAlerts()"></div>
+                    <div class="col-6 col-md-3"><label>Sodium / Na (mmol/L)</label><input type="text" class="form-control" id="V_Na" inputmode="text"></div>
+                    <div class="col-6 col-md-3"><label>Potassium / K (mmol/L)</label><input type="text" class="form-control" id="V_K" inputmode="text" oninput="checkVisitAlerts()"></div>
 
                     <div class="col-12"><hr class="my-1"></div>
                     <h6 class="col-12 text-secondary m-0" style="font-size:0.78rem;"><i class="fa fa-heartbeat"></i> Cardiac Biomarkers</h6>
-                    <div class="col-6 col-md-3"><label>BNP (pg/mL)</label><input type="text" class="form-control" id="V_BNP" inputmode="decimal"></div>
-                    <div class="col-6 col-md-3"><label>NT-proBNP (pg/mL)</label><input type="text" class="form-control" id="V_NTproBNP" inputmode="decimal"></div>
+                    <div class="col-6 col-md-3"><label>BNP (pg/mL)</label><input type="text" class="form-control" id="V_BNP" inputmode="text"></div>
+                    <div class="col-6 col-md-3"><label>NT-proBNP (pg/mL)</label><input type="text" class="form-control" id="V_NTproBNP" inputmode="text"></div>
 
                     <div class="col-12"><hr class="my-1"></div>
                     <h6 class="col-12 text-secondary m-0" style="font-size:0.78rem;"><i class="fa fa-syringe"></i> Iron Studies</h6>
-                    <div class="col-6 col-md-3"><label>Serum Iron (µmol/L)</label><input type="text" class="form-control" id="V_Iron" inputmode="decimal" oninput="checkVisitIronAlert()"></div>
-                    <div class="col-6 col-md-3"><label>Ferritin (µg/L)</label><input type="text" class="form-control" id="V_Ferritin" inputmode="decimal" oninput="checkVisitIronAlert()"></div>
-                    <div class="col-6 col-md-3"><label>Transferrin Sat. / TSAT (%)</label><input type="text" class="form-control" id="V_Transferrin" inputmode="decimal" oninput="checkVisitIronAlert()"></div>
+                    <div class="col-6 col-md-3"><label>Serum Iron (µmol/L)</label><input type="text" class="form-control" id="V_Iron" inputmode="text" oninput="checkVisitIronAlert()"></div>
+                    <div class="col-6 col-md-3"><label>Ferritin (µg/L)</label><input type="text" class="form-control" id="V_Ferritin" inputmode="text" oninput="checkVisitIronAlert()"></div>
+                    <div class="col-6 col-md-3"><label>Transferrin Sat. / TSAT (%)</label><input type="text" class="form-control" id="V_Transferrin" inputmode="text" oninput="checkVisitIronAlert()"></div>
 
                     <div class="col-12"><hr class="my-1"></div>
                     <h6 class="col-12 text-secondary m-0" style="font-size:0.78rem;"><i class="fa fa-vials"></i> CBC</h6>
-                    <div class="col-4 col-md-2"><label>Hb (g/dL)</label><input type="text" class="form-control" id="V_Hb" inputmode="decimal"></div>
-                    <div class="col-4 col-md-2"><label>WBC (×10⁹/L)</label><input type="text" class="form-control" id="V_WBC" inputmode="decimal"></div>
-                    <div class="col-4 col-md-2"><label>Platelets (×10⁹/L)</label><input type="text" class="form-control" id="V_Plt" inputmode="decimal"></div>
+                    <div class="col-4 col-md-2"><label>Hb (g/dL)</label><input type="text" class="form-control" id="V_Hb" inputmode="text"></div>
+                    <div class="col-4 col-md-2"><label>WBC (×10⁹/L)</label><input type="text" class="form-control" id="V_WBC" inputmode="text"></div>
+                    <div class="col-4 col-md-2"><label>Platelets (×10⁹/L)</label><input type="text" class="form-control" id="V_Plt" inputmode="text"></div>
 
                     <div class="col-12"><hr class="my-1"></div>
                     <h6 class="col-12 text-secondary m-0" style="font-size:0.78rem;"><i class="fa fa-flask"></i> Thyroid &amp; Coagulation</h6>
-                    <div class="col-6 col-md-3"><label>TSH (mIU/L)</label><input type="text" class="form-control" id="V_TSH" inputmode="decimal"></div>
-                    <div class="col-6 col-md-3"><label>Free T4 (pmol/L)</label><input type="text" class="form-control" id="V_FreeT4" inputmode="decimal"></div>
-                    <div class="col-6 col-md-3"><label>INR</label><input type="text" class="form-control" id="V_INR" inputmode="decimal"></div>
+                    <div class="col-6 col-md-3"><label>TSH (mIU/L)</label><input type="text" class="form-control" id="V_TSH" inputmode="text"></div>
+                    <div class="col-6 col-md-3"><label>Free T4 (pmol/L)</label><input type="text" class="form-control" id="V_FreeT4" inputmode="text"></div>
+                    <div class="col-6 col-md-3"><label>INR</label><input type="text" class="form-control" id="V_INR" inputmode="text"></div>
 
                     <div class="col-12"><hr class="my-1"></div>
                     <h6 class="col-12 text-secondary m-0" style="font-size:0.78rem;"><i class="fa fa-chart-line"></i> Lipid Profile (mmol/L)</h6>
-                    <div class="col-4 col-md-2"><label>Total Chol.</label><input type="text" class="form-control" id="V_TotalChol" inputmode="decimal"></div>
-                    <div class="col-4 col-md-2"><label>LDL</label><input type="text" class="form-control" id="V_LDL" inputmode="decimal"></div>
-                    <div class="col-4 col-md-2"><label>HDL</label><input type="text" class="form-control" id="V_HDL" inputmode="decimal"></div>
-                    <div class="col-4 col-md-2"><label>Triglycerides</label><input type="text" class="form-control" id="V_TG" inputmode="decimal"></div>
+                    <div class="col-4 col-md-2"><label>Total Chol.</label><input type="text" class="form-control" id="V_TotalChol" inputmode="text"></div>
+                    <div class="col-4 col-md-2"><label>LDL</label><input type="text" class="form-control" id="V_LDL" inputmode="text"></div>
+                    <div class="col-4 col-md-2"><label>HDL</label><input type="text" class="form-control" id="V_HDL" inputmode="text"></div>
+                    <div class="col-4 col-md-2"><label>Triglycerides</label><input type="text" class="form-control" id="V_TG" inputmode="text"></div>
                     <div class="col-12"><label>Other Labs</label><input type="text" class="form-control" id="V_Lab_Others" placeholder="Any other lab results or comments"></div>
                     <div class="col-12">
                         <div class="clinical-alert alert-warning-soft" id="alertVisitHyperK">
@@ -5051,8 +5051,8 @@ function _extraFieldHtml(idx, f, adm){
     } else if(f.t==='area'){
         out+='<textarea class="form-control" id="'+fid+'" rows="2"'+(f.ph?' placeholder="'+_esc(f.ph)+'"':'')+' oninput="'+oc+'">'+_esc(val)+'</textarea>';
     } else {
-        var typ=(f.t==='date')?'date':(f.t==='num')?'number':'text';
-        var im=(f.t==='num')?' inputmode="numeric"':'';
+        var typ=(f.t==='date')?'date':'text';
+        var im=(f.t==='num')?' inputmode="text"':'';
         // Derived fields (BMI, eGFR) are auto-computed — render readonly with a tinted bg.
         var ro=f._derived?' readonly':'';
         var roCls=f._derived?' bg-light text-success fw-bold':'';
@@ -6457,6 +6457,45 @@ function onVisitMedStatusChange(medId){
     }
 }
 
+function _visitMedFormHasValues(){
+    if(typeof VISIT_MED_LIST === 'undefined')return false;
+    var other=document.getElementById('V_Med_Others');
+    if(other&&String(other.value||'').trim())return true;
+    return VISIT_MED_LIST.some(function(m){
+        var status=document.getElementById(m.id+'_Status');
+        var dose=document.getElementById(m.id);
+        var custom=document.getElementById(m.id+'_Custom');
+        var freq=document.getElementById(m.id+'_Freq');
+        return (status&&status.value&&status.value!=='No') ||
+            (dose&&String(dose.value||'').trim()) ||
+            (custom&&String(custom.value||'').trim()) ||
+            (freq&&String(freq.value||'').trim());
+    });
+}
+
+function carryForwardVisitMedicationsFromLatestVisit(){
+    if(editingVisitId||!visits||!visits.length||typeof VISIT_MED_LIST==='undefined')return;
+    if(_visitMedFormHasValues())return;
+    var latest=visits[0]||{};
+    VISIT_MED_LIST.forEach(function(m){
+        var doseVal=latest[m.id]||'';
+        var customVal=latest[m.id+'_Custom']||'';
+        var freqVal=latest[m.id+'_Freq']||'';
+        var statusVal=latest[m.id+'_Status']||((doseVal||customVal||freqVal)?'Yes':'No');
+        var statusEl=document.getElementById(m.id+'_Status');
+        var doseEl=document.getElementById(m.id);
+        var customEl=document.getElementById(m.id+'_Custom');
+        var freqEl=document.getElementById(m.id+'_Freq');
+        if(statusEl)statusEl.value=(statusVal==='Yes')?'Yes':'No';
+        if(doseEl)doseEl.value=doseVal;
+        if(customEl)customEl.value=customVal;
+        if(freqEl)freqEl.value=freqVal;
+        if(statusEl)onVisitMedStatusChange(m.id);
+    });
+    var other=document.getElementById('V_Med_Others');
+    if(other)other.value=latest.V_Med_Others||'';
+}
+
 // ===== FORM HELPERS =====
 function isNumberKey(evt){var c=(evt.which)?evt.which:evt.keyCode;if(c>31&&(c<48||c>57))return false;return true;}
 function validateCivilID(input){var e=document.getElementById('civilError');if(input.value.length!==12&&input.value.length>0){input.classList.add('input-error');e.style.display='block';}else{input.classList.remove('input-error');e.style.display='none';}}
@@ -6854,6 +6893,7 @@ function sspAddVisit(){
     sspContinueEditing();
     if(typeof goToWizardStep === 'function') goToWizardStep(4);
     if(typeof syncVisitHeightFromBaseline === 'function') syncVisitHeightFromBaseline(true);
+    if(typeof carryForwardVisitMedicationsFromLatestVisit === 'function') carryForwardVisitMedicationsFromLatestVisit();
     setTimeout(function(){
         var vd = document.getElementById('Visit_Date');
         if(vd) vd.focus();
@@ -7098,6 +7138,7 @@ function editVisit(visitId){
 function cancelEditVisit(){
     editingVisitId = null;
     clearVisitForm();
+    if(typeof carryForwardVisitMedicationsFromLatestVisit==='function')carryForwardVisitMedicationsFromLatestVisit();
     var saveBtn = document.getElementById("visitSaveBtn");
     if(saveBtn) saveBtn.innerHTML = '<i class="fa fa-plus-circle"></i> ADD VISIT TO PATIENT RECORD';
     var cancelBtn = document.getElementById("visitCancelBtn");
@@ -7293,6 +7334,7 @@ function loadVisits(patientId){
         // First-visit-only: refresh Comorbidities section visibility now visits are known.
         if(typeof updateVisitComorbiditiesVisibility==='function') updateVisitComorbiditiesVisibility();
         if(!editingVisitId&&typeof syncVisitHeightFromBaseline==='function')syncVisitHeightFromBaseline(true);
+        if(!editingVisitId&&typeof carryForwardVisitMedicationsFromLatestVisit==='function')carryForwardVisitMedicationsFromLatestVisit();
     });
 }
 
