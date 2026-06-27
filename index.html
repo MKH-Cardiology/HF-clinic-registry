@@ -695,6 +695,32 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
     border-color:var(--tint-accent,#90a0b3);
     box-shadow:0 0 0 3px rgba(0,0,0,0.05);
 }
+.vertical-entry-group{
+    border:1px solid var(--tint-border,#e3e8ef);
+    background:#fff;
+    border-radius:8px;
+    padding:10px 12px;
+    margin-bottom:8px;
+}
+.vertical-entry-group .entry-title{
+    font-size:0.74rem;
+    font-weight:800;
+    color:#344054;
+    margin-bottom:7px;
+    display:flex;
+    align-items:center;
+    gap:7px;
+}
+.vertical-entry-group .entry-detail-panel{
+    background:#fbfcfe;
+    border-left:3px solid var(--tint-accent,#8b0000);
+    border-radius:6px;
+    padding:10px;
+    margin-top:8px;
+}
+.yes-no-field{
+    max-width:320px;
+}
 
 /* Hide raw <hr> and old text-secondary headers when they're going to be replaced
    by the JS post-processor — covered with a tag we add at runtime so we don't
@@ -1327,115 +1353,191 @@ img,canvas,table,svg{max-width:100%;}
 
             <div class="row g-2">
                 <h6 class="col-12 text-secondary m-0"><i class="fa fa-heartbeat"></i> ECG</h6>
-                <div class="col-6 col-md-3"><label>LBBB</label><select class="form-select" id="ECG_LBBB" onchange="checkCRTIndication()"><option value="">Select...</option><option>No</option><option>Yes</option></select></div>
-                <div class="col-6 col-md-3"><label>QRS Duration (ms)</label><input type="number" class="form-control" id="ECG_QRS" inputmode="numeric" placeholder="e.g. 120" oninput="checkCRTIndication()"></div>
-                <div class="col-12 col-md-3"><label>Arrhythmia</label><input type="text" class="form-control" id="ECG_Arrhythmia" placeholder="Type, if any"></div>
-                <div class="col-12 col-md-3"><label>Pacing Rhythm</label><input type="text" class="form-control" id="ECG_Pacing" placeholder="e.g. AAI, VVI, DDD, BiV"></div>
+                <div class="col-12 vertical-entry-group">
+                    <div class="entry-title"><i class="fa fa-heartbeat"></i> ECG</div>
+                    <div class="yes-no-field"><label>Performed</label><select class="form-select" id="ECG_Done" onchange="toggleECGDetails()"><option>No</option><option>Yes</option></select></div>
+                    <div id="ecgDetailsWrap" style="display:none;">
+                        <div class="row g-2 entry-detail-panel">
+                            <div class="col-12"><label>LBBB</label><select class="form-select" id="ECG_LBBB" onchange="checkCRTIndication()"><option value="">Select...</option><option>No</option><option>Yes</option></select></div>
+                            <div class="col-12"><label>QRS Duration (ms)</label><input type="number" class="form-control" id="ECG_QRS" inputmode="numeric" placeholder="e.g. 120" oninput="checkCRTIndication()"></div>
+                            <div class="col-12"><label>Arrhythmia</label><input type="text" class="form-control" id="ECG_Arrhythmia" placeholder="Type, if any"></div>
+                            <div class="col-12"><label>Pacing Rhythm</label><input type="text" class="form-control" id="ECG_Pacing" placeholder="e.g. AAI, VVI, DDD, BiV"></div>
+                        </div>
+                    </div>
+                </div>
                 <div class="col-12"><hr class="my-1"></div>
                 <h6 class="col-12 text-secondary m-0"><i class="fa fa-wave-square"></i> Holter</h6>
-                <div class="col-6 col-md-3"><label>Holter Performed</label><select class="form-select" id="Holter_Done" onchange="toggleHolterDetails()"><option>No</option><option>Yes</option></select></div>
-                <div class="col-12" id="holterDetailsWrap" style="display:none;">
-                    <div class="row g-2 p-2 mt-1" style="background:#fff5f5;border-left:3px solid #8b0000;border-radius:6px;">
-                        <div class="col-6 col-md-3"><label>Date</label><input type="date" class="form-control" id="Holter_Date"></div>
-                        <div class="col-6 col-md-3"><label>Duration (hours)</label><input type="number" class="form-control" id="Holter_Duration" inputmode="numeric" placeholder="e.g. 24, 48, 72"></div>
-                        <div class="col-4 col-md-2"><label>Max HR</label><input type="number" class="form-control" id="Holter_MaxHR" inputmode="numeric"></div>
-                        <div class="col-4 col-md-2"><label>Min HR</label><input type="number" class="form-control" id="Holter_MinHR" inputmode="numeric"></div>
-                        <div class="col-4 col-md-2"><label>Avg HR</label><input type="number" class="form-control" id="Holter_AvgHR" inputmode="numeric"></div>
-                        <div class="col-12 col-md-6"><label>Arrhythmia Burden / Type</label><input type="text" class="form-control" id="Holter_Arrhythmia" placeholder="e.g. PVCs 5%, NSVT runs, AF burden 30%"></div>
-                        <div class="col-12"><label>Findings / Notes</label><textarea class="form-control" id="Holter_Findings" rows="2" placeholder="Symptom-rhythm correlation, conclusion, recommendations..."></textarea></div>
+                <div class="col-12 vertical-entry-group">
+                    <div class="entry-title"><i class="fa fa-wave-square"></i> Holter</div>
+                    <div class="yes-no-field"><label>Performed</label><select class="form-select" id="Holter_Done" onchange="toggleHolterDetails()"><option>No</option><option>Yes</option></select></div>
+                    <div id="holterDetailsWrap" style="display:none;">
+                        <div class="row g-2 entry-detail-panel">
+                            <div class="col-12"><label>Date</label><input type="date" class="form-control" id="Holter_Date"></div>
+                            <div class="col-12"><label>Duration (hours)</label><input type="number" class="form-control" id="Holter_Duration" inputmode="numeric" placeholder="e.g. 24, 48, 72"></div>
+                            <div class="col-12"><label>Max HR</label><input type="number" class="form-control" id="Holter_MaxHR" inputmode="numeric"></div>
+                            <div class="col-12"><label>Min HR</label><input type="number" class="form-control" id="Holter_MinHR" inputmode="numeric"></div>
+                            <div class="col-12"><label>Avg HR</label><input type="number" class="form-control" id="Holter_AvgHR" inputmode="numeric"></div>
+                            <div class="col-12"><label>Arrhythmia Burden / Type</label><input type="text" class="form-control" id="Holter_Arrhythmia" placeholder="e.g. PVCs 5%, NSVT runs, AF burden 30%"></div>
+                            <div class="col-12"><label>Findings / Notes</label><textarea class="form-control" id="Holter_Findings" rows="2" placeholder="Symptom-rhythm correlation, conclusion, recommendations..."></textarea></div>
+                        </div>
                     </div>
                 </div>
                 <div class="col-12"><hr class="my-1"></div>
                 <h6 class="col-12 text-secondary m-0"><i class="fa fa-heart"></i> Echo</h6>
-                <div class="col-12 col-md-6"><label>ECHO Details</label><input type="text" class="form-control" id="ECHO"></div>
-                <div class="col-6 col-md-2"><label>EDVI/EDD</label><input type="text" class="form-control" id="Echo_EDVI" placeholder="EDVI/EDD"></div>
-                <div class="col-6 col-md-2"><label>ESVI/ESD</label><input type="text" class="form-control" id="Echo_ESVI" placeholder="ESVI/ESD"></div>
-                <div class="col-6 col-md-2"><label>EF %</label><input type="text" class="form-control" id="Echo_EF" inputmode="decimal"></div>
-
-                <div class="col-12"><hr class="my-1"></div>
-                <h6 class="col-12 text-secondary m-0"><i class="fa fa-magnet"></i> CMR</h6>
-                <div class="col-12 col-md-6"><label>CMR Details</label><input type="text" class="form-control" id="CMR_CT"></div>
-                <div class="col-6 col-md-3"><label>LVEDVI/EDD</label><input type="text" class="form-control" id="CMR_LVEDVI" placeholder="LVEDVI/EDD"></div>
-                <div class="col-6 col-md-3"><label>LVESVI/ESD</label><input type="text" class="form-control" id="CMR_LVESVI" placeholder="LVESVI/ESD"></div>
-                <div class="col-6 col-md-2"><label>LVEF %</label><input type="text" class="form-control" id="CMR_LVEF" inputmode="decimal"></div>
-                <div class="col-6 col-md-2"><label>RVEDI</label><input type="text" class="form-control" id="CMR_RVEDI"></div>
-                <div class="col-6 col-md-2"><label>RVEF %</label><input type="text" class="form-control" id="CMR_RVEF" inputmode="decimal"></div>
-                <div class="col-6 col-md-3"><label>LGE</label><select class="form-select" id="CMR_LGE" onchange="toggleLGEPercent()"><option value="">Select...</option><option>No</option><option>Yes</option></select></div>
-                <div class="col-6 col-md-3" id="cmrLGEPctWrap" style="display:none;"><label>LGE %</label><input type="text" class="form-control" id="CMR_LGE_Pct" inputmode="decimal"></div>
-                <div class="col-12 col-md-6"><label>CMR Others</label><input type="text" class="form-control" id="CMR_Others"></div>
-
-                <div class="col-12"><hr class="my-1"></div>
-                <h6 class="col-12 text-secondary m-0"><i class="fa fa-x-ray"></i> CT Angiography</h6>
-                <div class="col-6 col-md-3"><label>CT Angio Performed</label><select class="form-select" id="CT_Done" onchange="toggleCTAngioDetails()"><option>No</option><option>Yes</option></select></div>
-                <div class="col-12" id="ctAngioDetailsWrap" style="display:none;">
-                    <div class="row g-2 p-2 mt-1" style="background:#fff5f5;border-left:3px solid #8b0000;border-radius:6px;">
-                        <div class="col-12 col-md-6"><label>Findings</label><input type="text" class="form-control" id="CT_Angio"></div>
-                        <div class="col-6 col-md-3"><label>Calcium Score</label><input type="text" class="form-control" id="CT_Calcium" inputmode="decimal"></div>
-                        <div class="col-12 col-md-12"><label>CT Angio Notes</label><input type="text" class="form-control" id="CT_Notes"></div>
+                <div class="col-12 vertical-entry-group">
+                    <div class="entry-title"><i class="fa fa-heart"></i> Echo</div>
+                    <div class="yes-no-field"><label>Performed</label><select class="form-select" id="Echo_Done" onchange="toggleEchoDetails()"><option>No</option><option>Yes</option></select></div>
+                    <div id="echoDetailsWrap" style="display:none;">
+                        <div class="row g-2 entry-detail-panel">
+                            <div class="col-12"><label>ECHO Details</label><input type="text" class="form-control" id="ECHO"></div>
+                            <div class="col-12"><label>EDVI/EDD</label><input type="text" class="form-control" id="Echo_EDVI" placeholder="EDVI/EDD"></div>
+                            <div class="col-12"><label>ESVI/ESD</label><input type="text" class="form-control" id="Echo_ESVI" placeholder="ESVI/ESD"></div>
+                            <div class="col-12"><label>EF %</label><input type="text" class="form-control" id="Echo_EF" inputmode="decimal"></div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="col-12"><hr class="my-1"></div>
-                <h6 class="col-12 text-secondary m-0"><i class="fa fa-heart-circle-bolt"></i> Coronary Angiogram (CAG)</h6>
-                <div class="col-6 col-md-3"><label>CAG Performed</label><select class="form-select" id="CAG_Done" onchange="toggleCAGDetails()"><option>No</option><option>Yes</option></select></div>
-                <div class="col-12" id="cagDetailsWrap" style="display:none;">
-                    <div class="row g-2 p-2 mt-1" style="background:#fff5f5;border-left:3px solid #8b0000;border-radius:6px;">
-                        <div class="col-6 col-md-3"><label>Date</label><input type="date" class="form-control" id="CAG_Date"></div>
-                        <div class="col-6 col-md-3"><label>Access</label><select class="form-select" id="CAG_Access"><option value="">Select...</option><option>Radial</option><option>Femoral</option><option>Other</option></select></div>
-                        <div class="col-12 col-md-6"><label>Findings (vessels, % stenosis)</label><input type="text" class="form-control" id="CAG_Findings" placeholder="e.g. LM 30%, LAD 80% prox, RCA 90% mid"></div>
-                        <div class="col-12"><label>Notes</label><input type="text" class="form-control" id="CAG_Notes"></div>
+                <h6 class="col-12 text-secondary m-0"><i class="fa fa-magnet"></i> CMR</h6>
+                <div class="col-12 vertical-entry-group">
+                    <div class="entry-title"><i class="fa fa-magnet"></i> CMR</div>
+                    <div class="yes-no-field"><label>Performed</label><select class="form-select" id="CMR_Done" onchange="toggleCMRDetails()"><option>No</option><option>Yes</option></select></div>
+                    <div id="cmrDetailsWrap" style="display:none;">
+                        <div class="row g-2 entry-detail-panel">
+                            <div class="col-12"><label>CMR Details</label><input type="text" class="form-control" id="CMR_CT"></div>
+                            <div class="col-12"><label>LVEDVI/EDD</label><input type="text" class="form-control" id="CMR_LVEDVI" placeholder="LVEDVI/EDD"></div>
+                            <div class="col-12"><label>LVESVI/ESD</label><input type="text" class="form-control" id="CMR_LVESVI" placeholder="LVESVI/ESD"></div>
+                            <div class="col-12"><label>LVEF %</label><input type="text" class="form-control" id="CMR_LVEF" inputmode="decimal"></div>
+                            <div class="col-12"><label>RVEDI</label><input type="text" class="form-control" id="CMR_RVEDI"></div>
+                            <div class="col-12"><label>RVEF %</label><input type="text" class="form-control" id="CMR_RVEF" inputmode="decimal"></div>
+                            <div class="col-12"><label>LGE</label><select class="form-select" id="CMR_LGE" onchange="toggleLGEPercent()"><option value="">Select...</option><option>No</option><option>Yes</option></select></div>
+                            <div class="col-12" id="cmrLGEPctWrap" style="display:none;"><label>LGE %</label><input type="text" class="form-control" id="CMR_LGE_Pct" inputmode="decimal"></div>
+                            <div class="col-12"><label>CMR Others</label><input type="text" class="form-control" id="CMR_Others"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12"><hr class="my-1"></div>
+                <h6 class="col-12 text-secondary m-0"><i class="fa fa-x-ray"></i> CT Angiography</h6>
+                <div class="col-12 vertical-entry-group">
+                    <div class="entry-title"><i class="fa fa-x-ray"></i> CT Angiography</div>
+                    <div class="yes-no-field"><label>Performed</label><select class="form-select" id="CT_Done" onchange="toggleCTAngioDetails()"><option>No</option><option>Yes</option></select></div>
+                    <div id="ctAngioDetailsWrap" style="display:none;">
+                        <div class="row g-2 entry-detail-panel">
+                            <div class="col-12"><label>Findings</label><input type="text" class="form-control" id="CT_Angio"></div>
+                            <div class="col-12"><label>Calcium Score</label><input type="text" class="form-control" id="CT_Calcium" inputmode="decimal"></div>
+                            <div class="col-12"><label>CT Angio Notes</label><input type="text" class="form-control" id="CT_Notes"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12"><hr class="my-1"></div>
+                <h6 class="col-12 text-secondary m-0"><i class="fa fa-heart-circle-bolt"></i> Coronary Angiogram (CAG) / PCI</h6>
+                <div class="col-12 vertical-entry-group">
+                    <div class="entry-title"><i class="fa fa-heart-circle-bolt"></i> CAG / PCI</div>
+                    <div class="yes-no-field"><label>CAG Performed</label><select class="form-select" id="CAG_Done" onchange="toggleCAGDetails()"><option>No</option><option>Yes</option></select></div>
+                    <div id="cagDetailsWrap" style="display:none;">
+                        <div class="row g-2 entry-detail-panel">
+                            <div class="col-12"><label>CAG Date</label><input type="date" class="form-control" id="CAG_Date"></div>
+                            <div class="col-12"><label>Access</label><select class="form-select" id="CAG_Access"><option value="">Select...</option><option>Radial</option><option>Femoral</option><option>Other</option></select></div>
+                            <div class="col-12"><label>Findings (vessels, % stenosis)</label><input type="text" class="form-control" id="CAG_Findings" placeholder="e.g. LM 30%, LAD 80% prox, RCA 90% mid"></div>
+                            <div class="col-12"><label>PCI Done</label><select class="form-select" id="CAG_PCI_Done" onchange="toggleCAGPCIDetails()"><option>No</option><option>Yes</option></select></div>
+                            <div class="col-12" id="cagPciDetailsWrap" style="display:none;">
+                                <div class="row g-2 entry-detail-panel">
+                                    <div class="col-12"><label>PCI Date</label><input type="date" class="form-control" id="CAG_PCI_Date"></div>
+                                    <div class="col-12"><label>Number of Stents</label><input type="number" class="form-control" id="CAG_Stents_Number" inputmode="numeric" min="0"></div>
+                                    <div class="col-12"><label>PCI Details</label><input type="text" class="form-control" id="CAG_PCI_Details" placeholder="vessels, stent type, complications..."></div>
+                                </div>
+                            </div>
+                            <div class="col-12"><label>Notes</label><input type="text" class="form-control" id="CAG_Notes"></div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="col-12"><hr class="my-1"></div>
                 <h6 class="col-12 text-secondary m-0"><i class="fa fa-walking"></i> 6 Minute Walk Test</h6>
-                <div class="col-6 col-md-3"><label>Completed</label><select class="form-select" id="Walk_Completed" onchange="toggleWalkMeters()"><option>N</option><option>Y</option></select></div>
-                <div class="col-6 col-md-3" id="walkMetersWrap" style="display:none;"><label>Meters Walked</label><input type="number" class="form-control" id="Walk_Meters" inputmode="numeric" oninput="toggleWalkMeters()"></div>
-                <input type="hidden" id="Walk_Test">
+                <div class="col-12 vertical-entry-group">
+                    <div class="entry-title"><i class="fa fa-walking"></i> 6 Minute Walk Test</div>
+                    <div class="yes-no-field"><label>Completed</label><select class="form-select" id="Walk_Completed" onchange="toggleWalkMeters()"><option>N</option><option>Y</option></select></div>
+                    <div id="walkMetersWrap" style="display:none;">
+                        <div class="row g-2 entry-detail-panel">
+                            <div class="col-12"><label>Meters Walked</label><input type="number" class="form-control" id="Walk_Meters" inputmode="numeric" oninput="toggleWalkMeters()"></div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="Walk_Test">
+                </div>
 
                 <div class="col-12"><hr class="my-1"></div>
                 <h6 class="col-12 text-secondary m-0"><i class="fa fa-lungs"></i> CPET</h6>
-                <div class="col-6 col-md-3"><label>Peak VO₂</label><input type="text" class="form-control" id="CPET_PeakVO2" placeholder="ml/kg/min"></div>
-                <div class="col-6 col-md-3"><label>VE/VCO₂ Slope</label><input type="text" class="form-control" id="CPET_VEVCO2"></div>
-                <div class="col-6 col-md-3"><label>RER (validity)</label><input type="text" class="form-control" id="CPET_RER"></div>
-                <div class="col-6 col-md-3"><label>Anaerobic Threshold</label><input type="text" class="form-control" id="CPET_AT"></div>
-                <div class="col-6 col-md-3"><label>VO₂/HR</label><input type="text" class="form-control" id="CPET_VO2HR"></div>
-                <div class="col-6 col-md-3"><label>PetCO₂</label><input type="text" class="form-control" id="CPET_PetCO2"></div>
+                <div class="col-12 vertical-entry-group">
+                    <div class="entry-title"><i class="fa fa-lungs"></i> CPET</div>
+                    <div class="yes-no-field"><label>Performed</label><select class="form-select" id="CPET_Done" onchange="toggleCPETDetails()"><option>No</option><option>Yes</option></select></div>
+                    <div id="cpetDetailsWrap" style="display:none;">
+                        <div class="row g-2 entry-detail-panel">
+                            <div class="col-12"><label>Peak VO2</label><input type="text" class="form-control" id="CPET_PeakVO2" placeholder="ml/kg/min"></div>
+                            <div class="col-12"><label>VE/VCO2 Slope</label><input type="text" class="form-control" id="CPET_VEVCO2"></div>
+                            <div class="col-12"><label>RER (validity)</label><input type="text" class="form-control" id="CPET_RER"></div>
+                            <div class="col-12"><label>Anaerobic Threshold</label><input type="text" class="form-control" id="CPET_AT"></div>
+                            <div class="col-12"><label>VO2/HR</label><input type="text" class="form-control" id="CPET_VO2HR"></div>
+                            <div class="col-12"><label>PetCO2</label><input type="text" class="form-control" id="CPET_PetCO2"></div>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="col-12"><hr class="my-1"></div>
                 <h6 class="col-12 text-secondary m-0"><i class="fa fa-syringe"></i> Right Side Cath</h6>
-                <div class="col-6 col-md-3"><label>Performed</label><select class="form-select" id="RHC_Done" onchange="toggleRHCDetails()"><option>No</option><option>Yes</option></select></div>
-                <div class="col-12" id="rhcDetailsWrap" style="display:none;">
-                    <div class="row g-2 p-2 mt-1" style="background:#fff5f5;border-left:3px solid #8b0000;border-radius:6px;">
-                        <div class="col-6 col-md-3"><label>C.I (L/min/m²)</label><input type="text" class="form-control" id="RHC_CI" inputmode="decimal"></div>
-                        <div class="col-6 col-md-3"><label>RAP (mmHg)</label><input type="text" class="form-control" id="RHC_RAP" inputmode="decimal"></div>
-                        <div class="col-6 col-md-3"><label>RVP (S/D/ED mmHg)</label><input type="text" class="form-control" id="RHC_RVP" placeholder="S/D/ED"></div>
-                        <div class="col-6 col-md-3"><label>PCWP (mmHg)</label><input type="text" class="form-control" id="RHC_PCWP" inputmode="decimal"></div>
-                        <div class="col-6 col-md-3"><label>PAP (S/D/M)</label><input type="text" class="form-control" id="RHC_PAP" placeholder="S/D/M"></div>
-                        <div class="col-6 col-md-3"><label>PVR (Woods)</label><input type="text" class="form-control" id="RHC_PVR" inputmode="decimal"></div>
-                        <div class="col-6 col-md-3"><label>PAPi</label><input type="text" class="form-control" id="RHC_PAPi" inputmode="decimal"></div>
-                        <div class="col-6 col-md-3"><label>LV (S/D/ED)</label><input type="text" class="form-control" id="RHC_LV" placeholder="S/D/ED"></div>
-                        <div class="col-6 col-md-3"><label>MVO₂ Saturation (%)</label><input type="text" class="form-control" id="RHC_MVO2" inputmode="decimal"></div>
+                <div class="col-12 vertical-entry-group">
+                    <div class="entry-title"><i class="fa fa-syringe"></i> Right Side Cath</div>
+                    <div class="yes-no-field"><label>Performed</label><select class="form-select" id="RHC_Done" onchange="toggleRHCDetails()"><option>No</option><option>Yes</option></select></div>
+                    <div id="rhcDetailsWrap" style="display:none;">
+                        <div class="row g-2 entry-detail-panel">
+                            <div class="col-12"><label>C.I (L/min/m2)</label><input type="text" class="form-control" id="RHC_CI" inputmode="decimal"></div>
+                            <div class="col-12"><label>RAP (mmHg)</label><input type="text" class="form-control" id="RHC_RAP" inputmode="decimal"></div>
+                            <div class="col-12"><label>RVP (S/D/ED mmHg)</label><input type="text" class="form-control" id="RHC_RVP" placeholder="S/D/ED"></div>
+                            <div class="col-12"><label>PCWP (mmHg)</label><input type="text" class="form-control" id="RHC_PCWP" inputmode="decimal"></div>
+                            <div class="col-12"><label>PAP (S/D/M)</label><input type="text" class="form-control" id="RHC_PAP" placeholder="S/D/M"></div>
+                            <div class="col-12"><label>PVR (Woods)</label><input type="text" class="form-control" id="RHC_PVR" inputmode="decimal"></div>
+                            <div class="col-12"><label>PAPi</label><input type="text" class="form-control" id="RHC_PAPi" inputmode="decimal"></div>
+                            <div class="col-12"><label>LV (S/D/ED)</label><input type="text" class="form-control" id="RHC_LV" placeholder="S/D/ED"></div>
+                            <div class="col-12"><label>MVO2 Saturation (%)</label><input type="text" class="form-control" id="RHC_MVO2" inputmode="decimal"></div>
+                        </div>
                     </div>
                 </div>
                 <input type="hidden" id="Cath">
 
                 <div class="col-12"><hr class="my-1"></div>
                 <h6 class="col-12 text-secondary m-0"><i class="fa fa-hand-holding-medical"></i> In-Hospital Procedures</h6>
-                <div class="col-12">
-                    <label>Procedure(s) Performed <small class="text-muted" style="font-size:0.7rem;">(multi-select — tap to toggle)</small></label>
-                    <div class="d-flex gap-2 flex-wrap p-2" id="inHospProceduresBox" style="border:1px solid #ced4da;border-radius:6px;background:#fff;">
-                        <button type="button" class="btn btn-sm btn-outline-primary" data-proc="CAG/PCI" onclick="toggleInHospitalProcedure('CAG/PCI')">CAG / PCI</button>
-                        <button type="button" class="btn btn-sm btn-outline-primary" data-proc="Devices" onclick="toggleInHospitalProcedure('Devices')">Devices</button>
-                        <button type="button" class="btn btn-sm btn-outline-primary" data-proc="Ablations" onclick="toggleInHospitalProcedure('Ablations')">Ablations</button>
-                        <button type="button" class="btn btn-sm btn-outline-primary" data-proc="Pericardiocentesis" onclick="toggleInHospitalProcedure('Pericardiocentesis')">Pericardiocentesis</button>
-                        <button type="button" class="btn btn-sm btn-outline-primary" data-proc="Pleural tapping" onclick="toggleInHospitalProcedure('Pleural tapping')">Pleural tapping</button>
-                        <button type="button" class="btn btn-sm btn-outline-primary" data-proc="Ascites tapping" onclick="toggleInHospitalProcedure('Ascites tapping')">Ascites tapping</button>
-                        <button type="button" class="btn btn-sm btn-outline-primary" data-proc="Others" onclick="toggleInHospitalProcedure('Others')">Others</button>
-                    </div>
+                <div class="col-12 vertical-entry-group" id="inHospProceduresBox">
+                    <div class="entry-title"><i class="fa fa-hand-holding-medical"></i> Procedure Checklist</div>
                     <input type="hidden" id="InHospital_Procedures">
-                    <input type="text" class="form-control mt-2" id="InHospital_Procedures_Other" placeholder="Specify other procedure(s)..." style="display:none;">
-                    <textarea class="form-control mt-2" id="InHospital_Procedures_Notes" rows="2" placeholder="Notes on procedures performed (dates, details, vessels, devices implanted, etc.)"></textarea>
+                    <div class="row g-2">
+                        <div class="col-12"><label>Device Implanted During Admission</label><select class="form-select" id="Proc_Device_Done" onchange="toggleProcedureDetails('Proc_Device_Done','procDeviceWrap',['Proc_Device_Type','Proc_Device_Date']);syncInHospitalProcedures()"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-12" id="procDeviceWrap" style="display:none;"><div class="row g-2 entry-detail-panel">
+                            <div class="col-12"><label>Device Type</label><select class="form-select" id="Proc_Device_Type" onchange="syncInHospitalProcedures()"><option value="">Select...</option><option>ICD</option><option>CRT-P</option><option>CRT-D</option><option>Pacemaker AAI</option><option>Pacemaker VVI</option><option>Pacemaker DDD</option><option>Dual-chamber Pacemaker</option><option>Single-chamber Pacemaker</option><option>Leadless Pacemaker</option><option>His-bundle Pacemaker</option><option>Left Bundle Branch Area Pacing</option><option>S-ICD</option><option>Implantable Loop Recorder</option><option>LVAD</option><option>Other</option></select></div>
+                            <div class="col-12"><label>Device Date</label><input type="date" class="form-control" id="Proc_Device_Date" oninput="syncInHospitalProcedures()"></div>
+                        </div></div>
+                        <div class="col-12"><label>Ablation Performed</label><select class="form-select" id="Proc_Ablation_Done" onchange="toggleProcedureDetails('Proc_Ablation_Done','procAblationWrap',['Proc_Ablation_Type']);syncInHospitalProcedures()"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-12" id="procAblationWrap" style="display:none;"><div class="row g-2 entry-detail-panel">
+                            <div class="col-12"><label>Type of Ablation</label><input type="text" class="form-control" id="Proc_Ablation_Type" placeholder="e.g. AF, flutter, VT, SVT" oninput="syncInHospitalProcedures()"></div>
+                        </div></div>
+                        <div class="col-12"><label>Pericardiocentesis</label><select class="form-select" id="Proc_Pericardiocentesis_Done" onchange="toggleProcedureDetails('Proc_Pericardiocentesis_Done','procPericardiocentesisWrap',['Proc_Pericardiocentesis_Volume']);syncInHospitalProcedures()"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-12" id="procPericardiocentesisWrap" style="display:none;"><div class="row g-2 entry-detail-panel">
+                            <div class="col-12"><label>Volume Removed (mL)</label><input type="number" class="form-control" id="Proc_Pericardiocentesis_Volume" inputmode="numeric" oninput="syncInHospitalProcedures()"></div>
+                        </div></div>
+                        <div class="col-12"><label>Pleural Tapping</label><select class="form-select" id="Proc_Pleural_Tapping_Done" onchange="toggleProcedureDetails('Proc_Pleural_Tapping_Done','procPleuralTappingWrap',['Proc_Pleural_Tapping_Volume']);syncInHospitalProcedures()"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-12" id="procPleuralTappingWrap" style="display:none;"><div class="row g-2 entry-detail-panel">
+                            <div class="col-12"><label>Volume Removed (mL)</label><input type="number" class="form-control" id="Proc_Pleural_Tapping_Volume" inputmode="numeric" oninput="syncInHospitalProcedures()"></div>
+                        </div></div>
+                        <div class="col-12"><label>Ascites Tapping</label><select class="form-select" id="Proc_Ascites_Tapping_Done" onchange="toggleProcedureDetails('Proc_Ascites_Tapping_Done','procAscitesTappingWrap',['Proc_Ascites_Tapping_Volume']);syncInHospitalProcedures()"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-12" id="procAscitesTappingWrap" style="display:none;"><div class="row g-2 entry-detail-panel">
+                            <div class="col-12"><label>Volume Removed (mL)</label><input type="number" class="form-control" id="Proc_Ascites_Tapping_Volume" inputmode="numeric" oninput="syncInHospitalProcedures()"></div>
+                        </div></div>
+                        <div class="col-12"><label>Other Procedure</label><select class="form-select" id="Proc_Other_Done" onchange="toggleProcedureDetails('Proc_Other_Done','procOtherWrap',['InHospital_Procedures_Other']);syncInHospitalProcedures()"><option>No</option><option>Yes</option></select></div>
+                        <div class="col-12" id="procOtherWrap" style="display:none;"><div class="row g-2 entry-detail-panel">
+                            <div class="col-12"><label>Specify Other Procedure(s)</label><input type="text" class="form-control" id="InHospital_Procedures_Other" placeholder="Specify other procedure(s)..." oninput="syncInHospitalProcedures()"></div>
+                        </div></div>
+                        <div class="col-12"><label>Procedure Notes</label><textarea class="form-control" id="InHospital_Procedures_Notes" rows="2" placeholder="Notes on procedures performed (dates, details, vessels, devices implanted, etc.)"></textarea></div>
+                    </div>
                 </div>
 
                 <div class="col-12"><hr class="my-1"></div>
@@ -1476,10 +1578,17 @@ img,canvas,table,svg{max-width:100%;}
                 <select id="Liver_Dz"><option>No</option><option>Yes</option></select>
             </div>
             <div class="row g-2 mt-2">
-                <div class="col-12"><label class="fw-bold text-secondary mb-0"><i class="fa fa-microchip me-1"></i>History of Device Fixation</label></div>
-                <div class="col-12 col-md-6"><label>Device Implanted</label><select class="form-select" id="Device_Type" onchange="syncDeviceInfo()"><option value="">Select...</option><option>None</option><option>ICD</option><option>CRT-P</option><option>CRT-D</option><option>Pacemaker AAI</option><option>Pacemaker VVI</option><option>Pacemaker DDD</option><option>Dual-chamber Pacemaker</option><option>Single-chamber Pacemaker</option><option>Leadless Pacemaker</option><option>His-bundle Pacemaker</option><option>Left Bundle Branch Area Pacing</option><option>S-ICD</option><option>Implantable Loop Recorder</option><option>LVAD</option><option>Other</option></select></div>
-                <div class="col-12 col-md-3"><label>Device Date</label><input type="date" class="form-control" id="Device_Date" oninput="syncDeviceInfo()"></div>
-                <input type="hidden" id="Device_Info">
+                <div class="col-12 vertical-entry-group">
+                    <div class="entry-title"><i class="fa fa-microchip"></i> History of Device Fixation</div>
+                    <div class="yes-no-field"><label>History of Device Fixation</label><select class="form-select" id="Device_Done" onchange="toggleDeviceHistory()"><option>No</option><option>Yes</option></select></div>
+                    <div id="deviceHistoryWrap" style="display:none;">
+                        <div class="row g-2 entry-detail-panel">
+                            <div class="col-12"><label>Device Implanted</label><select class="form-select" id="Device_Type" onchange="syncDeviceInfo()"><option value="">Select...</option><option>ICD</option><option>CRT-P</option><option>CRT-D</option><option>Pacemaker AAI</option><option>Pacemaker VVI</option><option>Pacemaker DDD</option><option>Dual-chamber Pacemaker</option><option>Single-chamber Pacemaker</option><option>Leadless Pacemaker</option><option>His-bundle Pacemaker</option><option>Left Bundle Branch Area Pacing</option><option>S-ICD</option><option>Implantable Loop Recorder</option><option>LVAD</option><option>Other</option></select></div>
+                            <div class="col-12"><label>Device Date</label><input type="date" class="form-control" id="Device_Date" oninput="syncDeviceInfo()"></div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="Device_Info">
+                </div>
                 <div class="col-12"><hr class="my-1"></div>
                 <div class="col-12 col-md-6"><label>IHD Type</label><select class="form-select" id="IHD_Visible" onchange="document.getElementById('IHD').value=this.value"><option>No</option><option>STEMI</option><option>NSTEMI</option></select></div>
                 <div class="col-12 col-md-6"><label>PCI / CABG <small class="text-muted" style="font-size:0.7rem;">(multi-select — tap to toggle)</small></label>
@@ -1879,6 +1988,17 @@ img,canvas,table,svg{max-width:100%;}
                     <div class="col-12">
                         <div class="pill-group" id="vPillComorbidities"></div>
                     </div>
+                    <div class="col-12 vertical-entry-group">
+                        <div class="entry-title"><i class="fa fa-microchip"></i> History of Device Fixation</div>
+                        <div class="yes-no-field"><label>History of Device Fixation</label><select class="form-select" id="V_Device_Done" onchange="toggleVisitDeviceHistory()"><option>No</option><option>Yes</option></select></div>
+                        <div id="vDeviceHistoryWrap" style="display:none;">
+                            <div class="row g-2 entry-detail-panel">
+                                <div class="col-12"><label>Device Implanted</label><select class="form-select" id="V_Device_Type" onchange="syncVisitDeviceInfo()"><option value="">Select...</option><option>ICD</option><option>CRT-P</option><option>CRT-D</option><option>Pacemaker AAI</option><option>Pacemaker VVI</option><option>Pacemaker DDD</option><option>Dual-chamber Pacemaker</option><option>Single-chamber Pacemaker</option><option>Leadless Pacemaker</option><option>His-bundle Pacemaker</option><option>Left Bundle Branch Area Pacing</option><option>S-ICD</option><option>Implantable Loop Recorder</option><option>LVAD</option><option>Other</option></select></div>
+                                <div class="col-12"><label>Device Date</label><input type="date" class="form-control" id="V_Device_Date" oninput="syncVisitDeviceInfo()"></div>
+                            </div>
+                        </div>
+                        <input type="hidden" id="V_Device_Info">
+                    </div>
                     <!-- IHD Type + PCI/CABG (multi-select buttons) -->
                     <div class="col-12 col-md-6"><label>IHD Type</label><select class="form-select" id="V_IHD"><option>No</option><option>STEMI</option><option>NSTEMI</option></select></div>
                     <div class="col-12 col-md-6">
@@ -1980,11 +2100,19 @@ img,canvas,table,svg{max-width:100%;}
                     </div><!-- /#vComorbiditiesSection -->
                     <div class="col-12"><hr class="my-2"></div>
                     <h6 class="col-12 text-secondary">ECG</h6>
-                    <div class="col-4 col-md-3"><label>LBBB</label><select class="form-select" id="V_LBBB"><option>No</option><option>Yes</option></select></div>
-                    <div class="col-4 col-md-3"><label>QRS Width (ms)</label><input type="text" class="form-control" id="V_QRS" inputmode="numeric"></div>
-                    <div class="col-4 col-md-3"><label>Arrhythmia</label><input type="text" class="form-control" id="V_Arrhythmia"></div>
-                    <div class="col-6 col-md-3"><label>Pacing in ECG</label><select class="form-select" id="V_Pacing_ECG" onchange="toggleVisitPacingMode()"><option>No</option><option>Yes</option></select></div>
-                    <div class="col-6 col-md-3" id="vPacingModeWrap" style="display:none;"><label>Pacing Mode</label><input type="text" class="form-control" id="V_Pacing_Mode" placeholder="e.g. AAI, VVI, DDD, BiV"></div>
+                    <div class="col-12 vertical-entry-group">
+                        <div class="entry-title"><i class="fa fa-heartbeat"></i> ECG</div>
+                        <div class="yes-no-field"><label>Performed</label><select class="form-select" id="V_ECG_Done" onchange="toggleVisitECGDetails()"><option>No</option><option>Yes</option></select></div>
+                        <div id="vEcgDetailsWrap" style="display:none;">
+                            <div class="row g-2 entry-detail-panel">
+                                <div class="col-12"><label>LBBB</label><select class="form-select" id="V_LBBB"><option>No</option><option>Yes</option></select></div>
+                                <div class="col-12"><label>QRS Width (ms)</label><input type="text" class="form-control" id="V_QRS" inputmode="numeric"></div>
+                                <div class="col-12"><label>Arrhythmia</label><input type="text" class="form-control" id="V_Arrhythmia"></div>
+                                <div class="col-12"><label>Pacing in ECG</label><select class="form-select" id="V_Pacing_ECG" onchange="toggleVisitPacingMode()"><option>No</option><option>Yes</option></select></div>
+                                <div class="col-12" id="vPacingModeWrap" style="display:none;"><label>Pacing Mode</label><input type="text" class="form-control" id="V_Pacing_Mode" placeholder="e.g. AAI, VVI, DDD, BiV"></div>
+                            </div>
+                        </div>
+                    </div>
                     <div style="display:none;">
                         <span id="vEcgImageMeta" class="text-muted small"></span>
                         <input type="hidden" id="V_ECG_Image_File">
@@ -1993,60 +2121,157 @@ img,canvas,table,svg{max-width:100%;}
                     </div>
                     <div class="col-12"><hr class="my-2"></div>
                     <h6 class="col-12 text-secondary"><i class="fa fa-wave-square"></i> Holter Results</h6>
-                    <div class="col-6 col-md-3"><label>Holter Performed</label><select class="form-select" id="V_Holter_Done" onchange="toggleVisitHolter()"><option>No</option><option>Yes</option></select></div>
-                    <div class="col-6 col-md-3" id="vHolterDateWrap" style="display:none;"><label>Date</label><input type="date" class="form-control" id="V_Holter_Date"></div>
-                    <div class="col-6 col-md-3" id="vHolterDurationWrap" style="display:none;"><label>Duration (hours)</label><input type="number" class="form-control" id="V_Holter_Duration" inputmode="numeric" placeholder="e.g. 24, 48, 72"></div>
-                    <div class="col-6 col-md-3" id="vHolterMaxHRWrap" style="display:none;"><label>Max HR</label><input type="number" class="form-control" id="V_Holter_MaxHR" inputmode="numeric"></div>
-                    <div class="col-6 col-md-3" id="vHolterMinHRWrap" style="display:none;"><label>Min HR</label><input type="number" class="form-control" id="V_Holter_MinHR" inputmode="numeric"></div>
-                    <div class="col-6 col-md-3" id="vHolterAvgHRWrap" style="display:none;"><label>Avg HR</label><input type="number" class="form-control" id="V_Holter_AvgHR" inputmode="numeric"></div>
-                    <div class="col-12 col-md-6" id="vHolterArrhythmiaWrap" style="display:none;"><label>Arrhythmia Burden / Type</label><input type="text" class="form-control" id="V_Holter_Arrhythmia" placeholder="e.g. PVCs 5%, NSVT runs, AF burden 30%"></div>
-                    <div class="col-12" id="vHolterFindingsWrap" style="display:none;"><label>Findings / Notes</label><textarea class="form-control" id="V_Holter_Findings" rows="2" placeholder="Symptom-rhythm correlation, conclusion, recommendations..."></textarea></div>
+                    <div class="col-12 vertical-entry-group">
+                        <div class="entry-title"><i class="fa fa-wave-square"></i> Holter</div>
+                        <div class="yes-no-field"><label>Performed</label><select class="form-select" id="V_Holter_Done" onchange="toggleVisitHolter()"><option>No</option><option>Yes</option></select></div>
+                        <div id="vHolterDetailsWrap" style="display:none;">
+                            <div class="row g-2 entry-detail-panel">
+                                <div class="col-12" id="vHolterDateWrap" style="display:none;"><label>Date</label><input type="date" class="form-control" id="V_Holter_Date"></div>
+                                <div class="col-12" id="vHolterDurationWrap" style="display:none;"><label>Duration (hours)</label><input type="number" class="form-control" id="V_Holter_Duration" inputmode="numeric" placeholder="e.g. 24, 48, 72"></div>
+                                <div class="col-12" id="vHolterMaxHRWrap" style="display:none;"><label>Max HR</label><input type="number" class="form-control" id="V_Holter_MaxHR" inputmode="numeric"></div>
+                                <div class="col-12" id="vHolterMinHRWrap" style="display:none;"><label>Min HR</label><input type="number" class="form-control" id="V_Holter_MinHR" inputmode="numeric"></div>
+                                <div class="col-12" id="vHolterAvgHRWrap" style="display:none;"><label>Avg HR</label><input type="number" class="form-control" id="V_Holter_AvgHR" inputmode="numeric"></div>
+                                <div class="col-12" id="vHolterArrhythmiaWrap" style="display:none;"><label>Arrhythmia Burden / Type</label><input type="text" class="form-control" id="V_Holter_Arrhythmia" placeholder="e.g. PVCs 5%, NSVT runs, AF burden 30%"></div>
+                                <div class="col-12" id="vHolterFindingsWrap" style="display:none;"><label>Findings / Notes</label><textarea class="form-control" id="V_Holter_Findings" rows="2" placeholder="Symptom-rhythm correlation, conclusion, recommendations..."></textarea></div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="col-12"><hr class="my-2"></div>
                     <h6 class="col-12 text-secondary">F/U Echo</h6>
-                    <div class="col-6 col-md-4"><label>Change in EF</label><input type="text" class="form-control" id="V_EF_Change"></div>
-                    <div class="col-6 col-md-2"><label>EDVI/EDD</label><input type="text" class="form-control" id="V_Echo_EDVI" placeholder="EDVI/EDD"></div>
-                    <div class="col-6 col-md-2"><label>ESVI/ESD</label><input type="text" class="form-control" id="V_Echo_ESVI" placeholder="ESVI/ESD"></div>
-                    <div class="col-6 col-md-2"><label>EF %</label><input type="text" class="form-control" id="V_Echo_EF" inputmode="decimal"></div>
-                    <div class="col-12 col-md-12"><label>Other Echo Findings</label><input type="text" class="form-control" id="V_Echo_Other"></div>
+                    <div class="col-12 vertical-entry-group">
+                        <div class="entry-title"><i class="fa fa-heart"></i> F/U Echo</div>
+                        <div class="yes-no-field"><label>Performed</label><select class="form-select" id="V_Echo_Done" onchange="toggleVisitEchoDetails()"><option>No</option><option>Yes</option></select></div>
+                        <div id="vEchoDetailsWrap" style="display:none;">
+                            <div class="row g-2 entry-detail-panel">
+                                <div class="col-12"><label>Change in EF</label><input type="text" class="form-control" id="V_EF_Change"></div>
+                                <div class="col-12"><label>EDVI/EDD</label><input type="text" class="form-control" id="V_Echo_EDVI" placeholder="EDVI/EDD"></div>
+                                <div class="col-12"><label>ESVI/ESD</label><input type="text" class="form-control" id="V_Echo_ESVI" placeholder="ESVI/ESD"></div>
+                                <div class="col-12"><label>EF %</label><input type="text" class="form-control" id="V_Echo_EF" inputmode="decimal"></div>
+                                <div class="col-12"><label>Other Echo Findings</label><input type="text" class="form-control" id="V_Echo_Other"></div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="col-12"><hr class="my-2"></div>
                     <h6 class="col-12 text-secondary">F/U CMR</h6>
-                    <div class="col-6 col-md-3"><label>LVEDVI/EDD</label><input type="text" class="form-control" id="V_CMR_LVEDVI" placeholder="LVEDVI/EDD"></div>
-                    <div class="col-6 col-md-3"><label>LVESVI/ESD</label><input type="text" class="form-control" id="V_CMR_LVESVI" placeholder="LVESVI/ESD"></div>
-                    <div class="col-6 col-md-2"><label>LVEF %</label><input type="text" class="form-control" id="V_CMR_LVEF" inputmode="decimal"></div>
-                    <div class="col-6 col-md-2"><label>RVEDI</label><input type="text" class="form-control" id="V_CMR_RVEDI"></div>
-                    <div class="col-6 col-md-2"><label>RVEF %</label><input type="text" class="form-control" id="V_CMR_RVEF" inputmode="decimal"></div>
-                    <div class="col-6 col-md-3"><label>LGE</label><select class="form-select" id="V_CMR_LGE" onchange="toggleVisitLGEPercent()"><option value="">Select...</option><option>No</option><option>Yes</option></select></div>
-                    <div class="col-6 col-md-3" id="vCmrLGEPctWrap" style="display:none;"><label>LGE %</label><input type="text" class="form-control" id="V_CMR_LGE_Pct" inputmode="decimal"></div>
-                    <div class="col-12 col-md-6"><label>CMR Others</label><input type="text" class="form-control" id="V_CMR_Others"></div>
+                    <div class="col-12 vertical-entry-group">
+                        <div class="entry-title"><i class="fa fa-magnet"></i> F/U CMR</div>
+                        <div class="yes-no-field"><label>Performed</label><select class="form-select" id="V_CMR_Done" onchange="toggleVisitCMRDetails()"><option>No</option><option>Yes</option></select></div>
+                        <div id="vCmrDetailsWrap" style="display:none;">
+                            <div class="row g-2 entry-detail-panel">
+                                <div class="col-12"><label>LVEDVI/EDD</label><input type="text" class="form-control" id="V_CMR_LVEDVI" placeholder="LVEDVI/EDD"></div>
+                                <div class="col-12"><label>LVESVI/ESD</label><input type="text" class="form-control" id="V_CMR_LVESVI" placeholder="LVESVI/ESD"></div>
+                                <div class="col-12"><label>LVEF %</label><input type="text" class="form-control" id="V_CMR_LVEF" inputmode="decimal"></div>
+                                <div class="col-12"><label>RVEDI</label><input type="text" class="form-control" id="V_CMR_RVEDI"></div>
+                                <div class="col-12"><label>RVEF %</label><input type="text" class="form-control" id="V_CMR_RVEF" inputmode="decimal"></div>
+                                <div class="col-12"><label>LGE</label><select class="form-select" id="V_CMR_LGE" onchange="toggleVisitLGEPercent()"><option value="">Select...</option><option>No</option><option>Yes</option></select></div>
+                                <div class="col-12" id="vCmrLGEPctWrap" style="display:none;"><label>LGE %</label><input type="text" class="form-control" id="V_CMR_LGE_Pct" inputmode="decimal"></div>
+                                <div class="col-12"><label>CMR Others</label><input type="text" class="form-control" id="V_CMR_Others"></div>
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="col-12"><hr class="my-2"></div>
                     <h6 class="col-12 text-secondary"><i class="fa fa-walking"></i> F/U 6 Minute Walk Test</h6>
-                    <div class="col-6 col-md-3"><label>Completed</label><select class="form-select" id="V_Walk_Completed" onchange="toggleVisitWalkMeters()"><option>N</option><option>Y</option></select></div>
-                    <div class="col-6 col-md-3" id="vWalkMetersWrap" style="display:none;"><label>Meters Walked</label><input type="number" class="form-control" id="V_Walk_Meters" inputmode="numeric"></div>
+                    <div class="col-12 vertical-entry-group">
+                        <div class="entry-title"><i class="fa fa-walking"></i> 6 Minute Walk Test</div>
+                        <div class="yes-no-field"><label>Completed</label><select class="form-select" id="V_Walk_Completed" onchange="toggleVisitWalkMeters()"><option>N</option><option>Y</option></select></div>
+                        <div id="vWalkMetersWrap" style="display:none;">
+                            <div class="row g-2 entry-detail-panel">
+                                <div class="col-12"><label>Meters Walked</label><input type="number" class="form-control" id="V_Walk_Meters" inputmode="numeric"></div>
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="col-12"><hr class="my-2"></div>
                     <h6 class="col-12 text-secondary"><i class="fa fa-lungs"></i> F/U CPET</h6>
-                    <div class="col-6 col-md-3"><label>Peak VO₂</label><input type="text" class="form-control" id="V_CPET_PeakVO2" placeholder="ml/kg/min"></div>
-                    <div class="col-6 col-md-3"><label>VE/VCO₂ Slope</label><input type="text" class="form-control" id="V_CPET_VEVCO2"></div>
-                    <div class="col-6 col-md-3"><label>RER (validity)</label><input type="text" class="form-control" id="V_CPET_RER"></div>
-                    <div class="col-6 col-md-3"><label>Anaerobic Threshold</label><input type="text" class="form-control" id="V_CPET_AT"></div>
-                    <div class="col-6 col-md-3"><label>VO₂/HR</label><input type="text" class="form-control" id="V_CPET_VO2HR"></div>
-                    <div class="col-6 col-md-3"><label>PetCO₂</label><input type="text" class="form-control" id="V_CPET_PetCO2"></div>
+                    <div class="col-12 vertical-entry-group">
+                        <div class="entry-title"><i class="fa fa-lungs"></i> CPET</div>
+                        <div class="yes-no-field"><label>Performed</label><select class="form-select" id="V_CPET_Done" onchange="toggleVisitCPETDetails()"><option>No</option><option>Yes</option></select></div>
+                        <div id="vCpetDetailsWrap" style="display:none;">
+                            <div class="row g-2 entry-detail-panel">
+                                <div class="col-12"><label>Peak VO2</label><input type="text" class="form-control" id="V_CPET_PeakVO2" placeholder="ml/kg/min"></div>
+                                <div class="col-12"><label>VE/VCO2 Slope</label><input type="text" class="form-control" id="V_CPET_VEVCO2"></div>
+                                <div class="col-12"><label>RER (validity)</label><input type="text" class="form-control" id="V_CPET_RER"></div>
+                                <div class="col-12"><label>Anaerobic Threshold</label><input type="text" class="form-control" id="V_CPET_AT"></div>
+                                <div class="col-12"><label>VO2/HR</label><input type="text" class="form-control" id="V_CPET_VO2HR"></div>
+                                <div class="col-12"><label>PetCO2</label><input type="text" class="form-control" id="V_CPET_PetCO2"></div>
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="col-12"><hr class="my-2"></div>
                     <h6 class="col-12 text-secondary"><i class="fa fa-syringe"></i> F/U Right Side Cath</h6>
-                    <div class="col-6 col-md-3"><label>Performed</label><select class="form-select" id="V_RHC_Done" onchange="toggleVisitRHCDetails()"><option>No</option><option>Yes</option></select></div>
-                    <div class="col-12" id="vRhcDetailsWrap" style="display:none;">
-                        <div class="row g-2 p-2 mt-1" style="background:#fff5f5;border-left:3px solid #8b0000;border-radius:6px;">
-                            <div class="col-6 col-md-3"><label>C.I (L/min/m²)</label><input type="text" class="form-control" id="V_RHC_CI" inputmode="decimal"></div>
-                            <div class="col-6 col-md-3"><label>RAP (mmHg)</label><input type="text" class="form-control" id="V_RHC_RAP" inputmode="decimal"></div>
-                            <div class="col-6 col-md-3"><label>RVP (S/D/ED mmHg)</label><input type="text" class="form-control" id="V_RHC_RVP" placeholder="S/D/ED"></div>
-                            <div class="col-6 col-md-3"><label>PCWP (mmHg)</label><input type="text" class="form-control" id="V_RHC_PCWP" inputmode="decimal"></div>
-                            <div class="col-6 col-md-3"><label>PAP (S/D/M)</label><input type="text" class="form-control" id="V_RHC_PAP" placeholder="S/D/M"></div>
-                            <div class="col-6 col-md-3"><label>PVR (Woods)</label><input type="text" class="form-control" id="V_RHC_PVR" inputmode="decimal"></div>
-                            <div class="col-6 col-md-3"><label>PAPi</label><input type="text" class="form-control" id="V_RHC_PAPi" inputmode="decimal"></div>
-                            <div class="col-6 col-md-3"><label>LV (S/D/ED)</label><input type="text" class="form-control" id="V_RHC_LV" placeholder="S/D/ED"></div>
-                            <div class="col-6 col-md-3"><label>MVO₂ Saturation (%)</label><input type="text" class="form-control" id="V_RHC_MVO2" inputmode="decimal"></div>
+                    <div class="col-12 vertical-entry-group">
+                        <div class="entry-title"><i class="fa fa-syringe"></i> Right Side Cath</div>
+                        <div class="yes-no-field"><label>Performed</label><select class="form-select" id="V_RHC_Done" onchange="toggleVisitRHCDetails()"><option>No</option><option>Yes</option></select></div>
+                        <div id="vRhcDetailsWrap" style="display:none;">
+                            <div class="row g-2 entry-detail-panel">
+                                <div class="col-12"><label>C.I (L/min/m2)</label><input type="text" class="form-control" id="V_RHC_CI" inputmode="decimal"></div>
+                                <div class="col-12"><label>RAP (mmHg)</label><input type="text" class="form-control" id="V_RHC_RAP" inputmode="decimal"></div>
+                                <div class="col-12"><label>RVP (S/D/ED mmHg)</label><input type="text" class="form-control" id="V_RHC_RVP" placeholder="S/D/ED"></div>
+                                <div class="col-12"><label>PCWP (mmHg)</label><input type="text" class="form-control" id="V_RHC_PCWP" inputmode="decimal"></div>
+                                <div class="col-12"><label>PAP (S/D/M)</label><input type="text" class="form-control" id="V_RHC_PAP" placeholder="S/D/M"></div>
+                                <div class="col-12"><label>PVR (Woods)</label><input type="text" class="form-control" id="V_RHC_PVR" inputmode="decimal"></div>
+                                <div class="col-12"><label>PAPi</label><input type="text" class="form-control" id="V_RHC_PAPi" inputmode="decimal"></div>
+                                <div class="col-12"><label>LV (S/D/ED)</label><input type="text" class="form-control" id="V_RHC_LV" placeholder="S/D/ED"></div>
+                                <div class="col-12"><label>MVO2 Saturation (%)</label><input type="text" class="form-control" id="V_RHC_MVO2" inputmode="decimal"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12"><hr class="my-2"></div>
+                    <h6 class="col-12 text-secondary"><i class="fa fa-heart-circle-bolt"></i> Visit CAG / PCI</h6>
+                    <div class="col-12 vertical-entry-group">
+                        <div class="entry-title"><i class="fa fa-heart-circle-bolt"></i> CAG / PCI</div>
+                        <div class="yes-no-field"><label>CAG Performed</label><select class="form-select" id="V_CAG_Done" onchange="toggleVisitCAGDetails()"><option>No</option><option>Yes</option></select></div>
+                        <div id="vCagDetailsWrap" style="display:none;">
+                            <div class="row g-2 entry-detail-panel">
+                                <div class="col-12"><label>CAG Date</label><input type="date" class="form-control" id="V_CAG_Date"></div>
+                                <div class="col-12"><label>Findings</label><input type="text" class="form-control" id="V_CAG_Findings" placeholder="vessels, stenosis, access, notes..."></div>
+                                <div class="col-12"><label>PCI Done</label><select class="form-select" id="V_CAG_PCI_Done" onchange="toggleVisitCAGPCIDetails()"><option>No</option><option>Yes</option></select></div>
+                                <div class="col-12" id="vCagPciDetailsWrap" style="display:none;">
+                                    <div class="row g-2 entry-detail-panel">
+                                        <div class="col-12"><label>PCI Date</label><input type="date" class="form-control" id="V_CAG_PCI_Date"></div>
+                                        <div class="col-12"><label>Number of Stents</label><input type="number" class="form-control" id="V_CAG_Stents_Number" inputmode="numeric" min="0"></div>
+                                        <div class="col-12"><label>PCI Details</label><input type="text" class="form-control" id="V_CAG_PCI_Details" placeholder="vessels, stent type, complications..."></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12"><hr class="my-2"></div>
+                    <h6 class="col-12 text-secondary"><i class="fa fa-hand-holding-medical"></i> Visit Procedures</h6>
+                    <div class="col-12 vertical-entry-group" id="vProceduresBox">
+                        <div class="entry-title"><i class="fa fa-hand-holding-medical"></i> Procedure Checklist</div>
+                        <input type="hidden" id="V_Procedures">
+                        <div class="row g-2">
+                            <div class="col-12"><label>Device Implanted During Visit / Admission</label><select class="form-select" id="V_Proc_Device_Done" onchange="toggleVisitProcedureDetails('V_Proc_Device_Done','vProcDeviceWrap',['V_Proc_Device_Type','V_Proc_Device_Date']);syncVisitProcedures()"><option>No</option><option>Yes</option></select></div>
+                            <div class="col-12" id="vProcDeviceWrap" style="display:none;"><div class="row g-2 entry-detail-panel">
+                                <div class="col-12"><label>Device Type</label><select class="form-select" id="V_Proc_Device_Type" onchange="syncVisitProcedures()"><option value="">Select...</option><option>ICD</option><option>CRT-P</option><option>CRT-D</option><option>Pacemaker AAI</option><option>Pacemaker VVI</option><option>Pacemaker DDD</option><option>Dual-chamber Pacemaker</option><option>Single-chamber Pacemaker</option><option>Leadless Pacemaker</option><option>His-bundle Pacemaker</option><option>Left Bundle Branch Area Pacing</option><option>S-ICD</option><option>Implantable Loop Recorder</option><option>LVAD</option><option>Other</option></select></div>
+                                <div class="col-12"><label>Device Date</label><input type="date" class="form-control" id="V_Proc_Device_Date" oninput="syncVisitProcedures()"></div>
+                            </div></div>
+                            <div class="col-12"><label>Ablation Performed</label><select class="form-select" id="V_Proc_Ablation_Done" onchange="toggleVisitProcedureDetails('V_Proc_Ablation_Done','vProcAblationWrap',['V_Proc_Ablation_Type']);syncVisitProcedures()"><option>No</option><option>Yes</option></select></div>
+                            <div class="col-12" id="vProcAblationWrap" style="display:none;"><div class="row g-2 entry-detail-panel">
+                                <div class="col-12"><label>Type of Ablation</label><input type="text" class="form-control" id="V_Proc_Ablation_Type" placeholder="e.g. AF, flutter, VT, SVT" oninput="syncVisitProcedures()"></div>
+                            </div></div>
+                            <div class="col-12"><label>Pericardiocentesis</label><select class="form-select" id="V_Proc_Pericardiocentesis_Done" onchange="toggleVisitProcedureDetails('V_Proc_Pericardiocentesis_Done','vProcPericardiocentesisWrap',['V_Proc_Pericardiocentesis_Volume']);syncVisitProcedures()"><option>No</option><option>Yes</option></select></div>
+                            <div class="col-12" id="vProcPericardiocentesisWrap" style="display:none;"><div class="row g-2 entry-detail-panel">
+                                <div class="col-12"><label>Volume Removed (mL)</label><input type="number" class="form-control" id="V_Proc_Pericardiocentesis_Volume" inputmode="numeric" oninput="syncVisitProcedures()"></div>
+                            </div></div>
+                            <div class="col-12"><label>Pleural Tapping</label><select class="form-select" id="V_Proc_Pleural_Tapping_Done" onchange="toggleVisitProcedureDetails('V_Proc_Pleural_Tapping_Done','vProcPleuralTappingWrap',['V_Proc_Pleural_Tapping_Volume']);syncVisitProcedures()"><option>No</option><option>Yes</option></select></div>
+                            <div class="col-12" id="vProcPleuralTappingWrap" style="display:none;"><div class="row g-2 entry-detail-panel">
+                                <div class="col-12"><label>Volume Removed (mL)</label><input type="number" class="form-control" id="V_Proc_Pleural_Tapping_Volume" inputmode="numeric" oninput="syncVisitProcedures()"></div>
+                            </div></div>
+                            <div class="col-12"><label>Ascites Tapping</label><select class="form-select" id="V_Proc_Ascites_Tapping_Done" onchange="toggleVisitProcedureDetails('V_Proc_Ascites_Tapping_Done','vProcAscitesTappingWrap',['V_Proc_Ascites_Tapping_Volume']);syncVisitProcedures()"><option>No</option><option>Yes</option></select></div>
+                            <div class="col-12" id="vProcAscitesTappingWrap" style="display:none;"><div class="row g-2 entry-detail-panel">
+                                <div class="col-12"><label>Volume Removed (mL)</label><input type="number" class="form-control" id="V_Proc_Ascites_Tapping_Volume" inputmode="numeric" oninput="syncVisitProcedures()"></div>
+                            </div></div>
+                            <div class="col-12"><label>Other Procedure</label><select class="form-select" id="V_Proc_Other_Done" onchange="toggleVisitProcedureDetails('V_Proc_Other_Done','vProcOtherWrap',['V_Proc_Other']);syncVisitProcedures()"><option>No</option><option>Yes</option></select></div>
+                            <div class="col-12" id="vProcOtherWrap" style="display:none;"><div class="row g-2 entry-detail-panel">
+                                <div class="col-12"><label>Specify Other Procedure(s)</label><input type="text" class="form-control" id="V_Proc_Other" placeholder="Specify other procedure(s)..." oninput="syncVisitProcedures()"></div>
+                            </div></div>
+                            <div class="col-12"><label>Procedure Notes</label><textarea class="form-control" id="V_Procedures_Notes" rows="2" placeholder="Notes on procedures performed (dates, details, vessels, devices implanted, etc.)" oninput="syncVisitProcedures()"></textarea></div>
                         </div>
                     </div>
                     <div class="col-12"><hr class="my-2"></div>
@@ -3306,11 +3531,22 @@ function initFormUI(){
     buildComplications();
     buildVaccBlock();
     reorderVisitFormSections();
+    orderAdmissionPanels();
     applyFieldTints();
     applyVisitAccordions();
     showStickySave();
     goToWizardStep(1);
     if(typeof loadMainAlerts==='function')loadMainAlerts();
+}
+
+function orderAdmissionPanels(){
+    try{
+        var past=document.getElementById('admPanel5');
+        var inv=document.getElementById('admPanel4');
+        if(past&&inv&&past.compareDocumentPosition(inv)&Node.DOCUMENT_POSITION_PRECEDING){
+            inv.parentNode.insertBefore(past, inv);
+        }
+    }catch(e){console.warn('orderAdmissionPanels failed', e);}
 }
 
 // ===== FIELD-TINT POST-PROCESSOR =====
@@ -3348,6 +3584,8 @@ function applyFieldTints(){
             ['F/U 6 Minute Walk Test',  'tint-walk',      'fa-person-walking'],
             ['F/U CPET',                'tint-cpet',      'fa-lungs'],
             ['F/U Right Side Cath',     'tint-rhc',       'fa-syringe'],
+            ['Visit CAG',               'tint-ecg',       'fa-heart-circle-bolt'],
+            ['Visit Procedures',        'tint-plan',      'fa-hand-holding-medical'],
             ['Visit Labs',              'tint-renal',     'fa-flask-vial'], // header label only
             ['Medications (Doses)',     'tint-meds',      'fa-pills'],
             ['Assessment & Plan',       'tint-plan',      'fa-clipboard-list'],
@@ -3360,6 +3598,8 @@ function applyFieldTints(){
             ['CMR / CT',                'tint-cmr',       'fa-magnifying-glass-chart'],
             ['CMR',                     'tint-cmr',       'fa-magnifying-glass-chart'],
             ['Right Side Cath',         'tint-rhc',       'fa-syringe'],
+            ['Coronary Angiogram',      'tint-ecg',       'fa-heart-circle-bolt'],
+            ['In-Hospital Procedures',  'tint-plan',      'fa-hand-holding-medical'],
             ['6 Minute Walk',           'tint-walk',      'fa-person-walking'],
             ['CPET',                    'tint-cpet',      'fa-lungs']
         ];
@@ -3494,40 +3734,11 @@ function applyVisitAccordions(){
     } catch(e){ console.warn('applyVisitAccordions failed:', e); }
 }
 
-// Move "Visit Labs" block to appear BEFORE "F/U Echo" — per user request.
-// Strategy: locate the Labs heading + everything up to (but not including) the Medications heading,
-// move that group to immediately before the F/U Echo heading.
 function reorderVisitFormSections(){
     try {
-        // Wait for DOM to be present
-        var visitSection = document.querySelector('#hfForm .visit-section .row.g-2');
-        if(!visitSection) return;
-        var children = Array.prototype.slice.call(visitSection.children);
-        // Find anchor indices by text content
-        function findIdxByText(txt){
-            for(var i=0;i<children.length;i++){
-                var c=children[i];
-                if(c.tagName==='H6' && c.textContent.indexOf(txt)>=0) return i;
-            }
-            return -1;
-        }
-        var idxEcho = findIdxByText('F/U Echo');
-        var idxLabs = findIdxByText('Visit Labs');
-        var idxMeds = findIdxByText('Medications (Doses)');
-        if(idxEcho<0||idxLabs<0||idxMeds<0) return;
-        if(idxLabs<idxEcho) return; // already in desired order
-        // The HR before F/U Echo (one element before idxEcho) should also be respected.
-        // We'll move children[idxLabs-1 .. idxMeds-2]  (inclusive) to before children[idxEcho-1] (the HR).
-        // Ensure we have an HR before Echo:
-        var moveStart = idxLabs - 1; // include the <hr> right before "Visit Labs"
-        var moveEnd   = idxMeds - 1; // last index to move (just before the HR + Medications heading group)
-        // Capture the nodes to move
-        var nodesToMove = children.slice(moveStart, moveEnd + 1);
-        // Insertion target = the HR before Echo (i.e. children[idxEcho - 1])
-        var insertBefore = children[idxEcho - 1] || children[idxEcho];
-        nodesToMove.forEach(function(node){
-            visitSection.insertBefore(node, insertBefore);
-        });
+        // The visit form source order now matches the requested entry flow:
+        // past history, investigations/procedures, then labs and medications.
+        return;
     } catch(e){ console.warn('reorderVisitFormSections failed', e); }
 }
 
@@ -5234,56 +5445,244 @@ function restoreExtraAdmissions(savedJson){
     _renderExtraAdmissions();
 }
 
-// Show/hide CAG details panel
+function _val(id){
+    var el=document.getElementById(id);
+    return el?(el.value||''):'';
+}
+function _setVal(id,v){
+    var el=document.getElementById(id);
+    if(el)el.value=v;
+}
+function _hasMeaningfulValue(v, opts){
+    var s=String(v==null?'':v).trim();
+    if(!s)return false;
+    opts=opts||{};
+    if(opts.ignoreNo && (s==='No'||s==='N'||s==='None'))return false;
+    return true;
+}
+function _dataHasAny(data, ids, opts){
+    data=data||{};
+    return ids.some(function(id){return _hasMeaningfulValue(data[id], opts);});
+}
+function _domHasAny(ids, opts){
+    return ids.some(function(id){return _hasMeaningfulValue(_val(id), opts);});
+}
+function _clearFields(ids){
+    (ids||[]).forEach(function(id){
+        var el=document.getElementById(id);
+        if(!el)return;
+        if(el.tagName==='SELECT')el.selectedIndex=0;
+        else el.value='';
+    });
+}
+function toggleDetailsBySelect(selId, wrapId, clearIds, yesVal){
+    var sel=document.getElementById(selId);
+    var wrap=document.getElementById(wrapId);
+    if(!sel||!wrap)return false;
+    var show=sel.value===(yesVal||'Yes');
+    wrap.style.display=show?'block':'none';
+    if(!show)_clearFields(clearIds||[]);
+    return show;
+}
+
+function restoreBaselineInvestigationFlags(data){
+    data=data||{};
+    if(_dataHasAny(data,['ECG_LBBB','ECG_QRS','ECG_Arrhythmia','ECG_Pacing']))_setVal('ECG_Done','Yes');
+    if(_dataHasAny(data,['ECHO','Echo_EDVI','Echo_ESVI','Echo_EF']))_setVal('Echo_Done','Yes');
+    if(_dataHasAny(data,['CMR_CT','CMR_LVEDVI','CMR_LVESVI','CMR_LVEF','CMR_RVEDI','CMR_RVEF','CMR_LGE','CMR_LGE_Pct','CMR_Others']))_setVal('CMR_Done','Yes');
+    if(_dataHasAny(data,['CT_Angio','CT_Calcium','CT_Notes']))_setVal('CT_Done','Yes');
+    if(_dataHasAny(data,['CAG_Date','CAG_Access','CAG_Findings','CAG_Notes','CAG_PCI_Date','CAG_Stents_Number','CAG_PCI_Details']))_setVal('CAG_Done','Yes');
+    if(_dataHasAny(data,['CAG_PCI_Date','CAG_Stents_Number','CAG_PCI_Details']))_setVal('CAG_PCI_Done','Yes');
+    if(_dataHasAny(data,['Walk_Meters']))_setVal('Walk_Completed','Y');
+    if(_dataHasAny(data,['CPET_PeakVO2','CPET_VEVCO2','CPET_RER','CPET_AT','CPET_VO2HR','CPET_PetCO2']))_setVal('CPET_Done','Yes');
+    if(_dataHasAny(data,['RHC_CI','RHC_RAP','RHC_RVP','RHC_PCWP','RHC_PAP','RHC_PVR','RHC_PAPi','RHC_LV','RHC_MVO2']))_setVal('RHC_Done','Yes');
+    if(_dataHasAny(data,['Device_Type','Device_Date'],{ignoreNo:true}))_setVal('Device_Done','Yes');
+}
+
+function restoreVisitInvestigationFlags(data){
+    data=data||{};
+    if(_dataHasAny(data,['V_QRS','V_Arrhythmia','V_Pacing_Mode'])||data.V_LBBB==='Yes'||data.V_Pacing_ECG==='Yes')_setVal('V_ECG_Done','Yes');
+    if(_dataHasAny(data,['V_Holter_Date','V_Holter_Duration','V_Holter_MaxHR','V_Holter_MinHR','V_Holter_AvgHR','V_Holter_Arrhythmia','V_Holter_Findings']))_setVal('V_Holter_Done','Yes');
+    if(_dataHasAny(data,['V_EF_Change','V_Echo_EDVI','V_Echo_ESVI','V_Echo_EF','V_Echo_Other']))_setVal('V_Echo_Done','Yes');
+    if(_dataHasAny(data,['V_CMR_LVEDVI','V_CMR_LVESVI','V_CMR_LVEF','V_CMR_RVEDI','V_CMR_RVEF','V_CMR_LGE_Pct','V_CMR_Others'])||data.V_CMR_LGE==='Yes')_setVal('V_CMR_Done','Yes');
+    if(_dataHasAny(data,['V_CPET_PeakVO2','V_CPET_VEVCO2','V_CPET_RER','V_CPET_AT','V_CPET_VO2HR','V_CPET_PetCO2']))_setVal('V_CPET_Done','Yes');
+    if(_dataHasAny(data,['V_RHC_CI','V_RHC_RAP','V_RHC_RVP','V_RHC_PCWP','V_RHC_PAP','V_RHC_PVR','V_RHC_PAPi','V_RHC_LV','V_RHC_MVO2']))_setVal('V_RHC_Done','Yes');
+    if(_dataHasAny(data,['V_CAG_Date','V_CAG_Findings','V_CAG_PCI_Date','V_CAG_Stents_Number','V_CAG_PCI_Details']))_setVal('V_CAG_Done','Yes');
+    if(_dataHasAny(data,['V_CAG_PCI_Date','V_CAG_Stents_Number','V_CAG_PCI_Details']))_setVal('V_CAG_PCI_Done','Yes');
+    if(_dataHasAny(data,['V_Device_Type','V_Device_Date'],{ignoreNo:true}))_setVal('V_Device_Done','Yes');
+}
+
+function toggleECGDetails(){
+    toggleDetailsBySelect('ECG_Done','ecgDetailsWrap',['ECG_LBBB','ECG_QRS','ECG_Arrhythmia','ECG_Pacing']);
+    if(typeof checkCRTIndication==='function')checkCRTIndication();
+}
+function toggleEchoDetails(){
+    toggleDetailsBySelect('Echo_Done','echoDetailsWrap',['ECHO','Echo_EDVI','Echo_ESVI','Echo_EF']);
+}
+function toggleCMRDetails(){
+    var show=toggleDetailsBySelect('CMR_Done','cmrDetailsWrap',['CMR_CT','CMR_LVEDVI','CMR_LVESVI','CMR_LVEF','CMR_RVEDI','CMR_RVEF','CMR_LGE','CMR_LGE_Pct','CMR_Others']);
+    if(!show){var lg=document.getElementById('cmrLGEPctWrap');if(lg)lg.style.display='none';}
+    else if(typeof toggleLGEPercent==='function')toggleLGEPercent();
+}
+function toggleCPETDetails(){
+    toggleDetailsBySelect('CPET_Done','cpetDetailsWrap',['CPET_PeakVO2','CPET_VEVCO2','CPET_RER','CPET_AT','CPET_VO2HR','CPET_PetCO2']);
+}
+function toggleCAGPCIDetails(){
+    toggleDetailsBySelect('CAG_PCI_Done','cagPciDetailsWrap',['CAG_PCI_Date','CAG_Stents_Number','CAG_PCI_Details']);
+    if(typeof syncInHospitalProcedures==='function')syncInHospitalProcedures();
+}
 function toggleCAGDetails(){
-    var sel=document.getElementById('CAG_Done');
-    var wrap=document.getElementById('cagDetailsWrap');
-    if(!sel||!wrap)return;
-    if(sel.value==='Yes'){wrap.style.display='block';}
-    else{
-        wrap.style.display='none';
-        ['CAG_Date','CAG_Access','CAG_Findings','CAG_Notes'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
-    }
+    var show=toggleDetailsBySelect('CAG_Done','cagDetailsWrap',['CAG_Date','CAG_Access','CAG_Findings','CAG_Notes','CAG_PCI_Done','CAG_PCI_Date','CAG_Stents_Number','CAG_PCI_Details']);
+    if(!show){var p=document.getElementById('cagPciDetailsWrap');if(p)p.style.display='none';}
+    else toggleCAGPCIDetails();
+    if(typeof syncInHospitalProcedures==='function')syncInHospitalProcedures();
 }
 
-// Show/hide In-Hospital Holter details panel (Step 4)
 function toggleHolterDetails(){
-    var sel=document.getElementById('Holter_Done');
-    var wrap=document.getElementById('holterDetailsWrap');
-    if(!sel||!wrap)return;
-    if(sel.value==='Yes'){wrap.style.display='block';}
-    else{
-        wrap.style.display='none';
-        ['Holter_Date','Holter_Duration','Holter_MaxHR','Holter_MinHR','Holter_AvgHR','Holter_Arrhythmia','Holter_Findings'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
-    }
+    toggleDetailsBySelect('Holter_Done','holterDetailsWrap',['Holter_Date','Holter_Duration','Holter_MaxHR','Holter_MinHR','Holter_AvgHR','Holter_Arrhythmia','Holter_Findings']);
 }
 
-// ===== IN-HOSPITAL PROCEDURES (Step 4) =====
-// Multi-select buttons -> hidden #InHospital_Procedures (comma-joined)
-function toggleInHospitalProcedure(opt){
-    var btn=document.querySelector('#inHospProceduresBox button[data-proc="'+opt+'"]');
-    if(!btn)return;
-    var on=btn.classList.contains('btn-primary');
-    if(on){btn.classList.remove('btn-primary');btn.classList.add('btn-outline-primary');}
-    else  {btn.classList.add('btn-primary');btn.classList.remove('btn-outline-primary');}
-    var sel=[];
-    document.querySelectorAll('#inHospProceduresBox button.btn-primary').forEach(function(b){sel.push(b.getAttribute('data-proc'));});
-    var hid=document.getElementById('InHospital_Procedures');
-    if(hid)hid.value=sel.join(', ');
-    // Reveal "Specify other" input when "Others" is among the selected
-    var otherInput=document.getElementById('InHospital_Procedures_Other');
-    if(otherInput) otherInput.style.display=(sel.indexOf('Others')>=0)?'':'none';
+function toggleDeviceHistory(){
+    toggleDetailsBySelect('Device_Done','deviceHistoryWrap',['Device_Type','Device_Date','Device_Info']);
+    syncDeviceInfo();
+}
+
+function syncDeviceInfo(){
+    var done=document.getElementById('Device_Done');
+    var typeEl=document.getElementById('Device_Type');
+    var dateEl=document.getElementById('Device_Date');
+    var infoEl=document.getElementById('Device_Info');
+    if(!infoEl)return;
+    var type=(typeEl&&typeEl.value)||'';
+    var date=(dateEl&&dateEl.value)||'';
+    if(done&&done.value!=='Yes'&&(type||date))done.value='Yes';
+    if(done&&done.value!=='Yes'){
+        infoEl.value='';
+        if(typeEl)typeEl.value='';
+        if(dateEl)dateEl.value='';
+        return;
+    }
+    if(!type){infoEl.value='';return;}
+    infoEl.value=date?type+' ('+date+')':type;
+}
+
+function toggleProcedureDetails(selId, wrapId, clearIds){
+    toggleDetailsBySelect(selId, wrapId, clearIds||[]);
+}
+function _procDone(id){
+    return (document.getElementById(id)||{}).value==='Yes';
+}
+function syncInHospitalProcedures(){
+    var parts=[];
+    if(_val('CAG_Done')==='Yes'||_val('CAG_PCI_Done')==='Yes')parts.push('CAG/PCI');
+    if(_procDone('Proc_Device_Done'))parts.push('Devices');
+    if(_procDone('Proc_Ablation_Done'))parts.push('Ablations');
+    if(_procDone('Proc_Pericardiocentesis_Done'))parts.push('Pericardiocentesis');
+    if(_procDone('Proc_Pleural_Tapping_Done'))parts.push('Pleural tapping');
+    if(_procDone('Proc_Ascites_Tapping_Done'))parts.push('Ascites tapping');
+    if(_procDone('Proc_Other_Done'))parts.push('Others');
+    _setVal('InHospital_Procedures',parts.join(', '));
 }
 function restoreInHospitalProcedures(savedVal){
-    var sel=(savedVal||'').split(',').map(function(s){return s.trim();}).filter(Boolean);
-    var hid=document.getElementById('InHospital_Procedures');if(hid)hid.value=savedVal||'';
-    document.querySelectorAll('#inHospProceduresBox button').forEach(function(b){
-        var name=b.getAttribute('data-proc');
-        if(sel.indexOf(name)>=0){b.classList.add('btn-primary');b.classList.remove('btn-outline-primary');}
-        else                    {b.classList.remove('btn-primary');b.classList.add('btn-outline-primary');}
-    });
-    var otherInput=document.getElementById('InHospital_Procedures_Other');
-    if(otherInput) otherInput.style.display=(sel.indexOf('Others')>=0)?'':'none';
+    var raw=(savedVal||'').toLowerCase();
+    function has(txt){return raw.indexOf(txt.toLowerCase())>=0;}
+    if(has('cag')||has('pci'))_setVal('CAG_Done','Yes');
+    if(has('pci'))_setVal('CAG_PCI_Done','Yes');
+    if(has('devices')||_domHasAny(['Proc_Device_Type','Proc_Device_Date'],{ignoreNo:true}))_setVal('Proc_Device_Done','Yes');
+    if(has('ablation')||_domHasAny(['Proc_Ablation_Type']))_setVal('Proc_Ablation_Done','Yes');
+    if(has('pericardiocentesis')||_domHasAny(['Proc_Pericardiocentesis_Volume']))_setVal('Proc_Pericardiocentesis_Done','Yes');
+    if(has('pleural')||_domHasAny(['Proc_Pleural_Tapping_Volume']))_setVal('Proc_Pleural_Tapping_Done','Yes');
+    if(has('ascites')||_domHasAny(['Proc_Ascites_Tapping_Volume']))_setVal('Proc_Ascites_Tapping_Done','Yes');
+    if(has('others')||has('other')||_domHasAny(['InHospital_Procedures_Other']))_setVal('Proc_Other_Done','Yes');
+    toggleProcedureDetails('Proc_Device_Done','procDeviceWrap',['Proc_Device_Type','Proc_Device_Date']);
+    toggleProcedureDetails('Proc_Ablation_Done','procAblationWrap',['Proc_Ablation_Type']);
+    toggleProcedureDetails('Proc_Pericardiocentesis_Done','procPericardiocentesisWrap',['Proc_Pericardiocentesis_Volume']);
+    toggleProcedureDetails('Proc_Pleural_Tapping_Done','procPleuralTappingWrap',['Proc_Pleural_Tapping_Volume']);
+    toggleProcedureDetails('Proc_Ascites_Tapping_Done','procAscitesTappingWrap',['Proc_Ascites_Tapping_Volume']);
+    toggleProcedureDetails('Proc_Other_Done','procOtherWrap',['InHospital_Procedures_Other']);
+    syncInHospitalProcedures();
+}
+
+function toggleVisitECGDetails(){
+    toggleDetailsBySelect('V_ECG_Done','vEcgDetailsWrap',['V_LBBB','V_QRS','V_Arrhythmia','V_Pacing_ECG','V_Pacing_Mode']);
+    if(typeof toggleVisitPacingMode==='function')toggleVisitPacingMode();
+}
+function toggleVisitEchoDetails(){
+    toggleDetailsBySelect('V_Echo_Done','vEchoDetailsWrap',['V_EF_Change','V_Echo_EDVI','V_Echo_ESVI','V_Echo_EF','V_Echo_Other']);
+}
+function toggleVisitCMRDetails(){
+    var show=toggleDetailsBySelect('V_CMR_Done','vCmrDetailsWrap',['V_CMR_LVEDVI','V_CMR_LVESVI','V_CMR_LVEF','V_CMR_RVEDI','V_CMR_RVEF','V_CMR_LGE','V_CMR_LGE_Pct','V_CMR_Others']);
+    if(!show){var lg=document.getElementById('vCmrLGEPctWrap');if(lg)lg.style.display='none';}
+    else if(typeof toggleVisitLGEPercent==='function')toggleVisitLGEPercent();
+}
+function toggleVisitCPETDetails(){
+    toggleDetailsBySelect('V_CPET_Done','vCpetDetailsWrap',['V_CPET_PeakVO2','V_CPET_VEVCO2','V_CPET_RER','V_CPET_AT','V_CPET_VO2HR','V_CPET_PetCO2']);
+}
+function toggleVisitCAGPCIDetails(){
+    toggleDetailsBySelect('V_CAG_PCI_Done','vCagPciDetailsWrap',['V_CAG_PCI_Date','V_CAG_Stents_Number','V_CAG_PCI_Details']);
+    if(typeof syncVisitProcedures==='function')syncVisitProcedures();
+}
+function toggleVisitCAGDetails(){
+    var show=toggleDetailsBySelect('V_CAG_Done','vCagDetailsWrap',['V_CAG_Date','V_CAG_Findings','V_CAG_PCI_Done','V_CAG_PCI_Date','V_CAG_Stents_Number','V_CAG_PCI_Details']);
+    if(!show){var p=document.getElementById('vCagPciDetailsWrap');if(p)p.style.display='none';}
+    else toggleVisitCAGPCIDetails();
+    if(typeof syncVisitProcedures==='function')syncVisitProcedures();
+}
+function toggleVisitDeviceHistory(){
+    toggleDetailsBySelect('V_Device_Done','vDeviceHistoryWrap',['V_Device_Type','V_Device_Date','V_Device_Info']);
+    syncVisitDeviceInfo();
+}
+function syncVisitDeviceInfo(){
+    var done=document.getElementById('V_Device_Done');
+    var typeEl=document.getElementById('V_Device_Type');
+    var dateEl=document.getElementById('V_Device_Date');
+    var infoEl=document.getElementById('V_Device_Info');
+    if(!infoEl)return;
+    var type=(typeEl&&typeEl.value)||'';
+    var date=(dateEl&&dateEl.value)||'';
+    if(done&&done.value!=='Yes'&&(type||date))done.value='Yes';
+    if(done&&done.value!=='Yes'){
+        infoEl.value='';
+        if(typeEl)typeEl.value='';
+        if(dateEl)dateEl.value='';
+        return;
+    }
+    if(!type){infoEl.value='';return;}
+    infoEl.value=date?type+' ('+date+')':type;
+}
+function toggleVisitProcedureDetails(selId, wrapId, clearIds){
+    toggleDetailsBySelect(selId, wrapId, clearIds||[]);
+}
+function syncVisitProcedures(){
+    var parts=[];
+    if(_val('V_CAG_Done')==='Yes'||_val('V_CAG_PCI_Done')==='Yes')parts.push('CAG/PCI');
+    if(_procDone('V_Proc_Device_Done'))parts.push('Devices');
+    if(_procDone('V_Proc_Ablation_Done'))parts.push('Ablations');
+    if(_procDone('V_Proc_Pericardiocentesis_Done'))parts.push('Pericardiocentesis');
+    if(_procDone('V_Proc_Pleural_Tapping_Done'))parts.push('Pleural tapping');
+    if(_procDone('V_Proc_Ascites_Tapping_Done'))parts.push('Ascites tapping');
+    if(_procDone('V_Proc_Other_Done'))parts.push('Others');
+    _setVal('V_Procedures',parts.join(', '));
+}
+function restoreVisitProcedures(data){
+    data=data||{};
+    var raw=String(data.V_Procedures||'').toLowerCase();
+    function has(txt){return raw.indexOf(txt.toLowerCase())>=0;}
+    if(has('cag')||has('pci'))_setVal('V_CAG_Done','Yes');
+    if(has('pci'))_setVal('V_CAG_PCI_Done','Yes');
+    if(has('devices')||_dataHasAny(data,['V_Proc_Device_Type','V_Proc_Device_Date'],{ignoreNo:true}))_setVal('V_Proc_Device_Done','Yes');
+    if(has('ablation')||_dataHasAny(data,['V_Proc_Ablation_Type']))_setVal('V_Proc_Ablation_Done','Yes');
+    if(has('pericardiocentesis')||_dataHasAny(data,['V_Proc_Pericardiocentesis_Volume']))_setVal('V_Proc_Pericardiocentesis_Done','Yes');
+    if(has('pleural')||_dataHasAny(data,['V_Proc_Pleural_Tapping_Volume']))_setVal('V_Proc_Pleural_Tapping_Done','Yes');
+    if(has('ascites')||_dataHasAny(data,['V_Proc_Ascites_Tapping_Volume']))_setVal('V_Proc_Ascites_Tapping_Done','Yes');
+    if(has('others')||has('other')||_dataHasAny(data,['V_Proc_Other']))_setVal('V_Proc_Other_Done','Yes');
+    toggleVisitProcedureDetails('V_Proc_Device_Done','vProcDeviceWrap',['V_Proc_Device_Type','V_Proc_Device_Date']);
+    toggleVisitProcedureDetails('V_Proc_Ablation_Done','vProcAblationWrap',['V_Proc_Ablation_Type']);
+    toggleVisitProcedureDetails('V_Proc_Pericardiocentesis_Done','vProcPericardiocentesisWrap',['V_Proc_Pericardiocentesis_Volume']);
+    toggleVisitProcedureDetails('V_Proc_Pleural_Tapping_Done','vProcPleuralTappingWrap',['V_Proc_Pleural_Tapping_Volume']);
+    toggleVisitProcedureDetails('V_Proc_Ascites_Tapping_Done','vProcAscitesTappingWrap',['V_Proc_Ascites_Tapping_Volume']);
+    toggleVisitProcedureDetails('V_Proc_Other_Done','vProcOtherWrap',['V_Proc_Other']);
+    syncVisitProcedures();
 }
 
 // ===== CARDIOVERSION (Step 7) =====
@@ -5324,6 +5723,8 @@ function toggleVisitHolter(){
     var sel=document.getElementById('V_Holter_Done');
     if(!sel)return;
     var show=(sel.value==='Yes');
+    var outer=document.getElementById('vHolterDetailsWrap');
+    if(outer)outer.style.display=show?'block':'none';
     var wraps=['vHolterDateWrap','vHolterDurationWrap','vHolterMaxHRWrap','vHolterMinHRWrap','vHolterAvgHRWrap','vHolterArrhythmiaWrap','vHolterFindingsWrap'];
     wraps.forEach(function(id){var el=document.getElementById(id);if(el)el.style.display=show?'':'none';});
     if(!show){
@@ -6071,22 +6472,6 @@ function propagateHeightToSavedVisits(patientId,height){
     }).catch(function(e){console.warn('Height propagation failed:',e.message||e);});
 }
 
-function syncDeviceInfo(){
-    var typeEl=document.getElementById('Device_Type');
-    var dateEl=document.getElementById('Device_Date');
-    var infoEl=document.getElementById('Device_Info');
-    if(!infoEl)return;
-    var type=(typeEl&&typeEl.value)||'';
-    var date=(dateEl&&dateEl.value)||'';
-    if(type==='None'){
-        infoEl.value='';
-        if(dateEl)dateEl.value='';
-        return;
-    }
-    if(!type)return;
-    infoEl.value=date?type+' ('+date+')':type;
-}
-
 // Sync new individual baseline lab fields back to the legacy combined fields used elsewhere
 function syncBaselineUreaCreat(){var u=document.getElementById('Lab_Urea').value.trim(),c=document.getElementById('Lab_Creat').value.trim();var combo=(u||c)?(u+'/'+c):'';var t=document.getElementById('Lab_UreaCreat');if(t)t.value=combo;}
 function syncBaselineNaK(){var n=document.getElementById('Lab_Na').value.trim(),k=document.getElementById('Lab_K').value.trim();var combo=(n||k)?(n+'/'+k):'';var t=document.getElementById('Lab_NaK');if(t)t.value=combo;}
@@ -6160,6 +6545,7 @@ function _savePatientCore(){
     if(fileNo.length!==6){showPopup("error","Invalid File No","File Number must be exactly 6 digits");return;}
     if(!mobile){showPopup("error","Mobile Required","Mobile number is required.");document.getElementById("Mobile").classList.add('input-error');var me=document.getElementById('mobileError');if(me)me.style.display='block';return;}else{document.getElementById("Mobile").classList.remove('input-error');var me2=document.getElementById('mobileError');if(me2)me2.style.display='none';}
     if(typeof syncDeviceInfo==='function')syncDeviceInfo();
+    if(typeof syncInHospitalProcedures==='function')syncInHospitalProcedures();
     var data={};
     document.querySelectorAll('#hfForm input, #hfForm select, #hfForm textarea').forEach(function(el){
         if(el.id&&el.type!=='file'&&!el.id.startsWith('V_')&&el.id!=='Next_Appt'&&el.id!=='Next_Appt_Notes'&&el.id!=='Visit_Date'&&el.id!=='Visit_Type'&&!el.id.endsWith('_Visible'))data[el.id]=el.value;
@@ -6395,6 +6781,8 @@ function _commitVisitInline(){
     var visitData = {};
     if(typeof onVaccNotesChange==='function')onVaccNotesChange();
     if(typeof VACCINES!=='undefined'){VACCINES.forEach(function(vac){if(typeof onVaccDateChange==='function')onVaccDateChange(vac.id);});}
+    if(typeof syncVisitDeviceInfo==='function')syncVisitDeviceInfo();
+    if(typeof syncVisitProcedures==='function')syncVisitProcedures();
     document.querySelectorAll('[id^="V_"]').forEach(function(el){ if(el.id && el.type!=='file') visitData[el.id] = el.value; });
     if(typeof applyBaselineHeightToVisitData==='function')applyBaselineHeightToVisitData(visitData);
     visitData.visitDate = vDate;
@@ -6424,6 +6812,8 @@ function _commitNewVisitInline(){
     var visitData = {};
     if(typeof onVaccNotesChange==='function')onVaccNotesChange();
     if(typeof VACCINES!=='undefined'){VACCINES.forEach(function(vac){if(typeof onVaccDateChange==='function')onVaccDateChange(vac.id);});}
+    if(typeof syncVisitDeviceInfo==='function')syncVisitDeviceInfo();
+    if(typeof syncVisitProcedures==='function')syncVisitProcedures();
     document.querySelectorAll('[id^="V_"]').forEach(function(el){ if(el.id && el.type!=='file') visitData[el.id] = el.value; });
     if(typeof applyBaselineHeightToVisitData==='function')applyBaselineHeightToVisitData(visitData);
     visitData.visitDate = vDate;
@@ -6450,6 +6840,8 @@ function saveVisit(){
     // Ensure the vaccination hidden fields reflect the visible controls
     if(typeof onVaccNotesChange==='function')onVaccNotesChange();
     if(typeof VACCINES!=='undefined'){VACCINES.forEach(function(vac){if(typeof onVaccDateChange==='function')onVaccDateChange(vac.id);});}
+    if(typeof syncVisitDeviceInfo==='function')syncVisitDeviceInfo();
+    if(typeof syncVisitProcedures==='function')syncVisitProcedures();
     var patientId=currentPatientId||editingDocId,visitData={},visitDate=document.getElementById("Visit_Date").value,nextAppt=document.getElementById("Next_Appt").value;
     if(!visitDate){showPopup("error","Error","Please enter visit date.");return;}
     document.querySelectorAll('[id^="V_"]').forEach(function(el){if(el.id&&el.type!=='file')visitData[el.id]=el.value;});
@@ -6537,6 +6929,15 @@ function editVisit(visitId){
     if(typeof unpackVisitOtherSymptoms==='function')unpackVisitOtherSymptoms();
     // Restore visit multi-select referral UI
     if(typeof restoreReferralUI==='function') restoreReferralUI('V_Referral', v.V_Referral||'');
+    // Restore the new Yes/No investigation and procedure gates from saved detail data.
+    if(typeof restoreVisitInvestigationFlags==='function')restoreVisitInvestigationFlags(v);
+    if(typeof restoreVisitProcedures==='function')restoreVisitProcedures(v);
+    if(typeof toggleVisitDeviceHistory==='function')toggleVisitDeviceHistory();
+    if(typeof toggleVisitECGDetails==='function')toggleVisitECGDetails();
+    if(typeof toggleVisitEchoDetails==='function')toggleVisitEchoDetails();
+    if(typeof toggleVisitCMRDetails==='function')toggleVisitCMRDetails();
+    if(typeof toggleVisitCPETDetails==='function')toggleVisitCPETDetails();
+    if(typeof toggleVisitCAGDetails==='function')toggleVisitCAGDetails();
     // Restore visit Walk Test and RHC panel states
     if(typeof toggleVisitWalkMeters==='function')toggleVisitWalkMeters();
     if(typeof toggleVisitRHCDetails==='function')toggleVisitRHCDetails();
@@ -6723,7 +7124,7 @@ function clearVisitForm(){
     // Reset edit mode UI
     editingVisitId = null;
     // Hide visit conditional panels (including new Pacing-mode, Holter, comorbid wraps)
-    var vHide=['vCmrLGEPctWrap','vWalkMetersWrap','vRhcDetailsWrap','vPacingModeWrap','vHolterDateWrap','vHolterDurationWrap','vHolterMaxHRWrap','vHolterMinHRWrap','vHolterAvgHRWrap','vHolterArrhythmiaWrap','vHolterFindingsWrap','vPciCabgDetailsWrap','vValveInterventionWrap','vValveRepairDateWrap','vValveReplaceTypeWrap','vValveReplaceDateWrap','vValvePercutaneousWrap','vValveMVClipDateWrap','vValveTVClipDateWrap','vValveTAVIDateWrap','vGeneticsTypeWrap','vRecoveredLVTypeWrap','vLostFUReasonWrap','vLostFUOtherWrap','vAdvHFTherapyWrap'];
+    var vHide=['vDeviceHistoryWrap','vEcgDetailsWrap','vHolterDetailsWrap','vCmrLGEPctWrap','vEchoDetailsWrap','vCmrDetailsWrap','vWalkMetersWrap','vCpetDetailsWrap','vRhcDetailsWrap','vCagDetailsWrap','vCagPciDetailsWrap','vProcDeviceWrap','vProcAblationWrap','vProcPericardiocentesisWrap','vProcPleuralTappingWrap','vProcAscitesTappingWrap','vProcOtherWrap','vPacingModeWrap','vHolterDateWrap','vHolterDurationWrap','vHolterMaxHRWrap','vHolterMinHRWrap','vHolterAvgHRWrap','vHolterArrhythmiaWrap','vHolterFindingsWrap','vPciCabgDetailsWrap','vValveInterventionWrap','vValveRepairDateWrap','vValveReplaceTypeWrap','vValveReplaceDateWrap','vValvePercutaneousWrap','vValveMVClipDateWrap','vValveTVClipDateWrap','vValveTAVIDateWrap','vGeneticsTypeWrap','vRecoveredLVTypeWrap','vLostFUReasonWrap','vLostFUOtherWrap','vAdvHFTherapyWrap'];
     vHide.forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='none';});
     // Reset visit comorbidity pills + outline buttons
     document.querySelectorAll('#vPillComorbidities .pill-toggle').forEach(function(p){p.classList.remove('active');});
@@ -6836,8 +7237,11 @@ function toggleVisitRow(headerEl){
 function buildVisitDetailHTML(v){
     var sections=[
         {name:'Symptoms & Vitals', fields:[['NYHA','V_NYHA'],['KCCQ','V_KCCQ'],['Symptoms','V_Fatigue'],['Edema','V_Edema'],['Pulse','V_Pulse'],['BP','V_BP'],['SpO2','V_SpO2'],['Height','V_Height'],['Weight','V_Weight'],['BMI','V_BMI'],['JVP','V_JVP'],['Rales','V_Rales'],['S3','V_S3']]},
-        {name:'ECG / Echo',        fields:[['LBBB','V_LBBB'],['QRS','V_QRS'],['Arrhythmia','V_Arrhythmia'],['Pacing in ECG','V_Pacing_ECG'],['Pacing Mode','V_Pacing_Mode'],['EF Change','V_EF_Change'],['Echo Other','V_Echo_Other']]},
+        {name:'Past History & Comorbidities', fields:[['DM','V_DM'],['HTN','V_HTN'],['AF','V_AF'],['IHD','V_IHD'],['PCI / CABG','V_PCI_CABG'],['Device History','V_Device_Done'],['Device Type','V_Device_Type'],['Device Date','V_Device_Date'],['Device Info','V_Device_Info'],['CKD','V_CKD'],['Dialysis','V_Dialysis'],['CVA','V_CVA'],['PVD','V_PVD'],['Smoking','V_Smoker'],['Obese','V_Obese'],['OSA','V_OSA'],['Dyslipidemia','V_Dyslipidemia'],['Thyroid','V_Thyroid_Dz'],['Family History','V_FH_Cardio'],['Genetics','V_Genetics'],['Gene Type','V_Genetics_Type'],['Other','V_Comorbid_Others']]},
+        {name:'ECG / Echo',        fields:[['ECG Done','V_ECG_Done'],['LBBB','V_LBBB'],['QRS','V_QRS'],['Arrhythmia','V_Arrhythmia'],['Pacing in ECG','V_Pacing_ECG'],['Pacing Mode','V_Pacing_Mode'],['Echo Done','V_Echo_Done'],['EF Change','V_EF_Change'],['Echo EDVI/EDD','V_Echo_EDVI'],['Echo ESVI/ESD','V_Echo_ESVI'],['Echo EF','V_Echo_EF'],['Echo Other','V_Echo_Other']]},
         {name:'Holter Results',    fields:[['Holter Done','V_Holter_Done'],['Date','V_Holter_Date'],['Duration (h)','V_Holter_Duration'],['Max HR','V_Holter_MaxHR'],['Min HR','V_Holter_MinHR'],['Avg HR','V_Holter_AvgHR'],['Arrhythmia Burden','V_Holter_Arrhythmia'],['Findings','V_Holter_Findings']]},
+        {name:'CMR / Functional / Cath', fields:[['CMR Done','V_CMR_Done'],['CMR LVEDVI/EDD','V_CMR_LVEDVI'],['CMR LVESVI/ESD','V_CMR_LVESVI'],['CMR LVEF','V_CMR_LVEF'],['CMR RVEDI','V_CMR_RVEDI'],['CMR RVEF','V_CMR_RVEF'],['CMR LGE','V_CMR_LGE'],['CMR LGE %','V_CMR_LGE_Pct'],['CMR Others','V_CMR_Others'],['6MWT Completed','V_Walk_Completed'],['6MWT Meters','V_Walk_Meters'],['CPET Done','V_CPET_Done'],['Peak VO2','V_CPET_PeakVO2'],['VE/VCO2','V_CPET_VEVCO2'],['RER','V_CPET_RER'],['Anaerobic Threshold','V_CPET_AT'],['VO2/HR','V_CPET_VO2HR'],['PetCO2','V_CPET_PetCO2'],['RHC Done','V_RHC_Done'],['RHC CI','V_RHC_CI'],['RHC RAP','V_RHC_RAP'],['RHC RVP','V_RHC_RVP'],['RHC PCWP','V_RHC_PCWP'],['RHC PAP','V_RHC_PAP'],['RHC PVR','V_RHC_PVR'],['RHC PAPi','V_RHC_PAPi'],['RHC LV','V_RHC_LV'],['RHC MVO2','V_RHC_MVO2'],['CAG Done','V_CAG_Done'],['CAG Date','V_CAG_Date'],['CAG Findings','V_CAG_Findings'],['PCI Done','V_CAG_PCI_Done'],['PCI Date','V_CAG_PCI_Date'],['Number of Stents','V_CAG_Stents_Number'],['PCI Details','V_CAG_PCI_Details']]},
+        {name:'Procedures',        fields:[['Procedures','V_Procedures'],['Device Procedure','V_Proc_Device_Done'],['Device Type','V_Proc_Device_Type'],['Device Date','V_Proc_Device_Date'],['Ablation','V_Proc_Ablation_Done'],['Ablation Type','V_Proc_Ablation_Type'],['Pericardiocentesis','V_Proc_Pericardiocentesis_Done'],['Pericardiocentesis Volume','V_Proc_Pericardiocentesis_Volume'],['Pleural Tapping','V_Proc_Pleural_Tapping_Done'],['Pleural Volume','V_Proc_Pleural_Tapping_Volume'],['Ascites Tapping','V_Proc_Ascites_Tapping_Done'],['Ascites Volume','V_Proc_Ascites_Tapping_Volume'],['Other Procedure','V_Proc_Other'],['Procedure Notes','V_Procedures_Notes']]},
         {name:'Labs',              fields:[['HbA1c','V_HbA1c'],['Glucose','V_Gluc'],['Urea','V_Urea'],['Creat','V_Creat'],['eGFR','V_eGFR'],['Na','V_Na'],['K','V_K'],['BNP','V_BNP'],['NT-proBNP','V_NTproBNP'],['INR','V_INR'],['Iron','V_Iron'],['Ferritin','V_Ferritin'],['Transferrin','V_Transferrin'],['Hb','V_Hb'],['WBC','V_WBC'],['Plt','V_Plt'],['TSH','V_TSH'],['FreeT4','V_FreeT4'],['Total Chol','V_TotalChol'],['LDL','V_LDL'],['HDL','V_HDL'],['Triglycerides','V_TG'],['Other Labs','V_Lab_Others']]},
         {name:'Assessment & Plan', fields:[['Adverse Effects (Meds)','V_AdverseEffects'],['Compliance','V_Compliance'],['Compliance Notes','V_ComplianceNotes'],['Patient Complaints','V_Adverse'],['Plan','V_Plan'],['Notes','V_Others'],['Referral','V_Referral'],['Next Appt Notes','Next_Appt_Notes']]},
         {name:'Outcomes & Management', fields:[['Quadruple GDMT','V_Quad_GDMT'],['On Maximum GDMT','V_Max_GDMT'],['Recovered LV','V_Recovered_LV'],['Recovery Type','V_Recovered_LV_Type'],['Mortality','V_Mortality'],['Lost to Follow-up','V_LostFU'],['LTFU Reason','V_LostFU_Reason'],['LTFU Specify','V_LostFU_Other'],['Advanced HF','V_Advanced_HF_Outcome'],['Strong HF Eligible','V_Strong_HF'],['Advanced HF Therapy','V_Adv_HF_Therapy'],['Therapy Type','V_Adv_HF_Therapy_Type'],['Management Plan / Notes','V_Outcome_Notes']]}
@@ -6950,7 +7354,7 @@ function resetForm(){
     var _hst=document.getElementById('Hemo_Support_Type'); if(_hst) _hst.value='';
     if(typeof renderHemoSupportUI==='function') renderHemoSupportUI();
     // Hide conditional panels
-    var hideIds=['valvularTypeWrap','cmrLGEPctWrap','vCmrLGEPctWrap','walkMetersWrap','rhcDetailsWrap','pciCabgDetailsWrap','ctAngioDetailsWrap','lostFUReasonWrap','lostFUOtherWrap','valveSurgeryDateWrap','hfTypeOtherWrap','transferHospitalWrap','geneticsTypeWrap','cardioversionTypeWrap','cagDetailsWrap','holterDetailsWrap','bleedingUnitsWrap','bleedingSiteWrap','vPacingModeWrap','vHolterDateWrap','vHolterDurationWrap','vHolterMaxHRWrap','vHolterMinHRWrap','vHolterAvgHRWrap','vHolterArrhythmiaWrap','vHolterFindingsWrap'];
+    var hideIds=['valvularTypeWrap','deviceHistoryWrap','ecgDetailsWrap','cmrLGEPctWrap','echoDetailsWrap','cmrDetailsWrap','cpetDetailsWrap','vDeviceHistoryWrap','vEcgDetailsWrap','vEchoDetailsWrap','vCmrDetailsWrap','vCpetDetailsWrap','vCagDetailsWrap','vCagPciDetailsWrap','vProcDeviceWrap','vProcAblationWrap','vProcPericardiocentesisWrap','vProcPleuralTappingWrap','vProcAscitesTappingWrap','vProcOtherWrap','vCmrLGEPctWrap','walkMetersWrap','rhcDetailsWrap','pciCabgDetailsWrap','ctAngioDetailsWrap','lostFUReasonWrap','lostFUOtherWrap','valveSurgeryDateWrap','hfTypeOtherWrap','transferHospitalWrap','geneticsTypeWrap','cardioversionTypeWrap','cagDetailsWrap','cagPciDetailsWrap','holterDetailsWrap','bleedingUnitsWrap','bleedingSiteWrap','procDeviceWrap','procAblationWrap','procPericardiocentesisWrap','procPleuralTappingWrap','procAscitesTappingWrap','procOtherWrap','vPacingModeWrap','vHolterDetailsWrap','vHolterDateWrap','vHolterDurationWrap','vHolterMaxHRWrap','vHolterMinHRWrap','vHolterAvgHRWrap','vHolterArrhythmiaWrap','vHolterFindingsWrap'];
     hideIds.forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='none';});
     // Reset valvular-type, PCI/CABG, and InHospitalProcedures multi-select buttons
     document.querySelectorAll('#valvularTypeBox button, #pciCabgBox button, #inHospProceduresBox button').forEach(function(b){ b.classList.remove('btn-primary'); b.classList.add('btn-outline-primary'); });
@@ -7162,16 +7566,23 @@ function _buildLatestSnapshot(data, latestVisit){
     var VISIT_TO_BASELINE = {
         V_NYHA:'NYHA', V_KCCQ:'KCCQ', V_Edema:'Edema', V_Pulse:'Pulse', V_BP:'BP', V_SpO2:'SpO2',
         V_Weight:'Weight', V_JVP:'JVP', V_Rales:'Rales', V_S3:'S3',
+        V_Device_Done:'Device_Done', V_Device_Type:'Device_Type', V_Device_Date:'Device_Date', V_Device_Info:'Device_Info',
+        V_ECG_Done:'ECG_Done',
         V_LBBB:'ECG_LBBB', V_QRS:'ECG_QRS', V_Arrhythmia:'ECG_Arrhythmia',
-        V_Echo_EDVI:'Echo_EDVI', V_Echo_ESVI:'Echo_ESVI', V_Echo_EF:'Echo_EF', V_Echo_Other:'ECHO',
+        V_Echo_Done:'Echo_Done', V_Echo_EDVI:'Echo_EDVI', V_Echo_ESVI:'Echo_ESVI', V_Echo_EF:'Echo_EF', V_Echo_Other:'ECHO',
+        V_CMR_Done:'CMR_Done',
         V_CMR_LVEDVI:'CMR_LVEDVI', V_CMR_LVESVI:'CMR_LVESVI', V_CMR_LVEF:'CMR_LVEF',
         V_CMR_RVEDI:'CMR_RVEDI', V_CMR_RVEF:'CMR_RVEF', V_CMR_LGE:'CMR_LGE', V_CMR_LGE_Pct:'CMR_LGE_Pct', V_CMR_Others:'CMR_Others',
         V_Walk_Completed:'Walk_Completed', V_Walk_Meters:'Walk_Meters',
-        V_CPET_PeakVO2:'CPET_PeakVO2', V_CPET_VEVCO2:'CPET_VEVCO2', V_CPET_RER:'CPET_RER',
+        V_CPET_Done:'CPET_Done', V_CPET_PeakVO2:'CPET_PeakVO2', V_CPET_VEVCO2:'CPET_VEVCO2', V_CPET_RER:'CPET_RER',
         V_CPET_AT:'CPET_AT', V_CPET_VO2HR:'CPET_VO2HR', V_CPET_PetCO2:'CPET_PetCO2',
         V_RHC_Done:'RHC_Done', V_RHC_CI:'RHC_CI', V_RHC_RAP:'RHC_RAP', V_RHC_RVP:'RHC_RVP',
         V_RHC_PCWP:'RHC_PCWP', V_RHC_PAP:'RHC_PAP', V_RHC_PVR:'RHC_PVR', V_RHC_PAPi:'RHC_PAPi',
         V_RHC_LV:'RHC_LV', V_RHC_MVO2:'RHC_MVO2',
+        V_CAG_Done:'CAG_Done', V_CAG_Date:'CAG_Date', V_CAG_Findings:'CAG_Findings',
+        V_CAG_PCI_Done:'CAG_PCI_Done', V_CAG_PCI_Date:'CAG_PCI_Date',
+        V_CAG_Stents_Number:'CAG_Stents_Number', V_CAG_PCI_Details:'CAG_PCI_Details',
+        V_Procedures:'InHospital_Procedures', V_Procedures_Notes:'InHospital_Procedures_Notes',
         // Labs
         V_HbA1c:'Lab_HbA1c', V_Gluc:'Lab_Gluc', V_Urea:'Lab_Urea', V_Creat:'Lab_Creat', V_eGFR:'Lab_eGFR',
         V_Na:'Lab_Na', V_K:'Lab_K', V_BNP:'Lab_BNP_only', V_NTproBNP:'Lab_BNP',
@@ -7455,7 +7866,7 @@ function _clearPatientFormFields(){
         });
     }
     // Hide all conditional panels
-    var hideIds=['valvularTypeWrap','cmrLGEPctWrap','vCmrLGEPctWrap','walkMetersWrap','rhcDetailsWrap','pciCabgDetailsWrap','ctAngioDetailsWrap','cagDetailsWrap','lostFUReasonWrap','lostFUOtherWrap','valveSurgeryDateWrap','hfTypeOtherWrap','transferHospitalWrap','geneticsTypeWrap','cardioversionTypeWrap','bleedingUnitsWrap','bleedingSiteWrap'];
+    var hideIds=['valvularTypeWrap','deviceHistoryWrap','ecgDetailsWrap','cmrLGEPctWrap','echoDetailsWrap','cmrDetailsWrap','cpetDetailsWrap','vDeviceHistoryWrap','vEcgDetailsWrap','vEchoDetailsWrap','vCmrDetailsWrap','vCpetDetailsWrap','vCagDetailsWrap','vCagPciDetailsWrap','vProcDeviceWrap','vProcAblationWrap','vProcPericardiocentesisWrap','vProcPleuralTappingWrap','vProcAscitesTappingWrap','vProcOtherWrap','vCmrLGEPctWrap','walkMetersWrap','rhcDetailsWrap','pciCabgDetailsWrap','ctAngioDetailsWrap','cagDetailsWrap','cagPciDetailsWrap','lostFUReasonWrap','lostFUOtherWrap','valveSurgeryDateWrap','hfTypeOtherWrap','transferHospitalWrap','geneticsTypeWrap','cardioversionTypeWrap','bleedingUnitsWrap','bleedingSiteWrap','procDeviceWrap','procAblationWrap','procPericardiocentesisWrap','procPleuralTappingWrap','procAscitesTappingWrap','procOtherWrap'];
     hideIds.forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     // Reset extra in-hospital admissions list
     var ea=document.getElementById('Extra_Admissions'); if(ea){ ea.value='[]'; var ew=document.getElementById('extraAdmissionsWrap'); if(ew) ew.innerHTML=''; }
@@ -7498,7 +7909,8 @@ function editPt(id){
         ensureNationalityOption(d.Nationality||'');
         var _nat=document.getElementById('Nationality');if(_nat&&d.Nationality)_nat.value=d.Nationality;
     }
-    if(typeof syncDeviceInfo==='function')syncDeviceInfo();
+    if(typeof restoreBaselineInvestigationFlags==='function')restoreBaselineInvestigationFlags(d);
+    if(typeof toggleDeviceHistory==='function')toggleDeviceHistory();
     // Legacy migration: old Obese_OSA combined field maps to both Obese and OSA pills
     if(d.Obese_OSA==='Yes'){
         var ob=document.getElementById('Obese'),os=document.getElementById('OSA');
@@ -7512,6 +7924,10 @@ function editPt(id){
     if(typeof togglePCICABGDetails==='function')togglePCICABGDetails();
     // Restore other conditional panels
     if(typeof toggleValvularType==='function')toggleValvularType();
+    if(typeof toggleECGDetails==='function')toggleECGDetails();
+    if(typeof toggleEchoDetails==='function')toggleEchoDetails();
+    if(typeof toggleCMRDetails==='function')toggleCMRDetails();
+    if(typeof toggleCPETDetails==='function')toggleCPETDetails();
     if(typeof toggleLGEPercent==='function')toggleLGEPercent();
     if(typeof toggleWalkMeters==='function')toggleWalkMeters();
     if(typeof toggleRHCDetails==='function')toggleRHCDetails();
@@ -7714,7 +8130,7 @@ function generateExcel(data,visitsData,id){
         }
     });pr.push([]);});
     var ws1=XLSX.utils.aoa_to_sheet(pr);XLSX.utils.book_append_sheet(wb,ws1,"Patient Info");
-    if(visitsData.length>0){var vr=[];vr.push(["VISIT HISTORY"]);vr.push([]);visitsData.forEach(function(visit,idx){vr.push(["Visit #"+(visitsData.length-idx),"Date: "+visit.visitDate,"Type: "+visit.visitType]);var vFields=['V_Fatigue','V_NYHA','V_KCCQ','V_Edema','V_Pulse','V_BP','V_SpO2','V_Height','V_Weight','V_BMI','V_JVP','V_Rales','V_S3','V_LBBB','V_QRS','V_Arrhythmia','V_Pacing_ECG','V_Pacing_Mode','V_Holter_Done','V_Holter_Date','V_Holter_Duration','V_Holter_MaxHR','V_Holter_MinHR','V_Holter_AvgHR','V_Holter_Arrhythmia','V_Holter_Findings','V_EF_Change','V_Echo_EDVI','V_Echo_ESVI','V_Echo_EF','V_Echo_Other','V_CMR_LVEDVI','V_CMR_LVESVI','V_CMR_LVEF','V_CMR_RVEDI','V_CMR_RVEF','V_CMR_LGE','V_CMR_LGE_Pct','V_CMR_Others','V_Walk_Completed','V_Walk_Meters','V_CPET_PeakVO2','V_CPET_VEVCO2','V_CPET_RER','V_CPET_AT','V_CPET_VO2HR','V_CPET_PetCO2','V_RHC_Done','V_RHC_CI','V_RHC_RAP','V_RHC_RVP','V_RHC_PCWP','V_RHC_PAP','V_RHC_PVR','V_RHC_PAPi','V_RHC_LV','V_RHC_MVO2','V_HbA1c','V_Gluc','V_Urea','V_Creat','V_eGFR','V_Na','V_K','V_BNP','V_NTproBNP','V_INR','V_Iron','V_Transferrin','V_Ferritin','V_WBC','V_Hb','V_Plt','V_TSH','V_FreeT4','V_TotalChol','V_LDL','V_HDL','V_TG','V_Lab_Others','V_Vacc_Influenza','V_Vacc_Influenza_Date','V_Vacc_Pneumococcal','V_Vacc_Pneumococcal_Date','V_Vacc_COVID','V_Vacc_COVID_Date','V_Vacc_RSV','V_Vacc_RSV_Date','V_Vacc_Notes','V_Vacc_Influenza_Year','V_Vacc_Pneumococcal_Year','V_Vacc_COVID_Year','V_Vacc_Other'];VISIT_MED_LIST.forEach(function(m){vFields.push(m.id);vFields.push(m.id+'_Status');vFields.push(m.id+'_Custom');vFields.push(m.id+'_Freq');});vFields.push('V_Med_Others','V_AdverseEffects','V_Compliance','V_ComplianceNotes','V_Adverse','V_Plan','V_Others','V_Referral','V_Referral_Other','Next_Appt_Notes','V_Quad_GDMT','V_Max_GDMT','V_Recovered_LV','V_Recovered_LV_Type','V_Mortality','V_LostFU','V_LostFU_Reason','V_LostFU_Other','V_Advanced_HF_Outcome','V_Strong_HF','V_Adv_HF_Therapy','V_Adv_HF_Therapy_Type','V_Outcome_Notes');vFields.forEach(function(f){var val=visit[f];if(val&&val.toString().trim()!=='')vr.push([f.replace('V_','').replace(/_/g,' '),val]);});vr.push([]);});var ws2=XLSX.utils.aoa_to_sheet(vr);XLSX.utils.book_append_sheet(wb,ws2,"Visits");}
+    if(visitsData.length>0){var vr=[];vr.push(["VISIT HISTORY"]);vr.push([]);visitsData.forEach(function(visit,idx){vr.push(["Visit #"+(visitsData.length-idx),"Date: "+visit.visitDate,"Type: "+visit.visitType]);var vFields=['V_Fatigue','V_NYHA','V_KCCQ','V_Edema','V_Pulse','V_BP','V_SpO2','V_Height','V_Weight','V_BMI','V_JVP','V_Rales','V_S3','V_Device_Done','V_Device_Type','V_Device_Date','V_Device_Info','V_ECG_Done','V_LBBB','V_QRS','V_Arrhythmia','V_Pacing_ECG','V_Pacing_Mode','V_Holter_Done','V_Holter_Date','V_Holter_Duration','V_Holter_MaxHR','V_Holter_MinHR','V_Holter_AvgHR','V_Holter_Arrhythmia','V_Holter_Findings','V_Echo_Done','V_EF_Change','V_Echo_EDVI','V_Echo_ESVI','V_Echo_EF','V_Echo_Other','V_CMR_Done','V_CMR_LVEDVI','V_CMR_LVESVI','V_CMR_LVEF','V_CMR_RVEDI','V_CMR_RVEF','V_CMR_LGE','V_CMR_LGE_Pct','V_CMR_Others','V_Walk_Completed','V_Walk_Meters','V_CPET_Done','V_CPET_PeakVO2','V_CPET_VEVCO2','V_CPET_RER','V_CPET_AT','V_CPET_VO2HR','V_CPET_PetCO2','V_RHC_Done','V_RHC_CI','V_RHC_RAP','V_RHC_RVP','V_RHC_PCWP','V_RHC_PAP','V_RHC_PVR','V_RHC_PAPi','V_RHC_LV','V_RHC_MVO2','V_CAG_Done','V_CAG_Date','V_CAG_Findings','V_CAG_PCI_Done','V_CAG_PCI_Date','V_CAG_Stents_Number','V_CAG_PCI_Details','V_Procedures','V_Proc_Device_Done','V_Proc_Device_Type','V_Proc_Device_Date','V_Proc_Ablation_Done','V_Proc_Ablation_Type','V_Proc_Pericardiocentesis_Done','V_Proc_Pericardiocentesis_Volume','V_Proc_Pleural_Tapping_Done','V_Proc_Pleural_Tapping_Volume','V_Proc_Ascites_Tapping_Done','V_Proc_Ascites_Tapping_Volume','V_Proc_Other_Done','V_Proc_Other','V_Procedures_Notes','V_HbA1c','V_Gluc','V_Urea','V_Creat','V_eGFR','V_Na','V_K','V_BNP','V_NTproBNP','V_INR','V_Iron','V_Transferrin','V_Ferritin','V_WBC','V_Hb','V_Plt','V_TSH','V_FreeT4','V_TotalChol','V_LDL','V_HDL','V_TG','V_Lab_Others','V_Vacc_Influenza','V_Vacc_Influenza_Date','V_Vacc_Pneumococcal','V_Vacc_Pneumococcal_Date','V_Vacc_COVID','V_Vacc_COVID_Date','V_Vacc_RSV','V_Vacc_RSV_Date','V_Vacc_Notes','V_Vacc_Influenza_Year','V_Vacc_Pneumococcal_Year','V_Vacc_COVID_Year','V_Vacc_Other'];VISIT_MED_LIST.forEach(function(m){vFields.push(m.id);vFields.push(m.id+'_Status');vFields.push(m.id+'_Custom');vFields.push(m.id+'_Freq');});vFields.push('V_Med_Others','V_AdverseEffects','V_Compliance','V_ComplianceNotes','V_Adverse','V_Plan','V_Others','V_Referral','V_Referral_Other','Next_Appt_Notes','V_Quad_GDMT','V_Max_GDMT','V_Recovered_LV','V_Recovered_LV_Type','V_Mortality','V_LostFU','V_LostFU_Reason','V_LostFU_Other','V_Advanced_HF_Outcome','V_Strong_HF','V_Adv_HF_Therapy','V_Adv_HF_Therapy_Type','V_Outcome_Notes');vFields.forEach(function(f){var val=visit[f];if(val&&val.toString().trim()!=='')vr.push([f.replace('V_','').replace(/_/g,' '),val]);});vr.push([]);});var ws2=XLSX.utils.aoa_to_sheet(vr);XLSX.utils.book_append_sheet(wb,ws2,"Visits");}
     XLSX.writeFile(wb,"HF_Registry_"+(data.File_No||'unknown')+"_"+(data.Patient_Name||'patient')+".xlsx");showPopup("success","Excel Exported!","File downloaded successfully.");
 }
 
@@ -7748,7 +8164,7 @@ function generatePDF(data,visitsData,id){
     var mf=VISIT_MED_LIST.map(function(m){return m.id;});
     mf.push('V_Med_Others');
     visitsData.forEach(function(visit,idx){html+="<div style='border:2px solid #17a2b8;margin:15px 0;padding:15px;border-radius:8px;'><h4 style='color:#17a2b8;margin-top:0;'>Visit #"+(visitsData.length-idx)+": "+visit.visitDate+" ("+visit.visitType+")</h4>";
-    var vs=[{name:'Symptoms',fields:['V_Fatigue','V_NYHA','V_KCCQ','V_Edema']},{name:'Signs/Vitals',fields:['V_Pulse','V_BP','V_SpO2','V_Height','V_Weight','V_BMI','V_JVP','V_Rales','V_S3']},{name:'ECG',fields:['V_LBBB','V_QRS','V_Arrhythmia','V_Pacing_ECG','V_Pacing_Mode']},{name:'Holter',fields:['V_Holter_Done','V_Holter_Date','V_Holter_Duration','V_Holter_MaxHR','V_Holter_MinHR','V_Holter_AvgHR','V_Holter_Arrhythmia','V_Holter_Findings']},{name:'Labs',fields:['V_HbA1c','V_Gluc','V_Urea','V_Creat','V_eGFR','V_Na','V_K','V_BNP','V_NTproBNP','V_INR','V_Iron','V_Transferrin','V_Ferritin','V_WBC','V_Hb','V_Plt','V_TSH','V_FreeT4','V_TotalChol','V_LDL','V_HDL','V_TG','V_Lab_Others']},{name:'F/U Echo',fields:['V_EF_Change','V_Echo_EDVI','V_Echo_ESVI','V_Echo_EF','V_Echo_Other']},{name:'F/U CMR',fields:['V_CMR_LVEDVI','V_CMR_LVESVI','V_CMR_LVEF','V_CMR_RVEDI','V_CMR_RVEF','V_CMR_LGE','V_CMR_LGE_Pct','V_CMR_Others']},{name:'F/U 6MWT',fields:['V_Walk_Completed','V_Walk_Meters']},{name:'F/U CPET',fields:['V_CPET_PeakVO2','V_CPET_VEVCO2','V_CPET_RER','V_CPET_AT','V_CPET_VO2HR','V_CPET_PetCO2']},{name:'F/U Right Heart Cath',fields:['V_RHC_Done','V_RHC_CI','V_RHC_RAP','V_RHC_RVP','V_RHC_PCWP','V_RHC_PAP','V_RHC_PVR','V_RHC_PAPi','V_RHC_LV','V_RHC_MVO2']},{name:'Medications',fields:mf},{name:'Vaccinations',fields:['V_Vacc_Influenza','V_Vacc_Influenza_Date','V_Vacc_Pneumococcal','V_Vacc_Pneumococcal_Date','V_Vacc_COVID','V_Vacc_COVID_Date','V_Vacc_RSV','V_Vacc_RSV_Date','V_Vacc_Notes','V_Vacc_Influenza_Year','V_Vacc_Pneumococcal_Year','V_Vacc_COVID_Year','V_Vacc_Other']},{name:'Next Appointment',fields:['Next_Appt_Notes']},{name:'Plan',fields:['V_AdverseEffects','V_Compliance','V_ComplianceNotes','V_Adverse','V_Plan','V_Others','V_Referral','V_Referral_Other']},{name:'Outcomes & Management',fields:['V_Quad_GDMT','V_Max_GDMT','V_Recovered_LV','V_Recovered_LV_Type','V_Mortality','V_LostFU','V_LostFU_Reason','V_LostFU_Other','V_Advanced_HF_Outcome','V_Strong_HF','V_Adv_HF_Therapy','V_Adv_HF_Therapy_Type','V_Outcome_Notes']}];
+    var vs=[{name:'Symptoms',fields:['V_Fatigue','V_NYHA','V_KCCQ','V_Edema']},{name:'Signs/Vitals',fields:['V_Pulse','V_BP','V_SpO2','V_Height','V_Weight','V_BMI','V_JVP','V_Rales','V_S3']},{name:'Past History & Comorbidities',fields:['V_DM','V_HTN','V_AF','V_IHD','V_PCI_CABG','V_Device_Done','V_Device_Type','V_Device_Date','V_Device_Info','V_CKD','V_Dialysis','V_CVA','V_PVD','V_Smoker','V_Obese','V_OSA','V_Dyslipidemia','V_Thyroid_Dz','V_FH_Cardio','V_Genetics','V_Genetics_Type','V_Comorbid_Others']},{name:'ECG',fields:['V_ECG_Done','V_LBBB','V_QRS','V_Arrhythmia','V_Pacing_ECG','V_Pacing_Mode']},{name:'Holter',fields:['V_Holter_Done','V_Holter_Date','V_Holter_Duration','V_Holter_MaxHR','V_Holter_MinHR','V_Holter_AvgHR','V_Holter_Arrhythmia','V_Holter_Findings']},{name:'Labs',fields:['V_HbA1c','V_Gluc','V_Urea','V_Creat','V_eGFR','V_Na','V_K','V_BNP','V_NTproBNP','V_INR','V_Iron','V_Transferrin','V_Ferritin','V_WBC','V_Hb','V_Plt','V_TSH','V_FreeT4','V_TotalChol','V_LDL','V_HDL','V_TG','V_Lab_Others']},{name:'F/U Echo',fields:['V_Echo_Done','V_EF_Change','V_Echo_EDVI','V_Echo_ESVI','V_Echo_EF','V_Echo_Other']},{name:'F/U CMR',fields:['V_CMR_Done','V_CMR_LVEDVI','V_CMR_LVESVI','V_CMR_LVEF','V_CMR_RVEDI','V_CMR_RVEF','V_CMR_LGE','V_CMR_LGE_Pct','V_CMR_Others']},{name:'F/U 6MWT',fields:['V_Walk_Completed','V_Walk_Meters']},{name:'F/U CPET',fields:['V_CPET_Done','V_CPET_PeakVO2','V_CPET_VEVCO2','V_CPET_RER','V_CPET_AT','V_CPET_VO2HR','V_CPET_PetCO2']},{name:'F/U Right Heart Cath',fields:['V_RHC_Done','V_RHC_CI','V_RHC_RAP','V_RHC_RVP','V_RHC_PCWP','V_RHC_PAP','V_RHC_PVR','V_RHC_PAPi','V_RHC_LV','V_RHC_MVO2']},{name:'Visit CAG / PCI',fields:['V_CAG_Done','V_CAG_Date','V_CAG_Findings','V_CAG_PCI_Done','V_CAG_PCI_Date','V_CAG_Stents_Number','V_CAG_PCI_Details']},{name:'Visit Procedures',fields:['V_Procedures','V_Proc_Device_Done','V_Proc_Device_Type','V_Proc_Device_Date','V_Proc_Ablation_Done','V_Proc_Ablation_Type','V_Proc_Pericardiocentesis_Done','V_Proc_Pericardiocentesis_Volume','V_Proc_Pleural_Tapping_Done','V_Proc_Pleural_Tapping_Volume','V_Proc_Ascites_Tapping_Done','V_Proc_Ascites_Tapping_Volume','V_Proc_Other_Done','V_Proc_Other','V_Procedures_Notes']},{name:'Medications',fields:mf},{name:'Vaccinations',fields:['V_Vacc_Influenza','V_Vacc_Influenza_Date','V_Vacc_Pneumococcal','V_Vacc_Pneumococcal_Date','V_Vacc_COVID','V_Vacc_COVID_Date','V_Vacc_RSV','V_Vacc_RSV_Date','V_Vacc_Notes','V_Vacc_Influenza_Year','V_Vacc_Pneumococcal_Year','V_Vacc_COVID_Year','V_Vacc_Other']},{name:'Next Appointment',fields:['Next_Appt_Notes']},{name:'Plan',fields:['V_AdverseEffects','V_Compliance','V_ComplianceNotes','V_Adverse','V_Plan','V_Others','V_Referral','V_Referral_Other']},{name:'Outcomes & Management',fields:['V_Quad_GDMT','V_Max_GDMT','V_Recovered_LV','V_Recovered_LV_Type','V_Mortality','V_LostFU','V_LostFU_Reason','V_LostFU_Other','V_Advanced_HF_Outcome','V_Strong_HF','V_Adv_HF_Therapy','V_Adv_HF_Therapy_Type','V_Outcome_Notes']}];
     vs.forEach(function(vsec){var hd=false;vsec.fields.forEach(function(vf){if(visit[vf]&&visit[vf].toString().trim()!=='')hd=true;});if(!hd)return;
     html+="<h5 style='margin:10px 0 5px 0;color:#555;'>"+vsec.name+"</h5><table style='width:100%;border-collapse:collapse;font-size:11px;margin-bottom:10px;'>";
     vsec.fields.forEach(function(vf){var val=visit[vf];if(val&&val.toString().trim()!==''){html+="<tr style='border-bottom:1px solid #eee;'><td style='width:40%;padding:4px;background:#f5f5f5;'>"+vf.replace('V_','').replace(/_/g,' ')+"</td><td style='padding:4px;'>"+val+"</td></tr>";}});html+="</table>";});html+="</div>";});}
@@ -9108,14 +9524,17 @@ function exportAllVisitsSPSS(){
         'V_Echo_EDVI','V_Echo_ESVI','V_Echo_EF','V_CMR_LVEDVI','V_CMR_LVESVI','V_CMR_LVEF','V_CMR_RVEDI','V_CMR_RVEF','V_CMR_LGE_Pct',
         'V_Walk_Meters','V_CPET_PeakVO2','V_CPET_VEVCO2','V_CPET_RER','V_CPET_AT','V_CPET_VO2HR','V_CPET_PetCO2',
         'V_RHC_CI','V_RHC_RAP','V_RHC_RVP','V_RHC_PCWP','V_RHC_PAP','V_RHC_PVR','V_RHC_PAPi','V_RHC_MVO2',
+        'V_CAG_Stents_Number','V_Proc_Pericardiocentesis_Volume','V_Proc_Pleural_Tapping_Volume','V_Proc_Ascites_Tapping_Volume',
         'V_HbA1c','V_Gluc','V_Urea','V_Creat','V_eGFR','V_Na','V_K','V_BNP','V_NTproBNP','V_INR',
         'V_Iron','V_Transferrin','V_Ferritin','V_WBC','V_Hb','V_Plt','V_TSH','V_FreeT4',
         'V_TotalChol','V_LDL','V_HDL','V_TG'];
-    var V_BINARY = ['V_Holter_Done','V_RHC_Done','V_Walk_Completed','V_Quad_GDMT','V_Max_GDMT',
-        'V_Recovered_LV','V_Strong_HF','V_Adv_HF_Therapy'];
+    var V_BINARY = ['V_Device_Done','V_ECG_Done','V_Holter_Done','V_Echo_Done','V_CMR_Done','V_Walk_Completed','V_CPET_Done','V_RHC_Done',
+        'V_CAG_Done','V_CAG_PCI_Done','V_Proc_Device_Done','V_Proc_Ablation_Done','V_Proc_Pericardiocentesis_Done','V_Proc_Pleural_Tapping_Done','V_Proc_Ascites_Tapping_Done','V_Proc_Other_Done',
+        'V_Quad_GDMT','V_Max_GDMT','V_Recovered_LV','V_Strong_HF','V_Adv_HF_Therapy'];
     var V_TEXT = ['V_NYHA','V_Fatigue','V_Edema','V_BP','V_JVP','V_Rales','V_S3','V_LBBB','V_Arrhythmia',
-        'V_Pacing_ECG','V_Pacing_Mode','V_EF_Change','V_Compliance','V_Mortality','V_LostFU',
-        'V_Advanced_HF_Outcome','V_Adv_HF_Therapy_Type','V_Referral','V_Lab_Others','V_Med_Others'];
+        'V_Pacing_ECG','V_Pacing_Mode','V_Device_Type','V_Device_Info','V_EF_Change','V_CMR_LGE',
+        'V_CAG_Findings','V_CAG_PCI_Details','V_Procedures','V_Proc_Device_Type','V_Proc_Ablation_Type','V_Proc_Other','V_Procedures_Notes',
+        'V_Compliance','V_Mortality','V_LostFU','V_Advanced_HF_Outcome','V_Adv_HF_Therapy_Type','V_Referral','V_Lab_Others','V_Med_Others'];
 
     function toBin(v){
         if(v===undefined||v===null||v==='') return '';
