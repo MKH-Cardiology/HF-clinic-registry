@@ -572,6 +572,12 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
     letter-spacing:0.04em;
     text-transform:none;
 }
+.visit-subhead{
+    font-size:0.78rem;
+    font-weight:700;
+    letter-spacing:0.02em;
+}
+.visit-subhead i{margin-right:4px;}
 .field-tint > .ft-body{
     /* Body holds a Bootstrap row directly */
 }
@@ -2145,7 +2151,7 @@ img,canvas,table,svg{max-width:100%;}
                     </div></div>
                     </div><!-- /#vComorbiditiesSection -->
                     <div class="col-12"><hr class="my-2"></div>
-                    <h6 class="col-12 text-secondary">ECG</h6>
+                    <h6 class="col-12 text-secondary"><i class="fa fa-stethoscope"></i> Investigations and Procedures</h6>
                     <div class="col-12 vertical-entry-group">
                         <div class="entry-title"><i class="fa fa-heartbeat"></i> ECG</div>
                         <div class="yes-no-field"><label>Performed</label><select class="form-select" id="V_ECG_Done" onchange="toggleVisitECGDetails()"><option>No</option><option>Yes</option></select></div>
@@ -2166,7 +2172,7 @@ img,canvas,table,svg{max-width:100%;}
                         <div id="vEcgImagePreview" class="mt-1" style="max-width:100%;"></div>
                     </div>
                     <div class="col-12"><hr class="my-2"></div>
-                    <h6 class="col-12 text-secondary"><i class="fa fa-wave-square"></i> Holter Results</h6>
+                    <div class="col-12 text-secondary m-0 visit-subhead"><i class="fa fa-wave-square"></i> Holter Results</div>
                     <div class="col-12 vertical-entry-group">
                         <div class="entry-title"><i class="fa fa-wave-square"></i> Holter</div>
                         <div class="yes-no-field"><label>Performed</label><select class="form-select" id="V_Holter_Done" onchange="toggleVisitHolter()"><option>No</option><option>Yes</option></select></div>
@@ -2183,7 +2189,7 @@ img,canvas,table,svg{max-width:100%;}
                         </div>
                     </div>
                     <div class="col-12"><hr class="my-2"></div>
-                    <h6 class="col-12 text-secondary">F/U Echo</h6>
+                    <div class="col-12 text-secondary m-0 visit-subhead"><i class="fa fa-heart"></i> F/U Echo</div>
                     <div class="col-12 vertical-entry-group">
                         <div class="entry-title"><i class="fa fa-heart"></i> F/U Echo</div>
                         <div class="yes-no-field"><label>Performed</label><select class="form-select" id="V_Echo_Done" onchange="toggleVisitEchoDetails()"><option>No</option><option>Yes</option></select></div>
@@ -2198,7 +2204,7 @@ img,canvas,table,svg{max-width:100%;}
                         </div>
                     </div>
                     <div class="col-12"><hr class="my-2"></div>
-                    <h6 class="col-12 text-secondary">F/U CMR</h6>
+                    <div class="col-12 text-secondary m-0 visit-subhead"><i class="fa fa-magnet"></i> F/U CMR</div>
                     <div class="col-12 vertical-entry-group">
                         <div class="entry-title"><i class="fa fa-magnet"></i> F/U CMR</div>
                         <div class="yes-no-field"><label>Performed</label><select class="form-select" id="V_CMR_Done" onchange="toggleVisitCMRDetails()"><option>No</option><option>Yes</option></select></div>
@@ -2217,7 +2223,7 @@ img,canvas,table,svg{max-width:100%;}
                     </div>
 
                     <div class="col-12"><hr class="my-2"></div>
-                    <h6 class="col-12 text-secondary"><i class="fa fa-walking"></i> F/U 6 Minute Walk Test</h6>
+                    <div class="col-12 text-secondary m-0 visit-subhead"><i class="fa fa-walking"></i> F/U 6 Minute Walk Test</div>
                     <div class="col-12 vertical-entry-group">
                         <div class="entry-title"><i class="fa fa-walking"></i> 6 Minute Walk Test</div>
                         <div class="yes-no-field"><label>Completed</label><select class="form-select" id="V_Walk_Completed" onchange="toggleVisitWalkMeters()"><option>N</option><option>Y</option></select></div>
@@ -2229,7 +2235,7 @@ img,canvas,table,svg{max-width:100%;}
                     </div>
 
                     <div class="col-12"><hr class="my-2"></div>
-                    <h6 class="col-12 text-secondary"><i class="fa fa-lungs"></i> F/U CPET</h6>
+                    <div class="col-12 text-secondary m-0 visit-subhead"><i class="fa fa-lungs"></i> F/U CPET</div>
                     <div class="col-12 vertical-entry-group">
                         <div class="entry-title"><i class="fa fa-lungs"></i> CPET</div>
                         <div class="yes-no-field"><label>Performed</label><select class="form-select" id="V_CPET_Done" onchange="toggleVisitCPETDetails()"><option>No</option><option>Yes</option></select></div>
@@ -2246,7 +2252,7 @@ img,canvas,table,svg{max-width:100%;}
                     </div>
 
                     <div class="col-12"><hr class="my-2"></div>
-                    <h6 class="col-12 text-secondary"><i class="fa fa-syringe"></i> F/U Right Side Cath</h6>
+                    <div class="col-12 text-secondary m-0 visit-subhead"><i class="fa fa-syringe"></i> F/U Right Side Cath</div>
                     <div class="col-12 vertical-entry-group">
                         <div class="entry-title"><i class="fa fa-syringe"></i> Right Side Cath</div>
                         <div class="yes-no-field"><label>Performed</label><select class="form-select" id="V_RHC_Done" onchange="toggleVisitRHCDetails()"><option>No</option><option>Yes</option></select></div>
@@ -2266,7 +2272,7 @@ img,canvas,table,svg{max-width:100%;}
                     </div>
 
                     <div class="col-12"><hr class="my-2"></div>
-                    <h6 class="col-12 text-secondary"><i class="fa fa-heart-circle-bolt"></i> F/U CAG/PCI</h6>
+                    <div class="col-12 text-secondary m-0 visit-subhead"><i class="fa fa-heart-circle-bolt"></i> F/U CAG/PCI</div>
                     <div class="col-12 vertical-entry-group">
                         <div class="entry-title"><i class="fa fa-heart-circle-bolt"></i> F/U CAG/PCI</div>
                         <div class="yes-no-field"><label>CAG Performed</label><select class="form-select" id="V_CAG_Done" onchange="toggleVisitCAGDetails()"><option>No</option><option>Yes</option></select></div>
@@ -2288,12 +2294,12 @@ img,canvas,table,svg{max-width:100%;}
                     <div class="col-12"><hr class="my-2"></div>
                     <h6 class="col-12 text-secondary"><i class="fa fa-flask"></i> Visit Labs <small class="text-muted fw-normal">— Kuwait SI units</small></h6>
 
-                    <h6 class="col-12 text-secondary m-0" style="font-size:0.78rem;"><i class="fa fa-vial"></i> Glycemic</h6>
+                    <div class="col-12 text-secondary m-0 visit-subhead"><i class="fa fa-vial"></i> Glycemic</div>
                     <div class="col-6 col-md-3"><label>HbA1c (%)</label><input type="text" class="form-control" id="V_HbA1c" inputmode="text"></div>
                     <div class="col-6 col-md-3"><label>Fasting Glucose (mmol/L)</label><input type="text" class="form-control" id="V_Gluc" inputmode="text"></div>
 
                     <div class="col-12"><hr class="my-1"></div>
-                    <h6 class="col-12 text-secondary m-0" style="font-size:0.78rem;"><i class="fa fa-tint"></i> Renal &amp; Electrolytes</h6>
+                    <div class="col-12 text-secondary m-0 visit-subhead"><i class="fa fa-tint"></i> Renal &amp; Electrolytes</div>
                     <div class="col-6 col-md-3"><label>Urea (mmol/L)</label><input type="text" class="form-control" id="V_Urea" inputmode="text"></div>
                     <div class="col-6 col-md-3"><label>Creatinine (µmol/L)</label><input type="text" class="form-control" id="V_Creat" inputmode="text" oninput="calcEGFR()"></div>
                     <div class="col-6 col-md-3"><label class="text-success fw-bold">eGFR (ml/min/1.73m²) <span class="auto-badge"><i class="fa fa-lock"></i> Auto</span></label><input type="text" class="form-control bg-light text-success fw-bold" id="V_eGFR" readonly></div>
@@ -2301,30 +2307,30 @@ img,canvas,table,svg{max-width:100%;}
                     <div class="col-6 col-md-3"><label>Potassium / K (mmol/L)</label><input type="text" class="form-control" id="V_K" inputmode="text" oninput="checkVisitAlerts()"></div>
 
                     <div class="col-12"><hr class="my-1"></div>
-                    <h6 class="col-12 text-secondary m-0" style="font-size:0.78rem;"><i class="fa fa-heartbeat"></i> Cardiac Biomarkers</h6>
+                    <div class="col-12 text-secondary m-0 visit-subhead"><i class="fa fa-heartbeat"></i> Cardiac Biomarkers</div>
                     <div class="col-6 col-md-3"><label>BNP (pg/mL)</label><input type="text" class="form-control" id="V_BNP" inputmode="text"></div>
                     <div class="col-6 col-md-3"><label>NT-proBNP (pg/mL)</label><input type="text" class="form-control" id="V_NTproBNP" inputmode="text"></div>
 
                     <div class="col-12"><hr class="my-1"></div>
-                    <h6 class="col-12 text-secondary m-0" style="font-size:0.78rem;"><i class="fa fa-syringe"></i> Iron Studies</h6>
+                    <div class="col-12 text-secondary m-0 visit-subhead"><i class="fa fa-syringe"></i> Iron Studies</div>
                     <div class="col-6 col-md-3"><label>Serum Iron (µmol/L)</label><input type="text" class="form-control" id="V_Iron" inputmode="text" oninput="checkVisitIronAlert()"></div>
                     <div class="col-6 col-md-3"><label>Ferritin (µg/L)</label><input type="text" class="form-control" id="V_Ferritin" inputmode="text" oninput="checkVisitIronAlert()"></div>
                     <div class="col-6 col-md-3"><label>Transferrin Sat. / TSAT (%)</label><input type="text" class="form-control" id="V_Transferrin" inputmode="text" oninput="checkVisitIronAlert()"></div>
 
                     <div class="col-12"><hr class="my-1"></div>
-                    <h6 class="col-12 text-secondary m-0" style="font-size:0.78rem;"><i class="fa fa-vials"></i> CBC</h6>
+                    <div class="col-12 text-secondary m-0 visit-subhead"><i class="fa fa-vials"></i> CBC</div>
                     <div class="col-4 col-md-2"><label>Hb (g/dL)</label><input type="text" class="form-control" id="V_Hb" inputmode="text"></div>
                     <div class="col-4 col-md-2"><label>WBC (×10⁹/L)</label><input type="text" class="form-control" id="V_WBC" inputmode="text"></div>
                     <div class="col-4 col-md-2"><label>Platelets (×10⁹/L)</label><input type="text" class="form-control" id="V_Plt" inputmode="text"></div>
 
                     <div class="col-12"><hr class="my-1"></div>
-                    <h6 class="col-12 text-secondary m-0" style="font-size:0.78rem;"><i class="fa fa-flask"></i> Thyroid &amp; Coagulation</h6>
+                    <div class="col-12 text-secondary m-0 visit-subhead"><i class="fa fa-flask"></i> Thyroid &amp; Coagulation</div>
                     <div class="col-6 col-md-3"><label>TSH (mIU/L)</label><input type="text" class="form-control" id="V_TSH" inputmode="text"></div>
                     <div class="col-6 col-md-3"><label>Free T4 (pmol/L)</label><input type="text" class="form-control" id="V_FreeT4" inputmode="text"></div>
                     <div class="col-6 col-md-3"><label>INR</label><input type="text" class="form-control" id="V_INR" inputmode="text"></div>
 
                     <div class="col-12"><hr class="my-1"></div>
-                    <h6 class="col-12 text-secondary m-0" style="font-size:0.78rem;"><i class="fa fa-chart-line"></i> Lipid Profile (mmol/L)</h6>
+                    <div class="col-12 text-secondary m-0 visit-subhead"><i class="fa fa-chart-line"></i> Lipid Profile (mmol/L)</div>
                     <div class="col-4 col-md-2"><label>Total Chol.</label><input type="text" class="form-control" id="V_TotalChol" inputmode="text"></div>
                     <div class="col-4 col-md-2"><label>LDL</label><input type="text" class="form-control" id="V_LDL" inputmode="text"></div>
                     <div class="col-4 col-md-2"><label>HDL</label><input type="text" class="form-control" id="V_HDL" inputmode="text"></div>
@@ -3590,6 +3596,7 @@ function applyFieldTints(){
             ['Risk Factors and Comorbidities', 'tint-bnp', 'fa-notes-medical'],
             ['Past History and Comorbidities', 'tint-bnp', 'fa-notes-medical'],
             ['Comorbidities',           'tint-bnp',       'fa-notes-medical'],
+            ['Investigations and Procedures', 'tint-ecg',  'fa-stethoscope'],
             ['ECG',                     'tint-ecg',       'fa-heart-pulse'],
             ['F/U Echo',                'tint-echo',      'fa-wave-square'],
             ['F/U CMR',                 'tint-cmr',       'fa-magnifying-glass-chart'],
@@ -7394,10 +7401,8 @@ function buildVisitDetailHTML(v){
     var sections=[
         {name:'Symptoms & Vitals', fields:[['NYHA','V_NYHA'],['KCCQ','V_KCCQ'],['Symptoms','V_Fatigue'],['Edema','V_Edema'],['Pulse','V_Pulse'],['BP','V_BP'],['SpO2','V_SpO2'],['Height','V_Height'],['Weight','V_Weight'],['BMI','V_BMI'],['JVP','V_JVP'],['Rales','V_Rales'],['S3','V_S3']]},
         {name:'Risk Factors & Comorbidities', fields:[['DM','V_DM'],['HTN','V_HTN'],['AF','V_AF'],['IHD','V_IHD'],['CKD','V_CKD'],['Dialysis','V_Dialysis'],['CVA','V_CVA'],['PVD','V_PVD'],['Smoking','V_Smoker'],['Obese','V_Obese'],['OSA','V_OSA'],['Dyslipidemia','V_Dyslipidemia'],['Thyroid','V_Thyroid_Dz'],['Family History','V_FH_Cardio'],['Genetics','V_Genetics'],['Gene Type','V_Genetics_Type'],['Other','V_Comorbid_Others'],['Procedures','V_Procedures'],['Device History','V_Device_Done'],['Device Type','V_Device_Type'],['Device Date','V_Device_Date'],['Device Info','V_Device_Info'],['CA/CAG','V_Proc_CA_Done'],['CA/CAG Date','V_Proc_CA_Date'],['CA/CAG Details','V_Proc_CA_Details'],['PCI','V_Proc_PCI_Done'],['PCI Date','V_Proc_PCI_Date'],['PCI Stents #','V_Proc_PCI_Stents_Number'],['PCI Details','V_Proc_PCI_Details'],['CABG','V_Proc_CABG_Done'],['CABG Date','V_Proc_CABG_Date'],['CABG Details','V_Proc_CABG_Details'],['Legacy PCI/CABG','V_PCI_CABG'],['Legacy PCI/CABG Date','V_PCI_CABG_Date'],['Legacy PCI/CABG Details','V_PCI_CABG_Details'],['Ablation','V_Proc_Ablation_Done'],['Ablation Type','V_Proc_Ablation_Type'],['Procedure Notes','V_Procedures_Notes']]},
-        {name:'ECG / Echo',        fields:[['ECG Done','V_ECG_Done'],['LBBB','V_LBBB'],['QRS','V_QRS'],['Arrhythmia','V_Arrhythmia'],['Pacing in ECG','V_Pacing_ECG'],['Pacing Mode','V_Pacing_Mode'],['Echo Done','V_Echo_Done'],['EF Change','V_EF_Change'],['Echo EDVI/EDD','V_Echo_EDVI'],['Echo ESVI/ESD','V_Echo_ESVI'],['Echo EF','V_Echo_EF'],['Echo Other','V_Echo_Other']]},
-        {name:'Holter Results',    fields:[['Holter Done','V_Holter_Done'],['Date','V_Holter_Date'],['Duration (h)','V_Holter_Duration'],['Max HR','V_Holter_MaxHR'],['Min HR','V_Holter_MinHR'],['Avg HR','V_Holter_AvgHR'],['Arrhythmia Burden','V_Holter_Arrhythmia'],['Findings','V_Holter_Findings']]},
-        {name:'CMR / Functional / Cath', fields:[['CMR Done','V_CMR_Done'],['CMR LVEDVI/EDD','V_CMR_LVEDVI'],['CMR LVESVI/ESD','V_CMR_LVESVI'],['CMR LVEF','V_CMR_LVEF'],['CMR RVEDI','V_CMR_RVEDI'],['CMR RVEF','V_CMR_RVEF'],['CMR LGE','V_CMR_LGE'],['CMR LGE %','V_CMR_LGE_Pct'],['CMR Others','V_CMR_Others'],['6MWT Completed','V_Walk_Completed'],['6MWT Meters','V_Walk_Meters'],['CPET Done','V_CPET_Done'],['Peak VO2','V_CPET_PeakVO2'],['VE/VCO2','V_CPET_VEVCO2'],['RER','V_CPET_RER'],['Anaerobic Threshold','V_CPET_AT'],['VO2/HR','V_CPET_VO2HR'],['PetCO2','V_CPET_PetCO2'],['RHC Done','V_RHC_Done'],['RHC CI','V_RHC_CI'],['RHC RAP','V_RHC_RAP'],['RHC RVP','V_RHC_RVP'],['RHC PCWP','V_RHC_PCWP'],['RHC PAP','V_RHC_PAP'],['RHC PVR','V_RHC_PVR'],['RHC PAPi','V_RHC_PAPi'],['RHC LV','V_RHC_LV'],['RHC MVO2','V_RHC_MVO2'],['F/U CAG Done','V_CAG_Done'],['F/U CAG Date','V_CAG_Date'],['F/U CAG Findings','V_CAG_Findings'],['F/U PCI Done','V_CAG_PCI_Done'],['F/U PCI Date','V_CAG_PCI_Date'],['Number of Stents','V_CAG_Stents_Number'],['F/U PCI Details','V_CAG_PCI_Details']]},
-        {name:'Labs',              fields:[['HbA1c','V_HbA1c'],['Glucose','V_Gluc'],['Urea','V_Urea'],['Creat','V_Creat'],['eGFR','V_eGFR'],['Na','V_Na'],['K','V_K'],['BNP','V_BNP'],['NT-proBNP','V_NTproBNP'],['INR','V_INR'],['Iron','V_Iron'],['Ferritin','V_Ferritin'],['Transferrin','V_Transferrin'],['Hb','V_Hb'],['WBC','V_WBC'],['Plt','V_Plt'],['TSH','V_TSH'],['FreeT4','V_FreeT4'],['Total Chol','V_TotalChol'],['LDL','V_LDL'],['HDL','V_HDL'],['Triglycerides','V_TG'],['Other Labs','V_Lab_Others']]},
+        {name:'Investigations and Procedures', fields:[['ECG Done','V_ECG_Done'],['LBBB','V_LBBB'],['QRS','V_QRS'],['Arrhythmia','V_Arrhythmia'],['Pacing in ECG','V_Pacing_ECG'],['Pacing Mode','V_Pacing_Mode'],['Holter Done','V_Holter_Done'],['Holter Date','V_Holter_Date'],['Holter Duration (h)','V_Holter_Duration'],['Holter Max HR','V_Holter_MaxHR'],['Holter Min HR','V_Holter_MinHR'],['Holter Avg HR','V_Holter_AvgHR'],['Holter Arrhythmia Burden','V_Holter_Arrhythmia'],['Holter Findings','V_Holter_Findings'],['F/U Echo Done','V_Echo_Done'],['EF Change','V_EF_Change'],['Echo EDVI/EDD','V_Echo_EDVI'],['Echo ESVI/ESD','V_Echo_ESVI'],['Echo EF','V_Echo_EF'],['Echo Other','V_Echo_Other'],['F/U CMR Done','V_CMR_Done'],['CMR LVEDVI/EDD','V_CMR_LVEDVI'],['CMR LVESVI/ESD','V_CMR_LVESVI'],['CMR LVEF','V_CMR_LVEF'],['CMR RVEDI','V_CMR_RVEDI'],['CMR RVEF','V_CMR_RVEF'],['CMR LGE','V_CMR_LGE'],['CMR LGE %','V_CMR_LGE_Pct'],['CMR Others','V_CMR_Others'],['6MWT Completed','V_Walk_Completed'],['6MWT Meters','V_Walk_Meters'],['CPET Done','V_CPET_Done'],['Peak VO2','V_CPET_PeakVO2'],['VE/VCO2','V_CPET_VEVCO2'],['RER','V_CPET_RER'],['Anaerobic Threshold','V_CPET_AT'],['VO2/HR','V_CPET_VO2HR'],['PetCO2','V_CPET_PetCO2'],['Right Side Cath Done','V_RHC_Done'],['RHC CI','V_RHC_CI'],['RHC RAP','V_RHC_RAP'],['RHC RVP','V_RHC_RVP'],['RHC PCWP','V_RHC_PCWP'],['RHC PAP','V_RHC_PAP'],['RHC PVR','V_RHC_PVR'],['RHC PAPi','V_RHC_PAPi'],['RHC LV','V_RHC_LV'],['RHC MVO2','V_RHC_MVO2'],['F/U CAG Done','V_CAG_Done'],['F/U CAG Date','V_CAG_Date'],['F/U CAG Findings','V_CAG_Findings'],['F/U PCI Done','V_CAG_PCI_Done'],['F/U PCI Date','V_CAG_PCI_Date'],['Number of Stents','V_CAG_Stents_Number'],['F/U PCI Details','V_CAG_PCI_Details']]},
+        {name:'Visit Labs',        fields:[['HbA1c','V_HbA1c'],['Glucose','V_Gluc'],['Urea','V_Urea'],['Creat','V_Creat'],['eGFR','V_eGFR'],['Na','V_Na'],['K','V_K'],['BNP','V_BNP'],['NT-proBNP','V_NTproBNP'],['INR','V_INR'],['Iron','V_Iron'],['Ferritin','V_Ferritin'],['Transferrin','V_Transferrin'],['Hb','V_Hb'],['WBC','V_WBC'],['Plt','V_Plt'],['TSH','V_TSH'],['FreeT4','V_FreeT4'],['Total Chol','V_TotalChol'],['LDL','V_LDL'],['HDL','V_HDL'],['Triglycerides','V_TG'],['Other Labs','V_Lab_Others']]},
         {name:'Assessment & Plan', fields:[['Adverse Effects (Meds)','V_AdverseEffects'],['Compliance','V_Compliance'],['Compliance Notes','V_ComplianceNotes'],['Patient Complaints','V_Adverse'],['Plan','V_Plan'],['Notes','V_Others'],['Referral','V_Referral'],['Next Appt Notes','Next_Appt_Notes']]},
         {name:'Outcomes & Management', fields:[['Quadruple GDMT','V_Quad_GDMT'],['On Maximum GDMT','V_Max_GDMT'],['Recovered LV','V_Recovered_LV'],['Recovery Type','V_Recovered_LV_Type'],['Mortality','V_Mortality'],['Lost to Follow-up','V_LostFU'],['LTFU Reason','V_LostFU_Reason'],['LTFU Specify','V_LostFU_Other'],['Advanced HF','V_Advanced_HF_Outcome'],['Strong HF Eligible','V_Strong_HF'],['Advanced HF Therapy','V_Adv_HF_Therapy'],['Therapy Type','V_Adv_HF_Therapy_Type'],['Management Plan / Notes','V_Outcome_Notes']]}
     ];
