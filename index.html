@@ -1982,26 +1982,39 @@ img,canvas,table,svg{max-width:100%;}
                     <div class="col-4 col-md-2"><label>S3</label><select class="form-select" id="V_S3"><option>N</option><option>Y</option></select></div>
                     <div class="col-8 col-md-4"><label>Murmur</label><input type="text" class="form-control" id="V_Murmur" placeholder="e.g. ESM at apex, grade 3/6"></div>
                     <!-- ===== VISIT COMORBIDITIES (mirrors admission structure) — first visit only ===== -->
-                    <div class="col-12 row g-2 mx-0 px-0" id="vComorbiditiesSection">
-                    <div class="col-12"><hr class="my-2"></div>
-                    <h6 class="col-12 text-secondary"><i class="fa fa-notes-medical"></i> Past History and Comorbidities <small class="text-muted fw-normal">(tap to toggle)</small></h6>
+                    <div class="col-12 field-tint tint-bnp" id="vComorbiditiesSection">
+                    <div class="ft-head"><i class="fa fa-notes-medical"></i><span>Risk Factors and Comorbidities</span></div>
+                    <div class="ft-body"><div class="row g-2">
                     <div class="col-12">
                         <div class="pill-group" id="vPillComorbidities"></div>
                     </div>
+                    <div class="col-12 col-md-6"><label>IHD Type</label><select class="form-select" id="V_IHD"><option>No</option><option>STEMI</option><option>NSTEMI</option></select></div>
+                    <div class="col-12 col-md-6"><label>Smoking Status</label><select class="form-select" id="V_Smoker"><option>Never</option><option>Current</option><option>Former</option></select></div>
+                    <div class="col-12"><hr class="my-2"></div>
+                    <h6 class="col-12 text-secondary m-0" style="font-size:0.78rem;"><i class="fa fa-hand-holding-medical"></i> Procedures <small class="text-muted fw-normal">— devices, CA/CAG, PCI, CABG, ablation</small></h6>
+                    <input type="hidden" id="V_Procedures">
                     <div class="col-12 vertical-entry-group">
                         <div class="entry-title"><i class="fa fa-microchip"></i> History of Device Fixation</div>
-                        <div class="yes-no-field"><label>History of Device Fixation</label><select class="form-select" id="V_Device_Done" onchange="toggleVisitDeviceHistory()"><option>No</option><option>Yes</option></select></div>
+                        <div class="yes-no-field"><label>History of Device Fixation</label><select class="form-select" id="V_Device_Done" onchange="toggleVisitDeviceHistory();syncVisitProcedures()"><option>No</option><option>Yes</option></select></div>
                         <div id="vDeviceHistoryWrap" style="display:none;">
                             <div class="row g-2 entry-detail-panel">
-                                <div class="col-12"><label>Device Implanted</label><select class="form-select" id="V_Device_Type" onchange="syncVisitDeviceInfo()"><option value="">Select...</option><option>ICD</option><option>CRT-P</option><option>CRT-D</option><option>Pacemaker AAI</option><option>Pacemaker VVI</option><option>Pacemaker DDD</option><option>Dual-chamber Pacemaker</option><option>Single-chamber Pacemaker</option><option>Leadless Pacemaker</option><option>His-bundle Pacemaker</option><option>Left Bundle Branch Area Pacing</option><option>S-ICD</option><option>Implantable Loop Recorder</option><option>LVAD</option><option>Other</option></select></div>
-                                <div class="col-12"><label>Device Date</label><input type="date" class="form-control" id="V_Device_Date" oninput="syncVisitDeviceInfo()"></div>
+                                <div class="col-12"><label>Device Implanted</label><select class="form-select" id="V_Device_Type" onchange="syncVisitDeviceInfo();syncVisitProcedures()"><option value="">Select...</option><option>ICD</option><option>CRT-P</option><option>CRT-D</option><option>Pacemaker AAI</option><option>Pacemaker VVI</option><option>Pacemaker DDD</option><option>Dual-chamber Pacemaker</option><option>Single-chamber Pacemaker</option><option>Leadless Pacemaker</option><option>His-bundle Pacemaker</option><option>Left Bundle Branch Area Pacing</option><option>S-ICD</option><option>Implantable Loop Recorder</option><option>LVAD</option><option>Other</option></select></div>
+                                <div class="col-12"><label>Device Date</label><input type="date" class="form-control" id="V_Device_Date" oninput="syncVisitDeviceInfo();syncVisitProcedures()"></div>
                             </div>
                         </div>
                         <input type="hidden" id="V_Device_Info">
                     </div>
-                    <!-- IHD Type + PCI/CABG (multi-select buttons) -->
-                    <div class="col-12 col-md-6"><label>IHD Type</label><select class="form-select" id="V_IHD"><option>No</option><option>STEMI</option><option>NSTEMI</option></select></div>
-                    <div class="col-12 col-md-6">
+                    <div class="col-12 vertical-entry-group">
+                        <div class="entry-title"><i class="fa fa-heart-circle-bolt"></i> Coronary Angiography (CA/CAG)</div>
+                        <div class="yes-no-field"><label>CA/CAG History</label><select class="form-select" id="V_Proc_CA_Done" onchange="toggleVisitProcedureDetails('V_Proc_CA_Done','vProcCAWrap',['V_Proc_CA_Date','V_Proc_CA_Details']);syncVisitProcedures()"><option>No</option><option>Yes</option></select></div>
+                        <div id="vProcCAWrap" style="display:none;">
+                            <div class="row g-2 entry-detail-panel">
+                                <div class="col-12"><label>CA/CAG Date</label><input type="date" class="form-control" id="V_Proc_CA_Date" oninput="syncVisitProcedures()"></div>
+                                <div class="col-12"><label>CA/CAG Details</label><input type="text" class="form-control" id="V_Proc_CA_Details" placeholder="Access, vessels, findings..." oninput="syncVisitProcedures()"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
                         <label>PCI / CABG <small class="text-muted" style="font-size:0.7rem;">(multi-select — tap to toggle)</small></label>
                         <div class="d-flex gap-2 flex-wrap p-2" id="vPciCabgBox" style="border:1px solid #ced4da;border-radius:6px;background:#fff;">
                             <button type="button" class="btn btn-sm btn-outline-primary" data-vpcicabg="PCI" onclick="toggleVPCICABGOpt('PCI')">PCI</button>
@@ -2011,11 +2024,33 @@ img,canvas,table,svg{max-width:100%;}
                     </div>
                     <div class="col-12" id="vPciCabgDetailsWrap" style="display:none;">
                         <div class="row g-2 p-2 mt-1" style="background:#fff5f5;border-left:3px solid #8b0000;border-radius:6px;">
-                            <div class="col-12 col-md-4"><label class="text-danger fw-bold">Date of Procedure(s)</label><input type="date" class="form-control" id="V_PCI_CABG_Date"></div>
-                            <div class="col-12 col-md-8"><label class="text-danger fw-bold">Procedure Details (vessels, stents, grafts, etc.)</label><input type="text" class="form-control" id="V_PCI_CABG_Details" placeholder="e.g. LAD DES x1, RCA POBA; LIMA-LAD, SVG-OM"></div>
+                            <div class="col-12 col-md-4"><label class="text-danger fw-bold">Date of Procedure(s)</label><input type="date" class="form-control" id="V_PCI_CABG_Date" oninput="syncVisitProcedures()"></div>
+                            <div class="col-12 col-md-8"><label class="text-danger fw-bold">Procedure Details (vessels, stents, grafts, etc.)</label><input type="text" class="form-control" id="V_PCI_CABG_Details" placeholder="e.g. LAD DES x1, RCA POBA; LIMA-LAD, SVG-OM" oninput="syncVisitProcedures()"></div>
                         </div>
                     </div>
-                    <div class="col-12 col-md-6"><label>Smoking Status</label><select class="form-select" id="V_Smoker"><option>Never</option><option>Current</option><option>Former</option></select></div>
+                    <div class="col-12 vertical-entry-group">
+                        <div class="entry-title"><i class="fa fa-bolt"></i> Ablation</div>
+                        <div class="yes-no-field"><label>Ablation History</label><select class="form-select" id="V_Proc_Ablation_Done" onchange="toggleVisitProcedureDetails('V_Proc_Ablation_Done','vProcAblationWrap',['V_Proc_Ablation_Type']);syncVisitProcedures()"><option>No</option><option>Yes</option></select></div>
+                        <div id="vProcAblationWrap" style="display:none;">
+                            <div class="row g-2 entry-detail-panel">
+                                <div class="col-12"><label>Type of Ablation</label><input type="text" class="form-control" id="V_Proc_Ablation_Type" placeholder="e.g. AF, flutter, VT, SVT" oninput="syncVisitProcedures()"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12"><label>Procedure Notes</label><textarea class="form-control" id="V_Procedures_Notes" rows="2" placeholder="Procedure history notes..." oninput="syncVisitProcedures()"></textarea></div>
+                    <div style="display:none;">
+                        <select id="V_Proc_Device_Done"><option>No</option><option>Yes</option></select>
+                        <input type="text" id="V_Proc_Device_Type">
+                        <input type="date" id="V_Proc_Device_Date">
+                        <select id="V_Proc_Pericardiocentesis_Done"><option>No</option><option>Yes</option></select>
+                        <input type="number" id="V_Proc_Pericardiocentesis_Volume">
+                        <select id="V_Proc_Pleural_Tapping_Done"><option>No</option><option>Yes</option></select>
+                        <input type="number" id="V_Proc_Pleural_Tapping_Volume">
+                        <select id="V_Proc_Ascites_Tapping_Done"><option>No</option><option>Yes</option></select>
+                        <input type="number" id="V_Proc_Ascites_Tapping_Volume">
+                        <select id="V_Proc_Other_Done"><option>No</option><option>Yes</option></select>
+                        <input type="text" id="V_Proc_Other">
+                    </div>
                     <!-- ===== VALVE INTERVENTION (mirrors admission) ===== -->
                     <div class="col-12 col-md-6">
                         <label>Valve Intervention</label>
@@ -2097,6 +2132,7 @@ img,canvas,table,svg{max-width:100%;}
                         <select id="V_Lung_Dz"><option>No</option><option>Yes</option></select>
                         <select id="V_Liver_Dz"><option>No</option><option>Yes</option></select>
                     </div>
+                    </div></div>
                     </div><!-- /#vComorbiditiesSection -->
                     <div class="col-12"><hr class="my-2"></div>
                     <h6 class="col-12 text-secondary">ECG</h6>
@@ -2220,9 +2256,9 @@ img,canvas,table,svg{max-width:100%;}
                     </div>
 
                     <div class="col-12"><hr class="my-2"></div>
-                    <h6 class="col-12 text-secondary"><i class="fa fa-heart-circle-bolt"></i> Visit CAG / PCI</h6>
+                    <h6 class="col-12 text-secondary"><i class="fa fa-heart-circle-bolt"></i> F/U CAG/PCI</h6>
                     <div class="col-12 vertical-entry-group">
-                        <div class="entry-title"><i class="fa fa-heart-circle-bolt"></i> CAG / PCI</div>
+                        <div class="entry-title"><i class="fa fa-heart-circle-bolt"></i> F/U CAG/PCI</div>
                         <div class="yes-no-field"><label>CAG Performed</label><select class="form-select" id="V_CAG_Done" onchange="toggleVisitCAGDetails()"><option>No</option><option>Yes</option></select></div>
                         <div id="vCagDetailsWrap" style="display:none;">
                             <div class="row g-2 entry-detail-panel">
@@ -2237,41 +2273,6 @@ img,canvas,table,svg{max-width:100%;}
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12"><hr class="my-2"></div>
-                    <h6 class="col-12 text-secondary"><i class="fa fa-hand-holding-medical"></i> Visit Procedures</h6>
-                    <div class="col-12 vertical-entry-group" id="vProceduresBox">
-                        <div class="entry-title"><i class="fa fa-hand-holding-medical"></i> Procedure Checklist</div>
-                        <input type="hidden" id="V_Procedures">
-                        <div class="row g-2">
-                            <div class="col-12"><label>Device Implanted During Visit / Admission</label><select class="form-select" id="V_Proc_Device_Done" onchange="toggleVisitProcedureDetails('V_Proc_Device_Done','vProcDeviceWrap',['V_Proc_Device_Type','V_Proc_Device_Date']);syncVisitProcedures()"><option>No</option><option>Yes</option></select></div>
-                            <div class="col-12" id="vProcDeviceWrap" style="display:none;"><div class="row g-2 entry-detail-panel">
-                                <div class="col-12"><label>Device Type</label><select class="form-select" id="V_Proc_Device_Type" onchange="syncVisitProcedures()"><option value="">Select...</option><option>ICD</option><option>CRT-P</option><option>CRT-D</option><option>Pacemaker AAI</option><option>Pacemaker VVI</option><option>Pacemaker DDD</option><option>Dual-chamber Pacemaker</option><option>Single-chamber Pacemaker</option><option>Leadless Pacemaker</option><option>His-bundle Pacemaker</option><option>Left Bundle Branch Area Pacing</option><option>S-ICD</option><option>Implantable Loop Recorder</option><option>LVAD</option><option>Other</option></select></div>
-                                <div class="col-12"><label>Device Date</label><input type="date" class="form-control" id="V_Proc_Device_Date" oninput="syncVisitProcedures()"></div>
-                            </div></div>
-                            <div class="col-12"><label>Ablation Performed</label><select class="form-select" id="V_Proc_Ablation_Done" onchange="toggleVisitProcedureDetails('V_Proc_Ablation_Done','vProcAblationWrap',['V_Proc_Ablation_Type']);syncVisitProcedures()"><option>No</option><option>Yes</option></select></div>
-                            <div class="col-12" id="vProcAblationWrap" style="display:none;"><div class="row g-2 entry-detail-panel">
-                                <div class="col-12"><label>Type of Ablation</label><input type="text" class="form-control" id="V_Proc_Ablation_Type" placeholder="e.g. AF, flutter, VT, SVT" oninput="syncVisitProcedures()"></div>
-                            </div></div>
-                            <div class="col-12"><label>Pericardiocentesis</label><select class="form-select" id="V_Proc_Pericardiocentesis_Done" onchange="toggleVisitProcedureDetails('V_Proc_Pericardiocentesis_Done','vProcPericardiocentesisWrap',['V_Proc_Pericardiocentesis_Volume']);syncVisitProcedures()"><option>No</option><option>Yes</option></select></div>
-                            <div class="col-12" id="vProcPericardiocentesisWrap" style="display:none;"><div class="row g-2 entry-detail-panel">
-                                <div class="col-12"><label>Volume Removed (mL)</label><input type="number" class="form-control" id="V_Proc_Pericardiocentesis_Volume" inputmode="numeric" oninput="syncVisitProcedures()"></div>
-                            </div></div>
-                            <div class="col-12"><label>Pleural Tapping</label><select class="form-select" id="V_Proc_Pleural_Tapping_Done" onchange="toggleVisitProcedureDetails('V_Proc_Pleural_Tapping_Done','vProcPleuralTappingWrap',['V_Proc_Pleural_Tapping_Volume']);syncVisitProcedures()"><option>No</option><option>Yes</option></select></div>
-                            <div class="col-12" id="vProcPleuralTappingWrap" style="display:none;"><div class="row g-2 entry-detail-panel">
-                                <div class="col-12"><label>Volume Removed (mL)</label><input type="number" class="form-control" id="V_Proc_Pleural_Tapping_Volume" inputmode="numeric" oninput="syncVisitProcedures()"></div>
-                            </div></div>
-                            <div class="col-12"><label>Ascites Tapping</label><select class="form-select" id="V_Proc_Ascites_Tapping_Done" onchange="toggleVisitProcedureDetails('V_Proc_Ascites_Tapping_Done','vProcAscitesTappingWrap',['V_Proc_Ascites_Tapping_Volume']);syncVisitProcedures()"><option>No</option><option>Yes</option></select></div>
-                            <div class="col-12" id="vProcAscitesTappingWrap" style="display:none;"><div class="row g-2 entry-detail-panel">
-                                <div class="col-12"><label>Volume Removed (mL)</label><input type="number" class="form-control" id="V_Proc_Ascites_Tapping_Volume" inputmode="numeric" oninput="syncVisitProcedures()"></div>
-                            </div></div>
-                            <div class="col-12"><label>Other Procedure</label><select class="form-select" id="V_Proc_Other_Done" onchange="toggleVisitProcedureDetails('V_Proc_Other_Done','vProcOtherWrap',['V_Proc_Other']);syncVisitProcedures()"><option>No</option><option>Yes</option></select></div>
-                            <div class="col-12" id="vProcOtherWrap" style="display:none;"><div class="row g-2 entry-detail-panel">
-                                <div class="col-12"><label>Specify Other Procedure(s)</label><input type="text" class="form-control" id="V_Proc_Other" placeholder="Specify other procedure(s)..." oninput="syncVisitProcedures()"></div>
-                            </div></div>
-                            <div class="col-12"><label>Procedure Notes</label><textarea class="form-control" id="V_Procedures_Notes" rows="2" placeholder="Notes on procedures performed (dates, details, vessels, devices implanted, etc.)" oninput="syncVisitProcedures()"></textarea></div>
                         </div>
                     </div>
                     <div class="col-12"><hr class="my-2"></div>
@@ -3576,6 +3577,7 @@ function applyFieldTints(){
             // Visits-specific
             ['Symptoms',                'tint-symptoms',  'fa-comment-medical'],
             ['Signs / Vitals',          'tint-vitals',    'fa-heart-pulse'],
+            ['Risk Factors and Comorbidities', 'tint-bnp', 'fa-notes-medical'],
             ['Past History and Comorbidities', 'tint-bnp', 'fa-notes-medical'],
             ['Comorbidities',           'tint-bnp',       'fa-notes-medical'],
             ['ECG',                     'tint-ecg',       'fa-heart-pulse'],
@@ -3584,8 +3586,7 @@ function applyFieldTints(){
             ['F/U 6 Minute Walk Test',  'tint-walk',      'fa-person-walking'],
             ['F/U CPET',                'tint-cpet',      'fa-lungs'],
             ['F/U Right Side Cath',     'tint-rhc',       'fa-syringe'],
-            ['Visit CAG',               'tint-ecg',       'fa-heart-circle-bolt'],
-            ['Visit Procedures',        'tint-plan',      'fa-hand-holding-medical'],
+            ['F/U CAG/PCI',             'tint-ecg',       'fa-heart-circle-bolt'],
             ['Visit Labs',              'tint-renal',     'fa-flask-vial'], // header label only
             ['Medications (Doses)',     'tint-meds',      'fa-pills'],
             ['Assessment & Plan',       'tint-plan',      'fa-clipboard-list'],
@@ -3619,6 +3620,10 @@ function applyFieldTints(){
             var current = null;
             for(var i=0;i<children.length;i++){
                 var c = children[i];
+                if(c.classList && c.classList.contains('field-tint')){
+                    if(current){ current.end = i-1; groups.push(current); current = null; }
+                    continue;
+                }
                 if(c.tagName === 'H6' && c.classList.contains('text-secondary')){
                     if(current){ current.end = i-1; groups.push(current); }
                     current = { start:i, end:children.length-1, label:c.textContent, h6:c };
@@ -3681,31 +3686,32 @@ function applyFieldTints(){
 }
 
 // ===== VISIT-STEP ACCORDIONS =====
-// In the Visits step, several heavy sub-groups (echo, CMR, walk, CPET, RHC, labs, meds, plan)
-// are turned into collapsible boxes — closed by default — to declutter.
-// Lightweight groups (Visit Date, Symptoms, Signs/Vitals, ECG, Next Appt) stay open.
+// In the Visits step, every field-tint window is collapsible to keep entry vertical
+// and scannable while preserving the compact summary count in each header.
 function applyVisitAccordions(){
     try {
         var step9 = document.querySelector('.form-step[data-step="4"] .visit-section > .row.g-2');
         if(!step9) return;
-        // Collapsed-by-default labels (substring match)
-        var collapsibleLabels = ['F/U Echo','F/U CMR','F/U 6 Minute','F/U CPET','F/U Right Side','Iron Studies','CBC','Thyroid','Lipid','Urine','HF Vaccinations','Medications (Doses)','Assessment & Plan','Referral'];
         step9.querySelectorAll(':scope > .field-tint').forEach(function(box){
+            if(box.dataset.visitAccordion==='1') return;
             var head = box.querySelector('.ft-head');
             if(!head) return;
-            var labelEl = head.querySelector('span');
-            var label = labelEl ? labelEl.textContent : '';
-            var collapsible = collapsibleLabels.some(function(l){ return label.indexOf(l) >= 0; });
-            if(!collapsible) return;
+            box.dataset.visitAccordion='1';
             box.classList.add('collapsible');
-            // Add chevron + filled-count badge
-            var chev = document.createElement('i');
-            chev.className = 'fa fa-chevron-right ft-chev ms-auto';
-            head.appendChild(chev);
-            var pill = document.createElement('span');
-            pill.className = 'ft-filled';
-            pill.textContent = '0 filled';
-            head.appendChild(pill);
+            // Add filled-count badge + chevron.
+            var pill = head.querySelector('.ft-filled');
+            if(!pill){
+                pill = document.createElement('span');
+                pill.className = 'ft-filled';
+                pill.textContent = '0 filled';
+                head.appendChild(pill);
+            }
+            var chev = head.querySelector('.ft-chev');
+            if(!chev){
+                chev = document.createElement('i');
+                chev.className = 'fa fa-chevron-right ft-chev';
+                head.appendChild(chev);
+            }
             head.addEventListener('click', function(ev){
                 // Don't toggle if user clicked a control inside the head (shouldn't happen, but safe)
                 if(ev.target.closest('input,select,button,textarea')) return;
@@ -3834,6 +3840,7 @@ function toggleVPCICABGOpt(opt){
     if(!picked.length){
         ['V_PCI_CABG_Date','V_PCI_CABG_Details'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
     }
+    if(typeof syncVisitProcedures==='function')syncVisitProcedures();
 }
 
 // ===== Visit Valve Intervention (mirrors admission's block) =====
@@ -3905,6 +3912,7 @@ function restoreVisitComorbidUI(){
         else{b.classList.remove('btn-primary');b.classList.add('btn-outline-primary');}
     });
     var pdw=document.getElementById('vPciCabgDetailsWrap'); if(pdw) pdw.style.display = pciPicks.length ? 'block' : 'none';
+    if(typeof syncVisitProcedures==='function')syncVisitProcedures();
     // Valve intervention wrap
     var vi=document.getElementById('V_Valve_Intervention');
     var viw=document.getElementById('vValveInterventionWrap');
@@ -5655,8 +5663,21 @@ function toggleVisitProcedureDetails(selId, wrapId, clearIds){
 }
 function syncVisitProcedures(){
     var parts=[];
-    if(_val('V_CAG_Done')==='Yes'||_val('V_CAG_PCI_Done')==='Yes')parts.push('CAG/PCI');
-    if(_procDone('V_Proc_Device_Done'))parts.push('Devices');
+    if(_val('V_CAG_Done')==='Yes'||_val('V_CAG_PCI_Done')==='Yes')parts.push('F/U CAG/PCI');
+    if(_val('V_Device_Done')==='Yes'){
+        parts.push('Devices');
+        _setVal('V_Proc_Device_Done','Yes');
+        _setVal('V_Proc_Device_Type',_val('V_Device_Type'));
+        _setVal('V_Proc_Device_Date',_val('V_Device_Date'));
+    }else{
+        _setVal('V_Proc_Device_Done','No');
+        _setVal('V_Proc_Device_Type','');
+        _setVal('V_Proc_Device_Date','');
+    }
+    if(_procDone('V_Proc_CA_Done'))parts.push('CA/CAG');
+    var pciCabg=String(_val('V_PCI_CABG')||'').split(',').map(function(s){return s.trim();}).filter(Boolean);
+    if(pciCabg.indexOf('PCI')>=0)parts.push('PCI');
+    if(pciCabg.indexOf('CABG')>=0)parts.push('CABG');
     if(_procDone('V_Proc_Ablation_Done'))parts.push('Ablations');
     if(_procDone('V_Proc_Pericardiocentesis_Done'))parts.push('Pericardiocentesis');
     if(_procDone('V_Proc_Pleural_Tapping_Done'))parts.push('Pleural tapping');
@@ -5667,16 +5688,30 @@ function syncVisitProcedures(){
 function restoreVisitProcedures(data){
     data=data||{};
     var raw=String(data.V_Procedures||'').toLowerCase();
+    var rawParts=raw.split(',').map(function(s){return s.trim();}).filter(Boolean);
     function has(txt){return raw.indexOf(txt.toLowerCase())>=0;}
-    if(has('cag')||has('pci'))_setVal('V_CAG_Done','Yes');
-    if(has('pci'))_setVal('V_CAG_PCI_Done','Yes');
-    if(has('devices')||_dataHasAny(data,['V_Proc_Device_Type','V_Proc_Device_Date'],{ignoreNo:true}))_setVal('V_Proc_Device_Done','Yes');
+    function part(txt){return rawParts.indexOf(txt.toLowerCase())>=0;}
+    if(has('f/u cag')||has('f/u pci')||has('follow-up'))_setVal('V_CAG_Done','Yes');
+    if(has('f/u pci'))_setVal('V_CAG_PCI_Done','Yes');
+    if((has('devices')||_dataHasAny(data,['V_Proc_Device_Type','V_Proc_Device_Date'],{ignoreNo:true}))&&!_dataHasAny(data,['V_Device_Type','V_Device_Date'],{ignoreNo:true})){
+        _setVal('V_Device_Done','Yes');
+        _setVal('V_Device_Type',data.V_Proc_Device_Type||'');
+        _setVal('V_Device_Date',data.V_Proc_Device_Date||'');
+    }
+    if(part('ca/cag')||has('coronary angiography')||_dataHasAny(data,['V_Proc_CA_Date','V_Proc_CA_Details']))_setVal('V_Proc_CA_Done','Yes');
+    if((part('pci')||part('cabg'))&&!_val('V_PCI_CABG')){
+        var pc=[];
+        if(part('pci'))pc.push('PCI');
+        if(part('cabg'))pc.push('CABG');
+        _setVal('V_PCI_CABG',pc.join(', '));
+    }
     if(has('ablation')||_dataHasAny(data,['V_Proc_Ablation_Type']))_setVal('V_Proc_Ablation_Done','Yes');
     if(has('pericardiocentesis')||_dataHasAny(data,['V_Proc_Pericardiocentesis_Volume']))_setVal('V_Proc_Pericardiocentesis_Done','Yes');
     if(has('pleural')||_dataHasAny(data,['V_Proc_Pleural_Tapping_Volume']))_setVal('V_Proc_Pleural_Tapping_Done','Yes');
     if(has('ascites')||_dataHasAny(data,['V_Proc_Ascites_Tapping_Volume']))_setVal('V_Proc_Ascites_Tapping_Done','Yes');
     if(has('others')||has('other')||_dataHasAny(data,['V_Proc_Other']))_setVal('V_Proc_Other_Done','Yes');
-    toggleVisitProcedureDetails('V_Proc_Device_Done','vProcDeviceWrap',['V_Proc_Device_Type','V_Proc_Device_Date']);
+    if(typeof toggleVisitDeviceHistory==='function')toggleVisitDeviceHistory();
+    toggleVisitProcedureDetails('V_Proc_CA_Done','vProcCAWrap',['V_Proc_CA_Date','V_Proc_CA_Details']);
     toggleVisitProcedureDetails('V_Proc_Ablation_Done','vProcAblationWrap',['V_Proc_Ablation_Type']);
     toggleVisitProcedureDetails('V_Proc_Pericardiocentesis_Done','vProcPericardiocentesisWrap',['V_Proc_Pericardiocentesis_Volume']);
     toggleVisitProcedureDetails('V_Proc_Pleural_Tapping_Done','vProcPleuralTappingWrap',['V_Proc_Pleural_Tapping_Volume']);
@@ -7124,7 +7159,7 @@ function clearVisitForm(){
     // Reset edit mode UI
     editingVisitId = null;
     // Hide visit conditional panels (including new Pacing-mode, Holter, comorbid wraps)
-    var vHide=['vDeviceHistoryWrap','vEcgDetailsWrap','vHolterDetailsWrap','vCmrLGEPctWrap','vEchoDetailsWrap','vCmrDetailsWrap','vWalkMetersWrap','vCpetDetailsWrap','vRhcDetailsWrap','vCagDetailsWrap','vCagPciDetailsWrap','vProcDeviceWrap','vProcAblationWrap','vProcPericardiocentesisWrap','vProcPleuralTappingWrap','vProcAscitesTappingWrap','vProcOtherWrap','vPacingModeWrap','vHolterDateWrap','vHolterDurationWrap','vHolterMaxHRWrap','vHolterMinHRWrap','vHolterAvgHRWrap','vHolterArrhythmiaWrap','vHolterFindingsWrap','vPciCabgDetailsWrap','vValveInterventionWrap','vValveRepairDateWrap','vValveReplaceTypeWrap','vValveReplaceDateWrap','vValvePercutaneousWrap','vValveMVClipDateWrap','vValveTVClipDateWrap','vValveTAVIDateWrap','vGeneticsTypeWrap','vRecoveredLVTypeWrap','vLostFUReasonWrap','vLostFUOtherWrap','vAdvHFTherapyWrap'];
+    var vHide=['vDeviceHistoryWrap','vEcgDetailsWrap','vHolterDetailsWrap','vCmrLGEPctWrap','vEchoDetailsWrap','vCmrDetailsWrap','vWalkMetersWrap','vCpetDetailsWrap','vRhcDetailsWrap','vCagDetailsWrap','vCagPciDetailsWrap','vProcCAWrap','vProcDeviceWrap','vProcAblationWrap','vProcPericardiocentesisWrap','vProcPleuralTappingWrap','vProcAscitesTappingWrap','vProcOtherWrap','vPacingModeWrap','vHolterDateWrap','vHolterDurationWrap','vHolterMaxHRWrap','vHolterMinHRWrap','vHolterAvgHRWrap','vHolterArrhythmiaWrap','vHolterFindingsWrap','vPciCabgDetailsWrap','vValveInterventionWrap','vValveRepairDateWrap','vValveReplaceTypeWrap','vValveReplaceDateWrap','vValvePercutaneousWrap','vValveMVClipDateWrap','vValveTVClipDateWrap','vValveTAVIDateWrap','vGeneticsTypeWrap','vRecoveredLVTypeWrap','vLostFUReasonWrap','vLostFUOtherWrap','vAdvHFTherapyWrap'];
     vHide.forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='none';});
     // Reset visit comorbidity pills + outline buttons
     document.querySelectorAll('#vPillComorbidities .pill-toggle').forEach(function(p){p.classList.remove('active');});
@@ -7237,11 +7272,10 @@ function toggleVisitRow(headerEl){
 function buildVisitDetailHTML(v){
     var sections=[
         {name:'Symptoms & Vitals', fields:[['NYHA','V_NYHA'],['KCCQ','V_KCCQ'],['Symptoms','V_Fatigue'],['Edema','V_Edema'],['Pulse','V_Pulse'],['BP','V_BP'],['SpO2','V_SpO2'],['Height','V_Height'],['Weight','V_Weight'],['BMI','V_BMI'],['JVP','V_JVP'],['Rales','V_Rales'],['S3','V_S3']]},
-        {name:'Past History & Comorbidities', fields:[['DM','V_DM'],['HTN','V_HTN'],['AF','V_AF'],['IHD','V_IHD'],['PCI / CABG','V_PCI_CABG'],['Device History','V_Device_Done'],['Device Type','V_Device_Type'],['Device Date','V_Device_Date'],['Device Info','V_Device_Info'],['CKD','V_CKD'],['Dialysis','V_Dialysis'],['CVA','V_CVA'],['PVD','V_PVD'],['Smoking','V_Smoker'],['Obese','V_Obese'],['OSA','V_OSA'],['Dyslipidemia','V_Dyslipidemia'],['Thyroid','V_Thyroid_Dz'],['Family History','V_FH_Cardio'],['Genetics','V_Genetics'],['Gene Type','V_Genetics_Type'],['Other','V_Comorbid_Others']]},
+        {name:'Risk Factors & Comorbidities', fields:[['DM','V_DM'],['HTN','V_HTN'],['AF','V_AF'],['IHD','V_IHD'],['CKD','V_CKD'],['Dialysis','V_Dialysis'],['CVA','V_CVA'],['PVD','V_PVD'],['Smoking','V_Smoker'],['Obese','V_Obese'],['OSA','V_OSA'],['Dyslipidemia','V_Dyslipidemia'],['Thyroid','V_Thyroid_Dz'],['Family History','V_FH_Cardio'],['Genetics','V_Genetics'],['Gene Type','V_Genetics_Type'],['Other','V_Comorbid_Others'],['Procedures','V_Procedures'],['Device History','V_Device_Done'],['Device Type','V_Device_Type'],['Device Date','V_Device_Date'],['Device Info','V_Device_Info'],['CA/CAG','V_Proc_CA_Done'],['CA/CAG Date','V_Proc_CA_Date'],['CA/CAG Details','V_Proc_CA_Details'],['PCI / CABG','V_PCI_CABG'],['PCI/CABG Date','V_PCI_CABG_Date'],['PCI/CABG Details','V_PCI_CABG_Details'],['Ablation','V_Proc_Ablation_Done'],['Ablation Type','V_Proc_Ablation_Type'],['Procedure Notes','V_Procedures_Notes']]},
         {name:'ECG / Echo',        fields:[['ECG Done','V_ECG_Done'],['LBBB','V_LBBB'],['QRS','V_QRS'],['Arrhythmia','V_Arrhythmia'],['Pacing in ECG','V_Pacing_ECG'],['Pacing Mode','V_Pacing_Mode'],['Echo Done','V_Echo_Done'],['EF Change','V_EF_Change'],['Echo EDVI/EDD','V_Echo_EDVI'],['Echo ESVI/ESD','V_Echo_ESVI'],['Echo EF','V_Echo_EF'],['Echo Other','V_Echo_Other']]},
         {name:'Holter Results',    fields:[['Holter Done','V_Holter_Done'],['Date','V_Holter_Date'],['Duration (h)','V_Holter_Duration'],['Max HR','V_Holter_MaxHR'],['Min HR','V_Holter_MinHR'],['Avg HR','V_Holter_AvgHR'],['Arrhythmia Burden','V_Holter_Arrhythmia'],['Findings','V_Holter_Findings']]},
-        {name:'CMR / Functional / Cath', fields:[['CMR Done','V_CMR_Done'],['CMR LVEDVI/EDD','V_CMR_LVEDVI'],['CMR LVESVI/ESD','V_CMR_LVESVI'],['CMR LVEF','V_CMR_LVEF'],['CMR RVEDI','V_CMR_RVEDI'],['CMR RVEF','V_CMR_RVEF'],['CMR LGE','V_CMR_LGE'],['CMR LGE %','V_CMR_LGE_Pct'],['CMR Others','V_CMR_Others'],['6MWT Completed','V_Walk_Completed'],['6MWT Meters','V_Walk_Meters'],['CPET Done','V_CPET_Done'],['Peak VO2','V_CPET_PeakVO2'],['VE/VCO2','V_CPET_VEVCO2'],['RER','V_CPET_RER'],['Anaerobic Threshold','V_CPET_AT'],['VO2/HR','V_CPET_VO2HR'],['PetCO2','V_CPET_PetCO2'],['RHC Done','V_RHC_Done'],['RHC CI','V_RHC_CI'],['RHC RAP','V_RHC_RAP'],['RHC RVP','V_RHC_RVP'],['RHC PCWP','V_RHC_PCWP'],['RHC PAP','V_RHC_PAP'],['RHC PVR','V_RHC_PVR'],['RHC PAPi','V_RHC_PAPi'],['RHC LV','V_RHC_LV'],['RHC MVO2','V_RHC_MVO2'],['CAG Done','V_CAG_Done'],['CAG Date','V_CAG_Date'],['CAG Findings','V_CAG_Findings'],['PCI Done','V_CAG_PCI_Done'],['PCI Date','V_CAG_PCI_Date'],['Number of Stents','V_CAG_Stents_Number'],['PCI Details','V_CAG_PCI_Details']]},
-        {name:'Procedures',        fields:[['Procedures','V_Procedures'],['Device Procedure','V_Proc_Device_Done'],['Device Type','V_Proc_Device_Type'],['Device Date','V_Proc_Device_Date'],['Ablation','V_Proc_Ablation_Done'],['Ablation Type','V_Proc_Ablation_Type'],['Pericardiocentesis','V_Proc_Pericardiocentesis_Done'],['Pericardiocentesis Volume','V_Proc_Pericardiocentesis_Volume'],['Pleural Tapping','V_Proc_Pleural_Tapping_Done'],['Pleural Volume','V_Proc_Pleural_Tapping_Volume'],['Ascites Tapping','V_Proc_Ascites_Tapping_Done'],['Ascites Volume','V_Proc_Ascites_Tapping_Volume'],['Other Procedure','V_Proc_Other'],['Procedure Notes','V_Procedures_Notes']]},
+        {name:'CMR / Functional / Cath', fields:[['CMR Done','V_CMR_Done'],['CMR LVEDVI/EDD','V_CMR_LVEDVI'],['CMR LVESVI/ESD','V_CMR_LVESVI'],['CMR LVEF','V_CMR_LVEF'],['CMR RVEDI','V_CMR_RVEDI'],['CMR RVEF','V_CMR_RVEF'],['CMR LGE','V_CMR_LGE'],['CMR LGE %','V_CMR_LGE_Pct'],['CMR Others','V_CMR_Others'],['6MWT Completed','V_Walk_Completed'],['6MWT Meters','V_Walk_Meters'],['CPET Done','V_CPET_Done'],['Peak VO2','V_CPET_PeakVO2'],['VE/VCO2','V_CPET_VEVCO2'],['RER','V_CPET_RER'],['Anaerobic Threshold','V_CPET_AT'],['VO2/HR','V_CPET_VO2HR'],['PetCO2','V_CPET_PetCO2'],['RHC Done','V_RHC_Done'],['RHC CI','V_RHC_CI'],['RHC RAP','V_RHC_RAP'],['RHC RVP','V_RHC_RVP'],['RHC PCWP','V_RHC_PCWP'],['RHC PAP','V_RHC_PAP'],['RHC PVR','V_RHC_PVR'],['RHC PAPi','V_RHC_PAPi'],['RHC LV','V_RHC_LV'],['RHC MVO2','V_RHC_MVO2'],['F/U CAG Done','V_CAG_Done'],['F/U CAG Date','V_CAG_Date'],['F/U CAG Findings','V_CAG_Findings'],['F/U PCI Done','V_CAG_PCI_Done'],['F/U PCI Date','V_CAG_PCI_Date'],['Number of Stents','V_CAG_Stents_Number'],['F/U PCI Details','V_CAG_PCI_Details']]},
         {name:'Labs',              fields:[['HbA1c','V_HbA1c'],['Glucose','V_Gluc'],['Urea','V_Urea'],['Creat','V_Creat'],['eGFR','V_eGFR'],['Na','V_Na'],['K','V_K'],['BNP','V_BNP'],['NT-proBNP','V_NTproBNP'],['INR','V_INR'],['Iron','V_Iron'],['Ferritin','V_Ferritin'],['Transferrin','V_Transferrin'],['Hb','V_Hb'],['WBC','V_WBC'],['Plt','V_Plt'],['TSH','V_TSH'],['FreeT4','V_FreeT4'],['Total Chol','V_TotalChol'],['LDL','V_LDL'],['HDL','V_HDL'],['Triglycerides','V_TG'],['Other Labs','V_Lab_Others']]},
         {name:'Assessment & Plan', fields:[['Adverse Effects (Meds)','V_AdverseEffects'],['Compliance','V_Compliance'],['Compliance Notes','V_ComplianceNotes'],['Patient Complaints','V_Adverse'],['Plan','V_Plan'],['Notes','V_Others'],['Referral','V_Referral'],['Next Appt Notes','Next_Appt_Notes']]},
         {name:'Outcomes & Management', fields:[['Quadruple GDMT','V_Quad_GDMT'],['On Maximum GDMT','V_Max_GDMT'],['Recovered LV','V_Recovered_LV'],['Recovery Type','V_Recovered_LV_Type'],['Mortality','V_Mortality'],['Lost to Follow-up','V_LostFU'],['LTFU Reason','V_LostFU_Reason'],['LTFU Specify','V_LostFU_Other'],['Advanced HF','V_Advanced_HF_Outcome'],['Strong HF Eligible','V_Strong_HF'],['Advanced HF Therapy','V_Adv_HF_Therapy'],['Therapy Type','V_Adv_HF_Therapy_Type'],['Management Plan / Notes','V_Outcome_Notes']]}
@@ -7354,7 +7388,7 @@ function resetForm(){
     var _hst=document.getElementById('Hemo_Support_Type'); if(_hst) _hst.value='';
     if(typeof renderHemoSupportUI==='function') renderHemoSupportUI();
     // Hide conditional panels
-    var hideIds=['valvularTypeWrap','deviceHistoryWrap','ecgDetailsWrap','cmrLGEPctWrap','echoDetailsWrap','cmrDetailsWrap','cpetDetailsWrap','vDeviceHistoryWrap','vEcgDetailsWrap','vEchoDetailsWrap','vCmrDetailsWrap','vCpetDetailsWrap','vCagDetailsWrap','vCagPciDetailsWrap','vProcDeviceWrap','vProcAblationWrap','vProcPericardiocentesisWrap','vProcPleuralTappingWrap','vProcAscitesTappingWrap','vProcOtherWrap','vCmrLGEPctWrap','walkMetersWrap','rhcDetailsWrap','pciCabgDetailsWrap','ctAngioDetailsWrap','lostFUReasonWrap','lostFUOtherWrap','valveSurgeryDateWrap','hfTypeOtherWrap','transferHospitalWrap','geneticsTypeWrap','cardioversionTypeWrap','cagDetailsWrap','cagPciDetailsWrap','holterDetailsWrap','bleedingUnitsWrap','bleedingSiteWrap','procDeviceWrap','procAblationWrap','procPericardiocentesisWrap','procPleuralTappingWrap','procAscitesTappingWrap','procOtherWrap','vPacingModeWrap','vHolterDetailsWrap','vHolterDateWrap','vHolterDurationWrap','vHolterMaxHRWrap','vHolterMinHRWrap','vHolterAvgHRWrap','vHolterArrhythmiaWrap','vHolterFindingsWrap'];
+    var hideIds=['valvularTypeWrap','deviceHistoryWrap','ecgDetailsWrap','cmrLGEPctWrap','echoDetailsWrap','cmrDetailsWrap','cpetDetailsWrap','vDeviceHistoryWrap','vEcgDetailsWrap','vEchoDetailsWrap','vCmrDetailsWrap','vCpetDetailsWrap','vCagDetailsWrap','vCagPciDetailsWrap','vProcCAWrap','vProcDeviceWrap','vProcAblationWrap','vProcPericardiocentesisWrap','vProcPleuralTappingWrap','vProcAscitesTappingWrap','vProcOtherWrap','vCmrLGEPctWrap','walkMetersWrap','rhcDetailsWrap','pciCabgDetailsWrap','ctAngioDetailsWrap','lostFUReasonWrap','lostFUOtherWrap','valveSurgeryDateWrap','hfTypeOtherWrap','transferHospitalWrap','geneticsTypeWrap','cardioversionTypeWrap','cagDetailsWrap','cagPciDetailsWrap','holterDetailsWrap','bleedingUnitsWrap','bleedingSiteWrap','procDeviceWrap','procAblationWrap','procPericardiocentesisWrap','procPleuralTappingWrap','procAscitesTappingWrap','procOtherWrap','vPacingModeWrap','vHolterDetailsWrap','vHolterDateWrap','vHolterDurationWrap','vHolterMaxHRWrap','vHolterMinHRWrap','vHolterAvgHRWrap','vHolterArrhythmiaWrap','vHolterFindingsWrap'];
     hideIds.forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='none';});
     // Reset valvular-type, PCI/CABG, and InHospitalProcedures multi-select buttons
     document.querySelectorAll('#valvularTypeBox button, #pciCabgBox button, #inHospProceduresBox button').forEach(function(b){ b.classList.remove('btn-primary'); b.classList.add('btn-outline-primary'); });
@@ -7866,7 +7900,7 @@ function _clearPatientFormFields(){
         });
     }
     // Hide all conditional panels
-    var hideIds=['valvularTypeWrap','deviceHistoryWrap','ecgDetailsWrap','cmrLGEPctWrap','echoDetailsWrap','cmrDetailsWrap','cpetDetailsWrap','vDeviceHistoryWrap','vEcgDetailsWrap','vEchoDetailsWrap','vCmrDetailsWrap','vCpetDetailsWrap','vCagDetailsWrap','vCagPciDetailsWrap','vProcDeviceWrap','vProcAblationWrap','vProcPericardiocentesisWrap','vProcPleuralTappingWrap','vProcAscitesTappingWrap','vProcOtherWrap','vCmrLGEPctWrap','walkMetersWrap','rhcDetailsWrap','pciCabgDetailsWrap','ctAngioDetailsWrap','cagDetailsWrap','cagPciDetailsWrap','lostFUReasonWrap','lostFUOtherWrap','valveSurgeryDateWrap','hfTypeOtherWrap','transferHospitalWrap','geneticsTypeWrap','cardioversionTypeWrap','bleedingUnitsWrap','bleedingSiteWrap','procDeviceWrap','procAblationWrap','procPericardiocentesisWrap','procPleuralTappingWrap','procAscitesTappingWrap','procOtherWrap'];
+    var hideIds=['valvularTypeWrap','deviceHistoryWrap','ecgDetailsWrap','cmrLGEPctWrap','echoDetailsWrap','cmrDetailsWrap','cpetDetailsWrap','vDeviceHistoryWrap','vEcgDetailsWrap','vEchoDetailsWrap','vCmrDetailsWrap','vCpetDetailsWrap','vCagDetailsWrap','vCagPciDetailsWrap','vProcCAWrap','vProcDeviceWrap','vProcAblationWrap','vProcPericardiocentesisWrap','vProcPleuralTappingWrap','vProcAscitesTappingWrap','vProcOtherWrap','vCmrLGEPctWrap','walkMetersWrap','rhcDetailsWrap','pciCabgDetailsWrap','ctAngioDetailsWrap','cagDetailsWrap','cagPciDetailsWrap','lostFUReasonWrap','lostFUOtherWrap','valveSurgeryDateWrap','hfTypeOtherWrap','transferHospitalWrap','geneticsTypeWrap','cardioversionTypeWrap','bleedingUnitsWrap','bleedingSiteWrap','procDeviceWrap','procAblationWrap','procPericardiocentesisWrap','procPleuralTappingWrap','procAscitesTappingWrap','procOtherWrap'];
     hideIds.forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     // Reset extra in-hospital admissions list
     var ea=document.getElementById('Extra_Admissions'); if(ea){ ea.value='[]'; var ew=document.getElementById('extraAdmissionsWrap'); if(ew) ew.innerHTML=''; }
@@ -8130,7 +8164,7 @@ function generateExcel(data,visitsData,id){
         }
     });pr.push([]);});
     var ws1=XLSX.utils.aoa_to_sheet(pr);XLSX.utils.book_append_sheet(wb,ws1,"Patient Info");
-    if(visitsData.length>0){var vr=[];vr.push(["VISIT HISTORY"]);vr.push([]);visitsData.forEach(function(visit,idx){vr.push(["Visit #"+(visitsData.length-idx),"Date: "+visit.visitDate,"Type: "+visit.visitType]);var vFields=['V_Fatigue','V_NYHA','V_KCCQ','V_Edema','V_Pulse','V_BP','V_SpO2','V_Height','V_Weight','V_BMI','V_JVP','V_Rales','V_S3','V_Device_Done','V_Device_Type','V_Device_Date','V_Device_Info','V_ECG_Done','V_LBBB','V_QRS','V_Arrhythmia','V_Pacing_ECG','V_Pacing_Mode','V_Holter_Done','V_Holter_Date','V_Holter_Duration','V_Holter_MaxHR','V_Holter_MinHR','V_Holter_AvgHR','V_Holter_Arrhythmia','V_Holter_Findings','V_Echo_Done','V_EF_Change','V_Echo_EDVI','V_Echo_ESVI','V_Echo_EF','V_Echo_Other','V_CMR_Done','V_CMR_LVEDVI','V_CMR_LVESVI','V_CMR_LVEF','V_CMR_RVEDI','V_CMR_RVEF','V_CMR_LGE','V_CMR_LGE_Pct','V_CMR_Others','V_Walk_Completed','V_Walk_Meters','V_CPET_Done','V_CPET_PeakVO2','V_CPET_VEVCO2','V_CPET_RER','V_CPET_AT','V_CPET_VO2HR','V_CPET_PetCO2','V_RHC_Done','V_RHC_CI','V_RHC_RAP','V_RHC_RVP','V_RHC_PCWP','V_RHC_PAP','V_RHC_PVR','V_RHC_PAPi','V_RHC_LV','V_RHC_MVO2','V_CAG_Done','V_CAG_Date','V_CAG_Findings','V_CAG_PCI_Done','V_CAG_PCI_Date','V_CAG_Stents_Number','V_CAG_PCI_Details','V_Procedures','V_Proc_Device_Done','V_Proc_Device_Type','V_Proc_Device_Date','V_Proc_Ablation_Done','V_Proc_Ablation_Type','V_Proc_Pericardiocentesis_Done','V_Proc_Pericardiocentesis_Volume','V_Proc_Pleural_Tapping_Done','V_Proc_Pleural_Tapping_Volume','V_Proc_Ascites_Tapping_Done','V_Proc_Ascites_Tapping_Volume','V_Proc_Other_Done','V_Proc_Other','V_Procedures_Notes','V_HbA1c','V_Gluc','V_Urea','V_Creat','V_eGFR','V_Na','V_K','V_BNP','V_NTproBNP','V_INR','V_Iron','V_Transferrin','V_Ferritin','V_WBC','V_Hb','V_Plt','V_TSH','V_FreeT4','V_TotalChol','V_LDL','V_HDL','V_TG','V_Lab_Others','V_Vacc_Influenza','V_Vacc_Influenza_Date','V_Vacc_Pneumococcal','V_Vacc_Pneumococcal_Date','V_Vacc_COVID','V_Vacc_COVID_Date','V_Vacc_RSV','V_Vacc_RSV_Date','V_Vacc_Notes','V_Vacc_Influenza_Year','V_Vacc_Pneumococcal_Year','V_Vacc_COVID_Year','V_Vacc_Other'];VISIT_MED_LIST.forEach(function(m){vFields.push(m.id);vFields.push(m.id+'_Status');vFields.push(m.id+'_Custom');vFields.push(m.id+'_Freq');});vFields.push('V_Med_Others','V_AdverseEffects','V_Compliance','V_ComplianceNotes','V_Adverse','V_Plan','V_Others','V_Referral','V_Referral_Other','Next_Appt_Notes','V_Quad_GDMT','V_Max_GDMT','V_Recovered_LV','V_Recovered_LV_Type','V_Mortality','V_LostFU','V_LostFU_Reason','V_LostFU_Other','V_Advanced_HF_Outcome','V_Strong_HF','V_Adv_HF_Therapy','V_Adv_HF_Therapy_Type','V_Outcome_Notes');vFields.forEach(function(f){var val=visit[f];if(val&&val.toString().trim()!=='')vr.push([f.replace('V_','').replace(/_/g,' '),val]);});vr.push([]);});var ws2=XLSX.utils.aoa_to_sheet(vr);XLSX.utils.book_append_sheet(wb,ws2,"Visits");}
+    if(visitsData.length>0){var vr=[];vr.push(["VISIT HISTORY"]);vr.push([]);visitsData.forEach(function(visit,idx){vr.push(["Visit #"+(visitsData.length-idx),"Date: "+visit.visitDate,"Type: "+visit.visitType]);var vFields=['V_Fatigue','V_NYHA','V_KCCQ','V_Edema','V_Pulse','V_BP','V_SpO2','V_Height','V_Weight','V_BMI','V_JVP','V_Rales','V_S3','V_Device_Done','V_Device_Type','V_Device_Date','V_Device_Info','V_ECG_Done','V_LBBB','V_QRS','V_Arrhythmia','V_Pacing_ECG','V_Pacing_Mode','V_Holter_Done','V_Holter_Date','V_Holter_Duration','V_Holter_MaxHR','V_Holter_MinHR','V_Holter_AvgHR','V_Holter_Arrhythmia','V_Holter_Findings','V_Echo_Done','V_EF_Change','V_Echo_EDVI','V_Echo_ESVI','V_Echo_EF','V_Echo_Other','V_CMR_Done','V_CMR_LVEDVI','V_CMR_LVESVI','V_CMR_LVEF','V_CMR_RVEDI','V_CMR_RVEF','V_CMR_LGE','V_CMR_LGE_Pct','V_CMR_Others','V_Walk_Completed','V_Walk_Meters','V_CPET_Done','V_CPET_PeakVO2','V_CPET_VEVCO2','V_CPET_RER','V_CPET_AT','V_CPET_VO2HR','V_CPET_PetCO2','V_RHC_Done','V_RHC_CI','V_RHC_RAP','V_RHC_RVP','V_RHC_PCWP','V_RHC_PAP','V_RHC_PVR','V_RHC_PAPi','V_RHC_LV','V_RHC_MVO2','V_CAG_Done','V_CAG_Date','V_CAG_Findings','V_CAG_PCI_Done','V_CAG_PCI_Date','V_CAG_Stents_Number','V_CAG_PCI_Details','V_Procedures','V_Proc_CA_Done','V_Proc_CA_Date','V_Proc_CA_Details','V_Proc_Device_Done','V_Proc_Device_Type','V_Proc_Device_Date','V_Proc_Ablation_Done','V_Proc_Ablation_Type','V_Proc_Pericardiocentesis_Done','V_Proc_Pericardiocentesis_Volume','V_Proc_Pleural_Tapping_Done','V_Proc_Pleural_Tapping_Volume','V_Proc_Ascites_Tapping_Done','V_Proc_Ascites_Tapping_Volume','V_Proc_Other_Done','V_Proc_Other','V_Procedures_Notes','V_HbA1c','V_Gluc','V_Urea','V_Creat','V_eGFR','V_Na','V_K','V_BNP','V_NTproBNP','V_INR','V_Iron','V_Transferrin','V_Ferritin','V_WBC','V_Hb','V_Plt','V_TSH','V_FreeT4','V_TotalChol','V_LDL','V_HDL','V_TG','V_Lab_Others','V_Vacc_Influenza','V_Vacc_Influenza_Date','V_Vacc_Pneumococcal','V_Vacc_Pneumococcal_Date','V_Vacc_COVID','V_Vacc_COVID_Date','V_Vacc_RSV','V_Vacc_RSV_Date','V_Vacc_Notes','V_Vacc_Influenza_Year','V_Vacc_Pneumococcal_Year','V_Vacc_COVID_Year','V_Vacc_Other'];VISIT_MED_LIST.forEach(function(m){vFields.push(m.id);vFields.push(m.id+'_Status');vFields.push(m.id+'_Custom');vFields.push(m.id+'_Freq');});vFields.push('V_Med_Others','V_AdverseEffects','V_Compliance','V_ComplianceNotes','V_Adverse','V_Plan','V_Others','V_Referral','V_Referral_Other','Next_Appt_Notes','V_Quad_GDMT','V_Max_GDMT','V_Recovered_LV','V_Recovered_LV_Type','V_Mortality','V_LostFU','V_LostFU_Reason','V_LostFU_Other','V_Advanced_HF_Outcome','V_Strong_HF','V_Adv_HF_Therapy','V_Adv_HF_Therapy_Type','V_Outcome_Notes');vFields.forEach(function(f){var val=visit[f];if(val&&val.toString().trim()!=='')vr.push([f.replace('V_','').replace(/_/g,' '),val]);});vr.push([]);});var ws2=XLSX.utils.aoa_to_sheet(vr);XLSX.utils.book_append_sheet(wb,ws2,"Visits");}
     XLSX.writeFile(wb,"HF_Registry_"+(data.File_No||'unknown')+"_"+(data.Patient_Name||'patient')+".xlsx");showPopup("success","Excel Exported!","File downloaded successfully.");
 }
 
@@ -8164,7 +8198,7 @@ function generatePDF(data,visitsData,id){
     var mf=VISIT_MED_LIST.map(function(m){return m.id;});
     mf.push('V_Med_Others');
     visitsData.forEach(function(visit,idx){html+="<div style='border:2px solid #17a2b8;margin:15px 0;padding:15px;border-radius:8px;'><h4 style='color:#17a2b8;margin-top:0;'>Visit #"+(visitsData.length-idx)+": "+visit.visitDate+" ("+visit.visitType+")</h4>";
-    var vs=[{name:'Symptoms',fields:['V_Fatigue','V_NYHA','V_KCCQ','V_Edema']},{name:'Signs/Vitals',fields:['V_Pulse','V_BP','V_SpO2','V_Height','V_Weight','V_BMI','V_JVP','V_Rales','V_S3']},{name:'Past History & Comorbidities',fields:['V_DM','V_HTN','V_AF','V_IHD','V_PCI_CABG','V_Device_Done','V_Device_Type','V_Device_Date','V_Device_Info','V_CKD','V_Dialysis','V_CVA','V_PVD','V_Smoker','V_Obese','V_OSA','V_Dyslipidemia','V_Thyroid_Dz','V_FH_Cardio','V_Genetics','V_Genetics_Type','V_Comorbid_Others']},{name:'ECG',fields:['V_ECG_Done','V_LBBB','V_QRS','V_Arrhythmia','V_Pacing_ECG','V_Pacing_Mode']},{name:'Holter',fields:['V_Holter_Done','V_Holter_Date','V_Holter_Duration','V_Holter_MaxHR','V_Holter_MinHR','V_Holter_AvgHR','V_Holter_Arrhythmia','V_Holter_Findings']},{name:'Labs',fields:['V_HbA1c','V_Gluc','V_Urea','V_Creat','V_eGFR','V_Na','V_K','V_BNP','V_NTproBNP','V_INR','V_Iron','V_Transferrin','V_Ferritin','V_WBC','V_Hb','V_Plt','V_TSH','V_FreeT4','V_TotalChol','V_LDL','V_HDL','V_TG','V_Lab_Others']},{name:'F/U Echo',fields:['V_Echo_Done','V_EF_Change','V_Echo_EDVI','V_Echo_ESVI','V_Echo_EF','V_Echo_Other']},{name:'F/U CMR',fields:['V_CMR_Done','V_CMR_LVEDVI','V_CMR_LVESVI','V_CMR_LVEF','V_CMR_RVEDI','V_CMR_RVEF','V_CMR_LGE','V_CMR_LGE_Pct','V_CMR_Others']},{name:'F/U 6MWT',fields:['V_Walk_Completed','V_Walk_Meters']},{name:'F/U CPET',fields:['V_CPET_Done','V_CPET_PeakVO2','V_CPET_VEVCO2','V_CPET_RER','V_CPET_AT','V_CPET_VO2HR','V_CPET_PetCO2']},{name:'F/U Right Heart Cath',fields:['V_RHC_Done','V_RHC_CI','V_RHC_RAP','V_RHC_RVP','V_RHC_PCWP','V_RHC_PAP','V_RHC_PVR','V_RHC_PAPi','V_RHC_LV','V_RHC_MVO2']},{name:'Visit CAG / PCI',fields:['V_CAG_Done','V_CAG_Date','V_CAG_Findings','V_CAG_PCI_Done','V_CAG_PCI_Date','V_CAG_Stents_Number','V_CAG_PCI_Details']},{name:'Visit Procedures',fields:['V_Procedures','V_Proc_Device_Done','V_Proc_Device_Type','V_Proc_Device_Date','V_Proc_Ablation_Done','V_Proc_Ablation_Type','V_Proc_Pericardiocentesis_Done','V_Proc_Pericardiocentesis_Volume','V_Proc_Pleural_Tapping_Done','V_Proc_Pleural_Tapping_Volume','V_Proc_Ascites_Tapping_Done','V_Proc_Ascites_Tapping_Volume','V_Proc_Other_Done','V_Proc_Other','V_Procedures_Notes']},{name:'Medications',fields:mf},{name:'Vaccinations',fields:['V_Vacc_Influenza','V_Vacc_Influenza_Date','V_Vacc_Pneumococcal','V_Vacc_Pneumococcal_Date','V_Vacc_COVID','V_Vacc_COVID_Date','V_Vacc_RSV','V_Vacc_RSV_Date','V_Vacc_Notes','V_Vacc_Influenza_Year','V_Vacc_Pneumococcal_Year','V_Vacc_COVID_Year','V_Vacc_Other']},{name:'Next Appointment',fields:['Next_Appt_Notes']},{name:'Plan',fields:['V_AdverseEffects','V_Compliance','V_ComplianceNotes','V_Adverse','V_Plan','V_Others','V_Referral','V_Referral_Other']},{name:'Outcomes & Management',fields:['V_Quad_GDMT','V_Max_GDMT','V_Recovered_LV','V_Recovered_LV_Type','V_Mortality','V_LostFU','V_LostFU_Reason','V_LostFU_Other','V_Advanced_HF_Outcome','V_Strong_HF','V_Adv_HF_Therapy','V_Adv_HF_Therapy_Type','V_Outcome_Notes']}];
+    var vs=[{name:'Symptoms',fields:['V_Fatigue','V_NYHA','V_KCCQ','V_Edema']},{name:'Signs/Vitals',fields:['V_Pulse','V_BP','V_SpO2','V_Height','V_Weight','V_BMI','V_JVP','V_Rales','V_S3']},{name:'Risk Factors & Comorbidities',fields:['V_DM','V_HTN','V_AF','V_IHD','V_CKD','V_Dialysis','V_CVA','V_PVD','V_Smoker','V_Obese','V_OSA','V_Dyslipidemia','V_Thyroid_Dz','V_FH_Cardio','V_Genetics','V_Genetics_Type','V_Comorbid_Others','V_Procedures','V_Device_Done','V_Device_Type','V_Device_Date','V_Device_Info','V_Proc_CA_Done','V_Proc_CA_Date','V_Proc_CA_Details','V_PCI_CABG','V_PCI_CABG_Date','V_PCI_CABG_Details','V_Proc_Ablation_Done','V_Proc_Ablation_Type','V_Procedures_Notes']},{name:'ECG',fields:['V_ECG_Done','V_LBBB','V_QRS','V_Arrhythmia','V_Pacing_ECG','V_Pacing_Mode']},{name:'Holter',fields:['V_Holter_Done','V_Holter_Date','V_Holter_Duration','V_Holter_MaxHR','V_Holter_MinHR','V_Holter_AvgHR','V_Holter_Arrhythmia','V_Holter_Findings']},{name:'Labs',fields:['V_HbA1c','V_Gluc','V_Urea','V_Creat','V_eGFR','V_Na','V_K','V_BNP','V_NTproBNP','V_INR','V_Iron','V_Transferrin','V_Ferritin','V_WBC','V_Hb','V_Plt','V_TSH','V_FreeT4','V_TotalChol','V_LDL','V_HDL','V_TG','V_Lab_Others']},{name:'F/U Echo',fields:['V_Echo_Done','V_EF_Change','V_Echo_EDVI','V_Echo_ESVI','V_Echo_EF','V_Echo_Other']},{name:'F/U CMR',fields:['V_CMR_Done','V_CMR_LVEDVI','V_CMR_LVESVI','V_CMR_LVEF','V_CMR_RVEDI','V_CMR_RVEF','V_CMR_LGE','V_CMR_LGE_Pct','V_CMR_Others']},{name:'F/U 6MWT',fields:['V_Walk_Completed','V_Walk_Meters']},{name:'F/U CPET',fields:['V_CPET_Done','V_CPET_PeakVO2','V_CPET_VEVCO2','V_CPET_RER','V_CPET_AT','V_CPET_VO2HR','V_CPET_PetCO2']},{name:'F/U Right Heart Cath',fields:['V_RHC_Done','V_RHC_CI','V_RHC_RAP','V_RHC_RVP','V_RHC_PCWP','V_RHC_PAP','V_RHC_PVR','V_RHC_PAPi','V_RHC_LV','V_RHC_MVO2']},{name:'F/U CAG/PCI',fields:['V_CAG_Done','V_CAG_Date','V_CAG_Findings','V_CAG_PCI_Done','V_CAG_PCI_Date','V_CAG_Stents_Number','V_CAG_PCI_Details']},{name:'Medications',fields:mf},{name:'Vaccinations',fields:['V_Vacc_Influenza','V_Vacc_Influenza_Date','V_Vacc_Pneumococcal','V_Vacc_Pneumococcal_Date','V_Vacc_COVID','V_Vacc_COVID_Date','V_Vacc_RSV','V_Vacc_RSV_Date','V_Vacc_Notes','V_Vacc_Influenza_Year','V_Vacc_Pneumococcal_Year','V_Vacc_COVID_Year','V_Vacc_Other']},{name:'Next Appointment',fields:['Next_Appt_Notes']},{name:'Plan',fields:['V_AdverseEffects','V_Compliance','V_ComplianceNotes','V_Adverse','V_Plan','V_Others','V_Referral','V_Referral_Other']},{name:'Outcomes & Management',fields:['V_Quad_GDMT','V_Max_GDMT','V_Recovered_LV','V_Recovered_LV_Type','V_Mortality','V_LostFU','V_LostFU_Reason','V_LostFU_Other','V_Advanced_HF_Outcome','V_Strong_HF','V_Adv_HF_Therapy','V_Adv_HF_Therapy_Type','V_Outcome_Notes']}];
     vs.forEach(function(vsec){var hd=false;vsec.fields.forEach(function(vf){if(visit[vf]&&visit[vf].toString().trim()!=='')hd=true;});if(!hd)return;
     html+="<h5 style='margin:10px 0 5px 0;color:#555;'>"+vsec.name+"</h5><table style='width:100%;border-collapse:collapse;font-size:11px;margin-bottom:10px;'>";
     vsec.fields.forEach(function(vf){var val=visit[vf];if(val&&val.toString().trim()!==''){html+="<tr style='border-bottom:1px solid #eee;'><td style='width:40%;padding:4px;background:#f5f5f5;'>"+vf.replace('V_','').replace(/_/g,' ')+"</td><td style='padding:4px;'>"+val+"</td></tr>";}});html+="</table>";});html+="</div>";});}
@@ -9529,11 +9563,11 @@ function exportAllVisitsSPSS(){
         'V_Iron','V_Transferrin','V_Ferritin','V_WBC','V_Hb','V_Plt','V_TSH','V_FreeT4',
         'V_TotalChol','V_LDL','V_HDL','V_TG'];
     var V_BINARY = ['V_Device_Done','V_ECG_Done','V_Holter_Done','V_Echo_Done','V_CMR_Done','V_Walk_Completed','V_CPET_Done','V_RHC_Done',
-        'V_CAG_Done','V_CAG_PCI_Done','V_Proc_Device_Done','V_Proc_Ablation_Done','V_Proc_Pericardiocentesis_Done','V_Proc_Pleural_Tapping_Done','V_Proc_Ascites_Tapping_Done','V_Proc_Other_Done',
+        'V_CAG_Done','V_CAG_PCI_Done','V_Proc_CA_Done','V_Proc_Device_Done','V_Proc_Ablation_Done','V_Proc_Pericardiocentesis_Done','V_Proc_Pleural_Tapping_Done','V_Proc_Ascites_Tapping_Done','V_Proc_Other_Done',
         'V_Quad_GDMT','V_Max_GDMT','V_Recovered_LV','V_Strong_HF','V_Adv_HF_Therapy'];
     var V_TEXT = ['V_NYHA','V_Fatigue','V_Edema','V_BP','V_JVP','V_Rales','V_S3','V_LBBB','V_Arrhythmia',
         'V_Pacing_ECG','V_Pacing_Mode','V_Device_Type','V_Device_Info','V_EF_Change','V_CMR_LGE',
-        'V_CAG_Findings','V_CAG_PCI_Details','V_Procedures','V_Proc_Device_Type','V_Proc_Ablation_Type','V_Proc_Other','V_Procedures_Notes',
+        'V_CAG_Findings','V_CAG_PCI_Details','V_Procedures','V_Proc_CA_Date','V_Proc_CA_Details','V_PCI_CABG','V_PCI_CABG_Date','V_PCI_CABG_Details','V_Proc_Device_Type','V_Proc_Ablation_Type','V_Proc_Other','V_Procedures_Notes',
         'V_Compliance','V_Mortality','V_LostFU','V_Advanced_HF_Outcome','V_Adv_HF_Therapy_Type','V_Referral','V_Lab_Others','V_Med_Others'];
 
     function toBin(v){
