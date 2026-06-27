@@ -1973,7 +1973,7 @@ img,canvas,table,svg{max-width:100%;}
                     <div class="col-4 col-md-2"><label>Pulse</label><input type="text" class="form-control" id="V_Pulse" inputmode="numeric"></div>
                     <div class="col-4 col-md-2"><label>BP</label><input type="text" class="form-control" id="V_BP" placeholder="120/80"></div>
                     <div class="col-4 col-md-2"><label>SpO2 %</label><input type="number" class="form-control" id="V_SpO2" inputmode="numeric"></div>
-                    <div class="col-4 col-md-2"><label>Height (cm)</label><input type="number" class="form-control bg-light" id="V_Height" oninput="calcVisitBMI()" inputmode="numeric" readonly></div>
+                    <div class="col-4 col-md-2"><label>Height (cm)</label><input type="number" class="form-control border-primary" id="V_Height" oninput="setFixedHeightFromVisit()" inputmode="numeric"></div>
                     <div class="col-4 col-md-2"><label>Weight (kg)</label><input type="number" class="form-control" id="V_Weight" oninput="calcVisitBMI()" inputmode="numeric"></div>
                     <div class="col-4 col-md-2"><label>Dry Weight (kg)</label><input type="number" class="form-control" id="V_Dry_Weight" inputmode="numeric"></div>
                     <div class="col-4 col-md-2"><label class="text-success fw-bold">BMI <span class="auto-badge"><i class="fa fa-lock"></i> Auto</span></label><input type="text" class="form-control bg-light text-success fw-bold" id="V_BMI" readonly></div>
@@ -1990,6 +1990,11 @@ img,canvas,table,svg{max-width:100%;}
                     </div>
                     <div class="col-12 col-md-6"><label>IHD Type</label><select class="form-select" id="V_IHD"><option>No</option><option>STEMI</option><option>NSTEMI</option></select></div>
                     <div class="col-12 col-md-6"><label>Smoking Status</label><select class="form-select" id="V_Smoker"><option>Never</option><option>Current</option><option>Former</option></select></div>
+                    <div class="col-12 col-md-3"><label>Thyroid Disease</label><select class="form-select" id="V_Thyroid_Dz"><option>No</option><option>Hyperthyroid</option><option>Hypothyroid</option></select></div>
+                    <div class="col-12 col-md-3"><label>Family History (Cardio)</label><select class="form-select" id="V_FH_Cardio"><option>No</option><option>Yes</option></select></div>
+                    <div class="col-12 col-md-3"><label>Genetics</label><select class="form-select" id="V_Genetics" onchange="toggleVisitGeneticsType()"><option>No</option><option>Yes</option></select></div>
+                    <div class="col-12 col-md-6" id="vGeneticsTypeWrap" style="display:none;"><label>Type of Gene</label><input type="text" class="form-control" id="V_Genetics_Type" placeholder="e.g. MYH7, LMNA, TTN, MYBPC3..."></div>
+                    <div class="col-12"><label>Other Past History / Comorbidities</label><input type="text" class="form-control" id="V_Comorbid_Others" placeholder="Any other co-conditions"></div>
                     <div class="col-12"><hr class="my-2"></div>
                     <h6 class="col-12 text-secondary m-0" style="font-size:0.78rem;"><i class="fa fa-hand-holding-medical"></i> Procedures <small class="text-muted fw-normal">— devices, CA/CAG, PCI, CABG, ablation</small></h6>
                     <input type="hidden" id="V_Procedures">
@@ -2014,18 +2019,25 @@ img,canvas,table,svg{max-width:100%;}
                             </div>
                         </div>
                     </div>
-                    <div class="col-12">
-                        <label>PCI / CABG <small class="text-muted" style="font-size:0.7rem;">(multi-select — tap to toggle)</small></label>
-                        <div class="d-flex gap-2 flex-wrap p-2" id="vPciCabgBox" style="border:1px solid #ced4da;border-radius:6px;background:#fff;">
-                            <button type="button" class="btn btn-sm btn-outline-primary" data-vpcicabg="PCI" onclick="toggleVPCICABGOpt('PCI')">PCI</button>
-                            <button type="button" class="btn btn-sm btn-outline-primary" data-vpcicabg="CABG" onclick="toggleVPCICABGOpt('CABG')">CABG</button>
+                    <div class="col-12 vertical-entry-group">
+                        <div class="entry-title"><i class="fa fa-heart-circle-bolt"></i> PCI</div>
+                        <div class="yes-no-field"><label>PCI History</label><select class="form-select" id="V_Proc_PCI_Done" onchange="toggleVisitProcedureDetails('V_Proc_PCI_Done','vProcPCIWrap',['V_Proc_PCI_Date','V_Proc_PCI_Stents_Number','V_Proc_PCI_Details']);syncVisitProcedures()"><option>No</option><option>Yes</option></select></div>
+                        <div id="vProcPCIWrap" style="display:none;">
+                            <div class="row g-2 entry-detail-panel">
+                                <div class="col-12"><label>PCI Date</label><input type="date" class="form-control" id="V_Proc_PCI_Date" oninput="syncVisitProcedures()"></div>
+                                <div class="col-12"><label>Number of Stents</label><input type="number" class="form-control" id="V_Proc_PCI_Stents_Number" inputmode="numeric" oninput="syncVisitProcedures()"></div>
+                                <div class="col-12"><label>PCI Details</label><input type="text" class="form-control" id="V_Proc_PCI_Details" placeholder="e.g. LAD DES x1, RCA POBA" oninput="syncVisitProcedures()"></div>
+                            </div>
                         </div>
-                        <input type="hidden" id="V_PCI_CABG">
                     </div>
-                    <div class="col-12" id="vPciCabgDetailsWrap" style="display:none;">
-                        <div class="row g-2 p-2 mt-1" style="background:#fff5f5;border-left:3px solid #8b0000;border-radius:6px;">
-                            <div class="col-12 col-md-4"><label class="text-danger fw-bold">Date of Procedure(s)</label><input type="date" class="form-control" id="V_PCI_CABG_Date" oninput="syncVisitProcedures()"></div>
-                            <div class="col-12 col-md-8"><label class="text-danger fw-bold">Procedure Details (vessels, stents, grafts, etc.)</label><input type="text" class="form-control" id="V_PCI_CABG_Details" placeholder="e.g. LAD DES x1, RCA POBA; LIMA-LAD, SVG-OM" oninput="syncVisitProcedures()"></div>
+                    <div class="col-12 vertical-entry-group">
+                        <div class="entry-title"><i class="fa fa-heart-pulse"></i> CABG</div>
+                        <div class="yes-no-field"><label>CABG History</label><select class="form-select" id="V_Proc_CABG_Done" onchange="toggleVisitProcedureDetails('V_Proc_CABG_Done','vProcCABGWrap',['V_Proc_CABG_Date','V_Proc_CABG_Details']);syncVisitProcedures()"><option>No</option><option>Yes</option></select></div>
+                        <div id="vProcCABGWrap" style="display:none;">
+                            <div class="row g-2 entry-detail-panel">
+                                <div class="col-12"><label>CABG Date</label><input type="date" class="form-control" id="V_Proc_CABG_Date" oninput="syncVisitProcedures()"></div>
+                                <div class="col-12"><label>CABG Details</label><input type="text" class="form-control" id="V_Proc_CABG_Details" placeholder="e.g. LIMA-LAD, SVG-OM" oninput="syncVisitProcedures()"></div>
+                            </div>
                         </div>
                     </div>
                     <div class="col-12 vertical-entry-group">
@@ -2042,6 +2054,9 @@ img,canvas,table,svg{max-width:100%;}
                         <select id="V_Proc_Device_Done"><option>No</option><option>Yes</option></select>
                         <input type="text" id="V_Proc_Device_Type">
                         <input type="date" id="V_Proc_Device_Date">
+                        <input type="hidden" id="V_PCI_CABG">
+                        <input type="text" id="V_PCI_CABG_Date">
+                        <input type="text" id="V_PCI_CABG_Details">
                         <select id="V_Proc_Pericardiocentesis_Done"><option>No</option><option>Yes</option></select>
                         <input type="number" id="V_Proc_Pericardiocentesis_Volume">
                         <select id="V_Proc_Pleural_Tapping_Done"><option>No</option><option>Yes</option></select>
@@ -2112,11 +2127,6 @@ img,canvas,table,svg{max-width:100%;}
                             </div>
                         </div>
                     </div>
-                    <div class="col-12 col-md-3"><label>Thyroid Disease</label><select class="form-select" id="V_Thyroid_Dz"><option>No</option><option>Hyperthyroid</option><option>Hypothyroid</option></select></div>
-                    <div class="col-12 col-md-3"><label>Family History (Cardio)</label><select class="form-select" id="V_FH_Cardio"><option>No</option><option>Yes</option></select></div>
-                    <div class="col-12 col-md-3"><label>Genetics</label><select class="form-select" id="V_Genetics" onchange="toggleVisitGeneticsType()"><option>No</option><option>Yes</option></select></div>
-                    <div class="col-12 col-md-6" id="vGeneticsTypeWrap" style="display:none;"><label>Type of Gene</label><input type="text" class="form-control" id="V_Genetics_Type" placeholder="e.g. MYH7, LMNA, TTN, MYBPC3..."></div>
-                    <div class="col-12"><label>Other Past History / Comorbidities</label><input type="text" class="form-control" id="V_Comorbid_Others" placeholder="Any other co-conditions"></div>
                     <!-- Hidden mirrors for each visit comorbidity (pill toggles write Yes/No here) -->
                     <div style="display:none;">
                         <select id="V_DM"><option>No</option><option>Yes</option></select>
@@ -5663,6 +5673,9 @@ function toggleVisitProcedureDetails(selId, wrapId, clearIds){
 }
 function syncVisitProcedures(){
     var parts=[];
+    var legacyPCI=[];
+    var legacyDetails=[];
+    var legacyDate='';
     if(_val('V_CAG_Done')==='Yes'||_val('V_CAG_PCI_Done')==='Yes')parts.push('F/U CAG/PCI');
     if(_val('V_Device_Done')==='Yes'){
         parts.push('Devices');
@@ -5675,9 +5688,28 @@ function syncVisitProcedures(){
         _setVal('V_Proc_Device_Date','');
     }
     if(_procDone('V_Proc_CA_Done'))parts.push('CA/CAG');
-    var pciCabg=String(_val('V_PCI_CABG')||'').split(',').map(function(s){return s.trim();}).filter(Boolean);
-    if(pciCabg.indexOf('PCI')>=0)parts.push('PCI');
-    if(pciCabg.indexOf('CABG')>=0)parts.push('CABG');
+    if(_procDone('V_Proc_PCI_Done')){
+        parts.push('PCI');
+        legacyPCI.push('PCI');
+        legacyDate=legacyDate||_val('V_Proc_PCI_Date');
+        var pciDetail=[];
+        if(_val('V_Proc_PCI_Date'))pciDetail.push('date '+_val('V_Proc_PCI_Date'));
+        if(_val('V_Proc_PCI_Stents_Number'))pciDetail.push(_val('V_Proc_PCI_Stents_Number')+' stent(s)');
+        if(_val('V_Proc_PCI_Details'))pciDetail.push(_val('V_Proc_PCI_Details'));
+        if(pciDetail.length)legacyDetails.push('PCI: '+pciDetail.join('; '));
+    }
+    if(_procDone('V_Proc_CABG_Done')){
+        parts.push('CABG');
+        legacyPCI.push('CABG');
+        legacyDate=legacyDate||_val('V_Proc_CABG_Date');
+        var cabgDetail=[];
+        if(_val('V_Proc_CABG_Date'))cabgDetail.push('date '+_val('V_Proc_CABG_Date'));
+        if(_val('V_Proc_CABG_Details'))cabgDetail.push(_val('V_Proc_CABG_Details'));
+        if(cabgDetail.length)legacyDetails.push('CABG: '+cabgDetail.join('; '));
+    }
+    _setVal('V_PCI_CABG',legacyPCI.join(', '));
+    _setVal('V_PCI_CABG_Date',legacyDate);
+    _setVal('V_PCI_CABG_Details',legacyDetails.join(' | '));
     if(_procDone('V_Proc_Ablation_Done'))parts.push('Ablations');
     if(_procDone('V_Proc_Pericardiocentesis_Done'))parts.push('Pericardiocentesis');
     if(_procDone('V_Proc_Pleural_Tapping_Done'))parts.push('Pleural tapping');
@@ -5699,11 +5731,18 @@ function restoreVisitProcedures(data){
         _setVal('V_Device_Date',data.V_Proc_Device_Date||'');
     }
     if(part('ca/cag')||has('coronary angiography')||_dataHasAny(data,['V_Proc_CA_Date','V_Proc_CA_Details']))_setVal('V_Proc_CA_Done','Yes');
-    if((part('pci')||part('cabg'))&&!_val('V_PCI_CABG')){
-        var pc=[];
-        if(part('pci'))pc.push('PCI');
-        if(part('cabg'))pc.push('CABG');
-        _setVal('V_PCI_CABG',pc.join(', '));
+    var legacy=String(data.V_PCI_CABG||'').toLowerCase();
+    var hasLegacyPCI=part('pci')||legacy.indexOf('pci')>=0||legacy.indexOf('both')>=0;
+    var hasLegacyCABG=part('cabg')||legacy.indexOf('cabg')>=0||legacy.indexOf('both')>=0;
+    if(hasLegacyPCI||_dataHasAny(data,['V_Proc_PCI_Date','V_Proc_PCI_Stents_Number','V_Proc_PCI_Details'])){
+        _setVal('V_Proc_PCI_Done','Yes');
+        if(!_val('V_Proc_PCI_Date'))_setVal('V_Proc_PCI_Date',data.V_PCI_CABG_Date||'');
+        if(!_val('V_Proc_PCI_Details'))_setVal('V_Proc_PCI_Details',data.V_PCI_CABG_Details||'');
+    }
+    if(hasLegacyCABG||_dataHasAny(data,['V_Proc_CABG_Date','V_Proc_CABG_Details'])){
+        _setVal('V_Proc_CABG_Done','Yes');
+        if(!_val('V_Proc_CABG_Date'))_setVal('V_Proc_CABG_Date',data.V_PCI_CABG_Date||'');
+        if(!_val('V_Proc_CABG_Details'))_setVal('V_Proc_CABG_Details',data.V_PCI_CABG_Details||'');
     }
     if(has('ablation')||_dataHasAny(data,['V_Proc_Ablation_Type']))_setVal('V_Proc_Ablation_Done','Yes');
     if(has('pericardiocentesis')||_dataHasAny(data,['V_Proc_Pericardiocentesis_Volume']))_setVal('V_Proc_Pericardiocentesis_Done','Yes');
@@ -5712,6 +5751,8 @@ function restoreVisitProcedures(data){
     if(has('others')||has('other')||_dataHasAny(data,['V_Proc_Other']))_setVal('V_Proc_Other_Done','Yes');
     if(typeof toggleVisitDeviceHistory==='function')toggleVisitDeviceHistory();
     toggleVisitProcedureDetails('V_Proc_CA_Done','vProcCAWrap',['V_Proc_CA_Date','V_Proc_CA_Details']);
+    toggleVisitProcedureDetails('V_Proc_PCI_Done','vProcPCIWrap',['V_Proc_PCI_Date','V_Proc_PCI_Stents_Number','V_Proc_PCI_Details']);
+    toggleVisitProcedureDetails('V_Proc_CABG_Done','vProcCABGWrap',['V_Proc_CABG_Date','V_Proc_CABG_Details']);
     toggleVisitProcedureDetails('V_Proc_Ablation_Done','vProcAblationWrap',['V_Proc_Ablation_Type']);
     toggleVisitProcedureDetails('V_Proc_Pericardiocentesis_Done','vProcPericardiocentesisWrap',['V_Proc_Pericardiocentesis_Volume']);
     toggleVisitProcedureDetails('V_Proc_Pleural_Tapping_Done','vProcPleuralTappingWrap',['V_Proc_Pleural_Tapping_Volume']);
@@ -6420,7 +6461,7 @@ function onVisitMedStatusChange(medId){
 function isNumberKey(evt){var c=(evt.which)?evt.which:evt.keyCode;if(c>31&&(c<48||c>57))return false;return true;}
 function validateCivilID(input){var e=document.getElementById('civilError');if(input.value.length!==12&&input.value.length>0){input.classList.add('input-error');e.style.display='block';}else{input.classList.remove('input-error');e.style.display='none';}}
 function validateFileNo(input){var e=document.getElementById('fileError');if(input.value.length!==6&&input.value.length>0){input.classList.add('input-error');e.style.display='block';}else{input.classList.remove('input-error');e.style.display='none';}}
-function calcBMI(){
+function _updateAdmissionBMIFromHeightWeight(){
     var w=parseFloat(document.getElementById("Weight").value),h=parseFloat(document.getElementById("Height").value);
     var bmi=(w&&h)?(w/((h/100)**2)).toFixed(1):"";
     document.getElementById("BMI").value=bmi;
@@ -6430,6 +6471,10 @@ function calcBMI(){
         if(bmi&&parseFloat(bmi)>30){alertObesity.classList.add('visible');}
         else{alertObesity.classList.remove('visible');}
     }
+    return bmi;
+}
+function calcBMI(){
+    _updateAdmissionBMIFromHeightWeight();
     calcMAGGIC();
     if(typeof syncVisitHeightFromBaseline==='function')syncVisitHeightFromBaseline(true);
 }
@@ -6445,9 +6490,23 @@ function calcVisitBMI(){
     bEl.value = (w && h) ? (w / ((h/100)**2)).toFixed(1) : '';
 }
 
+function setFixedHeightFromVisit(){
+    var vEl=document.getElementById('V_Height');
+    var h=(vEl&&vEl.value)||'';
+    if(h&&parseFloat(h)){
+        var hEl=document.getElementById('Height');
+        if(hEl&&hEl.value!==h)hEl.value=h;
+        if(typeof _updateAdmissionBMIFromHeightWeight==='function')_updateAdmissionBMIFromHeightWeight();
+        if(typeof calcMAGGIC==='function')calcMAGGIC();
+    }
+    if(typeof calcVisitBMI==='function')calcVisitBMI();
+}
+
 function getBaselineHeightValue(){
     var hEl=document.getElementById('Height');
+    var vEl=document.getElementById('V_Height');
     var h=(hEl&&hEl.value)||'';
+    if(!h)h=(vEl&&vEl.value)||'';
     var pid=currentPatientId||editingDocId;
     if(!h&&pid&&typeof PC==='object'&&PC[pid])h=PC[pid].Height||'';
     return h;
@@ -6465,9 +6524,11 @@ function syncVisitHeightFromBaseline(force){
 
 function applyBaselineHeightToVisitData(visitData){
     if(!visitData)return visitData;
-    var h=getBaselineHeightValue();
+    var h=(visitData.V_Height&&parseFloat(visitData.V_Height))?visitData.V_Height:getBaselineHeightValue();
     if(h){
         visitData.V_Height=h;
+        var hEl=document.getElementById('Height');
+        if(hEl&&!hEl.value)hEl.value=h;
         var w=parseFloat(visitData.V_Weight);
         var hn=parseFloat(h);
         if(w&&hn)visitData.V_BMI=(w/((hn/100)**2)).toFixed(1);
@@ -6505,6 +6566,21 @@ function propagateHeightToSavedVisits(patientId,height){
         });
         if(count)return batch.commit();
     }).catch(function(e){console.warn('Height propagation failed:',e.message||e);});
+}
+
+function persistFixedHeightForPatient(patientId,height){
+    var h=height||getBaselineHeightValue();
+    var hn=parseFloat(h);
+    if(!patientId||!h||!hn||typeof db==='undefined')return null;
+    var update={Height:String(h),lastEditAt:new Date().toISOString(),lastEditBy:_currentAuditUser(),lastEditDoctor:_currentDoctorSelection()};
+    var w=parseFloat((document.getElementById('Weight')||{}).value);
+    if(w)update.BMI=(w/((hn/100)**2)).toFixed(1);
+    if(typeof PC==='object'&&PC[patientId]){
+        PC[patientId].Height=String(h);
+        if(update.BMI)PC[patientId].BMI=update.BMI;
+    }
+    if(typeof propagateHeightToSavedVisits==='function')propagateHeightToSavedVisits(patientId,h);
+    return db.collection("patients").doc(patientId).update(update).catch(function(e){console.warn('Patient height update failed:',e.message||e);});
 }
 
 // Sync new individual baseline lab fields back to the legacy combined fields used elsewhere
@@ -6891,6 +6967,7 @@ function saveVisit(){
         visitData.lastEditBy = _currentAuditUser();
         visitData.lastEditDoctor = _currentDoctorSelection();
         db.collection("patients").doc(patientId).collection("visits").doc(editingVisitId).update(visitData).then(function(){
+            if(typeof persistFixedHeightForPatient==='function')persistFixedHeightForPatient(patientId, visitData.V_Height);
             if(nextAppt){
                 db.collection("patients").doc(patientId).update({Next_Appt:nextAppt,lastEditAt:new Date().toISOString(),lastEditBy:_currentAuditUser(),lastEditDoctor:_currentDoctorSelection()});
                 if(PC[patientId])PC[patientId].Next_Appt=nextAppt;
@@ -6908,6 +6985,7 @@ function saveVisit(){
         visitData.addedBy = _currentAuditUser();
         visitData.addedDoctor = _currentDoctorSelection();
         db.collection("patients").doc(patientId).collection("visits").add(visitData).then(function(){
+            if(typeof persistFixedHeightForPatient==='function')persistFixedHeightForPatient(patientId, visitData.V_Height);
             if(nextAppt){
                 db.collection("patients").doc(patientId).update({Next_Appt:nextAppt,lastEditAt:new Date().toISOString(),lastEditBy:_currentAuditUser(),lastEditDoctor:_currentDoctorSelection()});
                 if(PC[patientId])PC[patientId].Next_Appt=nextAppt;
@@ -6932,6 +7010,7 @@ function editVisit(visitId){
         else if(el.id){ if(el.tagName==='SELECT') el.selectedIndex = 0; else el.value = ''; }
     });
     if(typeof syncVisitHeightFromBaseline==='function')syncVisitHeightFromBaseline(true);
+    if(typeof setFixedHeightFromVisit==='function')setFixedHeightFromVisit();
     document.getElementById("Visit_Date").value = v.visitDate || '';
     document.getElementById("Visit_Type").value = v.visitType || 'Routine';
     // Restore Next Appointment Notes (saved on the visit record)
@@ -7159,7 +7238,7 @@ function clearVisitForm(){
     // Reset edit mode UI
     editingVisitId = null;
     // Hide visit conditional panels (including new Pacing-mode, Holter, comorbid wraps)
-    var vHide=['vDeviceHistoryWrap','vEcgDetailsWrap','vHolterDetailsWrap','vCmrLGEPctWrap','vEchoDetailsWrap','vCmrDetailsWrap','vWalkMetersWrap','vCpetDetailsWrap','vRhcDetailsWrap','vCagDetailsWrap','vCagPciDetailsWrap','vProcCAWrap','vProcDeviceWrap','vProcAblationWrap','vProcPericardiocentesisWrap','vProcPleuralTappingWrap','vProcAscitesTappingWrap','vProcOtherWrap','vPacingModeWrap','vHolterDateWrap','vHolterDurationWrap','vHolterMaxHRWrap','vHolterMinHRWrap','vHolterAvgHRWrap','vHolterArrhythmiaWrap','vHolterFindingsWrap','vPciCabgDetailsWrap','vValveInterventionWrap','vValveRepairDateWrap','vValveReplaceTypeWrap','vValveReplaceDateWrap','vValvePercutaneousWrap','vValveMVClipDateWrap','vValveTVClipDateWrap','vValveTAVIDateWrap','vGeneticsTypeWrap','vRecoveredLVTypeWrap','vLostFUReasonWrap','vLostFUOtherWrap','vAdvHFTherapyWrap'];
+    var vHide=['vDeviceHistoryWrap','vEcgDetailsWrap','vHolterDetailsWrap','vCmrLGEPctWrap','vEchoDetailsWrap','vCmrDetailsWrap','vWalkMetersWrap','vCpetDetailsWrap','vRhcDetailsWrap','vCagDetailsWrap','vCagPciDetailsWrap','vProcCAWrap','vProcPCIWrap','vProcCABGWrap','vProcDeviceWrap','vProcAblationWrap','vProcPericardiocentesisWrap','vProcPleuralTappingWrap','vProcAscitesTappingWrap','vProcOtherWrap','vPacingModeWrap','vHolterDateWrap','vHolterDurationWrap','vHolterMaxHRWrap','vHolterMinHRWrap','vHolterAvgHRWrap','vHolterArrhythmiaWrap','vHolterFindingsWrap','vPciCabgDetailsWrap','vValveInterventionWrap','vValveRepairDateWrap','vValveReplaceTypeWrap','vValveReplaceDateWrap','vValvePercutaneousWrap','vValveMVClipDateWrap','vValveTVClipDateWrap','vValveTAVIDateWrap','vGeneticsTypeWrap','vRecoveredLVTypeWrap','vLostFUReasonWrap','vLostFUOtherWrap','vAdvHFTherapyWrap'];
     vHide.forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='none';});
     // Reset visit comorbidity pills + outline buttons
     document.querySelectorAll('#vPillComorbidities .pill-toggle').forEach(function(p){p.classList.remove('active');});
@@ -7272,7 +7351,7 @@ function toggleVisitRow(headerEl){
 function buildVisitDetailHTML(v){
     var sections=[
         {name:'Symptoms & Vitals', fields:[['NYHA','V_NYHA'],['KCCQ','V_KCCQ'],['Symptoms','V_Fatigue'],['Edema','V_Edema'],['Pulse','V_Pulse'],['BP','V_BP'],['SpO2','V_SpO2'],['Height','V_Height'],['Weight','V_Weight'],['BMI','V_BMI'],['JVP','V_JVP'],['Rales','V_Rales'],['S3','V_S3']]},
-        {name:'Risk Factors & Comorbidities', fields:[['DM','V_DM'],['HTN','V_HTN'],['AF','V_AF'],['IHD','V_IHD'],['CKD','V_CKD'],['Dialysis','V_Dialysis'],['CVA','V_CVA'],['PVD','V_PVD'],['Smoking','V_Smoker'],['Obese','V_Obese'],['OSA','V_OSA'],['Dyslipidemia','V_Dyslipidemia'],['Thyroid','V_Thyroid_Dz'],['Family History','V_FH_Cardio'],['Genetics','V_Genetics'],['Gene Type','V_Genetics_Type'],['Other','V_Comorbid_Others'],['Procedures','V_Procedures'],['Device History','V_Device_Done'],['Device Type','V_Device_Type'],['Device Date','V_Device_Date'],['Device Info','V_Device_Info'],['CA/CAG','V_Proc_CA_Done'],['CA/CAG Date','V_Proc_CA_Date'],['CA/CAG Details','V_Proc_CA_Details'],['PCI / CABG','V_PCI_CABG'],['PCI/CABG Date','V_PCI_CABG_Date'],['PCI/CABG Details','V_PCI_CABG_Details'],['Ablation','V_Proc_Ablation_Done'],['Ablation Type','V_Proc_Ablation_Type'],['Procedure Notes','V_Procedures_Notes']]},
+        {name:'Risk Factors & Comorbidities', fields:[['DM','V_DM'],['HTN','V_HTN'],['AF','V_AF'],['IHD','V_IHD'],['CKD','V_CKD'],['Dialysis','V_Dialysis'],['CVA','V_CVA'],['PVD','V_PVD'],['Smoking','V_Smoker'],['Obese','V_Obese'],['OSA','V_OSA'],['Dyslipidemia','V_Dyslipidemia'],['Thyroid','V_Thyroid_Dz'],['Family History','V_FH_Cardio'],['Genetics','V_Genetics'],['Gene Type','V_Genetics_Type'],['Other','V_Comorbid_Others'],['Procedures','V_Procedures'],['Device History','V_Device_Done'],['Device Type','V_Device_Type'],['Device Date','V_Device_Date'],['Device Info','V_Device_Info'],['CA/CAG','V_Proc_CA_Done'],['CA/CAG Date','V_Proc_CA_Date'],['CA/CAG Details','V_Proc_CA_Details'],['PCI','V_Proc_PCI_Done'],['PCI Date','V_Proc_PCI_Date'],['PCI Stents #','V_Proc_PCI_Stents_Number'],['PCI Details','V_Proc_PCI_Details'],['CABG','V_Proc_CABG_Done'],['CABG Date','V_Proc_CABG_Date'],['CABG Details','V_Proc_CABG_Details'],['Legacy PCI/CABG','V_PCI_CABG'],['Legacy PCI/CABG Date','V_PCI_CABG_Date'],['Legacy PCI/CABG Details','V_PCI_CABG_Details'],['Ablation','V_Proc_Ablation_Done'],['Ablation Type','V_Proc_Ablation_Type'],['Procedure Notes','V_Procedures_Notes']]},
         {name:'ECG / Echo',        fields:[['ECG Done','V_ECG_Done'],['LBBB','V_LBBB'],['QRS','V_QRS'],['Arrhythmia','V_Arrhythmia'],['Pacing in ECG','V_Pacing_ECG'],['Pacing Mode','V_Pacing_Mode'],['Echo Done','V_Echo_Done'],['EF Change','V_EF_Change'],['Echo EDVI/EDD','V_Echo_EDVI'],['Echo ESVI/ESD','V_Echo_ESVI'],['Echo EF','V_Echo_EF'],['Echo Other','V_Echo_Other']]},
         {name:'Holter Results',    fields:[['Holter Done','V_Holter_Done'],['Date','V_Holter_Date'],['Duration (h)','V_Holter_Duration'],['Max HR','V_Holter_MaxHR'],['Min HR','V_Holter_MinHR'],['Avg HR','V_Holter_AvgHR'],['Arrhythmia Burden','V_Holter_Arrhythmia'],['Findings','V_Holter_Findings']]},
         {name:'CMR / Functional / Cath', fields:[['CMR Done','V_CMR_Done'],['CMR LVEDVI/EDD','V_CMR_LVEDVI'],['CMR LVESVI/ESD','V_CMR_LVESVI'],['CMR LVEF','V_CMR_LVEF'],['CMR RVEDI','V_CMR_RVEDI'],['CMR RVEF','V_CMR_RVEF'],['CMR LGE','V_CMR_LGE'],['CMR LGE %','V_CMR_LGE_Pct'],['CMR Others','V_CMR_Others'],['6MWT Completed','V_Walk_Completed'],['6MWT Meters','V_Walk_Meters'],['CPET Done','V_CPET_Done'],['Peak VO2','V_CPET_PeakVO2'],['VE/VCO2','V_CPET_VEVCO2'],['RER','V_CPET_RER'],['Anaerobic Threshold','V_CPET_AT'],['VO2/HR','V_CPET_VO2HR'],['PetCO2','V_CPET_PetCO2'],['RHC Done','V_RHC_Done'],['RHC CI','V_RHC_CI'],['RHC RAP','V_RHC_RAP'],['RHC RVP','V_RHC_RVP'],['RHC PCWP','V_RHC_PCWP'],['RHC PAP','V_RHC_PAP'],['RHC PVR','V_RHC_PVR'],['RHC PAPi','V_RHC_PAPi'],['RHC LV','V_RHC_LV'],['RHC MVO2','V_RHC_MVO2'],['F/U CAG Done','V_CAG_Done'],['F/U CAG Date','V_CAG_Date'],['F/U CAG Findings','V_CAG_Findings'],['F/U PCI Done','V_CAG_PCI_Done'],['F/U PCI Date','V_CAG_PCI_Date'],['Number of Stents','V_CAG_Stents_Number'],['F/U PCI Details','V_CAG_PCI_Details']]},
@@ -7388,7 +7467,7 @@ function resetForm(){
     var _hst=document.getElementById('Hemo_Support_Type'); if(_hst) _hst.value='';
     if(typeof renderHemoSupportUI==='function') renderHemoSupportUI();
     // Hide conditional panels
-    var hideIds=['valvularTypeWrap','deviceHistoryWrap','ecgDetailsWrap','cmrLGEPctWrap','echoDetailsWrap','cmrDetailsWrap','cpetDetailsWrap','vDeviceHistoryWrap','vEcgDetailsWrap','vEchoDetailsWrap','vCmrDetailsWrap','vCpetDetailsWrap','vCagDetailsWrap','vCagPciDetailsWrap','vProcCAWrap','vProcDeviceWrap','vProcAblationWrap','vProcPericardiocentesisWrap','vProcPleuralTappingWrap','vProcAscitesTappingWrap','vProcOtherWrap','vCmrLGEPctWrap','walkMetersWrap','rhcDetailsWrap','pciCabgDetailsWrap','ctAngioDetailsWrap','lostFUReasonWrap','lostFUOtherWrap','valveSurgeryDateWrap','hfTypeOtherWrap','transferHospitalWrap','geneticsTypeWrap','cardioversionTypeWrap','cagDetailsWrap','cagPciDetailsWrap','holterDetailsWrap','bleedingUnitsWrap','bleedingSiteWrap','procDeviceWrap','procAblationWrap','procPericardiocentesisWrap','procPleuralTappingWrap','procAscitesTappingWrap','procOtherWrap','vPacingModeWrap','vHolterDetailsWrap','vHolterDateWrap','vHolterDurationWrap','vHolterMaxHRWrap','vHolterMinHRWrap','vHolterAvgHRWrap','vHolterArrhythmiaWrap','vHolterFindingsWrap'];
+    var hideIds=['valvularTypeWrap','deviceHistoryWrap','ecgDetailsWrap','cmrLGEPctWrap','echoDetailsWrap','cmrDetailsWrap','cpetDetailsWrap','vDeviceHistoryWrap','vEcgDetailsWrap','vEchoDetailsWrap','vCmrDetailsWrap','vCpetDetailsWrap','vCagDetailsWrap','vCagPciDetailsWrap','vProcCAWrap','vProcPCIWrap','vProcCABGWrap','vProcDeviceWrap','vProcAblationWrap','vProcPericardiocentesisWrap','vProcPleuralTappingWrap','vProcAscitesTappingWrap','vProcOtherWrap','vCmrLGEPctWrap','walkMetersWrap','rhcDetailsWrap','pciCabgDetailsWrap','ctAngioDetailsWrap','lostFUReasonWrap','lostFUOtherWrap','valveSurgeryDateWrap','hfTypeOtherWrap','transferHospitalWrap','geneticsTypeWrap','cardioversionTypeWrap','cagDetailsWrap','cagPciDetailsWrap','holterDetailsWrap','bleedingUnitsWrap','bleedingSiteWrap','procDeviceWrap','procAblationWrap','procPericardiocentesisWrap','procPleuralTappingWrap','procAscitesTappingWrap','procOtherWrap','vPacingModeWrap','vHolterDetailsWrap','vHolterDateWrap','vHolterDurationWrap','vHolterMaxHRWrap','vHolterMinHRWrap','vHolterAvgHRWrap','vHolterArrhythmiaWrap','vHolterFindingsWrap'];
     hideIds.forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='none';});
     // Reset valvular-type, PCI/CABG, and InHospitalProcedures multi-select buttons
     document.querySelectorAll('#valvularTypeBox button, #pciCabgBox button, #inHospProceduresBox button').forEach(function(b){ b.classList.remove('btn-primary'); b.classList.add('btn-outline-primary'); });
@@ -7900,7 +7979,7 @@ function _clearPatientFormFields(){
         });
     }
     // Hide all conditional panels
-    var hideIds=['valvularTypeWrap','deviceHistoryWrap','ecgDetailsWrap','cmrLGEPctWrap','echoDetailsWrap','cmrDetailsWrap','cpetDetailsWrap','vDeviceHistoryWrap','vEcgDetailsWrap','vEchoDetailsWrap','vCmrDetailsWrap','vCpetDetailsWrap','vCagDetailsWrap','vCagPciDetailsWrap','vProcCAWrap','vProcDeviceWrap','vProcAblationWrap','vProcPericardiocentesisWrap','vProcPleuralTappingWrap','vProcAscitesTappingWrap','vProcOtherWrap','vCmrLGEPctWrap','walkMetersWrap','rhcDetailsWrap','pciCabgDetailsWrap','ctAngioDetailsWrap','cagDetailsWrap','cagPciDetailsWrap','lostFUReasonWrap','lostFUOtherWrap','valveSurgeryDateWrap','hfTypeOtherWrap','transferHospitalWrap','geneticsTypeWrap','cardioversionTypeWrap','bleedingUnitsWrap','bleedingSiteWrap','procDeviceWrap','procAblationWrap','procPericardiocentesisWrap','procPleuralTappingWrap','procAscitesTappingWrap','procOtherWrap'];
+    var hideIds=['valvularTypeWrap','deviceHistoryWrap','ecgDetailsWrap','cmrLGEPctWrap','echoDetailsWrap','cmrDetailsWrap','cpetDetailsWrap','vDeviceHistoryWrap','vEcgDetailsWrap','vEchoDetailsWrap','vCmrDetailsWrap','vCpetDetailsWrap','vCagDetailsWrap','vCagPciDetailsWrap','vProcCAWrap','vProcPCIWrap','vProcCABGWrap','vProcDeviceWrap','vProcAblationWrap','vProcPericardiocentesisWrap','vProcPleuralTappingWrap','vProcAscitesTappingWrap','vProcOtherWrap','vCmrLGEPctWrap','walkMetersWrap','rhcDetailsWrap','pciCabgDetailsWrap','ctAngioDetailsWrap','cagDetailsWrap','cagPciDetailsWrap','lostFUReasonWrap','lostFUOtherWrap','valveSurgeryDateWrap','hfTypeOtherWrap','transferHospitalWrap','geneticsTypeWrap','cardioversionTypeWrap','bleedingUnitsWrap','bleedingSiteWrap','procDeviceWrap','procAblationWrap','procPericardiocentesisWrap','procPleuralTappingWrap','procAscitesTappingWrap','procOtherWrap'];
     hideIds.forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     // Reset extra in-hospital admissions list
     var ea=document.getElementById('Extra_Admissions'); if(ea){ ea.value='[]'; var ew=document.getElementById('extraAdmissionsWrap'); if(ew) ew.innerHTML=''; }
@@ -8164,7 +8243,7 @@ function generateExcel(data,visitsData,id){
         }
     });pr.push([]);});
     var ws1=XLSX.utils.aoa_to_sheet(pr);XLSX.utils.book_append_sheet(wb,ws1,"Patient Info");
-    if(visitsData.length>0){var vr=[];vr.push(["VISIT HISTORY"]);vr.push([]);visitsData.forEach(function(visit,idx){vr.push(["Visit #"+(visitsData.length-idx),"Date: "+visit.visitDate,"Type: "+visit.visitType]);var vFields=['V_Fatigue','V_NYHA','V_KCCQ','V_Edema','V_Pulse','V_BP','V_SpO2','V_Height','V_Weight','V_BMI','V_JVP','V_Rales','V_S3','V_Device_Done','V_Device_Type','V_Device_Date','V_Device_Info','V_ECG_Done','V_LBBB','V_QRS','V_Arrhythmia','V_Pacing_ECG','V_Pacing_Mode','V_Holter_Done','V_Holter_Date','V_Holter_Duration','V_Holter_MaxHR','V_Holter_MinHR','V_Holter_AvgHR','V_Holter_Arrhythmia','V_Holter_Findings','V_Echo_Done','V_EF_Change','V_Echo_EDVI','V_Echo_ESVI','V_Echo_EF','V_Echo_Other','V_CMR_Done','V_CMR_LVEDVI','V_CMR_LVESVI','V_CMR_LVEF','V_CMR_RVEDI','V_CMR_RVEF','V_CMR_LGE','V_CMR_LGE_Pct','V_CMR_Others','V_Walk_Completed','V_Walk_Meters','V_CPET_Done','V_CPET_PeakVO2','V_CPET_VEVCO2','V_CPET_RER','V_CPET_AT','V_CPET_VO2HR','V_CPET_PetCO2','V_RHC_Done','V_RHC_CI','V_RHC_RAP','V_RHC_RVP','V_RHC_PCWP','V_RHC_PAP','V_RHC_PVR','V_RHC_PAPi','V_RHC_LV','V_RHC_MVO2','V_CAG_Done','V_CAG_Date','V_CAG_Findings','V_CAG_PCI_Done','V_CAG_PCI_Date','V_CAG_Stents_Number','V_CAG_PCI_Details','V_Procedures','V_Proc_CA_Done','V_Proc_CA_Date','V_Proc_CA_Details','V_Proc_Device_Done','V_Proc_Device_Type','V_Proc_Device_Date','V_Proc_Ablation_Done','V_Proc_Ablation_Type','V_Proc_Pericardiocentesis_Done','V_Proc_Pericardiocentesis_Volume','V_Proc_Pleural_Tapping_Done','V_Proc_Pleural_Tapping_Volume','V_Proc_Ascites_Tapping_Done','V_Proc_Ascites_Tapping_Volume','V_Proc_Other_Done','V_Proc_Other','V_Procedures_Notes','V_HbA1c','V_Gluc','V_Urea','V_Creat','V_eGFR','V_Na','V_K','V_BNP','V_NTproBNP','V_INR','V_Iron','V_Transferrin','V_Ferritin','V_WBC','V_Hb','V_Plt','V_TSH','V_FreeT4','V_TotalChol','V_LDL','V_HDL','V_TG','V_Lab_Others','V_Vacc_Influenza','V_Vacc_Influenza_Date','V_Vacc_Pneumococcal','V_Vacc_Pneumococcal_Date','V_Vacc_COVID','V_Vacc_COVID_Date','V_Vacc_RSV','V_Vacc_RSV_Date','V_Vacc_Notes','V_Vacc_Influenza_Year','V_Vacc_Pneumococcal_Year','V_Vacc_COVID_Year','V_Vacc_Other'];VISIT_MED_LIST.forEach(function(m){vFields.push(m.id);vFields.push(m.id+'_Status');vFields.push(m.id+'_Custom');vFields.push(m.id+'_Freq');});vFields.push('V_Med_Others','V_AdverseEffects','V_Compliance','V_ComplianceNotes','V_Adverse','V_Plan','V_Others','V_Referral','V_Referral_Other','Next_Appt_Notes','V_Quad_GDMT','V_Max_GDMT','V_Recovered_LV','V_Recovered_LV_Type','V_Mortality','V_LostFU','V_LostFU_Reason','V_LostFU_Other','V_Advanced_HF_Outcome','V_Strong_HF','V_Adv_HF_Therapy','V_Adv_HF_Therapy_Type','V_Outcome_Notes');vFields.forEach(function(f){var val=visit[f];if(val&&val.toString().trim()!=='')vr.push([f.replace('V_','').replace(/_/g,' '),val]);});vr.push([]);});var ws2=XLSX.utils.aoa_to_sheet(vr);XLSX.utils.book_append_sheet(wb,ws2,"Visits");}
+    if(visitsData.length>0){var vr=[];vr.push(["VISIT HISTORY"]);vr.push([]);visitsData.forEach(function(visit,idx){vr.push(["Visit #"+(visitsData.length-idx),"Date: "+visit.visitDate,"Type: "+visit.visitType]);var vFields=['V_Fatigue','V_NYHA','V_KCCQ','V_Edema','V_Pulse','V_BP','V_SpO2','V_Height','V_Weight','V_BMI','V_JVP','V_Rales','V_S3','V_Device_Done','V_Device_Type','V_Device_Date','V_Device_Info','V_ECG_Done','V_LBBB','V_QRS','V_Arrhythmia','V_Pacing_ECG','V_Pacing_Mode','V_Holter_Done','V_Holter_Date','V_Holter_Duration','V_Holter_MaxHR','V_Holter_MinHR','V_Holter_AvgHR','V_Holter_Arrhythmia','V_Holter_Findings','V_Echo_Done','V_EF_Change','V_Echo_EDVI','V_Echo_ESVI','V_Echo_EF','V_Echo_Other','V_CMR_Done','V_CMR_LVEDVI','V_CMR_LVESVI','V_CMR_LVEF','V_CMR_RVEDI','V_CMR_RVEF','V_CMR_LGE','V_CMR_LGE_Pct','V_CMR_Others','V_Walk_Completed','V_Walk_Meters','V_CPET_Done','V_CPET_PeakVO2','V_CPET_VEVCO2','V_CPET_RER','V_CPET_AT','V_CPET_VO2HR','V_CPET_PetCO2','V_RHC_Done','V_RHC_CI','V_RHC_RAP','V_RHC_RVP','V_RHC_PCWP','V_RHC_PAP','V_RHC_PVR','V_RHC_PAPi','V_RHC_LV','V_RHC_MVO2','V_CAG_Done','V_CAG_Date','V_CAG_Findings','V_CAG_PCI_Done','V_CAG_PCI_Date','V_CAG_Stents_Number','V_CAG_PCI_Details','V_Procedures','V_Proc_CA_Done','V_Proc_CA_Date','V_Proc_CA_Details','V_Proc_PCI_Done','V_Proc_PCI_Date','V_Proc_PCI_Stents_Number','V_Proc_PCI_Details','V_Proc_CABG_Done','V_Proc_CABG_Date','V_Proc_CABG_Details','V_PCI_CABG','V_PCI_CABG_Date','V_PCI_CABG_Details','V_Proc_Device_Done','V_Proc_Device_Type','V_Proc_Device_Date','V_Proc_Ablation_Done','V_Proc_Ablation_Type','V_Proc_Pericardiocentesis_Done','V_Proc_Pericardiocentesis_Volume','V_Proc_Pleural_Tapping_Done','V_Proc_Pleural_Tapping_Volume','V_Proc_Ascites_Tapping_Done','V_Proc_Ascites_Tapping_Volume','V_Proc_Other_Done','V_Proc_Other','V_Procedures_Notes','V_HbA1c','V_Gluc','V_Urea','V_Creat','V_eGFR','V_Na','V_K','V_BNP','V_NTproBNP','V_INR','V_Iron','V_Transferrin','V_Ferritin','V_WBC','V_Hb','V_Plt','V_TSH','V_FreeT4','V_TotalChol','V_LDL','V_HDL','V_TG','V_Lab_Others','V_Vacc_Influenza','V_Vacc_Influenza_Date','V_Vacc_Pneumococcal','V_Vacc_Pneumococcal_Date','V_Vacc_COVID','V_Vacc_COVID_Date','V_Vacc_RSV','V_Vacc_RSV_Date','V_Vacc_Notes','V_Vacc_Influenza_Year','V_Vacc_Pneumococcal_Year','V_Vacc_COVID_Year','V_Vacc_Other'];VISIT_MED_LIST.forEach(function(m){vFields.push(m.id);vFields.push(m.id+'_Status');vFields.push(m.id+'_Custom');vFields.push(m.id+'_Freq');});vFields.push('V_Med_Others','V_AdverseEffects','V_Compliance','V_ComplianceNotes','V_Adverse','V_Plan','V_Others','V_Referral','V_Referral_Other','Next_Appt_Notes','V_Quad_GDMT','V_Max_GDMT','V_Recovered_LV','V_Recovered_LV_Type','V_Mortality','V_LostFU','V_LostFU_Reason','V_LostFU_Other','V_Advanced_HF_Outcome','V_Strong_HF','V_Adv_HF_Therapy','V_Adv_HF_Therapy_Type','V_Outcome_Notes');vFields.forEach(function(f){var val=visit[f];if(val&&val.toString().trim()!=='')vr.push([f.replace('V_','').replace(/_/g,' '),val]);});vr.push([]);});var ws2=XLSX.utils.aoa_to_sheet(vr);XLSX.utils.book_append_sheet(wb,ws2,"Visits");}
     XLSX.writeFile(wb,"HF_Registry_"+(data.File_No||'unknown')+"_"+(data.Patient_Name||'patient')+".xlsx");showPopup("success","Excel Exported!","File downloaded successfully.");
 }
 
@@ -8198,7 +8277,7 @@ function generatePDF(data,visitsData,id){
     var mf=VISIT_MED_LIST.map(function(m){return m.id;});
     mf.push('V_Med_Others');
     visitsData.forEach(function(visit,idx){html+="<div style='border:2px solid #17a2b8;margin:15px 0;padding:15px;border-radius:8px;'><h4 style='color:#17a2b8;margin-top:0;'>Visit #"+(visitsData.length-idx)+": "+visit.visitDate+" ("+visit.visitType+")</h4>";
-    var vs=[{name:'Symptoms',fields:['V_Fatigue','V_NYHA','V_KCCQ','V_Edema']},{name:'Signs/Vitals',fields:['V_Pulse','V_BP','V_SpO2','V_Height','V_Weight','V_BMI','V_JVP','V_Rales','V_S3']},{name:'Risk Factors & Comorbidities',fields:['V_DM','V_HTN','V_AF','V_IHD','V_CKD','V_Dialysis','V_CVA','V_PVD','V_Smoker','V_Obese','V_OSA','V_Dyslipidemia','V_Thyroid_Dz','V_FH_Cardio','V_Genetics','V_Genetics_Type','V_Comorbid_Others','V_Procedures','V_Device_Done','V_Device_Type','V_Device_Date','V_Device_Info','V_Proc_CA_Done','V_Proc_CA_Date','V_Proc_CA_Details','V_PCI_CABG','V_PCI_CABG_Date','V_PCI_CABG_Details','V_Proc_Ablation_Done','V_Proc_Ablation_Type','V_Procedures_Notes']},{name:'ECG',fields:['V_ECG_Done','V_LBBB','V_QRS','V_Arrhythmia','V_Pacing_ECG','V_Pacing_Mode']},{name:'Holter',fields:['V_Holter_Done','V_Holter_Date','V_Holter_Duration','V_Holter_MaxHR','V_Holter_MinHR','V_Holter_AvgHR','V_Holter_Arrhythmia','V_Holter_Findings']},{name:'Labs',fields:['V_HbA1c','V_Gluc','V_Urea','V_Creat','V_eGFR','V_Na','V_K','V_BNP','V_NTproBNP','V_INR','V_Iron','V_Transferrin','V_Ferritin','V_WBC','V_Hb','V_Plt','V_TSH','V_FreeT4','V_TotalChol','V_LDL','V_HDL','V_TG','V_Lab_Others']},{name:'F/U Echo',fields:['V_Echo_Done','V_EF_Change','V_Echo_EDVI','V_Echo_ESVI','V_Echo_EF','V_Echo_Other']},{name:'F/U CMR',fields:['V_CMR_Done','V_CMR_LVEDVI','V_CMR_LVESVI','V_CMR_LVEF','V_CMR_RVEDI','V_CMR_RVEF','V_CMR_LGE','V_CMR_LGE_Pct','V_CMR_Others']},{name:'F/U 6MWT',fields:['V_Walk_Completed','V_Walk_Meters']},{name:'F/U CPET',fields:['V_CPET_Done','V_CPET_PeakVO2','V_CPET_VEVCO2','V_CPET_RER','V_CPET_AT','V_CPET_VO2HR','V_CPET_PetCO2']},{name:'F/U Right Heart Cath',fields:['V_RHC_Done','V_RHC_CI','V_RHC_RAP','V_RHC_RVP','V_RHC_PCWP','V_RHC_PAP','V_RHC_PVR','V_RHC_PAPi','V_RHC_LV','V_RHC_MVO2']},{name:'F/U CAG/PCI',fields:['V_CAG_Done','V_CAG_Date','V_CAG_Findings','V_CAG_PCI_Done','V_CAG_PCI_Date','V_CAG_Stents_Number','V_CAG_PCI_Details']},{name:'Medications',fields:mf},{name:'Vaccinations',fields:['V_Vacc_Influenza','V_Vacc_Influenza_Date','V_Vacc_Pneumococcal','V_Vacc_Pneumococcal_Date','V_Vacc_COVID','V_Vacc_COVID_Date','V_Vacc_RSV','V_Vacc_RSV_Date','V_Vacc_Notes','V_Vacc_Influenza_Year','V_Vacc_Pneumococcal_Year','V_Vacc_COVID_Year','V_Vacc_Other']},{name:'Next Appointment',fields:['Next_Appt_Notes']},{name:'Plan',fields:['V_AdverseEffects','V_Compliance','V_ComplianceNotes','V_Adverse','V_Plan','V_Others','V_Referral','V_Referral_Other']},{name:'Outcomes & Management',fields:['V_Quad_GDMT','V_Max_GDMT','V_Recovered_LV','V_Recovered_LV_Type','V_Mortality','V_LostFU','V_LostFU_Reason','V_LostFU_Other','V_Advanced_HF_Outcome','V_Strong_HF','V_Adv_HF_Therapy','V_Adv_HF_Therapy_Type','V_Outcome_Notes']}];
+    var vs=[{name:'Symptoms',fields:['V_Fatigue','V_NYHA','V_KCCQ','V_Edema']},{name:'Signs/Vitals',fields:['V_Pulse','V_BP','V_SpO2','V_Height','V_Weight','V_BMI','V_JVP','V_Rales','V_S3']},{name:'Risk Factors & Comorbidities',fields:['V_DM','V_HTN','V_AF','V_IHD','V_CKD','V_Dialysis','V_CVA','V_PVD','V_Smoker','V_Obese','V_OSA','V_Dyslipidemia','V_Thyroid_Dz','V_FH_Cardio','V_Genetics','V_Genetics_Type','V_Comorbid_Others','V_Procedures','V_Device_Done','V_Device_Type','V_Device_Date','V_Device_Info','V_Proc_CA_Done','V_Proc_CA_Date','V_Proc_CA_Details','V_Proc_PCI_Done','V_Proc_PCI_Date','V_Proc_PCI_Stents_Number','V_Proc_PCI_Details','V_Proc_CABG_Done','V_Proc_CABG_Date','V_Proc_CABG_Details','V_PCI_CABG','V_PCI_CABG_Date','V_PCI_CABG_Details','V_Proc_Ablation_Done','V_Proc_Ablation_Type','V_Procedures_Notes']},{name:'ECG',fields:['V_ECG_Done','V_LBBB','V_QRS','V_Arrhythmia','V_Pacing_ECG','V_Pacing_Mode']},{name:'Holter',fields:['V_Holter_Done','V_Holter_Date','V_Holter_Duration','V_Holter_MaxHR','V_Holter_MinHR','V_Holter_AvgHR','V_Holter_Arrhythmia','V_Holter_Findings']},{name:'Labs',fields:['V_HbA1c','V_Gluc','V_Urea','V_Creat','V_eGFR','V_Na','V_K','V_BNP','V_NTproBNP','V_INR','V_Iron','V_Transferrin','V_Ferritin','V_WBC','V_Hb','V_Plt','V_TSH','V_FreeT4','V_TotalChol','V_LDL','V_HDL','V_TG','V_Lab_Others']},{name:'F/U Echo',fields:['V_Echo_Done','V_EF_Change','V_Echo_EDVI','V_Echo_ESVI','V_Echo_EF','V_Echo_Other']},{name:'F/U CMR',fields:['V_CMR_Done','V_CMR_LVEDVI','V_CMR_LVESVI','V_CMR_LVEF','V_CMR_RVEDI','V_CMR_RVEF','V_CMR_LGE','V_CMR_LGE_Pct','V_CMR_Others']},{name:'F/U 6MWT',fields:['V_Walk_Completed','V_Walk_Meters']},{name:'F/U CPET',fields:['V_CPET_Done','V_CPET_PeakVO2','V_CPET_VEVCO2','V_CPET_RER','V_CPET_AT','V_CPET_VO2HR','V_CPET_PetCO2']},{name:'F/U Right Heart Cath',fields:['V_RHC_Done','V_RHC_CI','V_RHC_RAP','V_RHC_RVP','V_RHC_PCWP','V_RHC_PAP','V_RHC_PVR','V_RHC_PAPi','V_RHC_LV','V_RHC_MVO2']},{name:'F/U CAG/PCI',fields:['V_CAG_Done','V_CAG_Date','V_CAG_Findings','V_CAG_PCI_Done','V_CAG_PCI_Date','V_CAG_Stents_Number','V_CAG_PCI_Details']},{name:'Medications',fields:mf},{name:'Vaccinations',fields:['V_Vacc_Influenza','V_Vacc_Influenza_Date','V_Vacc_Pneumococcal','V_Vacc_Pneumococcal_Date','V_Vacc_COVID','V_Vacc_COVID_Date','V_Vacc_RSV','V_Vacc_RSV_Date','V_Vacc_Notes','V_Vacc_Influenza_Year','V_Vacc_Pneumococcal_Year','V_Vacc_COVID_Year','V_Vacc_Other']},{name:'Next Appointment',fields:['Next_Appt_Notes']},{name:'Plan',fields:['V_AdverseEffects','V_Compliance','V_ComplianceNotes','V_Adverse','V_Plan','V_Others','V_Referral','V_Referral_Other']},{name:'Outcomes & Management',fields:['V_Quad_GDMT','V_Max_GDMT','V_Recovered_LV','V_Recovered_LV_Type','V_Mortality','V_LostFU','V_LostFU_Reason','V_LostFU_Other','V_Advanced_HF_Outcome','V_Strong_HF','V_Adv_HF_Therapy','V_Adv_HF_Therapy_Type','V_Outcome_Notes']}];
     vs.forEach(function(vsec){var hd=false;vsec.fields.forEach(function(vf){if(visit[vf]&&visit[vf].toString().trim()!=='')hd=true;});if(!hd)return;
     html+="<h5 style='margin:10px 0 5px 0;color:#555;'>"+vsec.name+"</h5><table style='width:100%;border-collapse:collapse;font-size:11px;margin-bottom:10px;'>";
     vsec.fields.forEach(function(vf){var val=visit[vf];if(val&&val.toString().trim()!==''){html+="<tr style='border-bottom:1px solid #eee;'><td style='width:40%;padding:4px;background:#f5f5f5;'>"+vf.replace('V_','').replace(/_/g,' ')+"</td><td style='padding:4px;'>"+val+"</td></tr>";}});html+="</table>";});html+="</div>";});}
@@ -9558,16 +9637,16 @@ function exportAllVisitsSPSS(){
         'V_Echo_EDVI','V_Echo_ESVI','V_Echo_EF','V_CMR_LVEDVI','V_CMR_LVESVI','V_CMR_LVEF','V_CMR_RVEDI','V_CMR_RVEF','V_CMR_LGE_Pct',
         'V_Walk_Meters','V_CPET_PeakVO2','V_CPET_VEVCO2','V_CPET_RER','V_CPET_AT','V_CPET_VO2HR','V_CPET_PetCO2',
         'V_RHC_CI','V_RHC_RAP','V_RHC_RVP','V_RHC_PCWP','V_RHC_PAP','V_RHC_PVR','V_RHC_PAPi','V_RHC_MVO2',
-        'V_CAG_Stents_Number','V_Proc_Pericardiocentesis_Volume','V_Proc_Pleural_Tapping_Volume','V_Proc_Ascites_Tapping_Volume',
+        'V_CAG_Stents_Number','V_Proc_PCI_Stents_Number','V_Proc_Pericardiocentesis_Volume','V_Proc_Pleural_Tapping_Volume','V_Proc_Ascites_Tapping_Volume',
         'V_HbA1c','V_Gluc','V_Urea','V_Creat','V_eGFR','V_Na','V_K','V_BNP','V_NTproBNP','V_INR',
         'V_Iron','V_Transferrin','V_Ferritin','V_WBC','V_Hb','V_Plt','V_TSH','V_FreeT4',
         'V_TotalChol','V_LDL','V_HDL','V_TG'];
     var V_BINARY = ['V_Device_Done','V_ECG_Done','V_Holter_Done','V_Echo_Done','V_CMR_Done','V_Walk_Completed','V_CPET_Done','V_RHC_Done',
-        'V_CAG_Done','V_CAG_PCI_Done','V_Proc_CA_Done','V_Proc_Device_Done','V_Proc_Ablation_Done','V_Proc_Pericardiocentesis_Done','V_Proc_Pleural_Tapping_Done','V_Proc_Ascites_Tapping_Done','V_Proc_Other_Done',
+        'V_CAG_Done','V_CAG_PCI_Done','V_Proc_CA_Done','V_Proc_PCI_Done','V_Proc_CABG_Done','V_Proc_Device_Done','V_Proc_Ablation_Done','V_Proc_Pericardiocentesis_Done','V_Proc_Pleural_Tapping_Done','V_Proc_Ascites_Tapping_Done','V_Proc_Other_Done',
         'V_Quad_GDMT','V_Max_GDMT','V_Recovered_LV','V_Strong_HF','V_Adv_HF_Therapy'];
     var V_TEXT = ['V_NYHA','V_Fatigue','V_Edema','V_BP','V_JVP','V_Rales','V_S3','V_LBBB','V_Arrhythmia',
         'V_Pacing_ECG','V_Pacing_Mode','V_Device_Type','V_Device_Info','V_EF_Change','V_CMR_LGE',
-        'V_CAG_Findings','V_CAG_PCI_Details','V_Procedures','V_Proc_CA_Date','V_Proc_CA_Details','V_PCI_CABG','V_PCI_CABG_Date','V_PCI_CABG_Details','V_Proc_Device_Type','V_Proc_Ablation_Type','V_Proc_Other','V_Procedures_Notes',
+        'V_CAG_Findings','V_CAG_PCI_Details','V_Procedures','V_Proc_CA_Date','V_Proc_CA_Details','V_Proc_PCI_Date','V_Proc_PCI_Details','V_Proc_CABG_Date','V_Proc_CABG_Details','V_PCI_CABG','V_PCI_CABG_Date','V_PCI_CABG_Details','V_Proc_Device_Type','V_Proc_Ablation_Type','V_Proc_Other','V_Procedures_Notes',
         'V_Compliance','V_Mortality','V_LostFU','V_Advanced_HF_Outcome','V_Adv_HF_Therapy_Type','V_Referral','V_Lab_Others','V_Med_Others'];
 
     function toBin(v){
