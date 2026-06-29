@@ -733,6 +733,7 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 }
 
 /* Data-entry comfort: admissions and visits use a calmer vertical rhythm. */
+.form-step[data-step="1"] .section-card-body > .row.g-2 > [class*="col-"],
 .form-step[data-step="2"] .section-card-body > .row.g-2 > [class*="col-"],
 .form-step[data-step="3"] .section-card-body > .row.g-2 > [class*="col-"],
 .form-step[data-step="3"] .field-tint .row.g-2 > [class*="col-"],
@@ -742,6 +743,8 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
     flex:0 0 100%;
     max-width:100%;
 }
+.form-step[data-step="1"] .form-control,
+.form-step[data-step="1"] .form-select,
 .form-step[data-step="2"] .form-control,
 .form-step[data-step="2"] .form-select,
 .form-step[data-step="3"] .form-control,
@@ -752,6 +755,7 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 .extra-adm-card .form-select{
     min-height:44px;
 }
+.form-step[data-step="1"] .row.g-2,
 .form-step[data-step="3"] .row.g-2,
 .form-step[data-step="4"] .visit-section .row.g-2{
     row-gap:0.75rem;
@@ -7421,19 +7425,44 @@ function _historyHasMeaningfulAdmissionData(adm){
     });
 }
 
+function _firstAdmissionDateValue(adm){
+    adm=adm||{};
+    var keys=['date','Admission_Date','admissionDate','AdmissionDate','Admit_Date','dischargeDate','Admission_Discharge_Date','Discharge_Date','Last_Admission','lastAdmission'];
+    for(var i=0;i<keys.length;i++){
+        var v=adm[keys[i]];
+        if(v!=null && String(v).trim()!=='') return v;
+    }
+    return '';
+}
+
+function _historyDateSortKey(v){
+    var d=_normalizeDisplayDate(v);
+    return /^\d{4}-\d{2}-\d{2}$/.test(d)?d:'';
+}
+
+function _admissionDateAlreadyShown(items,dateValue){
+    var key=_historyDateSortKey(dateValue);
+    if(!key) return false;
+    return items.some(function(it){return _historyDateSortKey(it._historyDate)===key;});
+}
+
 function buildAdmissionHistoryItems(patientId){
     var data=(patientId && typeof PC==='object' && PC[patientId]) ? PC[patientId] : {};
     var items=[];
     var main=_fillAdmissionFromSchema({}, data);
+    main.Last_Admission=_readPatientOrFormValue(data,'Last_Admission');
+    main.Admissions=_readPatientOrFormValue(data,'Admissions');
     main._admissionSeq=1;
     main._admissionLabel='In-Hospital Admission #1';
-    var hasMainAnchor=!!(main.date || main.dischargeDate || main.reason || main.LOS);
+    var mainDate=_firstAdmissionDateValue({date:main.date, Admission_Date:main.Admission_Date, dischargeDate:main.dischargeDate, Admission_Discharge_Date:main.Admission_Discharge_Date});
+    var hasMainAnchor=!!(main.date || main.Admission_Date || main.dischargeDate || main.Admission_Discharge_Date || main.reason || main.LOS || main.Admission_Cause || main.Transfer_Hospital_Name);
     if(hasMainAnchor && _historyHasMeaningfulAdmissionData(main)){
         items.push({
             _historyKind:'admission',
-            _historyDate:_normalizeDisplayDate(main.date || main.dischargeDate || ''),
+            _historyDate:_normalizeDisplayDate(mainDate),
             _admissionData:main,
-            _admissionLabel:main._admissionLabel
+            _admissionLabel:main._admissionLabel,
+            _historyOrder:items.length
         });
     }
     var rawExtra=(data && data.Extra_Admissions) || ((document.getElementById('Extra_Admissions')||{}).value) || '[]';
@@ -7445,27 +7474,63 @@ function buildAdmissionHistoryItems(patientId){
         var copy=Object.assign({}, adm);
         copy._admissionSeq=idx+2;
         copy._admissionLabel='In-Hospital Admission #'+(idx+2);
+        var extraDate=_firstAdmissionDateValue(copy);
         items.push({
             _historyKind:'admission',
-            _historyDate:_normalizeDisplayDate(copy.date || copy.Admission_Date || copy.dischargeDate || copy.Admission_Discharge_Date || ''),
+            _historyDate:_normalizeDisplayDate(extraDate),
             _admissionData:copy,
-            _admissionLabel:copy._admissionLabel
+            _admissionLabel:copy._admissionLabel,
+            _historyOrder:items.length
         });
     });
+    var lastAdmission=_readPatientOrFormValue(data,'Last_Admission');
+    var admissionsCount=_readPatientOrFormValue(data,'Admissions');
+    if(lastAdmission && !_admissionDateAlreadyShown(items,lastAdmission)){
+        var legacy={
+            date:lastAdmission,
+            Last_Admission:lastAdmission,
+            Admissions:admissionsCount,
+            LOS:_readPatientOrFormValue(data,'LOS'),
+            reason:'Last recorded in-hospital admission'
+        };
+        items.push({
+            _historyKind:'admission',
+            _historyDate:_normalizeDisplayDate(lastAdmission),
+            _admissionData:legacy,
+            _admissionLabel:'Last Recorded In-Hospital Admission',
+            _historyOrder:items.length
+        });
+    }
     return items;
 }
 
 // Return a YYYY-MM-DD form for display/sorting only. Never mutates the stored visitDate.
 function _normalizeDisplayDate(s){
     if(!s) return '';
+    if(s && typeof s.toDate==='function') s=s.toDate();
+    if(s instanceof Date && !isNaN(s.getTime())){
+        return s.getFullYear()+'-'+String(s.getMonth()+1).padStart(2,'0')+'-'+String(s.getDate()).padStart(2,'0');
+    }
+    if(typeof s==='object' && typeof s.seconds==='number'){
+        var tsDate=new Date(s.seconds*1000);
+        if(!isNaN(tsDate.getTime())) return tsDate.getFullYear()+'-'+String(tsDate.getMonth()+1).padStart(2,'0')+'-'+String(tsDate.getDate()).padStart(2,'0');
+    }
     s = String(s);
     // Strip BOM, zero-width spaces, leading apostrophe/backtick/whitespace
     s = s.replace(/^[\uFEFF\u200B\u200C\u200D'`\s]+/, '').replace(/\s+$/, '');
-    if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;          // already ISO
+    var ymd=s.match(/^(\d{4})[\/\-\.\s](\d{1,2})[\/\-\.\s](\d{1,2})(?:[T\s].*)?$/);
+    if(ymd) return ymd[1]+'-'+String(parseInt(ymd[2],10)).padStart(2,'0')+'-'+String(parseInt(ymd[3],10)).padStart(2,'0');
     // Accept lookalikes 'l'/'I' for '1', 'O' for '0' adjacent to digits
     var fixed = s.replace(/[lI](?=\d)|(?<=\d)[lI]/g, '1').replace(/O(?=\d)|(?<=\d)O/g, '0');
     var m = fixed.match(/^(\d{1,2})[\/\-\.\s](\d{1,2})[\/\-\.\s](\d{2,4})$/);
-    if(!m) return s;
+    if(!m){
+        var parsed=Date.parse(s);
+        if(!isNaN(parsed)){
+            var pd=new Date(parsed);
+            return pd.getFullYear()+'-'+String(pd.getMonth()+1).padStart(2,'0')+'-'+String(pd.getDate()).padStart(2,'0');
+        }
+        return s;
+    }
     var day=parseInt(m[1],10), mon=parseInt(m[2],10), yr=parseInt(m[3],10);
     if(yr<100) yr+=2000;
     if(mon>12 && day<=12){ var tmp=day; day=mon; mon=tmp; }
@@ -7484,8 +7549,14 @@ function renderCollapsibleVisits(visitsArr, admissionItems){
     });
     admissionItems.forEach(function(a){historyItems.push(a);});
     historyItems.sort(function(a,b){
-        var ka=a._historyDate||'', kb=b._historyDate||'';
-        return ka<kb ? 1 : (ka>kb ? -1 : 0);
+        var ka=_historyDateSortKey(a._historyDate), kb=_historyDateSortKey(b._historyDate);
+        if(ka||kb){
+            if(!ka) return 1;
+            if(!kb) return -1;
+            if(ka!==kb) return ka<kb ? 1 : -1;
+        }
+        if(a._historyKind!==b._historyKind) return a._historyKind==='admission' ? -1 : 1;
+        return (a._historyOrder||0)-(b._historyOrder||0);
     });
     if(historyItems.length===0){
         document.getElementById("visitHistory").innerHTML='<p class="text-muted small mb-2">No visits or in-hospital admissions recorded yet.</p>';
@@ -7502,7 +7573,7 @@ function renderCollapsibleVisits(visitsArr, admissionItems){
         var summary=isAdmission ? buildAdmissionHistorySummary(v._admissionData) : buildVisitHistorySummary(v);
         html+='<div class="visit-history-row'+(isAdmission?' admission-history-row':'')+'">';
         html+='<div class="visit-history-header'+(isExpanded?' expanded':'')+'" onclick="toggleVisitRow(this)">';
-        html+='<span class="vh-date">'+_esc(v._historyDate||v._displayDate||v.visitDate||'?')+'</span>';
+        html+='<span class="vh-date">'+_esc(v._historyDate||v._displayDate||v.visitDate||'No date')+'</span>';
         html+='<span class="vh-type">('+_esc(isAdmission ? (v._admissionLabel||'In-Hospital Admission') : (v.visitType||'Routine'))+')</span>';
         html+='<span class="vh-summary">'+_esc(summary)+'</span>';
         if(!isAdmission){
@@ -7535,6 +7606,8 @@ function buildAdmissionHistorySummary(adm){
     adm=adm||{};
     var parts=[];
     if(adm.reason)parts.push(adm.reason);
+    if(adm.Last_Admission && !adm.date)parts.push('Last admission '+adm.Last_Admission);
+    if(adm.Admissions)parts.push(adm.Admissions+' admission'+(String(adm.Admissions)==='1'?'':'s'));
     if(adm.Admission_HF_Related)parts.push(adm.Admission_HF_Related);
     if(adm.Admission_Cause)parts.push(adm.Admission_Cause);
     if(adm.dischargeDate || adm.Admission_Discharge_Date)parts.push('Disch '+(adm.dischargeDate||adm.Admission_Discharge_Date));
@@ -7547,6 +7620,10 @@ function buildAdmissionDetailHTML(adm){
     adm=adm||{};
     var schema=(typeof EXTRA_ADM_SCHEMA!=='undefined')?EXTRA_ADM_SCHEMA:[];
     var html='<table>';
+    var legacyRows='';
+    if(adm.Last_Admission)legacyRows+='<tr><td>Last Admission Date</td><td><strong>'+_esc(adm.Last_Admission)+'</strong></td></tr>';
+    if(adm.Admissions)legacyRows+='<tr><td>Number of Admissions</td><td><strong>'+_esc(adm.Admissions)+'</strong></td></tr>';
+    if(legacyRows)html+='<tr><td colspan="2"><div class="vh-section-label">Admission Timeline</div></td></tr>'+legacyRows;
     schema.forEach(function(sec){
         var rows='';
         (sec.fields||[]).forEach(function(f){
