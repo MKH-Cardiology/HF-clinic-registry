@@ -1868,7 +1868,7 @@ img,canvas,table,svg{max-width:100%;}
                     <div class="col-4 col-md-2"><label>Pulse</label><input type="text" class="form-control" id="V_Pulse" inputmode="numeric"></div>
                     <div class="col-4 col-md-2"><label>BP</label><input type="text" class="form-control" id="V_BP" placeholder="120/80"></div>
                     <div class="col-4 col-md-2"><label>SpO2 %</label><input type="number" class="form-control" id="V_SpO2" inputmode="numeric"></div>
-                    <div class="col-4 col-md-2"><label>Height (cm)</label><input type="number" class="form-control bg-light" id="V_Height" oninput="calcVisitBMI()" inputmode="numeric" readonly></div>
+                    <div class="col-4 col-md-2"><label>Height (cm)</label><input type="number" class="form-control border-primary" id="V_Height" oninput="calcVisitBMI();syncAdmissionHeightFromVisit(true)" inputmode="numeric"></div>
                     <div class="col-4 col-md-2"><label>Weight (kg)</label><input type="number" class="form-control" id="V_Weight" oninput="calcVisitBMI()" inputmode="numeric"></div>
                     <div class="col-4 col-md-2"><label>Dry Weight (kg)</label><input type="number" class="form-control" id="V_Dry_Weight" inputmode="numeric"></div>
                     <div class="col-4 col-md-2"><label class="text-success fw-bold">BMI <span class="auto-badge"><i class="fa fa-lock"></i> Auto</span></label><input type="text" class="form-control bg-light text-success fw-bold" id="V_BMI" readonly></div>
@@ -4967,6 +4967,11 @@ function _renderExtraAdmissions(){
     var wrap=document.getElementById('extraAdmissionsWrap');
     if(!wrap)return;
     var arr=_readExtraAdmissions();
+    var sharedHeight=(typeof getBaselineHeightValue==='function')?getBaselineHeightValue():'';
+    if(sharedHeight&&typeof syncVisitHeightFromBaseline==='function'){
+        syncVisitHeightFromBaseline(true);
+        arr=_readExtraAdmissions();
+    }
     if(arr.length===0){ wrap.innerHTML=''; return; }
     // Migrate legacy records: open gate controllers for any pre-existing detail data.
     var migrated=false;
@@ -5087,6 +5092,8 @@ function addExtraAdmission(){
     // record is clearly a fresh admission (reason is kept as a starting point).
     source.date='';
     source.dischargeDate='';
+    var sharedHeight=(typeof getBaselineHeightValue==='function')?getBaselineHeightValue():'';
+    if(sharedHeight)source.Height=sharedHeight;
     arr.push(source);
     _writeExtraAdmissions(arr);
     _renderExtraAdmissions();
@@ -5118,6 +5125,9 @@ function updateExtraAdmission(idx, field, value){
             }
         }
         // Auto-calc derived fields (BMI / eGFR) when an input they depend on changes.
+        if(field==='Height'&&value&&typeof syncHeightFromExtraAdmission==='function'){
+            syncHeightFromExtraAdmission(value);
+        }
         if(field==='Height'||field==='Weight'||field==='Lab_Creat'||field==='Lab_Creat_Disch'){
             _calcExtraAdmDerived(idx);
         }
@@ -5988,6 +5998,8 @@ function onVisitMedStatusChange(medId){
 function isNumberKey(evt){var c=(evt.which)?evt.which:evt.keyCode;if(c>31&&(c<48||c>57))return false;return true;}
 function validateCivilID(input){var e=document.getElementById('civilError');if(input.value.length!==12&&input.value.length>0){input.classList.add('input-error');e.style.display='block';}else{input.classList.remove('input-error');e.style.display='none';}}
 function validateFileNo(input){var e=document.getElementById('fileError');if(input.value.length!==6&&input.value.length>0){input.classList.add('input-error');e.style.display='block';}else{input.classList.remove('input-error');e.style.display='none';}}
+var _heightSyncLock=false;
+
 function calcBMI(){
     var w=parseFloat(document.getElementById("Weight").value),h=parseFloat(document.getElementById("Height").value);
     var bmi=(w&&h)?(w/((h/100)**2)).toFixed(1):"";
@@ -5999,7 +6011,7 @@ function calcBMI(){
         else{alertObesity.classList.remove('visible');}
     }
     calcMAGGIC();
-    if(typeof syncVisitHeightFromBaseline==='function')syncVisitHeightFromBaseline(true);
+    if(!_heightSyncLock&&typeof syncVisitHeightFromBaseline==='function')syncVisitHeightFromBaseline(true);
 }
 
 // Visit-form BMI: auto-computed from V_Height + V_Weight, mirrors baseline calcBMI.
@@ -6011,24 +6023,104 @@ function calcVisitBMI(){
     var w = parseFloat(wEl && wEl.value);
     var h = parseFloat(hEl && hEl.value);
     bEl.value = (w && h) ? (w / ((h/100)**2)).toFixed(1) : '';
+    if(!_heightSyncLock&&typeof syncAdmissionHeightFromVisit==='function')syncAdmissionHeightFromVisit(true);
 }
 
 function getBaselineHeightValue(){
     var hEl=document.getElementById('Height');
-    var h=(hEl&&hEl.value)||'';
+    var vEl=document.getElementById('V_Height');
+    var h=(hEl&&hEl.value)||(vEl&&vEl.value)||'';
     var pid=currentPatientId||editingDocId;
     if(!h&&pid&&typeof PC==='object'&&PC[pid])h=PC[pid].Height||'';
+    if(!h&&typeof _readExtraAdmissions==='function'){
+        var arr=_readExtraAdmissions();
+        for(var i=0;i<arr.length;i++){
+            if(arr[i]&&arr[i].Height){h=arr[i].Height;break;}
+        }
+    }
     return h;
 }
 
 function syncVisitHeightFromBaseline(force){
+    if(_heightSyncLock)return;
     var h=getBaselineHeightValue();
+    var hEl=document.getElementById('Height');
     var vEl=document.getElementById('V_Height');
-    if(!vEl||!h)return;
-    if(force||!vEl.value){
+    if(!h)return;
+    _heightSyncLock=true;
+    if(hEl&&(force||!hEl.value)){
+        hEl.value=h;
+        if(typeof calcBMI==='function')calcBMI();
+    }
+    if(vEl&&(force||!vEl.value)){
         vEl.value=h;
         if(typeof calcVisitBMI==='function')calcVisitBMI();
     }
+    if(typeof syncExtraAdmissionHeights==='function')syncExtraAdmissionHeights(h,true);
+    _heightSyncLock=false;
+}
+
+function syncAdmissionHeightFromVisit(force){
+    if(_heightSyncLock)return;
+    var vEl=document.getElementById('V_Height');
+    var h=(vEl&&vEl.value)||'';
+    if(!h)return;
+    var hEl=document.getElementById('Height');
+    _heightSyncLock=true;
+    if(hEl&&(force||!hEl.value)){
+        hEl.value=h;
+        if(typeof calcBMI==='function')calcBMI();
+    }
+    if(typeof syncExtraAdmissionHeights==='function')syncExtraAdmissionHeights(h,true);
+    _heightSyncLock=false;
+}
+
+function syncExtraAdmissionHeights(height, overwrite){
+    if(!height||typeof _readExtraAdmissions!=='function'||typeof _writeExtraAdmissions!=='function')return;
+    var arr=_readExtraAdmissions();
+    if(!arr||!arr.length)return;
+    var changed=false, changedIdx=[];
+    arr.forEach(function(adm,idx){
+        if(!adm)return;
+        if(overwrite||!adm.Height){
+            if(String(adm.Height||'')!==String(height)){
+                adm.Height=String(height);
+                changed=true;
+                changedIdx.push(idx);
+            }
+            var el=document.getElementById('ea_'+idx+'_Height');
+            if(el)el.value=height;
+        }
+    });
+    if(changed)_writeExtraAdmissions(arr);
+    changedIdx.forEach(function(idx){if(typeof _calcExtraAdmDerived==='function')_calcExtraAdmDerived(idx);});
+}
+
+function syncHeightFromExtraAdmission(height){
+    if(!height||_heightSyncLock)return;
+    _heightSyncLock=true;
+    var hEl=document.getElementById('Height');
+    var vEl=document.getElementById('V_Height');
+    if(hEl)hEl.value=height;
+    if(vEl)vEl.value=height;
+    if(typeof syncExtraAdmissionHeights==='function')syncExtraAdmissionHeights(height,true);
+    if(typeof calcBMI==='function')calcBMI();
+    if(typeof calcVisitBMI==='function')calcVisitBMI();
+    _heightSyncLock=false;
+}
+
+function persistSharedHeightForPatient(patientId){
+    var h=getBaselineHeightValue();
+    if(!patientId||!h||typeof db==='undefined')return null;
+    if(typeof PC==='object'&&PC[patientId])PC[patientId].Height=h;
+    return db.collection("patients").doc(patientId).update({
+        Height:h,
+        lastEditAt:new Date().toISOString(),
+        lastEditBy:_currentAuditUser(),
+        lastEditDoctor:_currentDoctorSelection()
+    }).then(function(){
+        if(typeof propagateHeightToSavedVisits==='function')propagateHeightToSavedVisits(patientId,h);
+    }).catch(function(e){console.warn('Height persistence failed:',e.message||e);});
 }
 
 function applyBaselineHeightToVisitData(visitData){
@@ -6444,6 +6536,7 @@ function _commitNewVisitInline(){
                 db.collection("patients").doc(pid).update({Next_Appt:nextAppt});
                 if(typeof PC === 'object' && PC[pid]) PC[pid].Next_Appt = nextAppt;
             }
+            if(typeof persistSharedHeightForPatient==='function')persistSharedHeightForPatient(pid);
             return writeAuditEntry(pid, {action:'visit_add', changes:[], note:'Visit added on '+vDate+' ('+visitData.visitType+') — via Save Patient'});
         })
         .catch(function(e){ console.warn('Inline new visit save failed:', e.message); });
@@ -6472,6 +6565,7 @@ function saveVisit(){
                 db.collection("patients").doc(patientId).update({Next_Appt:nextAppt,lastEditAt:new Date().toISOString(),lastEditBy:_currentAuditUser(),lastEditDoctor:_currentDoctorSelection()});
                 if(PC[patientId])PC[patientId].Next_Appt=nextAppt;
             }
+            if(typeof persistSharedHeightForPatient==='function')persistSharedHeightForPatient(patientId);
             writeAuditEntry(patientId, {action:'visit_edit', changes:[], note:'Visit '+editingVisitId+' edited (date '+visitDate+')'});
             showPopup("success","Visit Updated!","Changes saved successfully.");
             editingVisitId = null;
@@ -6489,6 +6583,7 @@ function saveVisit(){
                 db.collection("patients").doc(patientId).update({Next_Appt:nextAppt,lastEditAt:new Date().toISOString(),lastEditBy:_currentAuditUser(),lastEditDoctor:_currentDoctorSelection()});
                 if(PC[patientId])PC[patientId].Next_Appt=nextAppt;
             }
+            if(typeof persistSharedHeightForPatient==='function')persistSharedHeightForPatient(patientId);
             writeAuditEntry(patientId, {action:'visit_add', changes:[], note:'Visit added on '+visitDate+' ('+visitData.visitType+')'});
             showPopup("success","Visit Added!","Follow-up visit saved successfully.");
             clearVisitForm();loadVisits(patientId);
