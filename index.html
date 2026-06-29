@@ -1125,6 +1125,137 @@ img,canvas,table,svg{max-width:100%;}
 [style*="border-left:3px solid #8b0000"]{border-left:0!important;}
 [style*="border-left:3px solid #c5a000"]{border-left:0!important;}
 
+/* ---------- MOBILE COMFORT GUTTERS ----------
+   Restores breathing room on phones after the old edge-to-edge mobile rules.
+   This is intentionally CSS-only so field IDs, saving, validation and logic
+   remain unchanged. */
+@media (max-width:767px){
+    body{
+        background:#f4f6f9;
+        padding-bottom:calc(104px + env(safe-area-inset-bottom,0px));
+    }
+    .container,
+    .container.mt-3{
+        width:100%!important;
+        max-width:100%!important;
+        padding-left:14px!important;
+        padding-right:14px!important;
+        overflow-x:hidden;
+        box-sizing:border-box;
+    }
+    #pageMain > .container{
+        padding-bottom:128px!important;
+    }
+    .card,
+    .card.p-3{
+        margin-left:0!important;
+        margin-right:0!important;
+        padding:12px!important;
+        border-radius:12px!important;
+        box-shadow:0 2px 12px rgba(0,0,0,0.06)!important;
+        overflow:hidden;
+    }
+    .card > .d-flex.justify-content-between{
+        align-items:flex-start!important;
+        gap:10px;
+    }
+    .card > .d-flex.justify-content-between h6{
+        font-size:1rem;
+        line-height:1.2;
+    }
+    .card > .d-flex.justify-content-between .btn{
+        flex-shrink:0;
+        white-space:nowrap;
+    }
+    .input-group{
+        gap:8px;
+    }
+    .input-group > .form-control,
+    .input-group > .form-select,
+    .input-group > .btn{
+        width:100%!important;
+        flex:0 0 100%!important;
+        border-radius:10px!important;
+        min-height:46px;
+    }
+    #searchInput{
+        min-width:0;
+    }
+    .section-card{
+        border-radius:12px!important;
+        box-shadow:0 2px 12px rgba(0,0,0,0.05)!important;
+        margin-bottom:12px!important;
+        overflow:hidden;
+    }
+    .section-card-head{
+        padding:12px 12px 10px!important;
+    }
+    .section-card-body{
+        padding:12px!important;
+    }
+    .field-tint{
+        border:1px solid var(--tint-border,#e3e8ef)!important;
+        border-radius:10px!important;
+        padding:10px!important;
+        margin-left:0!important;
+        margin-right:0!important;
+    }
+    .field-tint > .ft-body{
+        padding:10px 0 0!important;
+    }
+    .ea-redstrip{
+        border-radius:10px!important;
+        padding:12px!important;
+    }
+    .visit-section,
+    .next-appt-card{
+        border-radius:10px!important;
+        padding:12px!important;
+    }
+    .sticky-save-bar{
+        left:0!important;
+        right:0!important;
+        padding:14px 16px calc(16px + env(safe-area-inset-bottom,0px))!important;
+        background:linear-gradient(180deg,rgba(244,246,249,0),rgba(244,246,249,.98) 28%)!important;
+    }
+    .sticky-save-bar.visible{
+        justify-content:center!important;
+    }
+    .sticky-save-bar .btn{
+        width:100%!important;
+        max-width:520px;
+        flex:0 1 auto!important;
+        min-height:50px;
+        border-radius:12px!important;
+    }
+}
+
+@media (max-width:575px){
+    .container,
+    .container.mt-3{
+        padding-left:16px!important;
+        padding-right:16px!important;
+    }
+    .clinic-header{
+        margin-bottom:10px;
+    }
+    .card,
+    .card.p-3{
+        padding:12px!important;
+        border-radius:13px!important;
+    }
+    .section-card-body{
+        padding:12px!important;
+    }
+    .field-tint{
+        padding:10px!important;
+    }
+    .sticky-save-bar{
+        padding-left:16px!important;
+        padding-right:16px!important;
+    }
+}
+
 </style>
 
 </head>
