@@ -198,6 +198,10 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 .visit-history-body table td{padding:3px 6px;border-bottom:1px solid #f0f0f0;vertical-align:top;}
 .visit-history-body table td:first-child{font-weight:600;color:#6c757d;width:38%;font-size:0.72rem;}
 .vh-section-label{font-size:0.68rem;font-weight:700;color:#8b0000;text-transform:uppercase;letter-spacing:0.06em;margin:7px 0 3px;border-bottom:1px solid #f0f0f0;padding-bottom:2px;}
+.visit-history-row.admission-history-row .visit-history-header{background:#fff8e6;}
+.visit-history-row.admission-history-row .visit-history-header:hover{background:#fff1cc;}
+.visit-history-row.admission-history-row .visit-history-header.expanded{background:#fff1cc;border-bottom:1px solid #d99a25;}
+.visit-history-row.admission-history-row .vh-date{color:#b8760b;}
 /* Calendar styles */
 .appt-cal-wrap{user-select:none;}
 .appt-cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
@@ -726,6 +730,31 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 }
 .yes-no-field{
     max-width:320px;
+}
+
+/* Data-entry comfort: admissions and visits use a calmer vertical rhythm. */
+.form-step[data-step="2"] .section-card-body > .row.g-2 > [class*="col-"],
+.form-step[data-step="3"] .section-card-body > .row.g-2 > [class*="col-"],
+.form-step[data-step="3"] .field-tint .row.g-2 > [class*="col-"],
+.form-step[data-step="4"] .visit-section > .row.g-2 > [class*="col-"],
+.form-step[data-step="4"] .visit-section .row.g-2 > [class*="col-"],
+.extra-adm-card .row.g-2 > [class*="col-"]{
+    flex:0 0 100%;
+    max-width:100%;
+}
+.form-step[data-step="2"] .form-control,
+.form-step[data-step="2"] .form-select,
+.form-step[data-step="3"] .form-control,
+.form-step[data-step="3"] .form-select,
+.form-step[data-step="4"] .form-control,
+.form-step[data-step="4"] .form-select,
+.extra-adm-card .form-control,
+.extra-adm-card .form-select{
+    min-height:44px;
+}
+.form-step[data-step="3"] .row.g-2,
+.form-step[data-step="4"] .visit-section .row.g-2{
+    row-gap:0.75rem;
 }
 
 /* Hide raw <hr> and old text-secondary headers when they're going to be replaced
@@ -7314,8 +7343,13 @@ function loadVisits(patientId){
     currentPatientId=patientId;
     db.collection("patients").doc(patientId).collection("visits").orderBy("visitDate","desc").get().then(function(snapshot){
         visits=[];
+        var admissionItems=buildAdmissionHistoryItems(patientId);
         if(snapshot.size===0){
-            document.getElementById("visitHistory").innerHTML='<p class="text-muted small mb-2">No visits recorded yet.</p>';
+            if(admissionItems.length){
+                renderCollapsibleVisits([], admissionItems);
+            }else{
+                document.getElementById("visitHistory").innerHTML='<p class="text-muted small mb-2">No visits or in-hospital admissions recorded yet.</p>';
+            }
             if(typeof updateVisitComorbiditiesVisibility==='function')updateVisitComorbiditiesVisibility();
             if(typeof syncVisitHeightFromBaseline==='function')syncVisitHeightFromBaseline(true);
             return;
@@ -7331,7 +7365,7 @@ function loadVisits(patientId){
             var ka=a._displayDate||'', kb=b._displayDate||'';
             return ka<kb ? 1 : (ka>kb ? -1 : 0); // descending
         });
-        renderCollapsibleVisits(visits);
+        renderCollapsibleVisits(visits, admissionItems);
         // Recompute vaccination suppression now that visits are known, and
         // refresh the (Add Visit) vaccination block if we're not mid-edit.
         if(typeof computeVaccPriorDoses==='function'){
@@ -7343,6 +7377,82 @@ function loadVisits(patientId){
         if(!editingVisitId&&typeof syncVisitHeightFromBaseline==='function')syncVisitHeightFromBaseline(true);
         if(!editingVisitId&&typeof carryForwardVisitMedicationsFromLatestVisit==='function')carryForwardVisitMedicationsFromLatestVisit();
     });
+}
+
+function _readPatientOrFormValue(data,key){
+    if(data && Object.prototype.hasOwnProperty.call(data,key) && data[key]!=null) return data[key]||'';
+    var el=document.getElementById(key);
+    return el?(el.value||''):'';
+}
+
+function _readAdmissionSchemaValue(data,key){
+    var alias=(typeof EXTRA_ADM_KEY_ALIAS!=='undefined' && EXTRA_ADM_KEY_ALIAS[key])?EXTRA_ADM_KEY_ALIAS[key]:key;
+    return _readPatientOrFormValue(data, alias);
+}
+
+function _fillAdmissionFromSchema(rec,data){
+    if(typeof EXTRA_ADM_SCHEMA==='undefined' || !Array.isArray(EXTRA_ADM_SCHEMA)) return rec;
+    EXTRA_ADM_SCHEMA.forEach(function(grp){
+        (grp.fields||[]).forEach(function(f){
+            if(!f || !f.k || f.t==='subhead' || String(f.k).charAt(0)==='_') return;
+            if(f.t==='pills' && Array.isArray(f.items)){
+                f.items.forEach(function(it){
+                    if(!it || !it.k) return;
+                    rec[it.k]=_readAdmissionSchemaValue(data,it.k);
+                });
+                return;
+            }
+            rec[f.k]=_readAdmissionSchemaValue(data,f.k);
+        });
+    });
+    return rec;
+}
+
+function _historyHasMeaningfulAdmissionData(adm){
+    if(!adm) return false;
+    return Object.keys(adm).some(function(k){
+        if(k.charAt(0)==='_') return false;
+        var v=adm[k];
+        var s=String(v==null?'':v).trim();
+        if(!s) return false;
+        if(s==='No' || s==='N' || s==='None') return false;
+        if(k==='Admission_HF_Related' && s==='HF related') return false;
+        return true;
+    });
+}
+
+function buildAdmissionHistoryItems(patientId){
+    var data=(patientId && typeof PC==='object' && PC[patientId]) ? PC[patientId] : {};
+    var items=[];
+    var main=_fillAdmissionFromSchema({}, data);
+    main._admissionSeq=1;
+    main._admissionLabel='In-Hospital Admission #1';
+    var hasMainAnchor=!!(main.date || main.dischargeDate || main.reason || main.LOS);
+    if(hasMainAnchor && _historyHasMeaningfulAdmissionData(main)){
+        items.push({
+            _historyKind:'admission',
+            _historyDate:_normalizeDisplayDate(main.date || main.dischargeDate || ''),
+            _admissionData:main,
+            _admissionLabel:main._admissionLabel
+        });
+    }
+    var rawExtra=(data && data.Extra_Admissions) || ((document.getElementById('Extra_Admissions')||{}).value) || '[]';
+    var extra=[];
+    try{ extra=JSON.parse(rawExtra||'[]'); }catch(e){ extra=[]; }
+    if(!Array.isArray(extra)) extra=[];
+    extra.forEach(function(adm,idx){
+        if(!_historyHasMeaningfulAdmissionData(adm)) return;
+        var copy=Object.assign({}, adm);
+        copy._admissionSeq=idx+2;
+        copy._admissionLabel='In-Hospital Admission #'+(idx+2);
+        items.push({
+            _historyKind:'admission',
+            _historyDate:_normalizeDisplayDate(copy.date || copy.Admission_Date || copy.dischargeDate || copy.Admission_Discharge_Date || ''),
+            _admissionData:copy,
+            _admissionLabel:copy._admissionLabel
+        });
+    });
+    return items;
 }
 
 // Return a YYYY-MM-DD form for display/sorting only. Never mutates the stored visitDate.
@@ -7363,32 +7473,106 @@ function _normalizeDisplayDate(s){
     return yr+'-'+String(mon).padStart(2,'0')+'-'+String(day).padStart(2,'0');
 }
 
-function renderCollapsibleVisits(visitsArr){
-    var html='<div class="d-flex align-items-center mb-2"><span class="fw-bold text-secondary" style="font-size:0.8rem;"><i class="fa fa-history me-1"></i>Visit History ('+visitsArr.length+')</span></div>';
-    visitsArr.forEach(function(v,idx){
+function renderCollapsibleVisits(visitsArr, admissionItems){
+    visitsArr=Array.isArray(visitsArr)?visitsArr:[];
+    admissionItems=Array.isArray(admissionItems)?admissionItems:buildAdmissionHistoryItems(currentPatientId||editingDocId);
+    var historyItems=[];
+    visitsArr.forEach(function(v){
+        v._historyKind='visit';
+        v._historyDate=v._displayDate || _normalizeDisplayDate(v.visitDate);
+        historyItems.push(v);
+    });
+    admissionItems.forEach(function(a){historyItems.push(a);});
+    historyItems.sort(function(a,b){
+        var ka=a._historyDate||'', kb=b._historyDate||'';
+        return ka<kb ? 1 : (ka>kb ? -1 : 0);
+    });
+    if(historyItems.length===0){
+        document.getElementById("visitHistory").innerHTML='<p class="text-muted small mb-2">No visits or in-hospital admissions recorded yet.</p>';
+        return;
+    }
+    var visitCount=visitsArr.length;
+    var admCount=admissionItems.length;
+    var countText=visitCount+' visit'+(visitCount===1?'':'s');
+    if(admCount) countText+=' + '+admCount+' admission'+(admCount===1?'':'s');
+    var html='<div class="d-flex align-items-center mb-2"><span class="fw-bold text-secondary" style="font-size:0.8rem;"><i class="fa fa-history me-1"></i>Visit History ('+countText+')</span></div>';
+    historyItems.forEach(function(v,idx){
         var isExpanded=(idx<2); // Last 2 visits expanded by default
-        var summaryParts=[];
-        if(v.V_NYHA)summaryParts.push('NYHA '+v.V_NYHA);
-        if(v.V_KCCQ)summaryParts.push('KCCQ '+v.V_KCCQ);
-        if(v.V_Weight)summaryParts.push(v.V_Weight+'kg');
-        if(v.V_BP)summaryParts.push('BP '+v.V_BP);
-        if(v.V_NTproBNP)summaryParts.push('NTpro '+v.V_NTproBNP);
-        var summary=summaryParts.join(' · ')||'—';
-        html+='<div class="visit-history-row">';
+        var isAdmission=v._historyKind==='admission';
+        var summary=isAdmission ? buildAdmissionHistorySummary(v._admissionData) : buildVisitHistorySummary(v);
+        html+='<div class="visit-history-row'+(isAdmission?' admission-history-row':'')+'">';
         html+='<div class="visit-history-header'+(isExpanded?' expanded':'')+'" onclick="toggleVisitRow(this)">';
-        html+='<span class="vh-date">'+(v._displayDate||v.visitDate||'?')+'</span>';
-        html+='<span class="vh-type">('+( v.visitType||'Routine')+')</span>';
-        html+='<span class="vh-summary">'+summary+'</span>';
-        html+='<button class="btn btn-sm btn-outline-primary py-0 px-2 me-1" style="font-size:0.7rem;" onclick="event.stopPropagation(); editVisit(\''+v.id+'\')" title="Edit this visit"><i class="fa fa-edit"></i></button>';
-        html+='<button class="btn btn-sm btn-outline-danger py-0 px-2 me-2" style="font-size:0.7rem;" onclick="event.stopPropagation(); deleteVisit(\''+v.id+'\',\''+(v._displayDate||v.visitDate||'')+'\')" title="Delete this visit (admin)"><i class="fa fa-trash"></i></button>';
+        html+='<span class="vh-date">'+_esc(v._historyDate||v._displayDate||v.visitDate||'?')+'</span>';
+        html+='<span class="vh-type">('+_esc(isAdmission ? (v._admissionLabel||'In-Hospital Admission') : (v.visitType||'Routine'))+')</span>';
+        html+='<span class="vh-summary">'+_esc(summary)+'</span>';
+        if(!isAdmission){
+            html+='<button class="btn btn-sm btn-outline-primary py-0 px-2 me-1" style="font-size:0.7rem;" onclick="event.stopPropagation(); editVisit(\''+v.id+'\')" title="Edit this visit"><i class="fa fa-edit"></i></button>';
+            html+='<button class="btn btn-sm btn-outline-danger py-0 px-2 me-2" style="font-size:0.7rem;" onclick="event.stopPropagation(); deleteVisit(\''+v.id+'\',\''+(v._displayDate||v.visitDate||'')+'\')" title="Delete this visit (admin)"><i class="fa fa-trash"></i></button>';
+        }else{
+            html+='<span class="badge bg-warning text-dark me-2" style="font-size:0.65rem;"><i class="fa fa-hospital me-1"></i>Admission</span>';
+        }
         html+='<i class="fa fa-chevron-down vh-chevron"></i>';
         html+='</div>';
         html+='<div class="visit-history-body'+(isExpanded?' show':'')+'">';
-        html+=buildVisitDetailHTML(v);
+        html+=isAdmission ? buildAdmissionDetailHTML(v._admissionData) : buildVisitDetailHTML(v);
         html+='</div>';
         html+='</div>';
     });
     document.getElementById("visitHistory").innerHTML=html;
+}
+
+function buildVisitHistorySummary(v){
+    var summaryParts=[];
+    if(v.V_NYHA)summaryParts.push('NYHA '+v.V_NYHA);
+    if(v.V_KCCQ)summaryParts.push('KCCQ '+v.V_KCCQ);
+    if(v.V_Weight)summaryParts.push(v.V_Weight+'kg');
+    if(v.V_BP)summaryParts.push('BP '+v.V_BP);
+    if(v.V_NTproBNP)summaryParts.push('NTpro '+v.V_NTproBNP);
+    return summaryParts.join(' · ')||'—';
+}
+
+function buildAdmissionHistorySummary(adm){
+    adm=adm||{};
+    var parts=[];
+    if(adm.reason)parts.push(adm.reason);
+    if(adm.Admission_HF_Related)parts.push(adm.Admission_HF_Related);
+    if(adm.Admission_Cause)parts.push(adm.Admission_Cause);
+    if(adm.dischargeDate || adm.Admission_Discharge_Date)parts.push('Disch '+(adm.dischargeDate||adm.Admission_Discharge_Date));
+    if(adm.LOS)parts.push('LOS '+adm.LOS+'d');
+    if(adm.Transfer_Other==='Yes')parts.push('Transfer '+(adm.Transfer_Hospital_Name||'Yes'));
+    return parts.join(' · ')||'In-hospital admission';
+}
+
+function buildAdmissionDetailHTML(adm){
+    adm=adm||{};
+    var schema=(typeof EXTRA_ADM_SCHEMA!=='undefined')?EXTRA_ADM_SCHEMA:[];
+    var html='<table>';
+    schema.forEach(function(sec){
+        var rows='';
+        (sec.fields||[]).forEach(function(f){
+            if(!f || !f.k || f.t==='subhead') return;
+            if(f.t==='pills' && Array.isArray(f.items)){
+                f.items.forEach(function(it){
+                    var pv=adm[it.k];
+                    if(pv&&String(pv).trim()!==''&&pv!=='No'&&pv!=='N'&&pv!=='None'){
+                        rows+='<tr><td>'+_esc(it.l||it.k)+'</td><td><strong>'+_esc(pv)+'</strong></td></tr>';
+                    }
+                });
+                return;
+            }
+            if(String(f.k).charAt(0)==='_') return;
+            var val=adm[f.k];
+            if(val&&String(val).trim()!==''&&val!=='No'&&val!=='N'&&val!=='None'){
+                rows+='<tr><td>'+_esc(f.l||f.k)+'</td><td><strong>'+_esc(val)+'</strong></td></tr>';
+            }
+        });
+        if(rows){html+='<tr><td colspan="2"><div class="vh-section-label">'+_esc(sec.sec||'Admission')+'</div></td></tr>'+rows;}
+    });
+    if(html==='<table>'){
+        html+='<tr><td colspan="2" class="text-muted">No admission details recorded.</td></tr>';
+    }
+    html+='</table>';
+    return html;
 }
 
 function toggleVisitRow(headerEl){
