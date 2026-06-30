@@ -1291,6 +1291,16 @@ img,canvas,table,svg{max-width:100%;}
     }
 }
 
+/* Two-field layout, applied by applyTwoColumnFieldLayout() after dynamic UI build. */
+#hfForm .row.g-2 > .field-2col{
+    flex:0 0 50%!important;
+    max-width:50%!important;
+}
+#hfForm .row.g-2 > .field-wide{
+    flex:0 0 100%!important;
+    max-width:100%!important;
+}
+
 </style>
 
 </head>
@@ -3750,6 +3760,7 @@ function initFormUI(){
     orderAdmissionPanels();
     applyFieldTints();
     applyVisitAccordions();
+    applyTwoColumnFieldLayout();
     showStickySave();
     goToWizardStep(1);
     if(typeof loadMainAlerts==='function')loadMainAlerts();
@@ -3954,6 +3965,46 @@ function applyVisitAccordions(){
             updateCount();
         });
     } catch(e){ console.warn('applyVisitAccordions failed:', e); }
+}
+
+function applyTwoColumnFieldLayout(){
+    try{
+        var longText = /notes?|details?|findings?|reason|plan|complaints?|other\b|murmur|referral|symptoms?|arrhythmia burden|procedure details|management/i;
+        function direct(el, selector){
+            try{return el.querySelector(':scope > '+selector);}catch(e){return null;}
+        }
+        function labelText(col){
+            var lbl=direct(col,'label') || col.querySelector('label');
+            return lbl ? (lbl.textContent||'').replace(/\s+/g,' ').trim() : '';
+        }
+        document.querySelectorAll('#hfForm .row.g-2 > [class*="col-"]').forEach(function(col){
+            if(!col || !col.classList) return;
+            col.classList.remove('field-2col','field-wide');
+            var isStructural =
+                col.tagName==='H6' ||
+                col.classList.contains('field-tint') ||
+                col.classList.contains('vertical-entry-group') ||
+                col.classList.contains('visit-subhead') ||
+                col.id==='visitMedDoses' ||
+                col.id==='vaccBlock' ||
+                direct(col,'hr') ||
+                direct(col,'.pill-group') ||
+                direct(col,'.next-appt-card') ||
+                direct(col,'.clinical-alert') ||
+                direct(col,'.alert') ||
+                direct(col,'.row.g-2');
+            var hasTextarea=!!direct(col,'textarea');
+            var text=labelText(col);
+            var input=direct(col,'input');
+            var placeholder=input ? (input.getAttribute('placeholder')||'') : '';
+            var isLongText=longText.test(text) || placeholder.length>34;
+            if(isStructural || hasTextarea || isLongText){
+                col.classList.add('field-wide');
+            }else{
+                col.classList.add('field-2col');
+            }
+        });
+    }catch(e){ console.warn('applyTwoColumnFieldLayout failed:', e); }
 }
 
 function reorderVisitFormSections(){
@@ -5408,6 +5459,7 @@ function _renderExtraAdmissions(){
     wrap.innerHTML=html;
     // Populate derived BMI / eGFR fields from saved data on (re)render.
     if(typeof _recalcAllExtraAdmDerived==='function') _recalcAllExtraAdmDerived();
+    if(typeof applyTwoColumnFieldLayout==='function') applyTwoColumnFieldLayout();
 }
 // Expand/collapse a whole admission card.
 function toggleExtraAdmission(idx){
@@ -5639,7 +5691,10 @@ function _maybeRerenderGatedSection(idx, field){
         });
         if(changed) _writeExtraAdmissions(arr);
         var bodyEl=document.getElementById('eaSec_'+idx+'_'+gi+'_body');
-        if(bodyEl) bodyEl.innerHTML=_extraSectionBodyHtml(grp, adm, idx);
+        if(bodyEl){
+            bodyEl.innerHTML=_extraSectionBodyHtml(grp, adm, idx);
+            if(typeof applyTwoColumnFieldLayout==='function') applyTwoColumnFieldLayout();
+        }
         return;
     }
 }
