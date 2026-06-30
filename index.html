@@ -1228,6 +1228,41 @@ img,canvas,table,svg{max-width:100%;}
         min-height:50px;
         border-radius:12px!important;
     }
+
+    /* Hybrid mobile form rhythm: compact fields pair up, details stay wide. */
+    .form-step[data-step="1"] .section-card-body > .row.g-2 > [class*="col-"]:not(.col-12),
+    .form-step[data-step="2"] .section-card-body > .row.g-2 > [class*="col-"]:not(.col-12),
+    .form-step[data-step="3"] .section-card-body > .row.g-2 > [class*="col-"]:not(.col-12),
+    .form-step[data-step="3"] .field-tint .row.g-2 > [class*="col-"]:not(.col-12),
+    .form-step[data-step="4"] .visit-section > .row.g-2 > [class*="col-"]:not(.col-12),
+    .form-step[data-step="4"] .visit-section .row.g-2 > [class*="col-"]:not(.col-12),
+    .extra-adm-card .row.g-2 > [class*="col-"]:not(.col-12),
+    .form-step .row.g-2 > .col-12.col-md-3,
+    .form-step .row.g-2 > .col-12.col-md-4:has(> select.form-select),
+    .form-step .row.g-2 > .col-12.col-md-4:has(> input[type="date"]),
+    .form-step .row.g-2 > .col-12.col-md-6:has(> select.form-select),
+    .form-step .row.g-2 > .col-12.col-md-6:has(> input[type="date"]),
+    .extra-adm-card .row.g-2 > .col-12.col-md-3,
+    .extra-adm-card .row.g-2 > .col-12.col-md-4:has(> select.form-select),
+    .extra-adm-card .row.g-2 > .col-12.col-md-4:has(> input[type="date"]),
+    .extra-adm-card .row.g-2 > .col-12.col-md-6:has(> select.form-select),
+    .extra-adm-card .row.g-2 > .col-12.col-md-6:has(> input[type="date"]){
+        flex:0 0 50%!important;
+        max-width:50%!important;
+    }
+    .form-step .row.g-2 > .col-12:has(> textarea),
+    .form-step .row.g-2 > .col-12:has(> .pill-group),
+    .form-step .row.g-2 > .col-12:has(> hr),
+    .form-step .row.g-2 > .col-12.vertical-entry-group,
+    .form-step .row.g-2 > h6.col-12,
+    .form-step .row.g-2 > .visit-subhead,
+    .extra-adm-card .row.g-2 > .col-12:has(> textarea),
+    .extra-adm-card .row.g-2 > .col-12:has(> .pill-group),
+    .extra-adm-card .row.g-2 > .col-12:has(> hr),
+    .extra-adm-card .row.g-2 > h6.col-12{
+        flex:0 0 100%!important;
+        max-width:100%!important;
+    }
 }
 
 @media (max-width:575px){
