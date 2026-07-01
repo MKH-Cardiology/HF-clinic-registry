@@ -6693,15 +6693,19 @@ function buildVisitMedDoses(){
             html+='<input type="text" class="form-control form-control-sm" id="'+m.id+'_Custom" placeholder="e.g. 12.5 mg">';
             html+='<label class="mt-1" style="font-size:0.7rem;">Frequency <small class="text-muted">(only if custom dose)</small></label>';
             html+='<input type="text" class="form-control form-control-sm" id="'+m.id+'_Freq" placeholder="">';
-            html+='<label class="mt-1" style="font-size:0.7rem;">Change this visit</label>';
+            html+='<label class="mt-1" style="font-size:0.7rem;">Dose change this visit</label>';
             html+='<select class="form-select form-select-sm" id="'+m.id+'_Change">';
-            html+='<option value="">No change recorded</option>';
-            html+='<option>Dose increased</option>';
-            html+='<option>Dose decreased</option>';
-            html+='<option>Started</option>';
-            html+='<option>Stopped</option>';
-            html+='<option>Switched</option>';
-            html+='<option>Held</option>';
+            html+='<option value="">No dose change</option>';
+            html+='<optgroup label="Increased to">';
+            m.doses.forEach(function(d){
+                if(d!=='') html+='<option value="Increased to '+d+'">Increased to '+d+'</option>';
+            });
+            html+='</optgroup>';
+            html+='<optgroup label="Decreased to">';
+            m.doses.forEach(function(d){
+                if(d!=='') html+='<option value="Decreased to '+d+'">Decreased to '+d+'</option>';
+            });
+            html+='</optgroup>';
             html+='</select>';
             html+='</div>';
             html+='</div>';
