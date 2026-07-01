@@ -6697,11 +6697,13 @@ function buildVisitMedDoses(){
             html+='<select class="form-select form-select-sm" id="'+m.id+'_Change">';
             html+='<option value="">No dose change</option>';
             html+='<optgroup label="Increased to">';
+            html+='<option value="Increased to custom dose">Increased to custom dose</option>';
             m.doses.forEach(function(d){
                 if(d!=='') html+='<option value="Increased to '+d+'">Increased to '+d+'</option>';
             });
             html+='</optgroup>';
             html+='<optgroup label="Decreased to">';
+            html+='<option value="Decreased to custom dose">Decreased to custom dose</option>';
             m.doses.forEach(function(d){
                 if(d!=='') html+='<option value="Decreased to '+d+'">Decreased to '+d+'</option>';
             });
@@ -6750,10 +6752,17 @@ function _visitMedFormHasValues(){
     });
 }
 
-function _visitMedChangeInfo(change){
+function _visitMedChangeInfo(change,custom,freq){
     var txt=String(change||'').trim();
     var m=txt.match(/^(Increased|Decreased) to (.+)$/);
-    return m?{direction:m[1],target:m[2]}:null;
+    if(!m)return null;
+    var target=String(m[2]||'').trim();
+    if(target.toLowerCase()==='custom dose'){
+        var customDose=String(custom||'').trim();
+        var customFreq=String(freq||'').trim();
+        return {direction:m[1],target:_visitMedBaseDoseText('',customDose,customFreq),targetIsCustom:true,customDose:customDose,customFreq:customFreq};
+    }
+    return {direction:m[1],target:target,targetIsCustom:false};
 }
 
 function _visitMedBaseDoseText(dose,custom,freq){
@@ -6762,20 +6771,21 @@ function _visitMedBaseDoseText(dose,custom,freq){
     custom=String(custom||'').trim();
     freq=String(freq||'').trim();
     if(dose)parts.push(dose);
-    if(custom)parts.push('('+custom+')');
+    if(custom)parts.push(dose?'('+custom+')':custom);
     if(freq)parts.push(freq);
     return parts.join(' ');
 }
 
 function _visitMedDisplayText(dose,custom,freq,change){
-    var base=_visitMedBaseDoseText(dose,custom,freq);
-    var info=_visitMedChangeInfo(change);
+    var info=_visitMedChangeInfo(change,custom,freq);
     if(info&&info.target){
-        return base?('Changed from '+base+' to '+info.target):('Changed to '+info.target);
+        var base=String(dose||'').trim();
+        return base?(info.direction+' from '+base+' to '+info.target):(info.direction+' to '+info.target);
     }
+    var base=_visitMedBaseDoseText(dose,custom,freq);
     var parts=[];
     if(base)parts.push(base);
-    if(String(change||'').trim())parts.push('Change: '+String(change).trim());
+    if(String(change||'').trim())parts.push(String(change).trim());
     return parts.join(' ');
 }
 
@@ -6786,11 +6796,17 @@ function carryForwardVisitMedicationsFromLatestVisit(){
         var doseVal=latest[m.id]||'';
         var customVal=latest[m.id+'_Custom']||'';
         var freqVal=latest[m.id+'_Freq']||'';
-        var changeInfo=_visitMedChangeInfo(latest[m.id+'_Change']);
+        var changeInfo=_visitMedChangeInfo(latest[m.id+'_Change'], customVal, freqVal);
         if(changeInfo&&changeInfo.target){
-            doseVal=changeInfo.target;
-            customVal='';
-            freqVal='';
+            if(changeInfo.targetIsCustom){
+                doseVal='';
+                customVal=changeInfo.customDose||'';
+                freqVal=changeInfo.customFreq||'';
+            }else{
+                doseVal=changeInfo.target;
+                customVal='';
+                freqVal='';
+            }
         }
         var statusVal=latest[m.id+'_Status']||((doseVal||customVal||freqVal)?'Yes':'No');
         var statusEl=document.getElementById(m.id+'_Status');
