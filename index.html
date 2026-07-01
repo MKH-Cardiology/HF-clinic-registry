@@ -2562,7 +2562,7 @@ img,canvas,table,svg{max-width:100%;}
                     <div class="col-12"><label>Other Medications</label><input type="text" class="form-control" id="V_Med_Others" placeholder="Any other medications not listed above (drug, dose, frequency)"></div>
                     <div class="col-12"><hr class="my-2"></div>
                     <h6 class="col-12 text-secondary">Assessment &amp; Plan</h6>
-                    <div class="col-12 col-md-6"><label>Adverse Effects of Medications</label><textarea class="form-control" id="V_AdverseEffects" rows="2" placeholder="e.g. cough on ACEi, hyperK on MRA..."></textarea></div>
+                    <div class="col-12 col-md-6"><label>Adverse Effects of Medications</label><textarea class="form-control" id="V_AdverseEffects" rows="2" placeholder=""></textarea></div>
                     <div class="col-6 col-md-3"><label>Compliance to Medications</label><select class="form-select" id="V_Compliance"><option value="">Select...</option><option>Fully compliant</option><option>Partially compliant</option><option>Non-compliant</option></select></div>
                     <div class="col-12"><label>Compliance Notes</label><textarea class="form-control" id="V_ComplianceNotes" rows="2" placeholder="Compliance notes (optional)"></textarea></div>
                     <div class="col-12 col-md-6"><label>Patient Complaints / Symptoms</label><textarea class="form-control" id="V_Adverse" rows="2"></textarea></div>
@@ -5111,9 +5111,9 @@ var EXTRA_ADM_SCHEMA=[
    // in `Med_<Name>_Dose` (matches the JSON keys used by Admission #1 so
    // analytics/export pipelines see the same shape).
    {k:'Med_ARNI',l:'ARNI (Entresto)',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
-   {k:'Med_ARNI_Dose',l:'ARNI Dose',t:'text',w:'col-6 col-md-3',ph:'24/26 / 49/51 / 97/103 mg BID',gate:{k:'Med_ARNI',v:'Yes'}},
+   {k:'Med_ARNI_Dose',l:'ARNI Dose',t:'text',w:'col-6 col-md-3',gate:{k:'Med_ARNI',v:'Yes'}},
    {k:'Med_SGLT2i',l:'SGLT2i',t:'sel',o:['None','Forxiga','Jardiance'],w:'col-6 col-md-3'},
-   {k:'Med_SGLT2i_Dose',l:'SGLT2i Dose',t:'text',w:'col-6 col-md-3',ph:'10 mg OD',gate:{k:'Med_SGLT2i',in:['Forxiga','Jardiance']}},
+   {k:'Med_SGLT2i_Dose',l:'SGLT2i Dose',t:'text',w:'col-6 col-md-3',gate:{k:'Med_SGLT2i',in:['Forxiga','Jardiance']}},
    {k:'Med_BB',l:'Beta-Blocker',t:'sel',o:['None','Concor','Dilatrend','Betaloc','Lopressor'],w:'col-6 col-md-3'},
    {k:'Med_BB_Dose',l:'BB Dose',t:'text',w:'col-6 col-md-3',gate:{k:'Med_BB',in:['Concor','Dilatrend','Betaloc','Lopressor']}},
    {k:'Med_MRA',l:'MRA',t:'sel',o:['None','Aldactone','Eplerenone','Finerenone','Inspra'],w:'col-6 col-md-3'},
@@ -5123,7 +5123,7 @@ var EXTRA_ADM_SCHEMA=[
    {k:'Med_GLP1',l:'GLP-1 Agonist',t:'sel',o:['None','Mounjaro','Ozempic'],w:'col-6 col-md-3'},
    {k:'Med_Vasodilator',l:'Vasodilator',t:'sel',o:['None','Hydralazine','Nitrates','Both'],w:'col-6 col-md-3'},
    {k:'Med_Procorolan',l:'Procorolan (Ivabradine)',t:'sel',o:['None','Procorolan'],w:'col-6 col-md-3'},
-   {k:'Med_Procorolan_Dose',l:'Procorolan Dose',t:'text',w:'col-6 col-md-3',ph:'5 mg BID / 7.5 mg BID',gate:{k:'Med_Procorolan',v:'Procorolan'}},
+   {k:'Med_Procorolan_Dose',l:'Procorolan Dose',t:'text',w:'col-6 col-md-3',gate:{k:'Med_Procorolan',v:'Procorolan'}},
    {k:'Med_CCB',l:'CCB',t:'sel',o:['None','Amlodipine','Nifedipine','Diltiazem','Verapamil','Other CCB'],w:'col-6 col-md-3'},
    {k:'Med_CCB_Dose',l:'CCB Dose',t:'text',w:'col-6 col-md-3',gate:{k:'Med_CCB',in:['Amlodipine','Nifedipine','Diltiazem','Verapamil','Other CCB']}},
    {k:'Med_Diuretic',l:'Diuretic',t:'sel',o:['None','Furosemide','Metolazone','HCTZ','Furosemide + Metolazone','Furosemide + HCTZ','Metolazone + HCTZ'],w:'col-6 col-md-3'},
@@ -6690,7 +6690,7 @@ function buildVisitMedDoses(){
             });
             html+='</select>';
             html+='<label class="mt-1" style="font-size:0.7rem;">Custom Dose <small class="text-muted">(if not in list)</small></label>';
-            html+='<input type="text" class="form-control form-control-sm" id="'+m.id+'_Custom" placeholder="e.g. 12.5 mg">';
+            html+='<input type="text" class="form-control form-control-sm" id="'+m.id+'_Custom" placeholder="">';
             html+='<label class="mt-1" style="font-size:0.7rem;">Frequency <small class="text-muted">(only if custom dose)</small></label>';
             html+='<input type="text" class="form-control form-control-sm" id="'+m.id+'_Freq" placeholder="">';
             html+='<label class="mt-1" style="font-size:0.7rem;">Dose change this visit</label>';
@@ -6781,7 +6781,6 @@ function _visitMedDisplayText(dose,custom,freq,change){
 
 function carryForwardVisitMedicationsFromLatestVisit(){
     if(editingVisitId||!visits||!visits.length||typeof VISIT_MED_LIST==='undefined')return;
-    if(_visitMedFormHasValues())return;
     var latest=visits[0]||{};
     VISIT_MED_LIST.forEach(function(m){
         var doseVal=latest[m.id]||'';
@@ -7851,8 +7850,8 @@ function renderCollapsibleVisits(visitsArr, admissionItems){
         html+='<span class="vh-type">('+_esc(isAdmission ? (v._admissionLabel||'In-Hospital Admission') : (v.visitType||'Routine'))+')</span>';
         html+='<span class="vh-summary">'+_esc(summary)+'</span>';
         if(!isAdmission){
-            html+='<button class="btn btn-sm btn-outline-primary py-0 px-2 me-1" style="font-size:0.7rem;" onclick="event.stopPropagation(); editVisit(\''+v.id+'\')" title="Edit this visit"><i class="fa fa-edit"></i></button>';
-            html+='<button class="btn btn-sm btn-outline-danger py-0 px-2 me-2" style="font-size:0.7rem;" onclick="event.stopPropagation(); deleteVisit(\''+v.id+'\',\''+(v._displayDate||v.visitDate||'')+'\')" title="Delete this visit (admin)"><i class="fa fa-trash"></i></button>';
+            html+='<button type="button" class="btn btn-sm btn-outline-primary py-0 px-2 me-1" style="font-size:0.7rem;" onclick="event.stopPropagation(); editVisit(\''+v.id+'\')" title="Edit this visit"><i class="fa fa-edit"></i></button>';
+            html+='<button type="button" class="btn btn-sm btn-outline-danger py-0 px-2 me-2" style="font-size:0.7rem;" onclick="event.stopPropagation(); deleteVisit(\''+v.id+'\',\''+(v._displayDate||v.visitDate||'')+'\')" title="Delete this visit (admin)"><i class="fa fa-trash"></i></button>';
         }else{
             html+='<span class="badge bg-warning text-dark me-2" style="font-size:0.65rem;"><i class="fa fa-hospital me-1"></i>Admission</span>';
         }
