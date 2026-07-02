@@ -1424,7 +1424,7 @@ img,canvas,table,svg{max-width:100%;}
             <div class="row g-2">
                 <div class="col-6 col-md-3"><label class="text-primary fw-bold">Entered By *</label><select class="form-select border-primary" id="Doctor_Name"><option value="">Select...</option><option>Dr Farouk</option><option>Dr Badawy</option><option>Dr Ali</option><option>Dr Hamza</option><option>Dr Ahmed</option></select></div>
                 <div class="col-6 col-md-3"><label>Name *</label><input type="text" class="form-control" id="Patient_Name"></div>
-                <div class="col-6 col-md-3"><label>Civil ID * (12 digits)</label><input type="text" class="form-control" id="Civil_ID" inputmode="text" pattern="[0-9]*" maxlength="12" oninput="validateCivilID(this)" onkeypress="return isNumberKey(event)"><small class="error-msg" id="civilError">Must be exactly 12 digits</small></div>
+                <div class="col-6 col-md-3"><label>Civil ID * (12 digits)</label><input type="text" class="form-control" id="Civil_ID" inputmode="text" pattern="[0-9]*" maxlength="12" oninput="validateCivilID(this); updateAgeFromCivilID();" onkeypress="return isNumberKey(event)"><small class="error-msg" id="civilError">Must be exactly 12 digits</small></div>
                 <div class="col-6 col-md-3"><label>File No * (6 digits)</label><input type="text" class="form-control" id="File_No" inputmode="text" pattern="[0-9]*" maxlength="6" oninput="validateFileNo(this)" onkeypress="return isNumberKey(event)"><small class="error-msg" id="fileError">Must be exactly 6 digits</small></div>
                 <div class="col-4 col-md-2"><label>Age</label><input type="text" class="form-control" id="Age" inputmode="text" oninput="calcBaselineEGFR(); calcMAGGIC(); calcEGFR(); if(typeof _recalcAllExtraAdmDerived==='function')_recalcAllExtraAdmDerived();"></div>
                 <div class="col-4 col-md-2"><label>Gender</label><select class="form-select" id="Gender" onchange="calcBaselineEGFR(); calcMAGGIC(); calcEGFR(); if(typeof _recalcAllExtraAdmDerived==='function')_recalcAllExtraAdmDerived();"><option value="">Select...</option><option>Male</option><option>Female</option></select></div>
@@ -6828,6 +6828,43 @@ function carryForwardVisitMedicationsFromLatestVisit(){
 // ===== FORM HELPERS =====
 function isNumberKey(evt){var c=(evt.which)?evt.which:evt.keyCode;if(c>31&&(c<48||c>57))return false;return true;}
 function validateCivilID(input){var e=document.getElementById('civilError');if(input.value.length!==12&&input.value.length>0){input.classList.add('input-error');e.style.display='block';}else{input.classList.remove('input-error');e.style.display='none';}}
+function _kuwaitCivilIdDOB(civilID){
+    var id=String(civilID||'').replace(/\D/g,'');
+    if(!/^\d{12}$/.test(id))return null;
+    var centuryCode=id.charAt(0);
+    var yy=parseInt(id.substr(1,2),10),mm=parseInt(id.substr(3,2),10),dd=parseInt(id.substr(5,2),10);
+    var base=(centuryCode==='1')?1800:((centuryCode==='2')?1900:((centuryCode==='3')?2000:null));
+    if(base===null||isNaN(yy)||isNaN(mm)||isNaN(dd))return null;
+    var dob=new Date(base+yy,mm-1,dd);
+    if(dob.getFullYear()!==base+yy||dob.getMonth()!==mm-1||dob.getDate()!==dd)return null;
+    if(dob>new Date())return null;
+    return dob;
+}
+function _ageFromDOB(dob,today){
+    today=today||new Date();
+    var age=today.getFullYear()-dob.getFullYear();
+    var birthdayPassed=(today.getMonth()>dob.getMonth())||(today.getMonth()===dob.getMonth()&&today.getDate()>=dob.getDate());
+    if(!birthdayPassed)age--;
+    return age>=0&&age<130?age:null;
+}
+function _refreshAgeDependentCalcs(){
+    if(typeof calcBaselineEGFR==='function')calcBaselineEGFR();
+    if(typeof calcDischargeEGFR==='function')calcDischargeEGFR();
+    if(typeof calcMAGGIC==='function')calcMAGGIC();
+    if(typeof calcEGFR==='function')calcEGFR();
+    if(typeof _recalcAllExtraAdmDerived==='function')_recalcAllExtraAdmDerived();
+}
+function updateAgeFromCivilID(){
+    var civilEl=document.getElementById('Civil_ID'),ageEl=document.getElementById('Age');
+    if(!civilEl||!ageEl)return false;
+    var dob=_kuwaitCivilIdDOB(civilEl.value);
+    if(!dob)return false;
+    var age=_ageFromDOB(dob);
+    if(age===null)return false;
+    ageEl.value=String(age);
+    _refreshAgeDependentCalcs();
+    return true;
+}
 function validateFileNo(input){var e=document.getElementById('fileError');if(input.value.length!==6&&input.value.length>0){input.classList.add('input-error');e.style.display='block';}else{input.classList.remove('input-error');e.style.display='none';}}
 function _updateAdmissionBMIFromHeightWeight(){
     var w=parseFloat(document.getElementById("Weight").value),h=parseFloat(document.getElementById("Height").value);
@@ -7018,6 +7055,7 @@ function savePatient(){
 }
 
 function _savePatientCore(){
+    if(typeof updateAgeFromCivilID==='function')updateAgeFromCivilID();
     var civilID=document.getElementById("Civil_ID").value,fileNo=document.getElementById("File_No").value;
     var mobile=(document.getElementById("Mobile").value||'').trim();
     if(civilID.length!==12){showPopup("error","Invalid Civil ID","Civil ID must be exactly 12 digits");return;}
@@ -8729,6 +8767,7 @@ function editPt(id){
         var _ahfDiag = document.getElementById('Advanced_HF');
         if(_ahfDiag && _ahfOut.value && !d.Advanced_HF) _ahfDiag.value = _ahfOut.value;
     }
+    if(typeof updateAgeFromCivilID==='function')updateAgeFromCivilID();
     applyPhenotypeEmphasis();updateGDMTRationale();checkGDMTAlerts();checkCRTIndication();calcBMI();
     if(typeof calcDischargeEGFR==='function') calcDischargeEGFR();
     // Restore baseline ECG image preview (if any)
