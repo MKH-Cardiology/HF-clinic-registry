@@ -8476,7 +8476,7 @@ function searchPatient(){
     var rawIsVisitDate=!visitDateVal && /^\d{4}-\d{2}-\d{2}$/.test(rawDateCandidate);
     var targetVisitDate=visitDateVal || (rawIsVisitDate?rawDateCandidate:"");
     var hasTextQuery=!!rawVal && !rawIsVisitDate;
-    var valLower=rawVal.toLowerCase();
+    var valLower=rawVal.toLowerCase().trim().replace(/\s+/g,' ');
     var valDigits=rawVal.replace(/\D/g,""); // digits only — for civil/file ID comparison
     res.innerHTML="<div class='text-center'><i class='fa fa-spinner fa-spin'></i> Searching...</div>";
     db.collection("patients").get().then(function(s){
@@ -8484,14 +8484,14 @@ function searchPatient(){
         s.forEach(function(d){
             var data=d.data();
             allPatients.push({id:d.id,data:data});
-            var name=String(data.Patient_Name||"").toLowerCase();
+            var name=String(data.Patient_Name||"").toLowerCase().trim().replace(/\s+/g,' ');
             var civil=String(data.Civil_ID||"").trim();
             var fno=String(data.File_No||"").trim();
             var civilDigits=civil.replace(/\D/g,"");
             var fnoDigits=fno.replace(/\D/g,"");
             var match=false;
             if(hasTextQuery && valDigits && (civilDigits===valDigits || fnoDigits===valDigits || (civilDigits&&civilDigits.indexOf(valDigits)>=0) || (fnoDigits&&fnoDigits.indexOf(valDigits)>=0))) match=true;
-            else if(hasTextQuery && name && name.indexOf(valLower)>=0) match=true;
+            else if(hasTextQuery && name && name.indexOf(valLower)===0) match=true;
             if(match){textMatched[d.id]=true;}
         });
         var candidates=targetVisitDate?allPatients:allPatients.filter(function(p){return textMatched[p.id];});
@@ -8514,16 +8514,24 @@ function searchPatient(){
                 .catch(function(){ return {patient:m, latest:null, dateHit:!targetVisitDate}; });
         });
         Promise.all(visitPromises).then(function(rows){
-            var matches=[], latestVisits=[];
+            var matchedRows=[];
             rows.forEach(function(r){
                 var textOk=!hasTextQuery || textMatched[r.patient.id];
                 var dateOk=!targetVisitDate || r.dateHit;
                 if(textOk && dateOk){
                     PC[r.patient.id]=r.patient.data;
-                    matches.push(r.patient);
-                    latestVisits.push(r.latest);
+                    matchedRows.push(r);
                 }
             });
+            if(hasTextQuery && !valDigits){
+                matchedRows.sort(function(a,b){
+                    var an=String((a.patient.data||{}).Patient_Name||'').trim().toLowerCase();
+                    var bn=String((b.patient.data||{}).Patient_Name||'').trim().toLowerCase();
+                    return an.localeCompare(bn);
+                });
+            }
+            var matches=matchedRows.map(function(r){return r.patient;});
+            var latestVisits=matchedRows.map(function(r){return r.latest;});
             if(matches.length === 0){
                 res.innerHTML="<div class='alert alert-warning'>No patient found. <button class='btn btn-sm btn-outline-dark ms-2' onclick='clearSearchResults()'>Back</button></div>";
                 return;
