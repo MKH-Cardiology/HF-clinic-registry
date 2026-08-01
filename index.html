@@ -1521,14 +1521,6 @@ img,canvas,table,svg{max-width:100%;}
                 <div class="col-12 col-md-6"><label>Reason / Notes</label><input type="text" class="form-control" id="Admission_Reason" placeholder="e.g. ADHF, ACS, arrhythmia..."></div>
                 <div class="col-6 col-md-3"><label>Cause of Admission</label><select class="form-select" id="Admission_HF_Related" onchange="toggleAdmissionCause()"><option value="HF related">HF related</option><option value="Other">Other (non-HF)</option></select></div>
                 <div class="col-12 col-md-9" id="admissionCauseWrap" style="display:none;"><label>Specify Cause</label><input type="text" class="form-control" id="Admission_Cause" placeholder="e.g. pneumonia, sepsis, elective procedure..."></div>
-                <div class="col-6 col-md-3"><label>Transfer to Other Hospital</label><select class="form-select" id="Transfer_Other" onchange="toggleTransferHospital()"><option>No</option><option>Yes</option></select></div>
-                <div class="col-12 col-md-6" id="transferHospitalWrap" style="display:none;"><label>Name of Hospital</label><input type="text" class="form-control" id="Transfer_Hospital_Name" placeholder="e.g. Chest Hospital, Amiri..."></div>
-                <div class="col-6 col-md-3"><label>Discharged Home</label><select class="form-select" id="Discharge_Home"><option>No</option><option>Yes</option></select></div>
-                <div class="col-12 col-md-6"><label>Other Discharge Destination / Details</label><input type="text" class="form-control" id="Discharge_Other" placeholder="Specify other discharge destination or details..."></div>
-                <div class="col-12"><hr class="my-1"><h6 class="text-secondary m-0"><i class="fa fa-person-walking me-1"></i>Status on Discharge</h6></div>
-                <div class="col-4 col-md-2"><label>Walking</label><select class="form-select" id="Discharge_Walking"><option>No</option><option>Yes</option></select></div>
-                <div class="col-4 col-md-2"><label>On Wheelchair</label><select class="form-select" id="Discharge_Wheelchair"><option>No</option><option>Yes</option></select></div>
-                <div class="col-4 col-md-2"><label>On Stretcher</label><select class="form-select" id="Discharge_Stretcher"><option>No</option><option>Yes</option></select></div>
             </div>
             <div class="row g-2">
                 <div class="col-4 col-md-2"><label class="text-primary">Height (cm)</label><input type="text" class="form-control border-primary" id="Height" oninput="calcBMI();syncVisitHeightFromBaseline(true)" inputmode="text"></div>
@@ -1827,8 +1819,16 @@ img,canvas,table,svg{max-width:100%;}
                     </div>
                 </div>
                 <div class="col-12 col-md-6"><label>Smoking Status</label><select class="form-select" id="Smoker_Visible" onchange="document.getElementById('Smoker').value=this.value;calcMAGGIC()"><option>Never</option><option>Current</option><option>Former</option></select></div>
-                <div class="col-6 col-md-3"><label>Frail</label><select class="form-select" id="Frail"><option>No</option><option>Yes</option></select></div>
-                <div class="col-6 col-md-3"><label>Frailty Index</label><input type="text" class="form-control" id="Frailty_Index" inputmode="text" placeholder="Enter frailty index"></div>
+                <div class="col-6 col-md-3"><label>Frail</label><select class="form-select" id="Frail" onchange="toggleFrailtyFields('')"><option>No</option><option>Yes</option></select></div>
+                <div class="col-12" id="frailtyWrap" style="display:none;">
+                    <div class="row g-2 p-2" style="background:#f6f2ff;border-left:3px solid #6f42c1;border-radius:6px;">
+                        <div class="col-12"><div class="fw-bold" style="color:#5b32a3;"><i class="fa fa-calculator me-1"></i>Frailty Index Assistant</div><small class="text-muted">Frailty Index = health deficits present ÷ health deficits assessed. The result ranges from 0 to 1.</small></div>
+                        <div class="col-6 col-md-3"><label>Deficits Present</label><input type="text" class="form-control" id="Frailty_Deficits" inputmode="numeric" placeholder="e.g. 8" oninput="calculateFrailtyIndex('')"></div>
+                        <div class="col-6 col-md-3"><label>Deficits Assessed</label><input type="text" class="form-control" id="Frailty_Items_Assessed" inputmode="numeric" placeholder="e.g. 40" oninput="calculateFrailtyIndex('')"></div>
+                        <div class="col-6 col-md-3"><label>Frailty Index <span class="auto-badge"><i class="fa fa-calculator"></i> Auto</span></label><input type="text" class="form-control bg-light text-success fw-bold" id="Frailty_Index" inputmode="decimal" placeholder="0.00–1.00"></div>
+                        <div class="col-12"><small class="text-muted" id="frailtyHelp">Enter the number of deficits present and the number assessed; the index will calculate automatically. The investigator may also enter a validated index directly.</small></div>
+                    </div>
+                </div>
                 <!-- ===== VALVE INTERVENTION BLOCK ===== -->
                 <div class="col-12 col-md-6">
                     <label>Valve Intervention</label>
@@ -2091,6 +2091,17 @@ img,canvas,table,svg{max-width:100%;}
                 <div class="col-6 col-md-3" id="lostFUReasonWrap" style="display:none;"><label>Reason</label><select class="form-select" id="LostFU_Reason" onchange="toggleLostFU()"><option value="">Select...</option><option>Travel back home</option><option>Others</option></select></div>
                 <div class="col-12 col-md-6" id="lostFUOtherWrap" style="display:none;"><label>Specify (Others)</label><input type="text" class="form-control" id="LostFU_Other"></div>
 
+                <!-- DISCHARGE & TRANSFER — kept with outcomes where disposition belongs -->
+                <div class="col-12"><hr class="my-2"></div>
+                <h6 class="col-12 text-secondary m-0"><i class="fa fa-person-walking-arrow-right me-1"></i> Discharge &amp; Transfer</h6>
+                <div class="col-6 col-md-3"><label>Discharged Home</label><select class="form-select" id="Discharge_Home" onchange="syncDischargeDisposition('home')"><option>No</option><option>Yes</option></select></div>
+                <div class="col-6 col-md-3"><label>Transfer to Other Hospital</label><select class="form-select" id="Transfer_Other" onchange="syncDischargeDisposition('transfer');toggleTransferHospital()"><option>No</option><option>Yes</option></select></div>
+                <div class="col-12 col-md-6" id="transferHospitalWrap" style="display:none;"><label>If Yes, Specify Hospital</label><input type="text" class="form-control" id="Transfer_Hospital_Name" placeholder="e.g. Chest Hospital, Amiri..."></div>
+                <div class="col-12 col-md-6"><label>Other Discharge Destination / Details</label><input type="text" class="form-control" id="Discharge_Other" placeholder="Specify other discharge destination or details..."></div>
+                <div class="col-6 col-md-3"><label>Status on Discharge</label><select class="form-select" id="Discharge_Status" onchange="syncDischargeStatusLegacy()"><option value="">Select...</option><option>Walking</option><option>On Wheelchair</option><option>On Stretcher</option></select></div>
+                <!-- Legacy fields retained invisibly so older exports remain compatible. -->
+                <input type="hidden" id="Discharge_Walking"><input type="hidden" id="Discharge_Wheelchair"><input type="hidden" id="Discharge_Stretcher">
+
                 <!-- ADVANCED HF — Strong HF + Therapy choices -->
                 <div class="col-12"><hr class="my-2"></div>
                 <h6 class="col-12 text-secondary m-0"><i class="fa fa-heart-circle-bolt"></i> Advanced HF</h6>
@@ -2214,8 +2225,16 @@ img,canvas,table,svg{max-width:100%;}
                     </div>
                     <div class="col-12 col-md-6"><label>IHD Type</label><select class="form-select" id="V_IHD"><option>No</option><option>STEMI</option><option>NSTEMI</option></select></div>
                     <div class="col-12 col-md-6"><label>Smoking Status</label><select class="form-select" id="V_Smoker"><option>Never</option><option>Current</option><option>Former</option></select></div>
-                    <div class="col-6 col-md-3"><label>Frail</label><select class="form-select" id="V_Frail"><option>No</option><option>Yes</option></select></div>
-                    <div class="col-6 col-md-3"><label>Frailty Index</label><input type="text" class="form-control" id="V_Frailty_Index" inputmode="text" placeholder="Enter frailty index"></div>
+                    <div class="col-6 col-md-3"><label>Frail</label><select class="form-select" id="V_Frail" onchange="toggleFrailtyFields('V_')"><option>No</option><option>Yes</option></select></div>
+                    <div class="col-12" id="vFrailtyWrap" style="display:none;">
+                        <div class="row g-2 p-2" style="background:#f6f2ff;border-left:3px solid #6f42c1;border-radius:6px;">
+                            <div class="col-12"><div class="fw-bold" style="color:#5b32a3;"><i class="fa fa-calculator me-1"></i>Frailty Index Assistant</div><small class="text-muted">Frailty Index = health deficits present ÷ health deficits assessed. The result ranges from 0 to 1.</small></div>
+                            <div class="col-6 col-md-3"><label>Deficits Present</label><input type="text" class="form-control" id="V_Frailty_Deficits" inputmode="numeric" placeholder="e.g. 8" oninput="calculateFrailtyIndex('V_')"></div>
+                            <div class="col-6 col-md-3"><label>Deficits Assessed</label><input type="text" class="form-control" id="V_Frailty_Items_Assessed" inputmode="numeric" placeholder="e.g. 40" oninput="calculateFrailtyIndex('V_')"></div>
+                            <div class="col-6 col-md-3"><label>Frailty Index <span class="auto-badge"><i class="fa fa-calculator"></i> Auto</span></label><input type="text" class="form-control bg-light text-success fw-bold" id="V_Frailty_Index" inputmode="decimal" placeholder="0.00–1.00"></div>
+                            <div class="col-12"><small class="text-muted" id="vFrailtyHelp">Enter the number of deficits present and the number assessed; the index will calculate automatically. The investigator may also enter a validated index directly.</small></div>
+                        </div>
+                    </div>
                     <div class="col-12 col-md-3"><label>Thyroid Disease</label><select class="form-select" id="V_Thyroid_Dz"><option>No</option><option>Hyperthyroid</option><option>Hypothyroid</option></select></div>
                     <div class="col-12 col-md-3"><label>Family History (Cardio)</label><select class="form-select" id="V_FH_Cardio"><option>No</option><option>Yes</option></select></div>
                     <div class="col-12 col-md-3"><label>Genetics</label><select class="form-select" id="V_Genetics" onchange="toggleVisitGeneticsType()"><option>No</option><option>Yes</option></select></div>
@@ -3243,7 +3262,9 @@ var VISIT_MED_GROUPS = [
         label: 'SGLT2 Inhibitors',
         meds: [
             {id:'V_Forxiga',   label:'Forxiga',   doses:['','5 mg PO OD','10 mg PO OD']},
-            {id:'V_Jardiance', label:'Jardiance', doses:['','10 mg PO OD','25 mg PO OD']}
+            {id:'V_Jardiance', label:'Jardiance', doses:['','10 mg PO OD','25 mg PO OD']},
+            {id:'V_Xigduo',    label:'Xigduo XR', doses:['','2.5/1000 mg PO OD','5/500 mg PO OD','5/1000 mg PO OD','10/500 mg PO OD','10/1000 mg PO OD']},
+            {id:'V_Synjardy',  label:'Synjardy',  doses:['','5/500 mg PO BID','5/1000 mg PO BID','12.5/500 mg PO BID','12.5/1000 mg PO BID']}
         ]
     },
     {
@@ -3335,6 +3356,39 @@ var VISIT_MED_GROUPS = [
 // Flat list for saveVisit/export compatibility
 var VISIT_MED_LIST = [];
 VISIT_MED_GROUPS.forEach(function(g){ g.meds.forEach(function(m){ VISIT_MED_LIST.push(m); }); });
+
+// Hospital admission medications deliberately mirror the excellent OPD/visit
+// editor. Separate A_* keys keep the admission snapshot independent of visits.
+var ADMISSION_MED_GROUPS = VISIT_MED_GROUPS.map(function(group){
+    return {
+        label:group.label,
+        meds:group.meds.map(function(m){
+            return {id:m.id.replace(/^V_/,'A_'),label:m.label,doses:m.doses.slice()};
+        })
+    };
+});
+var ADMISSION_MED_LIST=[];
+ADMISSION_MED_GROUPS.forEach(function(g){g.meds.forEach(function(m){ADMISSION_MED_LIST.push(m);});});
+
+// Maps the new per-drug hospital editor back to the registry's legacy grouped
+// Med_* fields so old analytics, cards and exports continue to work.
+var ADMISSION_MED_LEGACY_MAP={
+    A_Concor:'Med_BB',A_Betaloc:'Med_BB',A_Dilatrend:'Med_BB',A_Lopressor:'Med_BB',
+    A_Zestril:'Med_ACEiARB',A_Tritace:'Med_ACEiARB',A_Capoten:'Med_ACEiARB',A_Diovan:'Med_ACEiARB',A_Atacand:'Med_ACEiARB',A_Entresto:'Med_ARNI',
+    A_Aldactone:'Med_MRA',A_Eplerenone:'Med_MRA',A_Finerenone:'Med_MRA',
+    A_Forxiga:'Med_SGLT2i',A_Jardiance:'Med_SGLT2i',A_Xigduo:'Med_SGLT2i',A_Synjardy:'Med_SGLT2i',
+    A_Hydralazine:'Med_Vasodilator',A_Nitrates:'Med_Vasodilator',A_Procorolan:'Med_Procorolan',
+    A_Amlodipine:'Med_CCB',A_Nifedipine:'Med_CCB',A_Diltiazem:'Med_CCB',A_Verapamil:'Med_CCB',A_OtherCCB:'Med_CCB',
+    A_Furosemide:'Med_Diuretic',A_Metolazone:'Med_Diuretic',A_HCTZ:'Med_Diuretic',
+    A_Mounjaro:'Med_GLP1',A_Ozempic:'Med_GLP1',
+    A_Warfarin:'Med_OAC',A_Xarelto:'Med_OAC',A_Eliquis:'Med_OAC',
+    A_ASA:'Med_Antiplat',A_Plavix:'Med_Antiplat',A_Brilinta:'Med_Antiplat',A_Effient:'Med_Antiplat',
+    A_Zocor:'Med_Statin',A_Lipitor:'Med_Statin',A_Crestor:'Med_Statin',A_Ezetrol:'Med_Ezetrol',
+    A_Repatha:'Med_PCSK9',A_Praluent:'Med_PCSK9',A_Atozet:'Med_LipidCombo',A_Zympass:'Med_LipidCombo',
+    A_Fibrates:'Med_Fibrate',A_Omacor:'Med_Omega3',A_Vascepa:'Med_Omega3',A_Nicotine:'Med_Nicotine',
+    A_Cordarone:'Med_Arrhythmia',A_Flecainide:'Med_Arrhythmia',A_Sotalol:'Med_Arrhythmia',A_Propafenone:'Med_Arrhythmia',A_Digoxin:'Med_Digoxin',
+    A_Veltassa:'Med_K_Chelator',A_Lokelma:'Med_K_Chelator'
+};
 
 var PILL_COMORBIDITIES = [
     {id:'DM',label:'DM'},{id:'HTN',label:'HTN'},{id:'AF',label:'AF'},
@@ -4417,11 +4471,13 @@ function buildVaccBlock(){
             html+='<i class="fa fa-circle-check me-1"></i>Already given on <strong>'+_fmtVaccDate(prior)+'</strong>';
             html+='</div>';
         } else {
-            html+='<div class="d-flex gap-2 mt-1 align-items-center flex-wrap">';
-            html+='<button type="button" class="btn btn-sm btn-outline-success vacc-toggle-btn" id="vacc_'+v.id+'_yn" data-vacc-state="No" onclick="onVaccToggle(\''+v.id+'\')"><i class="fa fa-syringe me-1"></i>Not Given</button>';
-            html+='<input type="date" class="form-control form-control-sm" style="max-width:170px;display:none;" id="vacc_'+v.id+'_date" onchange="onVaccDateChange(\''+v.id+'\')">';
+            html+='<div class="d-flex gap-2 mt-2 align-items-center flex-wrap" id="vacc_'+v.id+'_choice" data-vacc-state="No">';
+            html+='<button type="button" class="btn btn-sm btn-outline-success" id="vacc_'+v.id+'_given" onclick="setVaccState(\''+v.id+'\',\'Yes\')"><i class="fa fa-circle-check me-1"></i>Given</button>';
+            html+='<button type="button" class="btn btn-sm btn-danger" id="vacc_'+v.id+'_not" onclick="setVaccState(\''+v.id+'\',\'No\')"><i class="fa fa-circle-xmark me-1"></i>Not Given</button>';
             html+='</div>';
-            html+='<small class="text-muted d-block mt-1" style="font-size:0.7rem;">Tap to mark given; tap again to clear.</small>';
+            html+='<div class="mt-2 p-2 bg-white rounded border" id="vacc_'+v.id+'_details" style="display:none;">';
+            html+='<label class="small fw-bold mb-1">Date given</label><input type="date" class="form-control form-control-sm" style="max-width:190px;" id="vacc_'+v.id+'_date" onchange="onVaccDateChange(\''+v.id+'\')">';
+            html+='<small class="text-muted d-block mt-1">Enter the administration date to complete this vaccine record.</small></div>';
             if(prior){
                 html+='<small class="text-muted d-block mt-1">Last dose: '+_fmtVaccDate(prior)+' — suppression expired, due again.</small>';
             }
@@ -4443,38 +4499,36 @@ function onVaccNotesChange(){
 
 // Toggle handler for the vaccination button. First tap -> Given (reveals date,
 // defaults to today). Second tap -> clears back to Not Given (removes date).
-function onVaccToggle(id){
-    var btn=document.getElementById('vacc_'+id+'_yn');
+function setVaccState(id,state){
+    var choice=document.getElementById('vacc_'+id+'_choice');
+    var given=document.getElementById('vacc_'+id+'_given');
+    var notGiven=document.getElementById('vacc_'+id+'_not');
+    var details=document.getElementById('vacc_'+id+'_details');
     var dt=document.getElementById('vacc_'+id+'_date');
-    if(!btn||!dt)return;
-    var nowYes=(btn.getAttribute('data-vacc-state')==='Yes');
-    if(nowYes){
-        // Currently Given -> clear it
-        btn.setAttribute('data-vacc-state','No');
-        btn.classList.remove('btn-success');
-        btn.classList.add('btn-outline-success');
-        btn.innerHTML='<i class="fa fa-syringe me-1"></i>Not Given';
-        dt.style.display='none';
-        dt.value='';
-    } else {
-        // Currently Not Given -> mark Given
-        btn.setAttribute('data-vacc-state','Yes');
-        btn.classList.add('btn-success');
-        btn.classList.remove('btn-outline-success');
-        btn.innerHTML='<i class="fa fa-circle-check me-1"></i>Given';
-        dt.style.display='';
-        if(!dt.value)dt.value=new Date().toISOString().split('T')[0];
-    }
+    if(!choice||!given||!notGiven||!details||!dt)return;
+    var isYes=(state==='Yes');
+    choice.setAttribute('data-vacc-state',isYes?'Yes':'No');
+    given.classList.toggle('btn-success',isYes);
+    given.classList.toggle('btn-outline-success',!isYes);
+    notGiven.classList.toggle('btn-danger',!isYes);
+    notGiven.classList.toggle('btn-outline-danger',isYes);
+    details.style.display=isYes?'':'none';
+    if(isYes && !dt.value)dt.value=new Date().toISOString().split('T')[0];
+    if(!isYes)dt.value='';
     onVaccDateChange(id);
+}
+function onVaccToggle(id){
+    var choice=document.getElementById('vacc_'+id+'_choice');
+    setVaccState(id,(choice&&choice.getAttribute('data-vacc-state')==='Yes')?'No':'Yes');
 }
 
 // Mirror the visible toggle + date into the hidden persistence fields.
 function onVaccDateChange(id){
-    var btn=document.getElementById('vacc_'+id+'_yn');
+    var choice=document.getElementById('vacc_'+id+'_choice');
     var dt=document.getElementById('vacc_'+id+'_date');
     var hYN=document.getElementById('V_Vacc_'+id);
     var hDT=document.getElementById('V_Vacc_'+id+'_Date');
-    var isYes=(btn&&btn.getAttribute('data-vacc-state')==='Yes');
+    var isYes=(choice&&choice.getAttribute('data-vacc-state')==='Yes');
     if(hYN)hYN.value=isYes?'Yes':'No';
     if(hDT)hDT.value=isYes?(dt?dt.value:''):'';
     // Keep legacy *_Year field in sync for backward-compatible exports/alerts
@@ -4490,25 +4544,12 @@ function syncVaccFromHidden(){
     VACCINES.forEach(function(v){
         var hYN=document.getElementById('V_Vacc_'+v.id);
         var hDT=document.getElementById('V_Vacc_'+v.id+'_Date');
-        var btn=document.getElementById('vacc_'+v.id+'_yn');
+        var choice=document.getElementById('vacc_'+v.id+'_choice');
         var dt=document.getElementById('vacc_'+v.id+'_date');
-        if(!btn||!dt)return; // covered (read-only) — nothing to sync
+        if(!choice||!dt)return; // covered (read-only) — nothing to sync
         var isYes=(hYN&&hYN.value==='Yes');
-        if(isYes){
-            btn.setAttribute('data-vacc-state','Yes');
-            btn.classList.add('btn-success');
-            btn.classList.remove('btn-outline-success');
-            btn.innerHTML='<i class="fa fa-circle-check me-1"></i>Given';
-            dt.style.display='';
-            dt.value=(hDT&&hDT.value)||'';
-        } else {
-            btn.setAttribute('data-vacc-state','No');
-            btn.classList.remove('btn-success');
-            btn.classList.add('btn-outline-success');
-            btn.innerHTML='<i class="fa fa-syringe me-1"></i>Not Given';
-            dt.style.display='none';
-            dt.value='';
-        }
+        dt.value=isYes?((hDT&&hDT.value)||''):'';
+        setVaccState(v.id,isYes?'Yes':'No');
     });
     var notesEl=document.getElementById('vacc_notes_input');
     var hidNotes=document.getElementById('V_Vacc_Notes');
@@ -4599,26 +4640,100 @@ function _buildHomeMedHtml(medId){
 
 function buildMedSection7(){
     var html='';
-    var done={};
-    MED_GROUPS_HOME.forEach(function(group){
+    html+='<div class="alert alert-light border py-2 px-3 mb-2" style="font-size:0.78rem;"><i class="fa fa-circle-info text-primary me-1"></i>Select <strong>Yes</strong> to reveal dose controls, or <strong>Stopped</strong> to document discontinued therapy. This mirrors the OPD visit medication workflow.</div>';
+    ADMISSION_MED_GROUPS.forEach(function(group){
         html+='<div class="visit-med-group">';
         html+='<div class="visit-med-group-label"><i class="fa fa-pills me-1"></i>'+group.label+'</div>';
         html+='<div class="row g-2">';
-        group.meds.forEach(function(medId){
-            if(MED_FORMULARY[medId]){ html+=_buildHomeMedHtml(medId); done[medId]=1; }
+        group.meds.forEach(function(m){
+            html+='<div class="col-6 col-md-3">';
+            html+='<label>'+m.label+'</label>';
+            html+='<select class="form-select" id="'+m.id+'_Status" onchange="onAdmissionMedStatusChange(\''+m.id+'\')"><option value="No">No</option><option value="Yes">Yes</option><option value="Stopped">Stopped</option></select>';
+            html+='<div class="med-sub-fields" id="asub_'+m.id+'">';
+            html+='<label style="font-size:0.7rem;">Dose (preset)</label><select class="form-select" id="'+m.id+'"><option value="">Select dose...</option>';
+            m.doses.forEach(function(d){if(d!=='')html+='<option value="'+d+'">'+d+'</option>';});
+            html+='</select>';
+            html+='<label class="mt-1" style="font-size:0.7rem;">Custom Dose <small class="text-muted">(if not in list)</small></label><input type="text" class="form-control form-control-sm" id="'+m.id+'_Custom">';
+            html+='<label class="mt-1" style="font-size:0.7rem;">Frequency <small class="text-muted">(only if custom dose)</small></label><input type="text" class="form-control form-control-sm" id="'+m.id+'_Freq">';
+            html+='<label class="mt-1" style="font-size:0.7rem;">Dose change this admission</label><select class="form-select form-select-sm" id="'+m.id+'_Change"><option value="">No dose change</option><optgroup label="Increased to"><option value="Increased to custom dose">Increased to custom dose</option>';
+            m.doses.forEach(function(d){if(d!=='')html+='<option value="Increased to '+d+'">Increased to '+d+'</option>';});
+            html+='</optgroup><optgroup label="Decreased to"><option value="Decreased to custom dose">Decreased to custom dose</option>';
+            m.doses.forEach(function(d){if(d!=='')html+='<option value="Decreased to '+d+'">Decreased to '+d+'</option>';});
+            html+='</optgroup></select></div></div>';
         });
         html+='</div></div>';
     });
-    // Safety net: render any MED_FORMULARY key not covered by a group above.
-    var leftovers=Object.keys(MED_FORMULARY).filter(function(k){return !done[k];});
-    if(leftovers.length){
-        html+='<div class="visit-med-group">';
-        html+='<div class="visit-med-group-label"><i class="fa fa-pills me-1"></i>Other Medications</div>';
-        html+='<div class="row g-2">';
-        leftovers.forEach(function(medId){ html+=_buildHomeMedHtml(medId); });
-        html+='</div></div>';
-    }
+    // Hidden backward-compatible mirrors used by existing analytics and exports.
+    html+='<div style="display:none;">';
+    Object.keys(MED_FORMULARY).forEach(function(medId){
+        html+='<input type="hidden" id="'+medId+'"><input type="hidden" id="'+medId+'_Dose"><input type="hidden" id="'+medId+'_DoseCustom"><input type="hidden" id="'+medId+'_Freq"><input type="hidden" id="'+medId+'_Date">';
+    });
+    html+='</div>';
     document.getElementById('medSection7').innerHTML=html;
+}
+
+function onAdmissionMedStatusChange(medId){
+    var status=(document.getElementById(medId+'_Status')||{}).value||'No';
+    var sub=document.getElementById('asub_'+medId);
+    if(!sub)return;
+    if(status==='Yes')sub.classList.add('visible');
+    else{
+        sub.classList.remove('visible');
+        [medId,medId+'_Custom',medId+'_Freq',medId+'_Change'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+    }
+    syncAdmissionMedicationsToLegacy();
+    if(typeof updateGDMTRationale==='function')updateGDMTRationale();
+}
+
+function syncAdmissionMedicationsToLegacy(){
+    if(typeof ADMISSION_MED_LIST==='undefined')return;
+    var aggregate={},firstDetail={};
+    Object.keys(MED_FORMULARY||{}).forEach(function(k){aggregate[k]=[];});
+    ADMISSION_MED_LIST.forEach(function(m){
+        var legacy=ADMISSION_MED_LEGACY_MAP[m.id];
+        if(!legacy)return;
+        var status=(document.getElementById(m.id+'_Status')||{}).value||'No';
+        if(status==='No')return;
+        var value=status==='Stopped'?'Stopped':m.label.replace('Xigduo XR','Xigduo');
+        if(legacy==='Med_ARNI'&&status==='Yes')value='Yes';
+        if(aggregate[legacy].indexOf(value)<0)aggregate[legacy].push(value);
+        if(!firstDetail[legacy]&&status==='Yes'){
+            firstDetail[legacy]={dose:(document.getElementById(m.id)||{}).value||'',custom:(document.getElementById(m.id+'_Custom')||{}).value||'',freq:(document.getElementById(m.id+'_Freq')||{}).value||''};
+        }
+    });
+    Object.keys(MED_FORMULARY||{}).forEach(function(legacy){
+        var base=document.getElementById(legacy);if(base)base.value=aggregate[legacy].length?aggregate[legacy].join(', '):((MED_FORMULARY[legacy].options||[])[0]||'None');
+        var detail=firstDetail[legacy]||{};
+        var dose=document.getElementById(legacy+'_Dose');if(dose)dose.value=detail.dose||'';
+        var custom=document.getElementById(legacy+'_DoseCustom');if(custom)custom.value=detail.custom||'';
+        var freq=document.getElementById(legacy+'_Freq');if(freq)freq.value=detail.freq||'';
+    });
+}
+
+function restoreAdmissionMedications(data){
+    data=data||{};
+    ADMISSION_MED_LIST.forEach(function(m){
+        var statusEl=document.getElementById(m.id+'_Status');if(!statusEl)return;
+        var hasNew=data[m.id+'_Status']!==undefined||data[m.id]||data[m.id+'_Custom']||data[m.id+'_Freq']||data[m.id+'_Change'];
+        if(hasNew){
+            statusEl.value=data[m.id+'_Status']||((data[m.id]||data[m.id+'_Custom']||data[m.id+'_Freq'])?'Yes':'No');
+        }else{
+            var legacy=ADMISSION_MED_LEGACY_MAP[m.id],legacyVal=String(data[legacy]||'');
+            var candidates=Object.keys(ADMISSION_MED_LEGACY_MAP).filter(function(k){return ADMISSION_MED_LEGACY_MAP[k]===legacy;});
+            var label=m.label.replace('Xigduo XR','Xigduo');
+            var active=legacyVal.split(',').map(function(x){return x.trim();}).indexOf(label)>=0;
+            if(m.id==='A_Entresto'&&legacyVal==='Yes')active=true;
+            if(legacyVal==='Stopped'&&candidates[0]===m.id)statusEl.value='Stopped';
+            else statusEl.value=active?'Yes':'No';
+            if(active){
+                var de=document.getElementById(m.id);if(de)de.value=data[legacy+'_Dose']||'';
+                var ce=document.getElementById(m.id+'_Custom');if(ce)ce.value=data[legacy+'_DoseCustom']||'';
+                var fe=document.getElementById(m.id+'_Freq');if(fe)fe.value=data[legacy+'_Freq']||'';
+            }
+        }
+        onAdmissionMedStatusChange(m.id);
+    });
+    syncAdmissionMedicationsToLegacy();
 }
 
 function toggleMedGroup(grpId){
@@ -4720,10 +4835,14 @@ function syncMultiMedField(medId){
 
 function onMedChange(medId){
     var sel=document.getElementById(medId);
+    if(!sel)return;
     var val=sel.value;
     var sub=document.getElementById('sub_'+medId);
     var doseSel=document.getElementById(medId+'_Dose');
     var med=MED_FORMULARY[medId];
+    // The redesigned admission editor keeps Med_* as hidden compatibility
+    // mirrors, so the old visual sub-panel may intentionally be absent.
+    if(!sub||!doseSel)return;
     if(val==='None'||val==='No'||val===''||val==='Stopped'){
         sub.classList.remove('visible');
         doseSel.innerHTML='<option value="">Select dose...</option>';
@@ -4910,6 +5029,53 @@ function toggleTransferHospital(){
     if(sel.value==='Yes'){wrap.style.display='';}
     else{wrap.style.display='none';var n=document.getElementById('Transfer_Hospital_Name');if(n)n.value='';}
 }
+function syncDischargeDisposition(source){
+    var home=document.getElementById('Discharge_Home');
+    var transfer=document.getElementById('Transfer_Other');
+    if(source==='home'&&home&&home.value==='Yes'&&transfer)transfer.value='No';
+    if(source==='transfer'&&transfer&&transfer.value==='Yes'&&home)home.value='No';
+    toggleTransferHospital();
+}
+function syncDischargeStatusLegacy(){
+    var status=(document.getElementById('Discharge_Status')||{}).value||'';
+    var map={Discharge_Walking:'Walking',Discharge_Wheelchair:'On Wheelchair',Discharge_Stretcher:'On Stretcher'};
+    Object.keys(map).forEach(function(id){var el=document.getElementById(id);if(el)el.value=(status===map[id])?'Yes':'No';});
+}
+function restoreDischargeStatus(data){
+    data=data||{};
+    var status=data.Discharge_Status||'';
+    if(!status){
+        if(data.Discharge_Walking==='Yes')status='Walking';
+        else if(data.Discharge_Wheelchair==='Yes')status='On Wheelchair';
+        else if(data.Discharge_Stretcher==='Yes')status='On Stretcher';
+    }
+    var el=document.getElementById('Discharge_Status');if(el)el.value=status;
+    syncDischargeStatusLegacy();
+    toggleTransferHospital();
+}
+function toggleFrailtyFields(prefix){
+    prefix=prefix||'';
+    var frail=document.getElementById(prefix+'Frail');
+    var wrap=document.getElementById(prefix==='V_'?'vFrailtyWrap':'frailtyWrap');
+    if(!frail||!wrap)return;
+    var show=frail.value==='Yes';
+    wrap.style.display=show?'':'none';
+    if(!show){
+        ['Frailty_Deficits','Frailty_Items_Assessed','Frailty_Index'].forEach(function(k){var el=document.getElementById(prefix+k);if(el)el.value='';});
+    }
+}
+function calculateFrailtyIndex(prefix){
+    prefix=prefix||'';
+    var deficits=document.getElementById(prefix+'Frailty_Deficits');
+    var assessed=document.getElementById(prefix+'Frailty_Items_Assessed');
+    var result=document.getElementById(prefix+'Frailty_Index');
+    if(!deficits||!assessed||!result)return;
+    var d=parseFloat(deficits.value),a=parseFloat(assessed.value);
+    result.classList.remove('is-invalid');
+    if(!isFinite(d)||!isFinite(a)||a<=0){result.value='';return;}
+    if(d<0||d>a){result.value='';result.classList.add('is-invalid');return;}
+    result.value=(d/a).toFixed(3);
+}
 // Show/hide "Type of Gene" when Genetics === 'Yes'
 function toggleGeneticsType(){
     var sel=document.getElementById('Genetics');
@@ -4948,15 +5114,7 @@ var EXTRA_ADM_SCHEMA=[
    {k:'reason',l:'Reason / Notes',t:'text',w:'col-12 col-md-6',ph:'e.g. ADHF, ACS, arrhythmia...'},
    {k:'LOS',l:'Length of Stay (Days)',t:'num',w:'col-6 col-md-3'},
    {k:'Admission_HF_Related',l:'Cause of Admission',t:'sel',o:['HF related','Other'],w:'col-6 col-md-3'},
-   {k:'Admission_Cause',l:'Specify Cause',t:'text',w:'col-12 col-md-6',ph:'e.g. pneumonia, sepsis, elective procedure...',gate:{k:'Admission_HF_Related',v:'Other'}},
-   {k:'Transfer_Other',l:'Transfer to Other Hospital',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
-   {k:'Transfer_Hospital_Name',l:'Name of Hospital',t:'text',w:'col-12 col-md-6',ph:'e.g. Chest Hospital, Amiri...',gate:{k:'Transfer_Other',v:'Yes'}},
-   {k:'Discharge_Home',l:'Discharged Home',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
-   {k:'Discharge_Other',l:'Other Discharge Destination / Details',t:'text',w:'col-12 col-md-6',ph:'Specify other discharge destination or details...'},
-   {k:'_sub_DischargeStatus',t:'subhead',l:'Status on Discharge',i:'fa-person-walking'},
-   {k:'Discharge_Walking',l:'Walking',t:'sel',o:['No','Yes'],w:'col-4 col-md-2'},
-   {k:'Discharge_Wheelchair',l:'On Wheelchair',t:'sel',o:['No','Yes'],w:'col-4 col-md-2'},
-   {k:'Discharge_Stretcher',l:'On Stretcher',t:'sel',o:['No','Yes'],w:'col-4 col-md-2'}
+   {k:'Admission_Cause',l:'Specify Cause',t:'text',w:'col-12 col-md-6',ph:'e.g. pneumonia, sepsis, elective procedure...',gate:{k:'Admission_HF_Related',v:'Other'}}
  ]},
  {sec:'Symptoms, Signs & Vitals',icon:'fa-heart-pulse',tint:'tint-vitals',fields:[
    {k:'Height',l:'Height (cm)',t:'num',w:'col-4 col-md-2'},
@@ -5079,7 +5237,9 @@ var EXTRA_ADM_SCHEMA=[
    // Detail fields not represented in the pill row
    {k:'Smoker',l:'Smoking Status',t:'sel',o:['Never','Current','Former'],w:'col-12 col-md-6'},
    {k:'Frail',l:'Frail',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
-   {k:'Frailty_Index',l:'Frailty Index',t:'text',w:'col-6 col-md-3',ph:'Enter frailty index'},
+   {k:'Frailty_Deficits',l:'Deficits Present',t:'num',w:'col-6 col-md-3',ph:'e.g. 8',gate:{k:'Frail',v:'Yes'}},
+   {k:'Frailty_Items_Assessed',l:'Items Assessed',t:'num',w:'col-6 col-md-3',ph:'e.g. 40',gate:{k:'Frail',v:'Yes'}},
+   {k:'Frailty_Index',l:'Frailty Index (auto)',t:'text',w:'col-6 col-md-3',ph:'deficits ÷ assessed',_derived:true,gate:{k:'Frail',v:'Yes'}},
    {k:'Valve_Intervention',l:'Valve Intervention',t:'sel',o:['No','Yes'],w:'col-12 col-md-3'},
    // Surgical Repair (valves + date) — gated on Valve_Intervention=Yes
    {k:'Valve_Repair_Valves',l:'Surgical Repair (valves)',t:'btnmulti',o:['Aortic','Mitral','Tricuspid','Pulmonary'],w:'col-12',gate:{k:'Valve_Intervention',v:'Yes'}},
@@ -5174,6 +5334,12 @@ var EXTRA_ADM_SCHEMA=[
    {k:'LostFU',l:'Lost to Follow-up',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
    {k:'LostFU_Reason',l:'LTFU Reason',t:'sel',o:['','Travel back home','Others'],w:'col-6 col-md-3',gate:{k:'LostFU',v:'Yes'}},
    {k:'LostFU_Other',l:'Specify (Others)',t:'text',w:'col-12 col-md-6',gate:{k:'LostFU_Reason',v:'Others'}},
+   {k:'_sub_Discharge',t:'subhead',l:'Discharge & Transfer',i:'fa-person-walking-arrow-right'},
+   {k:'Discharge_Home',l:'Discharged Home',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
+   {k:'Transfer_Other',l:'Transferred to Other Hospital',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
+   {k:'Transfer_Hospital_Name',l:'Receiving Hospital',t:'text',w:'col-12 col-md-6',ph:'Specify hospital',gate:{k:'Transfer_Other',v:'Yes'}},
+   {k:'Discharge_Other',l:'Other Discharge Destination / Details',t:'text',w:'col-12 col-md-6',ph:'Specify other destination or details...'},
+   {k:'Discharge_Status',l:'Status on Discharge',t:'sel',o:['','Walking','On Wheelchair','On Stretcher'],w:'col-12 col-md-4'},
    {k:'Advanced_HF_Outcome',l:'Advanced HF?',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
    {k:'Strong_HF',l:'Strong HF eligible?',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
    {k:'Adv_HF_Therapy',l:'Advanced HF Therapy?',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
@@ -5234,6 +5400,37 @@ function _backfillExtraAdmGates(adm){
     return changed;
 }
 
+// Upgrade older repeat-admission records without losing legacy medication or
+// discharge data. New keys are added only when the richer editor has no value.
+function _migrateExtraAdmissionData(adm){
+    var changed=false;
+    if(!adm.Discharge_Status){
+        if(adm.Discharge_Walking==='Yes')adm.Discharge_Status='Walking';
+        else if(adm.Discharge_Wheelchair==='Yes')adm.Discharge_Status='On Wheelchair';
+        else if(adm.Discharge_Stretcher==='Yes')adm.Discharge_Status='On Stretcher';
+        if(adm.Discharge_Status)changed=true;
+    }
+    (ADMISSION_MED_LIST||[]).forEach(function(m){
+        if(adm[m.id+'_Status']!==undefined||adm[m.id]||adm[m.id+'_Custom']||adm[m.id+'_Freq'])return;
+        var legacy=ADMISSION_MED_LEGACY_MAP[m.id],legacyVal=String(adm[legacy]||'');
+        if(!legacy||!legacyVal)return;
+        var candidates=Object.keys(ADMISSION_MED_LEGACY_MAP).filter(function(k){return ADMISSION_MED_LEGACY_MAP[k]===legacy;});
+        var label=m.label.replace('Xigduo XR','Xigduo');
+        var active=legacyVal.split(',').map(function(x){return x.trim();}).indexOf(label)>=0;
+        if(m.id==='A_Entresto'&&legacyVal==='Yes')active=true;
+        var stopped=(legacyVal==='Stopped'&&candidates[0]===m.id);
+        if(!active&&!stopped)return;
+        adm[m.id+'_Status']=stopped?'Stopped':'Yes';
+        if(active){
+            adm[m.id]=adm[legacy+'_Dose']||'';
+            adm[m.id+'_Custom']=adm[legacy+'_DoseCustom']||'';
+            adm[m.id+'_Freq']=adm[legacy+'_Freq']||'';
+        }
+        changed=true;
+    });
+    return changed;
+}
+
 // Build the HTML for a single field within an extra-admission card.
 // Field types:
 //   'sel'      - dropdown
@@ -5250,57 +5447,40 @@ function _backfillExtraAdmGates(adm){
 // subsection header inline above the field (used for ECG, Holter, Echo, CMR,
 // CT, CAG, 6MWT, CPET, Device, RHC subsections inside Investigations).
 function _extraMedicationEditorHtml(idx, adm){
-    var html='<div class="col-12">';
-    var rendered={};
-    MED_GROUPS_HOME.forEach(function(group){
+    var html='<div class="col-12"><div class="alert alert-light border py-2 px-3 mb-2" style="font-size:0.78rem;"><i class="fa fa-circle-info text-primary me-1"></i>Same medication workflow as the index admission and OPD visit.</div>';
+    ADMISSION_MED_GROUPS.forEach(function(group){
         html+='<div class="visit-med-group"><div class="visit-med-group-label"><i class="fa fa-pills me-1"></i>'+_esc(group.label)+'</div><div class="row g-2">';
-        group.meds.forEach(function(medId){
-            var med=MED_FORMULARY[medId];
-            if(!med)return;
-            rendered[medId]=1;
-            var selected=(adm[medId]!=null&&adm[medId]!=='')?String(adm[medId]):String((med.options||[])[0]||'');
-            var isMulti=MULTI_SELECT_MEDS.indexOf(medId)>=0;
-            html+='<div class="col-6 col-md-3"><label>'+_esc(med.label)+(isMulti?' <small class="text-muted" style="font-size:0.6rem;">(multi)</small>':'')+'</label>';
-            if(isMulti){
-                var picked=selected.split(',').map(function(s){return s.trim();}).filter(Boolean);
-                html+='<div class="multi-med-wrap">';
-                (med.options||[]).forEach(function(opt){
-                    if(opt==='None'||opt==='No')return;
-                    var safe=medId+'_opt_'+opt.replace(/[^a-zA-Z0-9]/g,'');
-                    var on=picked.indexOf(opt)>=0;
-                    var show=on&&opt!=='Stopped';
-                    var doseKey=safe+'_Dose', customKey=safe+'_DoseCustom', freqKey=safe+'_Freq';
-                    var doses=(med.doses&&med.doses[opt])||[];
-                    html+='<div class="multi-med-item"><label class="multi-med-check"><input type="checkbox" class="form-check-input" '+(on?'checked ':'')+'onchange="toggleExtraAdmMedicationOption('+idx+',\''+medId+'\',\''+String(opt).replace(/'/g,"\\'")+'\',this.checked)"> <span>'+_esc(opt)+'</span></label>';
-                    html+='<div class="multi-med-detail" style="display:'+(show?'block':'none')+';">';
-                    html+='<select class="form-select form-select-sm" onchange="updateExtraAdmission('+idx+',\''+doseKey+'\',this.value)"><option value="">Dose...</option>';
-                    doses.forEach(function(d){html+='<option value="'+_esc(d)+'"'+(String(adm[doseKey]||'')===String(d)?' selected':'')+'>'+_esc(d)+'</option>';});
-                    html+='</select><input type="text" class="form-control form-control-sm mt-1" placeholder="Custom dose" value="'+_esc(adm[customKey]||'')+'" oninput="updateExtraAdmission('+idx+',\''+customKey+'\',this.value)">';
-                    html+='<input type="text" class="form-control form-control-sm mt-1" placeholder="Frequency (only if custom)" value="'+_esc(adm[freqKey]||'')+'" oninput="updateExtraAdmission('+idx+',\''+freqKey+'\',this.value)"></div></div>';
-                });
-                html+='</div>';
-            }else{
-                html+='<select class="form-select" onchange="onExtraAdmMedicationChange('+idx+',\''+medId+'\',this.value)">';
-                (med.options||[]).forEach(function(opt){html+='<option value="'+_esc(opt)+'"'+(selected===String(opt)?' selected':'')+'>'+_esc(opt)+'</option>';});
-                html+='</select>';
-                var active=selected!==''&&selected!=='None'&&selected!=='No'&&selected!=='Stopped';
-                var doseKey2=medId+'_Dose', customKey2=medId+'_DoseCustom', freqKey2=medId+'_Freq', dateKey=medId+'_Date';
-                var doses2=(med.doses&&med.doses[selected])||[];
-                html+='<div class="med-sub-fields'+(active?' visible':'')+'">';
-                html+='<label>Dose (preset)</label><select class="form-select" onchange="updateExtraAdmission('+idx+',\''+doseKey2+'\',this.value)"><option value="">Select dose...</option>';
-                doses2.forEach(function(d){html+='<option value="'+_esc(d)+'"'+(String(adm[doseKey2]||'')===String(d)?' selected':'')+'>'+_esc(d)+'</option>';});
-                html+='</select><label class="mt-1" style="font-size:0.7rem;">Custom Dose <small class="text-muted">(if not in list)</small></label>';
-                html+='<input type="text" class="form-control form-control-sm" value="'+_esc(adm[customKey2]||'')+'" oninput="updateExtraAdmission('+idx+',\''+customKey2+'\',this.value)">';
-                html+='<label class="mt-1" style="font-size:0.7rem;">Frequency <small class="text-muted">(only if custom dose)</small></label>';
-                html+='<input type="text" class="form-control form-control-sm" value="'+_esc(adm[freqKey2]||'')+'" oninput="updateExtraAdmission('+idx+',\''+freqKey2+'\',this.value)">';
-                html+='<label class="mt-1">Start Date</label><input type="date" class="form-control" value="'+_esc(adm[dateKey]||'')+'" onchange="updateExtraAdmission('+idx+',\''+dateKey+'\',this.value)"></div>';
-            }
-            html+='</div>';
+        group.meds.forEach(function(m){
+            var statusKey=m.id+'_Status',status=String(adm[statusKey]||((adm[m.id]||adm[m.id+'_Custom']||adm[m.id+'_Freq'])?'Yes':'No'));
+            var active=status==='Yes';
+            html+='<div class="col-6 col-md-3"><label>'+_esc(m.label)+'</label>';
+            html+='<select class="form-select" onchange="onExtraAdmissionMedStatusChange('+idx+',\''+m.id+'\',this.value)"><option value="No"'+(status==='No'?' selected':'')+'>No</option><option value="Yes"'+(status==='Yes'?' selected':'')+'>Yes</option><option value="Stopped"'+(status==='Stopped'?' selected':'')+'>Stopped</option></select>';
+            html+='<div class="med-sub-fields'+(active?' visible':'')+'"><label style="font-size:0.7rem;">Dose (preset)</label><select class="form-select" onchange="updateExtraAdmission('+idx+',\''+m.id+'\',this.value)"><option value="">Select dose...</option>';
+            m.doses.forEach(function(d){if(d!=='')html+='<option value="'+_esc(d)+'"'+(String(adm[m.id]||'')===String(d)?' selected':'')+'>'+_esc(d)+'</option>';});
+            html+='</select><label class="mt-1" style="font-size:0.7rem;">Custom Dose <small class="text-muted">(if not in list)</small></label><input type="text" class="form-control form-control-sm" value="'+_esc(adm[m.id+'_Custom']||'')+'" oninput="updateExtraAdmission('+idx+',\''+m.id+'_Custom\',this.value)">';
+            html+='<label class="mt-1" style="font-size:0.7rem;">Frequency <small class="text-muted">(only if custom dose)</small></label><input type="text" class="form-control form-control-sm" value="'+_esc(adm[m.id+'_Freq']||'')+'" oninput="updateExtraAdmission('+idx+',\''+m.id+'_Freq\',this.value)">';
+            html+='<label class="mt-1" style="font-size:0.7rem;">Dose change this admission</label><select class="form-select form-select-sm" onchange="updateExtraAdmission('+idx+',\''+m.id+'_Change\',this.value)"><option value=""'+(!adm[m.id+'_Change']?' selected':'')+'>No dose change</option><optgroup label="Increased to"><option value="Increased to custom dose"'+(adm[m.id+'_Change']==='Increased to custom dose'?' selected':'')+'>Increased to custom dose</option>';
+            m.doses.forEach(function(d){if(d!==''){var v='Increased to '+d;html+='<option value="'+_esc(v)+'"'+(adm[m.id+'_Change']===v?' selected':'')+'>'+_esc(v)+'</option>';}});
+            html+='</optgroup><optgroup label="Decreased to"><option value="Decreased to custom dose"'+(adm[m.id+'_Change']==='Decreased to custom dose'?' selected':'')+'>Decreased to custom dose</option>';
+            m.doses.forEach(function(d){if(d!==''){var v='Decreased to '+d;html+='<option value="'+_esc(v)+'"'+(adm[m.id+'_Change']===v?' selected':'')+'>'+_esc(v)+'</option>';}});
+            html+='</optgroup></select></div></div>';
         });
         html+='</div></div>';
     });
     html+='</div>';
     return html;
+}
+
+function onExtraAdmissionMedStatusChange(idx,medId,status){
+    var arr=_readExtraAdmissions();
+    if(!(idx>=0&&idx<arr.length))return;
+    arr[idx][medId+'_Status']=status;
+    if(status!=='Yes'){
+        [medId,medId+'_Custom',medId+'_Freq',medId+'_Change'].forEach(function(k){arr[idx][k]='';});
+    }
+    _writeExtraAdmissions(arr);
+    _rerenderExtraAdmMedicationSection(idx);
+    _refreshExtraAdmBadge(idx,medId+'_Status');
 }
 
 function _rerenderExtraAdmMedicationSection(idx){
@@ -5460,9 +5640,9 @@ function _extraSectionFilled(grp, adm){
     grp.fields.forEach(function(f){
         if(f.t==='subhead') return;
         if(f.t==='fullmeds'){
-            Object.keys(MED_FORMULARY||{}).forEach(function(k){
-                var v=adm[k];
-                if(v!=null&&String(v).trim()!==''&&String(v)!=='No'&&String(v)!=='None')filled++;
+            (ADMISSION_MED_LIST||[]).forEach(function(m){
+                var v=adm[m.id+'_Status'];
+                if(v==='Yes'||v==='Stopped')filled++;
             });
             return;
         }
@@ -5577,7 +5757,10 @@ function _renderExtraAdmissions(){
     if(arr.length===0){ wrap.innerHTML=''; return; }
     // Migrate legacy records: open gate controllers for any pre-existing detail data.
     var migrated=false;
-    arr.forEach(function(adm){ if(_backfillExtraAdmGates(adm)) migrated=true; });
+    arr.forEach(function(adm){
+        if(_migrateExtraAdmissionData(adm))migrated=true;
+        if(_backfillExtraAdmGates(adm)) migrated=true;
+    });
     if(migrated) _writeExtraAdmissions(arr);
     var html='';
     arr.forEach(function(adm,idx){ html+=_extraAdmCardHtml(adm,idx); });
@@ -5668,16 +5851,8 @@ function _harvestAdmissionOne(){
         grp.fields.forEach(function(f){
             if(f.t==='subhead') return;
             if(f.t==='fullmeds'){
-                Object.keys(MED_FORMULARY||{}).forEach(function(medId){
-                    harvestField(medId);
-                    [medId+'_Dose',medId+'_DoseCustom',medId+'_Freq',medId+'_Date'].forEach(harvestField);
-                    if(MULTI_SELECT_MEDS.indexOf(medId)>=0){
-                        (MED_FORMULARY[medId].options||[]).forEach(function(opt){
-                            if(opt==='None'||opt==='No')return;
-                            var safe=medId+'_opt_'+opt.replace(/[^a-zA-Z0-9]/g,'');
-                            [safe+'_Dose',safe+'_DoseCustom',safe+'_Freq'].forEach(harvestField);
-                        });
-                    }
+                (ADMISSION_MED_LIST||[]).forEach(function(m){
+                    [m.id+'_Status',m.id,m.id+'_Custom',m.id+'_Freq',m.id+'_Change'].forEach(harvestField);
                 });
                 return;
             }
@@ -5729,6 +5904,19 @@ function updateExtraAdmission(idx, field, value){
     var arr=_readExtraAdmissions();
     if(idx>=0 && idx<arr.length){
         arr[idx][field]=value;
+        // Discharge destinations are mutually exclusive, and the single status
+        // dropdown is mirrored to old Yes/No keys for backward compatibility.
+        if(field==='Discharge_Home'&&value==='Yes')arr[idx].Transfer_Other='No';
+        if(field==='Transfer_Other'&&value==='Yes')arr[idx].Discharge_Home='No';
+        if(field==='Discharge_Status'){
+            arr[idx].Discharge_Walking=(value==='Walking')?'Yes':'No';
+            arr[idx].Discharge_Wheelchair=(value==='On Wheelchair')?'Yes':'No';
+            arr[idx].Discharge_Stretcher=(value==='On Stretcher')?'Yes':'No';
+        }
+        if(field==='Frailty_Deficits'||field==='Frailty_Items_Assessed'){
+            var d=parseFloat(arr[idx].Frailty_Deficits),a=parseFloat(arr[idx].Frailty_Items_Assessed);
+            arr[idx].Frailty_Index=(isFinite(d)&&isFinite(a)&&a>0&&d>=0&&d<=a)?(d/a).toFixed(3):'';
+        }
         _writeExtraAdmissions(arr);
         if(field==='date'||field==='reason'){
             var card=document.querySelector('.extra-adm-card[data-extra-idx="'+idx+'"] .ea-summary');
@@ -5743,9 +5931,13 @@ function updateExtraAdmission(idx, field, value){
         if(field==='Height'||field==='Weight'||field==='Lab_Creat'||field==='Lab_Creat_Disch'){
             _calcExtraAdmDerived(idx);
         }
+        if(field==='Frailty_Deficits'||field==='Frailty_Items_Assessed'){
+            var fi=document.getElementById('ea_'+idx+'_Frailty_Index');if(fi)fi.value=arr[idx].Frailty_Index||'';
+        }
         // If this field gates other fields, re-render its section so gated
         // fields appear/disappear immediately (smart conditional behaviour).
         _maybeRerenderGatedSection(idx, field);
+        if(field==='Discharge_Home'&&value==='Yes')_maybeRerenderGatedSection(idx,'Transfer_Other');
         _refreshExtraAdmBadge(idx, field);
     }
 }
@@ -5804,7 +5996,7 @@ function _recalcAllExtraAdmDerived(){
 function _sectionOwnsKey(grp, key){
     return grp.fields.some(function(f){
         if(f.k===key) return true;
-        if(f.t==='fullmeds'&&String(key||'').indexOf('Med_')===0)return true;
+        if(f.t==='fullmeds'&&(String(key||'').indexOf('Med_')===0||String(key||'').indexOf('A_')===0))return true;
         if(f.t==='pills' && Array.isArray(f.items)){
             return f.items.some(function(it){return it.k===key;});
         }
@@ -7205,6 +7397,8 @@ function _savePatientCore(){
     if(!mobile){showPopup("error","Mobile Required","Mobile number is required.");document.getElementById("Mobile").classList.add('input-error');var me=document.getElementById('mobileError');if(me)me.style.display='block';return;}else{document.getElementById("Mobile").classList.remove('input-error');var me2=document.getElementById('mobileError');if(me2)me2.style.display='none';}
     if(typeof syncDeviceInfo==='function')syncDeviceInfo();
     if(typeof syncInHospitalProcedures==='function')syncInHospitalProcedures();
+    if(typeof syncAdmissionMedicationsToLegacy==='function')syncAdmissionMedicationsToLegacy();
+    if(typeof syncDischargeStatusLegacy==='function')syncDischargeStatusLegacy();
     var data={};
     document.querySelectorAll('#hfForm input, #hfForm select, #hfForm textarea').forEach(function(el){
         if(el.id&&el.type!=='file'&&!el.id.startsWith('V_')&&el.id!=='Next_Appt'&&el.id!=='Next_Appt_Notes'&&el.id!=='Visit_Date'&&el.id!=='Visit_Type'&&!el.id.endsWith('_Visible'))data[el.id]=el.value;
@@ -7615,6 +7809,7 @@ function editVisit(visitId){
     if(typeof syncVisitPillsFromData==='function') syncVisitPillsFromData();
     // Restore visit Comorbidities sub-UI (PCI/CABG buttons, valve intervention block, genetics)
     if(typeof restoreVisitComorbidUI==='function') restoreVisitComorbidUI();
+    if(typeof toggleFrailtyFields==='function') toggleFrailtyFields('V_');
     // First-visit-only: show Comorbidities section only when editing the earliest visit.
     if(typeof updateVisitComorbiditiesVisibility==='function') updateVisitComorbiditiesVisibility();
     // Rebuild the vaccination block. Suppression must EXCLUDE the visit being
@@ -7789,6 +7984,7 @@ function clearVisitForm(){
     editingVisitId = null;
     // Hide visit conditional panels (including new Pacing-mode, Holter, comorbid wraps)
     var vHide=['vDeviceHistoryWrap','vEcgDetailsWrap','vHolterDetailsWrap','vCmrLGEPctWrap','vEchoDetailsWrap','vCmrDetailsWrap','vWalkMetersWrap','vCpetDetailsWrap','vRhcDetailsWrap','vCagDetailsWrap','vCagPciDetailsWrap','vProcCAWrap','vProcPCIWrap','vProcCABGWrap','vProcDeviceWrap','vProcAblationWrap','vProcPericardiocentesisWrap','vProcPleuralTappingWrap','vProcAscitesTappingWrap','vProcOtherWrap','vPacingModeWrap','vHolterDateWrap','vHolterDurationWrap','vHolterMaxHRWrap','vHolterMinHRWrap','vHolterAvgHRWrap','vHolterArrhythmiaWrap','vHolterFindingsWrap','vPciCabgDetailsWrap','vValveInterventionWrap','vValveRepairDateWrap','vValveReplaceTypeWrap','vValveReplaceDateWrap','vValvePercutaneousWrap','vValveMVClipDateWrap','vValveTVClipDateWrap','vValveTAVIDateWrap','vGeneticsTypeWrap','vRecoveredLVTypeWrap','vLostFUReasonWrap','vLostFUOtherWrap','vAdvHFTherapyWrap'];
+    vHide.push('vFrailtyWrap');
     vHide.forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='none';});
     // Reset visit comorbidity pills + outline buttons
     document.querySelectorAll('#vPillComorbidities .pill-toggle').forEach(function(p){p.classList.remove('active');});
@@ -8242,6 +8438,7 @@ function resetForm(){
     if(typeof renderHemoSupportUI==='function') renderHemoSupportUI();
     // Hide conditional panels
     var hideIds=['valvularTypeWrap','deviceHistoryWrap','ecgDetailsWrap','cmrLGEPctWrap','echoDetailsWrap','cmrDetailsWrap','cpetDetailsWrap','vDeviceHistoryWrap','vEcgDetailsWrap','vEchoDetailsWrap','vCmrDetailsWrap','vCpetDetailsWrap','vCagDetailsWrap','vCagPciDetailsWrap','vProcCAWrap','vProcPCIWrap','vProcCABGWrap','vProcDeviceWrap','vProcAblationWrap','vProcPericardiocentesisWrap','vProcPleuralTappingWrap','vProcAscitesTappingWrap','vProcOtherWrap','vCmrLGEPctWrap','walkMetersWrap','rhcDetailsWrap','pciCabgDetailsWrap','ctAngioDetailsWrap','lostFUReasonWrap','lostFUOtherWrap','valveSurgeryDateWrap','hfTypeOtherWrap','transferHospitalWrap','geneticsTypeWrap','cardioversionTypeWrap','cagDetailsWrap','cagPciDetailsWrap','holterDetailsWrap','bleedingUnitsWrap','bleedingSiteWrap','procDeviceWrap','procAblationWrap','procPericardiocentesisWrap','procPleuralTappingWrap','procAscitesTappingWrap','procOtherWrap','vPacingModeWrap','vHolterDetailsWrap','vHolterDateWrap','vHolterDurationWrap','vHolterMaxHRWrap','vHolterMinHRWrap','vHolterAvgHRWrap','vHolterArrhythmiaWrap','vHolterFindingsWrap'];
+    hideIds.push('frailtyWrap','vFrailtyWrap');
     hideIds.forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='none';});
     // Reset valvular-type, PCI/CABG, and InHospitalProcedures multi-select buttons
     document.querySelectorAll('#valvularTypeBox button, #pciCabgBox button, #inHospProceduresBox button').forEach(function(b){ b.classList.remove('btn-primary'); b.classList.add('btn-outline-primary'); });
@@ -8263,10 +8460,10 @@ function generateCardHTML(data, id, latestVisit){
 
     var allFields=[
         ['Patient_Name','Civil_ID','File_No','Age','Gender','Nationality','Mobile','Doctor_Name','Referred_From','Referred_From_Other'],
-        ['HF_Type','HF_Type_Other','EF_Diagnosis','Advanced_HF','HF_Cause','Other_Cardio','Valvular_Disease','Valvular_Type','Admissions','Last_Admission','LOS','Admission_Date','Admission_Discharge_Date','Admission_Reason','Transfer_Other','Transfer_Hospital_Name','Extra_Admissions'],
+        ['HF_Type','HF_Type_Other','EF_Diagnosis','Advanced_HF','HF_Cause','Other_Cardio','Valvular_Disease','Valvular_Type','Admissions','Last_Admission','LOS','Admission_Date','Admission_Discharge_Date','Admission_Reason','Extra_Admissions'],
         ['Height','Weight','BMI','Dry_Weight','NYHA','KCCQ','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur'],
         ['ECG_LBBB','ECG_QRS','ECG_Arrhythmia','ECG_Pacing','Holter_Done','Holter_Date','Holter_Duration','Holter_MaxHR','Holter_MinHR','Holter_AvgHR','Holter_Arrhythmia','Holter_Findings','ECHO','Echo_EDVI','Echo_ESVI','Echo_EF','CMR_CT','CMR_LVEDVI','CMR_LVESVI','CMR_LVEF','CMR_RVEDI','CMR_RVEF','CMR_LGE','CMR_LGE_Pct','CMR_Others','CT_Done','CT_Angio','CT_Calcium','CT_Notes','CAG_Done','CAG_Date','CAG_Access','CAG_Findings','CAG_Notes','Walk_Completed','Walk_Meters','CPET_PeakVO2','CPET_VEVCO2','CPET_RER','CPET_AT','CPET_VO2HR','CPET_PetCO2','Device_Type','Device_Date','RHC_Done','RHC_CI','RHC_RAP','RHC_RVP','RHC_PCWP','RHC_PAP','RHC_PVR','RHC_PAPi','RHC_LV','RHC_MVO2','InHospital_Procedures','InHospital_Procedures_Other','InHospital_Procedures_Notes','Investigations_Other'],
-        ['DM','HTN','AF','IHD','PCI_CABG','CKD','Dialysis','CVA','PVD','Smoker','Obese','OSA','Dyslipidemia','Valve_Surgery','Valve_Surgery_Date','Lung_Dz','Liver_Dz','Thyroid_Dz','FH_Cardio','Genetics','Genetics_Type','Comorbid_Others'],
+        ['DM','HTN','AF','IHD','PCI_CABG','CKD','Dialysis','CVA','PVD','Alcohol','Smoker','Frail','Frailty_Deficits','Frailty_Items_Assessed','Frailty_Index','Obese','OSA','Dyslipidemia','Valve_Surgery','Valve_Surgery_Date','Lung_Dz','Liver_Dz','Thyroid_Dz','FH_Cardio','Genetics','Genetics_Type','Comorbid_Others'],
         // Latest labs (baseline + visit overlay; admission/discharge variants where available)
         ['Lab_HbA1c','Lab_Gluc','Lab_Urea','Lab_Creat','Lab_eGFR','Lab_Urea_Disch','Lab_Creat_Disch','Lab_eGFR_Disch','Lab_Na','Lab_K','Lab_Na_Disch','Lab_K_Disch','Lab_BNP','Lab_BNP_Disch','Lab_BNP_only','Lab_BNP_only_Disch','Lab_Hb','Lab_Hb_Disch','Lab_WBC','Lab_Plt','Lab_Iron','Lab_Ferritin','Lab_TrSats','Lab_TSH','Lab_FreeT4','Lab_TotalChol','Lab_LDL','Lab_HDL','Lab_TG','Lab_AlbCreat','Lab_Others'],
         // Cardioversion / Inotropes / Hemodynamic support — In-hospital (Section 7)
@@ -8274,7 +8471,7 @@ function generateCardHTML(data, id, latestVisit){
         // In-Hospital Complications (Section 8)
         ['Complications','Bleeding_Transfusion','Bleeding_Units','Bleeding_Site','Complications_Other'],
         // Outcomes
-        ['Quad_GDMT','Max_GDMT','Recovered_LV','Mortality','LostFU','LostFU_Reason','LostFU_Other','Advanced_HF_Outcome','Strong_HF','Adv_HF_Therapy','Adv_HF_Therapy_Type','Referral','Referral_Other','Notes','Next_Appt']
+        ['Quad_GDMT','Max_GDMT','Recovered_LV','Mortality','LostFU','LostFU_Reason','LostFU_Other','Discharge_Home','Transfer_Other','Transfer_Hospital_Name','Discharge_Other','Discharge_Status','Advanced_HF_Outcome','Strong_HF','Adv_HF_Therapy','Adv_HF_Therapy_Type','Referral','Referral_Other','Notes','Next_Appt']
     ];
     var sn=['Demographics','HF Diagnosis & Admission','Symptoms & Signs (latest)','Investigations','Past History and Comorbidities','Latest Labs','In-Hospital (Cardioversion & Inotropes)','In-Hospital Complications','Outcomes & Management'];
 
@@ -8519,6 +8716,26 @@ function _buildMedsRowsForCard(data, latestVisit){
     }
     if(anyVisitMed) return rows;
 
+    // No visit medication snapshot: show the new, detailed index-admission
+    // editor before falling back to the legacy grouped fields.
+    var anyAdmissionMed=false;
+    if(typeof ADMISSION_MED_LIST!=='undefined'){
+        ADMISSION_MED_LIST.forEach(function(m){
+            var status=data[m.id+'_Status']||'';
+            var dose=data[m.id]||'',custom=data[m.id+'_Custom']||'',freq=data[m.id+'_Freq']||'',change=data[m.id+'_Change']||'';
+            if(status==='Yes'||status==='Stopped'||dose||custom||freq||change){
+                anyAdmissionMed=true;
+                var display=(status==='Stopped')?'Stopped':(_visitMedDisplayText(dose,custom,freq,change)||'Yes');
+                rows+='<tr><th>'+_escHtml(m.label)+'</th><td>'+_escHtml(display)+'</td></tr>';
+            }
+        });
+        if(data.Med_Others&&String(data.Med_Others).trim()){
+            anyAdmissionMed=true;
+            rows+='<tr><th>Other Medications</th><td>'+_escHtml(data.Med_Others)+'</td></tr>';
+        }
+    }
+    if(anyAdmissionMed)return rows;
+
     // ---- Fallback to baseline (Section 7) medications, with proper labels and dose formatting ----
     if(typeof MED_FORMULARY === 'undefined') return rows;
     Object.keys(MED_FORMULARY).forEach(function(medId){
@@ -8592,7 +8809,7 @@ function _visitSnapshotInfo(snap){
     var latest=Object.assign({}, all[0]);
     // Aggregate latest dose per vaccine across every visit so the card chips
     // reflect the patient's true vaccination history.
-    ['Influenza','Pneumococcal','COVID','RSV'].forEach(function(vid){
+    ['Influenza','Pneumococcal','COVID','RSV','PSV2','Shingrix'].forEach(function(vid){
         var best='';
         all.forEach(function(vis){
             var iso=vis['V_Vacc_'+vid+'_Date']||'';
@@ -8884,6 +9101,7 @@ function editPt(id){
             if(fqEl&&d[medId+'_Freq'])fqEl.value=d[medId+'_Freq'];
         }
     });
+    if(typeof restoreAdmissionMedications==='function')restoreAdmissionMedications(d);
     GDMT_PILLARS.forEach(function(medId){
         var el=document.getElementById('Rationale_'+medId);
         if(el&&d['Rationale_'+medId])el.value=d['Rationale_'+medId];
@@ -8893,6 +9111,8 @@ function editPt(id){
     if(typeof restoreHemoSupportFromData==='function') restoreHemoSupportFromData(d);
     if(typeof restoreAdvHFTherapyFromData==='function')restoreAdvHFTherapyFromData(d);
     if(typeof restoreReferralUI==='function')          restoreReferralUI('Referral', d.Referral||'');
+    if(typeof toggleFrailtyFields==='function'){toggleFrailtyFields('');toggleFrailtyFields('V_');}
+    if(typeof restoreDischargeStatus==='function')restoreDischargeStatus(d);
     // Restore In-Hospital Complications multi-select (Step 9)
     if(typeof restoreComplications==='function')       restoreComplications(d.Complications||'');
     // Restore extra in-hospital admissions list (Step 3)
@@ -9009,8 +9229,8 @@ function generateExcel(data,visitsData,id){
     pr.push(["Patient Name:",data.Patient_Name||'']);pr.push(["Civil ID:",data.Civil_ID||'']);pr.push(["File No:",data.File_No||'']);pr.push(["Age:",data.Age||'']);pr.push(["Gender:",data.Gender||'']);pr.push(["Nationality:",data.Nationality||'']);pr.push(["Mobile:",data.Mobile||'']);pr.push(["Doctor:",data.Doctor_Name||'']);pr.push([]);
     var sections=[{name:'HF DIAGNOSIS',fields:['HF_Type','HF_Type_Other','EF_Diagnosis','Advanced_HF','HF_Cause','Other_Cardio','Valvular_Disease','Valvular_Type','Admissions','Last_Admission','LOS']},{name:'IN-HOSPITAL ADMISSION',fields:['Admission_Date','Admission_Discharge_Date','Admission_Reason','Transfer_Other','Transfer_Hospital_Name','Extra_Admissions']},{name:'SYMPTOMS & SIGNS (ON ADMISSION)',fields:['Height','Weight','BMI','Dry_Weight','NYHA','KCCQ','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur']},{name:'INVESTIGATIONS',fields:['ECG_LBBB','ECG_QRS','ECG_Arrhythmia','ECG_Pacing','Holter_Done','Holter_Date','Holter_Duration','Holter_MaxHR','Holter_MinHR','Holter_AvgHR','Holter_Arrhythmia','Holter_Findings','ECHO','Echo_EDVI','Echo_ESVI','Echo_EF','CMR_CT','CMR_LVEDVI','CMR_LVESVI','CMR_LVEF','CMR_RVEDI','CMR_RVEF','CMR_LGE','CMR_LGE_Pct','CMR_Others','CT_Done','CT_Angio','CT_Calcium','CT_Notes','CAG_Done','CAG_Date','CAG_Access','CAG_Findings','CAG_Notes','Walk_Completed','Walk_Meters','CPET_PeakVO2','CPET_VEVCO2','CPET_RER','CPET_AT','CPET_VO2HR','CPET_PetCO2','Device_Type','Device_Date','RHC_Done','RHC_CI','RHC_RAP','RHC_RVP','RHC_PCWP','RHC_PAP','RHC_PVR','RHC_PAPi','RHC_LV','RHC_MVO2','InHospital_Procedures','InHospital_Procedures_Other','InHospital_Procedures_Notes','Investigations_Other']},{name:'PAST HISTORY AND COMORBIDITIES',fields:['DM','HTN','AF','IHD','PCI_CABG','PCI_CABG_Date','PCI_CABG_Details','CKD','Dialysis','CVA','PVD','Smoker','Obese','OSA','Dyslipidemia','Valve_Surgery','Valve_Surgery_Date','Lung_Dz','Liver_Dz','Thyroid_Dz','FH_Cardio','Genetics','Genetics_Type','Comorbid_Others']},{name:'IN-HOSPITAL LABS',fields:['Lab_HbA1c','Lab_Gluc','Lab_Urea','Lab_Creat','Lab_eGFR','Lab_Na','Lab_K','Lab_Urea_Disch','Lab_Creat_Disch','Lab_eGFR_Disch','Lab_Na_Disch','Lab_K_Disch','Lab_BNP','Lab_BNP_Disch','Lab_BNP_only','Lab_BNP_only_Disch','Lab_Iron','Lab_Ferritin','Lab_TrSats','Lab_Hb','Lab_Hb_Disch','Lab_WBC','Lab_Plt','Lab_TSH','Lab_FreeT4','Lab_TotalChol','Lab_LDL','Lab_HDL','Lab_TG','Lab_AlbCreat','Lab_Others']},{name:'IN-HOSPITAL MGMT (CARDIOVERSION, INOTROPES & MCS)',fields:['Cardioversion','Cardioversion_Type','Cardioversion_Notes','Inotropes_Used','Inotropes_Selected','Inotrope_Dobutamine_MaxDose','Inotrope_Dopamine_MaxDose','Inotrope_Milrinone_MaxDose','Inotrope_Simdax_MaxDose','Inotrope_Levophed_MaxDose','Inotrope_Adrenaline_MaxDose','Inotrope_Vasopressin_MaxDose','Hemo_Support','Hemo_Support_Type']},{name:'MEDICATIONS',fields:['Med_ARNI','Med_ARNI_Dose','Med_SGLT2i','Med_SGLT2i_Dose','Med_GLP1','Med_BB','Med_BB_Dose','Med_MRA','Med_MRA_Dose','Med_ACEiARB','Med_ACEiARB_Dose','Med_Vasodilator','Med_Procorolan','Med_Procorolan_Dose','Med_CCB','Med_CCB_Dose','Med_Diuretic','Med_Statin','Med_LipidCombo','Med_Ezetrol','Med_PCSK9','Med_Fibrate','Med_Omega3','Med_Nicotine','Med_Antiplat','Med_OAC','Med_Arrhythmia','Med_Digoxin','Med_K_Chelator','Med_Others']},{name:'IN-HOSPITAL COMPLICATIONS',fields:['Complications','Bleeding_Transfusion','Bleeding_Units','Bleeding_Site','Complications_Other']},{name:'OUTCOMES & FOLLOW-UP',fields:['Quad_GDMT','Max_GDMT','Recovered_LV','Mortality','LostFU','LostFU_Reason','LostFU_Other','Advanced_HF_Outcome','Strong_HF','Adv_HF_Therapy','Adv_HF_Therapy_Type','Referral','Referral_Other','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt','Next_Appt_Notes']}];
     sections.forEach(function(sec){
-        if(sec.name==='IN-HOSPITAL ADMISSION')sec.fields.push('Discharge_Home','Discharge_Other','Discharge_Walking','Discharge_Wheelchair','Discharge_Stretcher');
-        if(sec.name==='PAST HISTORY AND COMORBIDITIES')sec.fields.push('Alcohol','Frail','Frailty_Index');
+        if(sec.name==='OUTCOMES & FOLLOW-UP')sec.fields.push('Discharge_Home','Transfer_Other','Transfer_Hospital_Name','Discharge_Other','Discharge_Status');
+        if(sec.name==='PAST HISTORY AND COMORBIDITIES')sec.fields.push('Alcohol','Frail','Frailty_Deficits','Frailty_Items_Assessed','Frailty_Index');
     });
     sections.forEach(function(sec){pr.push([sec.name]);sec.fields.forEach(function(f){
         if(f==='Extra_Admissions'){
@@ -9045,8 +9265,8 @@ function generatePDF(data,visitsData,id){
     html+="<h3 style='color:#333;'>Patient: "+(data.Patient_Name||'Unknown')+" | File: "+(data.File_No||'N/A')+"</h3>";
     var sections=[{name:'Demographics',fields:['Patient_Name','Civil_ID','File_No','Age','Gender','Nationality','Mobile','Doctor_Name','Referred_From','Referred_From_Other']},{name:'HF Diagnosis',fields:['HF_Type','HF_Type_Other','EF_Diagnosis','Advanced_HF','HF_Cause','Other_Cardio','Valvular_Disease','Valvular_Type','Admissions','Last_Admission','LOS']},{name:'In-Hospital Admission',fields:['Admission_Date','Admission_Discharge_Date','Admission_Reason','Transfer_Other','Transfer_Hospital_Name','Extra_Admissions']},{name:'Symptoms & Signs (On Admission)',fields:['Height','Weight','BMI','Dry_Weight','NYHA','KCCQ','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur']},{name:'Investigations',fields:['ECG_LBBB','ECG_QRS','ECG_Arrhythmia','ECG_Pacing','Holter_Done','Holter_Date','Holter_Duration','Holter_MaxHR','Holter_MinHR','Holter_AvgHR','Holter_Arrhythmia','Holter_Findings','ECHO','Echo_EDVI','Echo_ESVI','Echo_EF','CMR_CT','CMR_LVEDVI','CMR_LVESVI','CMR_LVEF','CMR_RVEDI','CMR_RVEF','CMR_LGE','CMR_LGE_Pct','CMR_Others','CT_Done','CT_Angio','CT_Calcium','CT_Notes','CAG_Done','CAG_Date','CAG_Access','CAG_Findings','CAG_Notes','Walk_Completed','Walk_Meters','CPET_PeakVO2','CPET_VEVCO2','CPET_RER','CPET_AT','CPET_VO2HR','CPET_PetCO2','Device_Type','Device_Date','RHC_Done','RHC_CI','RHC_RAP','RHC_RVP','RHC_PCWP','RHC_PAP','RHC_PVR','RHC_PAPi','RHC_LV','RHC_MVO2','InHospital_Procedures','InHospital_Procedures_Other','InHospital_Procedures_Notes','Investigations_Other']},{name:'Past History and Comorbidities',fields:['DM','HTN','AF','IHD','PCI_CABG','PCI_CABG_Date','PCI_CABG_Details','CKD','Dialysis','CVA','PVD','Smoker','Obese','OSA','Dyslipidemia','Valve_Surgery','Valve_Surgery_Date','Lung_Dz','Liver_Dz','Thyroid_Dz','FH_Cardio','Genetics','Genetics_Type','Comorbid_Others']},{name:'In-Hospital Labs',fields:['Lab_HbA1c','Lab_Gluc','Lab_Urea','Lab_Creat','Lab_eGFR','Lab_Na','Lab_K','Lab_Urea_Disch','Lab_Creat_Disch','Lab_eGFR_Disch','Lab_Na_Disch','Lab_K_Disch','Lab_BNP','Lab_BNP_Disch','Lab_BNP_only','Lab_BNP_only_Disch','Lab_Iron','Lab_Ferritin','Lab_TrSats','Lab_Hb','Lab_Hb_Disch','Lab_WBC','Lab_Plt','Lab_TSH','Lab_FreeT4','Lab_TotalChol','Lab_LDL','Lab_HDL','Lab_TG','Lab_AlbCreat','Lab_Others']},{name:'In-Hospital Mgmt (Cardioversion, Inotropes & MCS)',fields:['Cardioversion','Cardioversion_Type','Cardioversion_Notes','Inotropes_Used','Inotropes_Selected','Inotrope_Dobutamine_MaxDose','Inotrope_Dopamine_MaxDose','Inotrope_Milrinone_MaxDose','Inotrope_Simdax_MaxDose','Inotrope_Levophed_MaxDose','Inotrope_Adrenaline_MaxDose','Inotrope_Vasopressin_MaxDose','Hemo_Support','Hemo_Support_Type']},{name:'Medications',fields:['Med_ARNI','Med_ARNI_Dose','Med_SGLT2i','Med_SGLT2i_Dose','Med_GLP1','Med_BB','Med_BB_Dose','Med_MRA','Med_MRA_Dose','Med_ACEiARB','Med_ACEiARB_Dose','Med_Vasodilator','Med_Procorolan','Med_Procorolan_Dose','Med_CCB','Med_CCB_Dose','Med_Diuretic','Med_Statin','Med_LipidCombo','Med_Ezetrol','Med_PCSK9','Med_Fibrate','Med_Omega3','Med_Nicotine','Med_Antiplat','Med_OAC','Med_Arrhythmia','Med_Digoxin','Med_K_Chelator','Med_Others']},{name:'In-Hospital Complications',fields:['Complications','Bleeding_Transfusion','Bleeding_Units','Bleeding_Site','Complications_Other']},{name:'Outcomes & Follow-up',fields:['Quad_GDMT','Max_GDMT','Recovered_LV','Mortality','LostFU','LostFU_Reason','LostFU_Other','Advanced_HF_Outcome','Strong_HF','Adv_HF_Therapy','Adv_HF_Therapy_Type','Referral','Referral_Other','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt','Next_Appt_Notes']}];
     sections.forEach(function(sec){
-        if(sec.name==='In-Hospital Admission')sec.fields.push('Discharge_Home','Discharge_Other','Discharge_Walking','Discharge_Wheelchair','Discharge_Stretcher');
-        if(sec.name==='Past History and Comorbidities')sec.fields.push('Alcohol','Frail','Frailty_Index');
+        if(sec.name==='Outcomes & Follow-up')sec.fields.push('Discharge_Home','Transfer_Other','Transfer_Hospital_Name','Discharge_Other','Discharge_Status');
+        if(sec.name==='Past History and Comorbidities')sec.fields.push('Alcohol','Frail','Frailty_Deficits','Frailty_Items_Assessed','Frailty_Index');
     });
     sections.forEach(function(sec){html+="<h4 style='background:#f0f0f0;padding:8px;margin-top:15px;color:#8b0000;'>"+sec.name+"</h4><table style='width:100%;border-collapse:collapse;font-size:12px;'>";sec.fields.forEach(function(f){
         if(f==='Extra_Admissions'){
@@ -9073,7 +9293,7 @@ function generatePDF(data,visitsData,id){
     visitsData.forEach(function(visit,idx){html+="<div style='border:2px solid #17a2b8;margin:15px 0;padding:15px;border-radius:8px;'><h4 style='color:#17a2b8;margin-top:0;'>Visit #"+(visitsData.length-idx)+": "+visit.visitDate+" ("+visit.visitType+")</h4>";
     var vs=[{name:'Symptoms',fields:['V_Fatigue','V_NYHA','V_KCCQ','V_Edema']},{name:'Signs/Vitals',fields:['V_Pulse','V_BP','V_SpO2','V_Height','V_Weight','V_BMI','V_JVP','V_Rales','V_S3']},{name:'Risk Factors & Comorbidities',fields:['V_DM','V_HTN','V_AF','V_IHD','V_CKD','V_Dialysis','V_CVA','V_PVD','V_Smoker','V_Obese','V_OSA','V_Dyslipidemia','V_Thyroid_Dz','V_FH_Cardio','V_Genetics','V_Genetics_Type','V_Comorbid_Others','V_Procedures','V_Device_Done','V_Device_Type','V_Device_Date','V_Device_Info','V_Proc_CA_Done','V_Proc_CA_Date','V_Proc_CA_Details','V_Proc_PCI_Done','V_Proc_PCI_Date','V_Proc_PCI_Stents_Number','V_Proc_PCI_Details','V_Proc_CABG_Done','V_Proc_CABG_Date','V_Proc_CABG_Details','V_PCI_CABG','V_PCI_CABG_Date','V_PCI_CABG_Details','V_Proc_Ablation_Done','V_Proc_Ablation_Type','V_Procedures_Notes']},{name:'ECG',fields:['V_ECG_Done','V_LBBB','V_QRS','V_Arrhythmia','V_Pacing_ECG','V_Pacing_Mode']},{name:'Holter',fields:['V_Holter_Done','V_Holter_Date','V_Holter_Duration','V_Holter_MaxHR','V_Holter_MinHR','V_Holter_AvgHR','V_Holter_Arrhythmia','V_Holter_Findings']},{name:'Labs',fields:['V_HbA1c','V_Gluc','V_Urea','V_Creat','V_eGFR','V_Na','V_K','V_BNP','V_NTproBNP','V_INR','V_Iron','V_Transferrin','V_Ferritin','V_WBC','V_Hb','V_Plt','V_TSH','V_FreeT4','V_TotalChol','V_LDL','V_HDL','V_TG','V_Lab_Others']},{name:'F/U Echo',fields:['V_Echo_Done','V_EF_Change','V_Echo_EDVI','V_Echo_ESVI','V_Echo_EF','V_Echo_Other']},{name:'F/U CMR',fields:['V_CMR_Done','V_CMR_LVEDVI','V_CMR_LVESVI','V_CMR_LVEF','V_CMR_RVEDI','V_CMR_RVEF','V_CMR_LGE','V_CMR_LGE_Pct','V_CMR_Others']},{name:'F/U 6MWT',fields:['V_Walk_Completed','V_Walk_Meters']},{name:'F/U CPET',fields:['V_CPET_Done','V_CPET_PeakVO2','V_CPET_VEVCO2','V_CPET_RER','V_CPET_AT','V_CPET_VO2HR','V_CPET_PetCO2']},{name:'F/U Right Heart Cath',fields:['V_RHC_Done','V_RHC_CI','V_RHC_RAP','V_RHC_RVP','V_RHC_PCWP','V_RHC_PAP','V_RHC_PVR','V_RHC_PAPi','V_RHC_LV','V_RHC_MVO2']},{name:'F/U CAG/PCI',fields:['V_CAG_Done','V_CAG_Date','V_CAG_Findings','V_CAG_PCI_Done','V_CAG_PCI_Date','V_CAG_Stents_Number','V_CAG_PCI_Details']},{name:'Medications',fields:mf},{name:'Vaccinations',fields:['V_Vacc_Influenza','V_Vacc_Influenza_Date','V_Vacc_Pneumococcal','V_Vacc_Pneumococcal_Date','V_Vacc_COVID','V_Vacc_COVID_Date','V_Vacc_RSV','V_Vacc_RSV_Date','V_Vacc_Notes','V_Vacc_Influenza_Year','V_Vacc_Pneumococcal_Year','V_Vacc_COVID_Year','V_Vacc_Other']},{name:'Next Appointment',fields:['Next_Appt_Notes']},{name:'Plan',fields:['V_AdverseEffects','V_Compliance','V_ComplianceNotes','V_Adverse','V_Plan','V_Others','V_Referral','V_Referral_Other']},{name:'Outcomes & Management',fields:['V_Quad_GDMT','V_Max_GDMT','V_Recovered_LV','V_Recovered_LV_Type','V_Mortality','V_LostFU','V_LostFU_Reason','V_LostFU_Other','V_Advanced_HF_Outcome','V_Strong_HF','V_Adv_HF_Therapy','V_Adv_HF_Therapy_Type','V_Outcome_Notes']}];
     vs.forEach(function(vsec){
-        if(vsec.name==='Risk Factors & Comorbidities')vsec.fields.push('V_Alcohol','V_Frail','V_Frailty_Index');
+        if(vsec.name==='Risk Factors & Comorbidities')vsec.fields.push('V_Alcohol','V_Frail','V_Frailty_Deficits','V_Frailty_Items_Assessed','V_Frailty_Index');
         if(vsec.name==='Vaccinations')vsec.fields.push('V_Vacc_PSV2','V_Vacc_PSV2_Date','V_Vacc_Shingrix','V_Vacc_Shingrix_Date');
     });
     vs.forEach(function(vsec){var hd=false;vsec.fields.forEach(function(vf){if(visit[vf]&&visit[vf].toString().trim()!=='')hd=true;});if(!hd)return;
@@ -10202,10 +10422,10 @@ function exportAnalyticsPDF(){var container=document.getElementById('pdfContaine
 var ALL_PATIENT_FIELDS = [
     'Patient_Name','Civil_ID','File_No','Age','Gender','Nationality','Mobile','Doctor_Name',
     'HF_Type','EF_Diagnosis','Advanced_HF','HF_Cause','Other_Cardio','Valvular_Disease','Valvular_Type','Admissions','Last_Admission','LOS',
-    'Admission_Date','Admission_Discharge_Date','Admission_Reason','Admission_HF_Related','Admission_Cause','Transfer_Other','Transfer_Hospital_Name','Discharge_Home','Discharge_Other','Discharge_Walking','Discharge_Wheelchair','Discharge_Stretcher','Extra_Admissions',
+    'Admission_Date','Admission_Discharge_Date','Admission_Reason','Admission_HF_Related','Admission_Cause','Extra_Admissions',
     'Height','Weight','BMI','Dry_Weight','NYHA','KCCQ','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur',
     'ECG','ECG_LBBB','ECG_QRS','ECG_Arrhythmia','ECG_Pacing','Holter_Done','Holter_Date','Holter_Duration','Holter_MaxHR','Holter_MinHR','Holter_AvgHR','Holter_Arrhythmia','Holter_Findings','ECHO','Echo_EDVI','Echo_ESVI','Echo_EF','CMR_CT','CMR_LVEDVI','CMR_LVESVI','CMR_LVEF','CMR_RVEDI','CMR_RVEF','CMR_LGE','CMR_LGE_Pct','CMR_Others','CT_Done','CT_Angio','CT_Calcium','CT_Notes','Walk_Completed','Walk_Meters','CPET_PeakVO2','CPET_VEVCO2','CPET_RER','CPET_AT','CPET_VO2HR','CPET_PetCO2','Device_Type','Device_Date','RHC_Done','RHC_CI','RHC_RAP','RHC_RVP','RHC_PCWP','RHC_PAP','RHC_PVR','RHC_PAPi','RHC_LV','RHC_MVO2',
-    'DM','HTN','AF','IHD','PCI_CABG','PCI_CABG_Date','PCI_CABG_Details','CKD','CVA','PVD','Alcohol','Smoker','Frail','Frailty_Index','Obese','OSA','Obese_OSA','Dyslipidemia','Valve_Surgery','Valve_Surgery_Date','Lung_Dz','Liver_Dz','Thyroid_Dz','FH_Cardio','Genetics',
+    'DM','HTN','AF','IHD','PCI_CABG','PCI_CABG_Date','PCI_CABG_Details','CKD','CVA','PVD','Alcohol','Smoker','Frail','Frailty_Deficits','Frailty_Items_Assessed','Frailty_Index','Obese','OSA','Obese_OSA','Dyslipidemia','Valve_Surgery','Valve_Surgery_Date','Lung_Dz','Liver_Dz','Thyroid_Dz','FH_Cardio','Genetics',
     // In-Hospital Labs (Section 6 — admission + discharge variants)
     'Lab_HbA1c','Lab_Gluc',
     'Lab_Urea','Lab_Creat','Lab_eGFR','Lab_Na','Lab_K',
@@ -10229,7 +10449,7 @@ var ALL_PATIENT_FIELDS = [
     'Med_Lipid','Med_Lipid_Dose','Med_Omega3','Med_Omega3_Dose','Med_Nicotine','Med_Nicotine_Dose','Med_Antiplat','Med_Antiplat_Dose',
     'Med_OAC','Med_OAC_Dose','Med_Arrhythmia','Med_Arrhythmia_Dose','Med_K_Chelator','Med_K_Chelator_Dose','Med_Others',
     // Outcomes (Section 8) — Max GDMT, Recovered LV, Advanced HF, Strong HF, Adv Therapy + multi-select Referral
-    'Quad_GDMT','Max_GDMT','Recovered_LV','Mortality','LostFU','LostFU_Reason','LostFU_Other',
+    'Quad_GDMT','Max_GDMT','Recovered_LV','Mortality','LostFU','LostFU_Reason','LostFU_Other','Discharge_Home','Transfer_Other','Transfer_Hospital_Name','Discharge_Other','Discharge_Status',
     'Advanced_HF_Outcome','Strong_HF','Adv_HF_Therapy','Adv_HF_Therapy_Type',
     'Referral','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt'
 ];
@@ -11586,10 +11806,10 @@ function switchImportTab(which){
 // Master list of all field IDs the form uses
 var IMPORT_FIELDS = [
     'Doctor_Name','Patient_Name','Civil_ID','File_No','Age','Gender','Nationality','Mobile',
-    'HF_Type','EF_Diagnosis','Advanced_HF','HF_Cause','Other_Cardio','Valvular_Disease','Valvular_Type','Admissions','Last_Admission','LOS','Admission_Date','Admission_Discharge_Date','Admission_Reason','Admission_HF_Related','Admission_Cause','Transfer_Other','Transfer_Hospital_Name','Discharge_Home','Discharge_Other','Discharge_Walking','Discharge_Wheelchair','Discharge_Stretcher',
+    'HF_Type','EF_Diagnosis','Advanced_HF','HF_Cause','Other_Cardio','Valvular_Disease','Valvular_Type','Admissions','Last_Admission','LOS','Admission_Date','Admission_Discharge_Date','Admission_Reason','Admission_HF_Related','Admission_Cause',
     'Height','Weight','BMI','Dry_Weight','NYHA','KCCQ','Fatigue','Pulse','BP','SpO2','Edema','JVP','Rales','S3','Murmur',
     'ECG','ECHO','Echo_EDVI','Echo_ESVI','Echo_EF','CMR_CT','CMR_LVEDVI','CMR_LVESVI','CMR_LVEF','CMR_RVEDI','CMR_RVEF','CMR_LGE','CMR_LGE_Pct','CMR_Others','CT_Done','CT_Angio','CT_Calcium','CT_Notes','Walk_Completed','Walk_Meters','CPET_PeakVO2','CPET_VEVCO2','CPET_RER','CPET_AT','CPET_VO2HR','CPET_PetCO2','Device_Type','Device_Date','RHC_Done','RHC_CI','RHC_RAP','RHC_RVP','RHC_PCWP','RHC_PAP','RHC_PVR','RHC_PAPi','RHC_LV','RHC_MVO2',
-    'DM','HTN','AF','IHD','PCI_CABG','CKD','CVA','PVD','Alcohol','Smoker','Frail','Frailty_Index','Obese','OSA','Obese_OSA','Dyslipidemia','Valve_Surgery','Valve_Surgery_Date','Lung_Dz','Liver_Dz','Thyroid_Dz','FH_Cardio','Genetics',
+    'DM','HTN','AF','IHD','PCI_CABG','CKD','CVA','PVD','Alcohol','Smoker','Frail','Frailty_Deficits','Frailty_Items_Assessed','Frailty_Index','Obese','OSA','Obese_OSA','Dyslipidemia','Valve_Surgery','Valve_Surgery_Date','Lung_Dz','Liver_Dz','Thyroid_Dz','FH_Cardio','Genetics',
     'Lab_HbA1c','Lab_Gluc','Lab_UreaCreat','Lab_eGFR','Lab_NaK','Lab_BNP','Lab_IronFerritin','Lab_TrSats','Lab_CBC','Lab_Thyroid','Lab_Lipids','Lab_AlbCreat','Lab_Others',
     'Med_ARNI','Med_ARNI_Dose','Med_SGLT2i','Med_SGLT2i_Dose','Med_GLP1','Med_GLP1_Dose',
     'Med_BB','Med_BB_Dose','Med_MRA','Med_MRA_Dose','Med_ACEiARB','Med_ACEiARB_Dose',
@@ -11597,7 +11817,7 @@ var IMPORT_FIELDS = [
     'Med_Diuretic','Med_Diuretic_Dose','Med_Lipid','Med_Lipid_Dose','Med_Omega3','Med_Omega3_Dose','Med_Nicotine','Med_Nicotine_Dose','Med_Antiplat','Med_Antiplat_Dose',
     'Med_OAC','Med_OAC_Dose','Med_Arrhythmia','Med_Arrhythmia_Dose','Med_K_Chelator','Med_K_Chelator_Dose','Med_Others',
     'Hemo_Support','Hemo_Support_Type',
-    'Quad_GDMT','Max_GDMT','Recovered_LV','Mortality','LostFU','LostFU_Reason','LostFU_Other','Advanced_HF_Outcome','Strong_HF','Adv_HF_Therapy','Adv_HF_Therapy_Type','Referral','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt'
+    'Quad_GDMT','Max_GDMT','Recovered_LV','Mortality','LostFU','LostFU_Reason','LostFU_Other','Discharge_Home','Transfer_Other','Transfer_Hospital_Name','Discharge_Other','Discharge_Status','Advanced_HF_Outcome','Strong_HF','Adv_HF_Therapy','Adv_HF_Therapy_Type','Referral','HF_Dur','MAGGIC_Score','MAGGIC_Risk','Notes','Next_Appt'
 ];
 
 var importParsedRows = [];
