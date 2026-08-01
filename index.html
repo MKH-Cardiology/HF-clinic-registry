@@ -2772,13 +2772,27 @@ img,canvas,table,svg{max-width:100%;}
         </div>
         <!-- Upcoming Follow-ups moved to Main page; div kept hidden for loadAdmin compatibility -->
         <div style="display:none;"><div id="upcomingAppts"></div></div>
-        <div class="card p-2 overflow-auto" style="max-height:60vh;">
-            <table class="table table-sm table-hover text-center align-middle">
-                <thead class="table-dark">
-                    <tr><th>File</th><th>Name</th><th>Doctor</th><th>Action</th></tr>
-                </thead>
-                <tbody id="adminTableBody"></tbody>
-            </table>
+        <div class="card shadow-sm overflow-hidden">
+            <div class="p-3 border-bottom" style="background:#f8fafc;">
+                <label for="adminSearchInput" class="form-label fw-bold mb-1"><i class="fa fa-magnifying-glass text-primary me-1"></i>Search Registry</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="fa fa-search text-muted"></i></span>
+                    <input type="search" class="form-control" id="adminSearchInput" placeholder="Name, file number, Civil ID, mobile, doctor or HF type..." autocomplete="off" oninput="filterAdminPatients()" onkeydown="if(event.key==='Escape')clearAdminSearch()">
+                    <button class="btn btn-outline-secondary" type="button" id="adminSearchClear" onclick="clearAdminSearch()" title="Clear search"><i class="fa fa-xmark me-1"></i>Clear</button>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                    <small class="text-muted">Use multiple words to narrow the results.</small>
+                    <span class="badge bg-primary" id="adminSearchCount">0 patients</span>
+                </div>
+            </div>
+            <div class="p-2 overflow-auto" style="max-height:60vh;">
+                <table class="table table-sm table-hover text-center align-middle mb-0">
+                    <thead class="table-dark" style="position:sticky;top:0;z-index:1;">
+                        <tr><th>File</th><th>Name</th><th>Doctor</th><th>Action</th></tr>
+                    </thead>
+                    <tbody id="adminTableBody"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -9203,22 +9217,67 @@ function delPt(id){
     });
 }
 
+var _adminPatientsCache=[];
+function _adminSearchText(v){
+    return String(v==null?'':v).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\u0600-\u06ff]+/g,' ').trim();
+}
+function _renderAdminPatients(rows,query){
+    var tb=document.getElementById('adminTableBody');
+    var count=document.getElementById('adminSearchCount');
+    if(!tb)return;
+    if(count)count.textContent=rows.length+' of '+_adminPatientsCache.length+' patients';
+    if(!rows.length){
+        tb.innerHTML="<tr><td colspan='4' class='text-center py-4 text-muted'><i class='fa fa-search fa-2x mb-2 d-block opacity-50'></i>"+(query?'No patients match this search.':'No patients yet.')+"</td></tr>";
+        return;
+    }
+    var html='';
+    rows.forEach(function(rec){
+        var d=rec.data,id=rec.id;
+        var editMeta='';
+        if(d.lastEditBy){
+            var date='';try{date=d.lastEditAt?new Date(d.lastEditAt).toLocaleDateString():'';}catch(e){}
+            editMeta="<br><small class='text-muted' style='font-size:0.7rem;'>last edit: "+_escHtml(String(d.lastEditBy).split('@')[0])+(date?' &middot; '+_escHtml(date):'')+"</small>";
+        }
+        html+="<tr><td>"+_escHtml(d.File_No||'')+"</td><td>"+_escHtml(d.Patient_Name||'')+editMeta+"</td><td>"+_escHtml(d.Doctor_Name||'')+"</td><td class='text-nowrap'><button class='btn btn-sm btn-primary me-1' onclick='editFromAdmin(\""+id+"\")' title='Edit'><i class='fa fa-edit'></i></button><button class='btn btn-sm btn-secondary me-1' onclick='pdfFromAdmin(\""+id+"\")' title='PDF'><i class='fa fa-file-pdf'></i></button><button class='btn btn-sm btn-success me-1' onclick='exportPatientExcel(\""+id+"\")' title='Excel'><i class='fa fa-file-excel'></i></button><button class='btn btn-sm btn-danger' onclick='delPt(\""+id+"\")' title='Delete'><i class='fa fa-trash'></i></button></td></tr>";
+    });
+    tb.innerHTML=html;
+}
+function filterAdminPatients(){
+    var input=document.getElementById('adminSearchInput');
+    var query=_adminSearchText(input?input.value:'');
+    var terms=query.split(/\s+/).filter(Boolean);
+    var rows=!terms.length?_adminPatientsCache:_adminPatientsCache.filter(function(rec){
+        return terms.every(function(term){return rec.search.indexOf(term)>=0;});
+    });
+    _renderAdminPatients(rows,query);
+}
+function clearAdminSearch(){
+    var input=document.getElementById('adminSearchInput');
+    if(input){input.value='';input.focus();}
+    filterAdminPatients();
+}
 function loadAdmin(){
-    var tb=document.getElementById("adminTableBody");
+    var tb=document.getElementById('adminTableBody');
     tb.innerHTML="<tr><td colspan='4' class='text-center'><i class='fa fa-spinner fa-spin'></i> Loading...</td></tr>";
-    var today=new Date().toISOString().split('T')[0],upcomingHTML="";
-    db.collection("patients").orderBy("timestamp","desc").get().then(function(snap){
-        tb.innerHTML="";document.getElementById("totalPatients").innerText=snap.size;
-        if(snap.size===0){tb.innerHTML="<tr><td colspan='4'>No patients yet</td></tr>";return;}
+    var count=document.getElementById('adminSearchCount');if(count)count.textContent='Loading...';
+    var today=new Date().toISOString().split('T')[0],upcomingHTML='';
+    db.collection('patients').orderBy('timestamp','desc').get().then(function(snap){
+        _adminPatientsCache=[];
+        document.getElementById('totalPatients').innerText=snap.size;
         snap.forEach(function(docSnap){
             var d=docSnap.data(),id=docSnap.id;PC[id]=d;
+            var searchable=[d.Patient_Name,d.File_No,d.Civil_ID,d.Mobile,d.Doctor_Name,d.HF_Type,d.Nationality,d.Gender].map(_adminSearchText).join(' ');
+            _adminPatientsCache.push({id:id,data:d,search:searchable});
             if(d.Next_Appt&&d.Next_Appt>=today){var da=Math.floor((new Date(d.Next_Appt)-new Date(today))/(1000*60*60*24));
-            if(da<=14){var color=da<=3?"danger":(da<=7?"warning":"info");
-            upcomingHTML+="<div class='alert alert-"+color+" py-1 px-2 mb-1 d-flex justify-content-between' style='font-size:0.85rem;'><span><b>"+(d.Patient_Name||'Unknown')+"</b> ("+(d.File_No||'')+")</span><span><i class='fa fa-calendar'></i> "+d.Next_Appt+" (in "+da+" days)</span></div>";}}
-            tb.innerHTML+="<tr><td>"+(d.File_No||'')+"</td><td>"+(d.Patient_Name||'')+(d.lastEditBy?"<br><small class='text-muted' style='font-size:0.7rem;'>last edit: "+(d.lastEditBy||'').split('@')[0]+" &middot; "+(d.lastEditAt?new Date(d.lastEditAt).toLocaleDateString():'')+"</small>":"")+"</td><td>"+(d.Doctor_Name||'')+"</td><td><button class='btn btn-sm btn-primary me-1' onclick='editFromAdmin(\""+id+"\")' title='Edit'><i class='fa fa-edit'></i></button><button class='btn btn-sm btn-secondary me-1' onclick='pdfFromAdmin(\""+id+"\")' title='PDF'><i class='fa fa-file-pdf'></i></button><button class='btn btn-sm btn-success me-1' onclick='exportPatientExcel(\""+id+"\")' title='Excel'><i class='fa fa-file-excel'></i></button><button class='btn btn-sm btn-danger' onclick='delPt(\""+id+"\")' title='Delete'><i class='fa fa-trash'></i></button></td></tr>";
+            if(da<=14){var color=da<=3?'danger':(da<=7?'warning':'info');
+            upcomingHTML+="<div class='alert alert-"+color+" py-1 px-2 mb-1 d-flex justify-content-between' style='font-size:0.85rem;'><span><b>"+_escHtml(d.Patient_Name||'Unknown')+"</b> ("+_escHtml(d.File_No||'')+")</span><span><i class='fa fa-calendar'></i> "+_escHtml(d.Next_Appt)+" (in "+da+" days)</span></div>";}}
         });
-        document.getElementById("upcomingAppts").innerHTML=upcomingHTML||"<p class='text-muted small mb-0'>No appointments in the next 14 days.</p>";
-    }).catch(function(){tb.innerHTML="<tr><td colspan='4' class='text-danger'>Error loading data</td></tr>";});
+        filterAdminPatients();
+        document.getElementById('upcomingAppts').innerHTML=upcomingHTML||"<p class='text-muted small mb-0'>No appointments in the next 14 days.</p>";
+    }).catch(function(){
+        if(count)count.textContent='Unavailable';
+        tb.innerHTML="<tr><td colspan='4' class='text-danger'>Error loading data</td></tr>";
+    });
 }
 
 function exportPatientExcel(id){var data=PC[id];if(!data){showPopup("error","Error","Patient data not found");return;}db.collection("patients").doc(id).collection("visits").orderBy("visitDate","desc").get().then(function(vs){var vd=[];vs.forEach(function(doc){vd.push(doc.data());});generateExcel(data,vd,id);}).catch(function(){generateExcel(data,[],id);});}
