@@ -1603,8 +1603,8 @@ img,canvas,table,svg{max-width:100%;}
                     <input type="text" class="form-control form-control-sm mt-1" id="Sym_Other_Text" placeholder="Other symptoms (specify)" oninput="syncOtherSymptoms()">
                     <input type="hidden" id="Fatigue">
                 </div>
-                <div class="col-4 col-md-2"><label>Pulse</label><input type="text" class="form-control" id="Pulse" inputmode="text"></div>
                 <div class="col-4 col-md-2"><label>BP</label><input type="text" class="form-control" id="BP" placeholder="120/80" oninput="calcMAGGIC()"></div>
+                <div class="col-4 col-md-2"><label>Pulse</label><input type="text" class="form-control" id="Pulse" inputmode="text"></div>
                 <div class="col-4 col-md-2"><label>SpO2 (%)</label><input type="text" class="form-control" id="SpO2" inputmode="text"></div>
                 <div class="col-4 col-md-2"><label>JVP</label><select class="form-select" id="JVP"><option>Normal</option><option>Raised</option></select></div>
                 <div class="col-4 col-md-2"><label>Rales</label><select class="form-select" id="Rales"><option>No</option><option>Yes</option></select></div>
@@ -2295,8 +2295,8 @@ img,canvas,table,svg{max-width:100%;}
                     <div class="col-4 col-md-2"><label>KCCQ (0-100)</label><input type="text" class="form-control" id="V_KCCQ" min="0" max="100" inputmode="text" placeholder="0-100"></div>
                     <div class="col-12"><hr class="my-2"></div>
                     <h6 class="col-12 text-secondary">Signs / Vitals</h6>
-                    <div class="col-4 col-md-2"><label>Pulse</label><input type="text" class="form-control" id="V_Pulse" inputmode="text"></div>
                     <div class="col-4 col-md-2"><label>BP</label><input type="text" class="form-control" id="V_BP" placeholder="120/80"></div>
+                    <div class="col-4 col-md-2"><label>Pulse</label><input type="text" class="form-control" id="V_Pulse" inputmode="text"></div>
                     <div class="col-4 col-md-2"><label>SpO2 %</label><input type="text" class="form-control" id="V_SpO2" inputmode="text"></div>
                     <div class="col-4 col-md-2"><label>Height (cm)</label><input type="text" class="form-control border-primary" id="V_Height" oninput="setFixedHeightFromVisit()" inputmode="text"></div>
                     <div class="col-4 col-md-2"><label>Weight (kg)</label><input type="text" class="form-control" id="V_Weight" oninput="calcVisitBMI()" inputmode="text"></div>
@@ -5301,8 +5301,8 @@ var EXTRA_ADM_SCHEMA=[
    {k:'KCCQ',l:'KCCQ',t:'num',w:'col-4 col-md-2'},
    {k:'Symptoms',l:'Symptoms',t:'multi',o:['Dyspnea','Palpitations','Fatigue','Chest Pain','Syncope'],w:'col-12 col-md-8'},
    {k:'Sym_Other_Text',l:'Other Symptoms',t:'text',w:'col-12 col-md-4',ph:'Other symptoms (specify)'},
-   {k:'Pulse',l:'Pulse',t:'text',w:'col-4 col-md-2'},
    {k:'BP',l:'BP',t:'text',w:'col-4 col-md-2',ph:'120/80'},
+   {k:'Pulse',l:'Pulse',t:'text',w:'col-4 col-md-2'},
    {k:'SpO2',l:'SpO2 (%)',t:'num',w:'col-4 col-md-2'},
    {k:'JVP',l:'JVP',t:'sel',o:['Normal','Raised'],w:'col-4 col-md-2'},
    {k:'Rales',l:'Rales',t:'sel',o:['No','Yes'],w:'col-4 col-md-2'},
