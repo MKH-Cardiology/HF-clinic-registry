@@ -104,6 +104,17 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 .patient-card-header:hover{background:#ffe9e9 !important;}
 .patient-card-header .pc-chevron{font-size:0.8rem;}
 .patient-card-body{animation:pc-fade-in .18s ease-out;}
+.patient-alarm-badges{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.patient-alarm-badges .badge{font-size:.68rem;padding:5px 7px;white-space:normal;text-align:left}
+.patient-alarm-panel{border:1px solid #f1c46a;border-left:5px solid #dc3545;border-radius:9px;background:linear-gradient(135deg,#fffaf0,#fff);padding:10px 12px;margin:8px 0 14px;box-shadow:0 3px 10px rgba(75,45,0,.07)}
+.patient-alarm-panel.alarm-clear{border-color:#9fd3ad;border-left-color:#198754;background:linear-gradient(135deg,#f2fff6,#fff)}
+.patient-alarm-title{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.86rem;font-weight:800;color:#8b0000;margin-bottom:7px}
+.patient-alarm-panel.alarm-clear .patient-alarm-title{color:#146c43;margin-bottom:0}
+.patient-alarm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:6px}
+.patient-alarm-item{display:flex;gap:8px;align-items:flex-start;border:1px solid rgba(0,0,0,.08);border-radius:7px;padding:7px 8px;background:#fff;font-size:.76rem;line-height:1.25}
+.patient-alarm-item .alarm-icon{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:0 0 22px;color:#fff;font-size:.68rem}
+.patient-alarm-item.alarm-danger .alarm-icon{background:#dc3545}.patient-alarm-item.alarm-warning .alarm-icon{background:#d98b00}.patient-alarm-item.alarm-info .alarm-icon{background:#0d6efd}.patient-alarm-item.alarm-secondary .alarm-icon{background:#6c757d}
+.patient-alarm-item .alarm-name{font-weight:800;color:#343a40}.patient-alarm-item .alarm-detail{color:#5f6670;margin-top:2px}
 @keyframes pc-fade-in{from{opacity:0;transform:translateY(-2px);}to{opacity:1;transform:translateY(0);}}
 .empty-field{color:#adb5bd;font-style:italic}
 .input-error{border:2px solid #dc3545!important}
@@ -1385,6 +1396,7 @@ img,canvas,table,svg{max-width:100%;}
 
 <div class="card p-3 border-top border-4 border-danger">
     <h4 class="mb-1 text-dark fw-bold" id="formTitle">New Patient Entry</h4>
+    <div id="openPatientAlarms" style="display:none;" aria-live="polite"></div>
 
     <!-- SAVE SUCCESS PANEL — shown after a successful save/update -->
     <div id="saveSuccessPanel">
@@ -8165,6 +8177,7 @@ function loadVisits(patientId){
             if(typeof updateVisitComorbiditiesVisibility==='function')updateVisitComorbiditiesVisibility();
             if(typeof syncVisitHeightFromBaseline==='function')syncVisitHeightFromBaseline(true);
             if(typeof carryForwardVisitOutcomeFields==='function')carryForwardVisitOutcomeFields();
+            if(typeof renderOpenPatientAlarms==='function')renderOpenPatientAlarms((PC&&PC[patientId])||{},[]);
             return;
         }
         snapshot.forEach(function(doc){visits.push({id:doc.id,...doc.data()});});
@@ -8190,6 +8203,9 @@ function loadVisits(patientId){
         if(!editingVisitId&&typeof syncVisitHeightFromBaseline==='function')syncVisitHeightFromBaseline(true);
         if(!editingVisitId&&typeof carryForwardVisitMedicationsFromLatestVisit==='function')carryForwardVisitMedicationsFromLatestVisit();
         if(!editingVisitId&&typeof carryForwardVisitOutcomeFields==='function')carryForwardVisitOutcomeFields();
+        if(typeof renderOpenPatientAlarms==='function')renderOpenPatientAlarms((PC&&PC[patientId])||{},visits);
+    }).catch(function(){
+        if(typeof renderOpenPatientAlarms==='function')renderOpenPatientAlarms((PC&&PC[patientId])||{},[]);
     });
 }
 
@@ -8542,6 +8558,7 @@ function resetForm(){
     document.getElementById("submitBtn").disabled=false;document.getElementById("submitBtn").innerHTML='<i class="fa fa-save me-1"></i> SAVE PATIENT';
     document.getElementById("cancelEditBtn").classList.add("d-none");
     document.getElementById("formTitle").innerText="New Patient Entry";
+    if(typeof hideOpenPatientAlarms==='function')hideOpenPatientAlarms();
     // Reset visit form UI
     var vSaveBtn = document.getElementById("visitSaveBtn");
     if(vSaveBtn) vSaveBtn.innerHTML = '<i class="fa fa-plus-circle"></i> ADD VISIT TO PATIENT RECORD';
@@ -8598,11 +8615,149 @@ function resetForm(){
     goToWizardStep(1);
 }
 
-function generateCardHTML(data, id, latestVisit){
+// ===== PER-PATIENT CLINIC ALARMS =====
+// Shared alarm engine used by collapsed patient cards and the opened record.
+function _patientAlarmISO(value){
+    if(!value)return '';
+    var iso=(typeof _normalizeDisplayDate==='function')?_normalizeDisplayDate(value):String(value);
+    return /^\d{4}-\d{2}-\d{2}$/.test(iso)?iso:'';
+}
+function _patientAlarmToday(){
+    var d=new Date();
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function _patientAlarmDate(iso){return iso?new Date(iso+'T00:00:00Z'):null;}
+function _patientAlarmAddDays(iso,days){var d=_patientAlarmDate(iso);if(!d)return '';d.setUTCDate(d.getUTCDate()+days);return d.toISOString().split('T')[0];}
+function _patientAlarmAddMonths(iso,months){
+    var d=_patientAlarmDate(iso);if(!d)return '';
+    var day=d.getUTCDate();d.setUTCDate(1);d.setUTCMonth(d.getUTCMonth()+months);
+    var max=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth()+1,0)).getUTCDate();
+    d.setUTCDate(Math.min(day,max));return d.toISOString().split('T')[0];
+}
+function _patientAlarmDays(fromIso,toIso){var a=_patientAlarmDate(fromIso),b=_patientAlarmDate(toIso);return(!a||!b)?0:Math.floor((b-a)/(24*60*60*1000));}
+
+function computePatientAlarms(data,visitsArr){
+    data=data||{};
+    var today=_patientAlarmToday();
+    var all=(visitsArr||[]).slice();
+    all.forEach(function(v){v._alarmDate=_patientAlarmISO(v.visitDate);});
+    all.sort(function(a,b){return (b._alarmDate||'').localeCompare(a._alarmDate||'');});
+    var latest=all.length?all[0]:null;
+    var lastVisit=latest?latest._alarmDate:'';
+    var enrolled=_patientAlarmISO(data.timestamp)||_patientAlarmISO(data.lastEditAt);
+    var contact=lastVisit||enrolled;
+    var alarms=[];
+    function latestWith(test){for(var i=0;i<all.length;i++){if(test(all[i]))return all[i];}return null;}
+    function add(key,name,short,level,icon,detail,dueDate,daysOverdue){
+        alarms.push({key:key,name:name,short:short,level:level,icon:icon,detail:detail||'',dueDate:dueDate||'',daysOverdue:Math.max(0,daysOverdue||0)});
+    }
+
+    // Scheduled clinic appointment: show within 14 days, or flag as missed if
+    // no visit has been recorded on/after the appointment date.
+    var appt=_patientAlarmISO(data.Next_Appt);
+    if(appt){
+        var until=_patientAlarmDays(today,appt);
+        if(appt>=today&&until<=14){
+            add('appointment','Clinic appointment',until===0?'Appointment today':'Appointment '+until+'d',until<=3?'warning':'info','fa-calendar-check',until===0?'Scheduled for today':'Scheduled '+appt+' · in '+until+' day'+(until===1?'':'s'),appt,0);
+        }else if(appt<today&&(!lastVisit||lastVisit<appt)){
+            var missed=_patientAlarmDays(appt,today);
+            add('appointment','Missed appointment','Missed appt +'+missed+'d','danger','fa-calendar-xmark','Scheduled '+appt+' · no later visit recorded',appt,missed);
+        }
+    }
+
+    // Medication refill: 56 days after the latest visit marked as a refill.
+    var refillVisit=latestWith(function(v){return v.V_Med_Refill_Today==='Yes';});
+    var refillBase=refillVisit?refillVisit._alarmDate:contact;
+    var refillDue=_patientAlarmAddDays(refillBase,56);
+    if(refillDue&&refillDue<=today){
+        var refillLate=_patientAlarmDays(refillDue,today);
+        add('refill','Medication refill','Refill +'+refillLate+'d','warning','fa-prescription-bottle-medical','Due '+refillDue+' · '+(refillVisit?'last refill '+refillBase:'no previous refill marked'),refillDue,refillLate);
+    }
+
+    // Clinic registration/doctor renewal: six calendar months after a checked registered visit.
+    var registeredVisit=latestWith(function(v){return v.V_Registered_Visit==='Yes';});
+    var registrationBase=registeredVisit?registeredVisit._alarmDate:(enrolled||contact);
+    var registrationDue=_patientAlarmAddMonths(registrationBase,6);
+    if(registrationDue&&registrationDue<=today){
+        var registrationLate=_patientAlarmDays(registrationDue,today);
+        add('registration','Clinic registration','Registration +'+registrationLate+'d','info','fa-id-card','Due '+registrationDue+' · '+(registeredVisit?'last registered visit '+registrationBase:'no registered visit marked'),registrationDue,registrationLate);
+    }
+
+    // KCCQ: six calendar months after the latest completed assessment.
+    var kccqVisit=latestWith(function(v){return v.V_KCCQ!==undefined&&v.V_KCCQ!==null&&String(v.V_KCCQ).trim()!=='';});
+    var kccqBase=kccqVisit?kccqVisit._alarmDate:contact;
+    var kccqDue=_patientAlarmAddMonths(kccqBase,6);
+    if(kccqDue&&kccqDue<=today){
+        var kccqLate=_patientAlarmDays(kccqDue,today);
+        add('kccq','KCCQ assessment','KCCQ +'+kccqLate+'d','secondary','fa-clipboard-check','Due '+kccqDue+' · '+(kccqVisit?'last KCCQ '+kccqBase:'no KCCQ recorded'),kccqDue,kccqLate);
+    }
+
+    // Lost follow-up: six calendar months without a clinic visit/contact.
+    var lostDue=_patientAlarmAddMonths(contact,6);
+    if(lostDue&&lostDue<=today){
+        var since=_patientAlarmDays(contact,today),lostLate=_patientAlarmDays(lostDue,today);
+        add('lostfu','Lost follow-up risk','Lost F/U '+since+'d','danger','fa-user-clock','No clinic visit since '+contact+' · '+since+' days without follow-up',lostDue,lostLate);
+    }
+
+    // Vaccination due status is aggregated across every visit.
+    var vaccCfg=[['Influenza','Flu',1],['COVID','COVID',1],['RSV','RSV','lifetime'],['PSV2','PSV 2','lifetime'],['Shingrix','Shingrix','lifetime']];
+    var dueVacc=[];
+    vaccCfg.forEach(function(cfg){
+        var best='';
+        all.forEach(function(v){
+            var iso=_patientAlarmISO(v['V_Vacc_'+cfg[0]+'_Date']);
+            if(!iso&&v['V_Vacc_'+cfg[0]+'_Year']){var y=parseInt(v['V_Vacc_'+cfg[0]+'_Year'],10);if(y>1900)iso=y+'-01-01';}
+            if(iso&&(!best||iso>best))best=iso;
+        });
+        if(!best){var legacy=data['Vacc_'+cfg[0]+'_Year'];if(legacy&&parseInt(legacy,10)>1900)best=parseInt(legacy,10)+'-01-01';}
+        var covered=false;
+        if(best){covered=cfg[2]==='lifetime'||_patientAlarmAddMonths(best,cfg[2]*12)>today;}
+        if(!covered)dueVacc.push(cfg[1]);
+    });
+    if(dueVacc.length)add('vaccines','Vaccinations due','Vaccines '+dueVacc.length,'warning','fa-syringe',dueVacc.join(', ')+' due or not recorded','',0);
+
+    var rank={danger:0,warning:1,info:2,secondary:3};
+    alarms.sort(function(a,b){var r=(rank[a.level]||0)-(rank[b.level]||0);if(r)return r;return b.daysOverdue-a.daysOverdue;});
+    return alarms;
+}
+
+function renderPatientAlarmBadges(alarms){
+    if(!alarms||!alarms.length)return "<span class='badge bg-success'><i class='fa fa-circle-check me-1'></i>No due alarms</span>";
+    return alarms.map(function(a){
+        var cls=a.level==='warning'?'bg-warning text-dark':(a.level==='info'?'bg-info text-dark':(a.level==='secondary'?'bg-secondary':'bg-danger'));
+        return "<span class='badge "+cls+"'><i class='fa "+a.icon+" me-1'></i>"+_escHtml(a.short)+"</span>";
+    }).join('');
+}
+
+function renderPatientAlarmPanelHTML(alarms){
+    if(!alarms||!alarms.length){
+        return "<div class='patient-alarm-panel alarm-clear'><div class='patient-alarm-title'><span><i class='fa fa-circle-check me-1'></i>Clinic alarms</span><span class='badge bg-success'>Up to date</span></div></div>";
+    }
+    var html="<div class='patient-alarm-panel'><div class='patient-alarm-title'><span><i class='fa fa-bell me-1'></i>Clinic alarms</span><span class='badge bg-danger'>"+alarms.length+" action"+(alarms.length===1?'':'s')+"</span></div><div class='patient-alarm-grid'>";
+    alarms.forEach(function(a){
+        html+="<div class='patient-alarm-item alarm-"+a.level+"'><span class='alarm-icon'><i class='fa "+a.icon+"'></i></span><div><div class='alarm-name'>"+_escHtml(a.name)+"</div><div class='alarm-detail'>"+_escHtml(a.detail)+"</div></div></div>";
+    });
+    return html+'</div></div>';
+}
+
+function showOpenPatientAlarmLoading(name){
+    var wrap=document.getElementById('openPatientAlarms');if(!wrap)return;
+    wrap.style.display='';
+    wrap.innerHTML="<div class='patient-alarm-panel'><div class='patient-alarm-title mb-0'><span><i class='fa fa-spinner fa-spin me-1'></i>Checking clinic alarms"+(name?' for '+_escHtml(name):'')+"…</span></div></div>";
+}
+function renderOpenPatientAlarms(data,visitsArr){
+    var wrap=document.getElementById('openPatientAlarms');if(!wrap)return;
+    wrap.style.display='';
+    wrap.innerHTML=renderPatientAlarmPanelHTML(computePatientAlarms(data,visitsArr));
+}
+function hideOpenPatientAlarms(){var wrap=document.getElementById('openPatientAlarms');if(wrap){wrap.style.display='none';wrap.innerHTML='';}}
+
+function generateCardHTML(data, id, latestVisit, allVisits){
     // ===== Card sections (now powered by the LATEST snapshot — baseline + most recent visit overlay) =====
     // latestVisit is OPTIONAL — when provided, its V_* labs/meds override the baseline equivalents
     // so the card shows the freshest clinical picture.
     var snap = _buildLatestSnapshot(data, latestVisit);
+    var patientAlarms=computePatientAlarms(data,allVisits||(latestVisit?[latestVisit]:[]));
 
     var allFields=[
         ['Patient_Name','Civil_ID','File_No','Age','Gender','Nationality','Mobile','Doctor_Name','Referred_From','Referred_From_Other'],
@@ -8687,23 +8842,12 @@ function generateCardHTML(data, id, latestVisit){
             missingVacc.push(c.short);
         }
     });
-    if(missingVacc.length>0) headerBadges += "<span class='badge bg-warning text-dark me-1'><i class='fa fa-syringe me-1'></i>Vacc due: "+missingVacc.join(',')+"</span>";
     headerBadges += vaccGivenChips;
 
     var bmiVal=parseFloat(data.BMI||0);
     if(bmiVal>30) headerBadges += "<span class='badge bg-warning text-dark me-1'><i class='fa fa-weight-scale me-1'></i>BMI "+bmiVal.toFixed(1)+"</span>";
 
-    var today=new Date();
-    var sixMonthsAgo=new Date(today.getTime());sixMonthsAgo.setMonth(sixMonthsAgo.getMonth()-6);
-    var lastSeenDate=null;
-    if(latestVisit&&latestVisit.visitDate){var _lsIso=_normalizeDisplayDate(latestVisit.visitDate);if(_lsIso)lastSeenDate=new Date(_lsIso+'T00:00:00');}
-    if(!lastSeenDate&&data.lastEditAt)lastSeenDate=new Date(data.lastEditAt);
-    if(!lastSeenDate&&data.timestamp)lastSeenDate=new Date(data.timestamp);
-    var overdueBadge='';
-    if(lastSeenDate&&lastSeenDate<sixMonthsAgo&&(!data.Next_Appt||data.Next_Appt<today.toISOString().split('T')[0])){
-        var daysSince=Math.floor((today-lastSeenDate)/(1000*60*60*24));
-        overdueBadge = "<span class='badge bg-danger me-1'><i class='fa fa-user-clock me-1'></i>"+daysSince+"d overdue</span>";
-    }
+    var alarmBadges=renderPatientAlarmBadges(patientAlarms);
 
     // ===== ACCORDION HEADER (always visible) =====
     // Shows: Name, Nationality, MRN/File, badges, action buttons. Click anywhere on the row body
@@ -8719,7 +8863,8 @@ function generateCardHTML(data, id, latestVisit){
     html += " &middot; <i class='fa fa-id-card me-1'></i>File: "+_escHtml(mrnDisplay);
     if(civilDisplay) html += " &middot; <span class='text-muted'>Civil: "+_escHtml(civilDisplay)+"</span>";
     html += "</div>";
-    if(headerBadges || overdueBadge) html += "<div class='mt-1'>"+overdueBadge+headerBadges+"</div>";
+    html += "<div class='patient-alarm-badges'>"+alarmBadges+"</div>";
+    if(headerBadges) html += "<div class='mt-1'>"+headerBadges+"</div>";
     html += "</div></div>";
     // Action buttons (stop click propagation so card doesn't toggle)
     html += "<div class='d-flex flex-wrap gap-1' style='flex:0 0 auto;' onclick='event.stopPropagation()'>";
@@ -8736,6 +8881,8 @@ function generateCardHTML(data, id, latestVisit){
     if(latestVisit && latestVisit.visitDate){
         html += "<div class='alert alert-info py-1 px-2 mb-2' style='font-size:0.78rem;'><i class='fa fa-clock me-1'></i><strong>Latest visit:</strong> "+_escHtml(latestVisit.visitDate)+" ("+_escHtml(latestVisit.visitType||'Routine')+") &middot; labs &amp; meds shown reflect this visit.</div>";
     }
+
+    html += renderPatientAlarmPanelHTML(patientAlarms);
 
     html += "<div class='row'>";
     var totalFilled = 0;
@@ -9016,9 +9163,9 @@ function searchPatient(){
                             if(_normalizeDisplayDate(v.visitDate)===targetVisitDate) dateHit=true;
                         });
                     }
-                    return {patient:m, latest:info.latest, dateHit:dateHit};
+                    return {patient:m, latest:info.latest, allVisits:info.all, dateHit:dateHit};
                 })
-                .catch(function(){ return {patient:m, latest:null, dateHit:!targetVisitDate}; });
+                .catch(function(){ return {patient:m, latest:null, allVisits:[], dateHit:!targetVisitDate}; });
         });
         Promise.all(visitPromises).then(function(rows){
             var matchedRows=[];
@@ -9039,13 +9186,14 @@ function searchPatient(){
             }
             var matches=matchedRows.map(function(r){return r.patient;});
             var latestVisits=matchedRows.map(function(r){return r.latest;});
+            var allVisitHistories=matchedRows.map(function(r){return r.allVisits||[];});
             if(matches.length === 0){
                 res.innerHTML="<div class='alert alert-warning'>No patient found. <button class='btn btn-sm btn-outline-dark ms-2' onclick='clearSearchResults()'>Back</button></div>";
                 return;
             }
             var html = "<div class='mb-2'><button class='btn btn-sm btn-outline-dark fw-bold' onclick='clearSearchResults()'><i class='fa fa-arrow-left'></i> Back</button> <small class='text-muted ms-2'>"+matches.length+" result"+(matches.length>1?'s':'')+" — tap a card to expand</small></div>";
             matches.forEach(function(m, i){
-                html += generateCardHTML(m.data, m.id, latestVisits[i]);
+                html += generateCardHTML(m.data, m.id, latestVisits[i], allVisitHistories[i]);
             });
             res.innerHTML = html;
         });
@@ -9080,6 +9228,7 @@ function showTrends(patientId){
 // leaking into the next patient. Mirrors the field-clearing logic from resetForm() but
 // skips the cross-page side effects (search reset, page navigation, wizard reset).
 function _clearPatientFormFields(){
+    if(typeof hideOpenPatientAlarms==='function')hideOpenPatientAlarms();
     document.querySelectorAll('#hfForm input, #hfForm select, #hfForm textarea').forEach(function(el){
         if(el.tagName==='SELECT'){ el.selectedIndex=0; }
         else if(el.type==='checkbox' || el.type==='radio'){ el.checked=false; }
@@ -9166,6 +9315,7 @@ function editPt(id){
         window._editOrigin = adminActive ? 'admin' : 'main';
     }
     var d=PC[id];editingDocId=id;currentPatientId=id;
+    if(typeof showOpenPatientAlarmLoading==='function')showOpenPatientAlarmLoading(d&&d.Patient_Name);
     Object.keys(d).forEach(function(k){var el=document.getElementById(k);if(el)el.value=d[k]||"";});
     if(typeof ensureNationalityOption==='function'){
         ensureNationalityOption(d.Nationality||'');
