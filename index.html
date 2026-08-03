@@ -162,6 +162,49 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 .pill-toggle:hover{border-color:#aaa;}
 .pill-toggle.active:hover{border-color:#155724;}
 
+/* ===== PROMINENT REGISTERED CLINIC VISIT CONTROL ===== */
+.registered-visit-field{display:flex;align-items:stretch;}
+.section-card-body label.registered-visit-control{
+    width:100%;min-height:76px;margin:0;padding:10px 12px;
+    display:flex;align-items:center;gap:11px;
+    border:2px solid #dfa236;border-radius:10px;
+    background:linear-gradient(135deg,#fff8e8,#fffdf8);
+    color:#704600;cursor:pointer;user-select:none;
+    box-shadow:0 2px 8px rgba(160,100,0,.08);
+    transition:border-color .18s,background .18s,box-shadow .18s,transform .18s;
+}
+.registered-visit-control:hover{border-color:#bd7900;box-shadow:0 4px 12px rgba(160,100,0,.14);transform:translateY(-1px);}
+.registered-visit-icon{
+    width:36px;height:36px;border-radius:50%;flex:0 0 36px;
+    display:flex;align-items:center;justify-content:center;
+    background:#d98b00;color:#fff;font-size:.92rem;
+}
+.registered-visit-copy{flex:1;min-width:0;line-height:1.2;}
+.registered-visit-title{display:block;color:#704600;font-size:.82rem;font-weight:800;margin-bottom:3px;}
+.registered-visit-help{display:block;color:#7b6850;font-size:.68rem;font-weight:500;}
+.registered-visit-switch{display:flex;align-items:center;flex:0 0 auto;margin:0;min-height:0;}
+.registered-visit-switch .form-check-input{
+    width:3.25rem;height:1.65rem;margin:0;cursor:pointer;
+    border-width:2px;border-color:#bd7900;background-color:#fff;
+    box-shadow:0 0 0 3px rgba(217,139,0,.12);
+}
+.registered-visit-switch .form-check-input:checked{
+    background-color:#198754;border-color:#198754;
+    box-shadow:0 0 0 3px rgba(25,135,84,.16);
+}
+.registered-visit-state{
+    min-width:42px;padding:4px 7px;border-radius:999px;text-align:center;
+    background:#d98b00;color:#fff;font-size:.65rem;font-weight:900;letter-spacing:.06em;
+}
+.registered-visit-control.is-registered{
+    border-color:#198754;background:linear-gradient(135deg,#eaf8f0,#f9fffb);
+    color:#11633e;box-shadow:0 3px 10px rgba(25,135,84,.13);
+}
+.registered-visit-control.is-registered .registered-visit-icon,
+.registered-visit-control.is-registered .registered-visit-state{background:#198754;}
+.registered-visit-control.is-registered .registered-visit-title{color:#11633e;}
+.registered-visit-control.is-registered .registered-visit-help{color:#3e7058;}
+
 /* ===== CLINICAL ALERTS ===== */
 .clinical-alert{display:none;padding:8px 12px;border-radius:8px;font-size:0.78rem;margin:6px 0;animation:fadeUp 0.3s ease;}
 .clinical-alert.visible{display:flex;align-items:flex-start;gap:8px;}
@@ -1300,6 +1343,10 @@ img,canvas,table,svg{max-width:100%;}
         padding-left:16px!important;
         padding-right:16px!important;
     }
+    #hfForm .row.g-2 > .registered-visit-field{
+        flex:0 0 100%!important;
+        max-width:100%!important;
+    }
 }
 
 /* Two-field layout, applied by applyTwoColumnFieldLayout() after dynamic UI build. */
@@ -1527,7 +1574,7 @@ img,canvas,table,svg{max-width:100%;}
 
             <!-- ===== IN-HOSPITAL ADMISSION BLOCK ===== -->
             <div class="row g-2 mb-3" style="background:#fff5f5;border-left:4px solid #8b0000;border-radius:8px;padding:12px;margin:0 0 12px 0;">
-                <div class="col-12 d-flex align-items-center justify-content-between flex-wrap gap-2" style="margin-bottom:4px;">
+                <div class="col-12 d-flex align-items-center justify-content-between flex-wrap gap-2 admission-strip-heading" style="margin-bottom:4px;">
                     <h6 class="text-primary fw-bold mb-0" style="font-size:0.95rem;"><i class="fa fa-hospital me-1"></i>In-Hospital Admission</h6>
                 </div>
                 <div class="col-6 col-md-3"><label>Admission Date</label><input type="date" class="form-control" id="Admission_Date"></div>
@@ -2203,13 +2250,19 @@ img,canvas,table,svg{max-width:100%;}
                     <div class="col-6 col-md-3"><label>Visit Date *</label><input type="date" class="form-control" id="Visit_Date"></div>
                     <div class="col-6 col-md-3"><label>Visit Type</label><select class="form-select" id="Visit_Type"><option>Routine</option><option>Urgent</option><option>Post-Discharge</option><option>Telemedicine</option></select></div>
                     <div class="col-6 col-md-3"><label>Medication Refill Today?</label><select class="form-select" id="V_Med_Refill_Today"><option>No</option><option>Yes</option></select><small class="text-muted">Yes starts the next 8-week refill reminder.</small></div>
-                    <div class="col-12 col-md-4 d-flex align-items-center">
-                        <div class="form-check form-switch mt-3">
-                            <input class="form-check-input" type="checkbox" id="visitRegisteredCheck" onchange="syncVisitServiceFlags()">
-                            <label class="form-check-label fw-bold" for="visitRegisteredCheck">Registered clinic visit</label>
-                            <input type="hidden" id="V_Registered_Visit" value="No">
-                            <div class="text-muted" style="font-size:0.7rem;">Checked visits start the 6-month clinic-registration reminder.</div>
-                        </div>
+                    <div class="col-12 col-md-4 registered-visit-field">
+                        <label class="registered-visit-control" id="registeredVisitControl" for="visitRegisteredCheck">
+                            <span class="registered-visit-icon"><i class="fa fa-calendar-check"></i></span>
+                            <span class="registered-visit-copy">
+                                <span class="registered-visit-title">Registered Clinic Visit</span>
+                                <span class="registered-visit-help" id="registeredVisitHelp">Turn on to start the 6-month clinic-registration reminder.</span>
+                            </span>
+                            <span class="form-check form-switch registered-visit-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" id="visitRegisteredCheck" aria-describedby="registeredVisitHelp" onchange="syncVisitServiceFlags()">
+                            </span>
+                            <span class="registered-visit-state" id="registeredVisitState">NO</span>
+                        </label>
+                        <input type="hidden" id="V_Registered_Visit" value="No">
                     </div>
                     <div class="col-12"><hr class="my-2"></div>
                     <h6 class="col-12 text-secondary">Symptoms</h6>
@@ -2227,9 +2280,9 @@ img,canvas,table,svg{max-width:100%;}
                     </div>
                     <div class="col-4 col-md-2"><label>NYHA Class</label><select class="form-select" id="V_NYHA"><option value="">Select</option><option>I</option><option>II</option><option>III</option><option>IV</option><option>N/A</option></select></div>
                     <div class="col-4 col-md-2"><label>KCCQ (0-100)</label><input type="text" class="form-control" id="V_KCCQ" min="0" max="100" inputmode="text" placeholder="0-100"></div>
-                    <div class="col-4 col-md-3"><label>Oedema</label><select class="form-select" id="V_Edema"><option>No</option><option>Mild feet</option><option>Moderate</option><option>Severe</option></select></div>
                     <div class="col-12"><hr class="my-2"></div>
                     <h6 class="col-12 text-secondary">Signs / Vitals</h6>
+                    <div class="col-4 col-md-3"><label>Oedema</label><select class="form-select" id="V_Edema"><option>No</option><option>Mild feet</option><option>Moderate</option><option>Severe</option></select></div>
                     <div class="col-4 col-md-2"><label>Pulse</label><input type="text" class="form-control" id="V_Pulse" inputmode="text"></div>
                     <div class="col-4 col-md-2"><label>BP</label><input type="text" class="form-control" id="V_BP" placeholder="120/80"></div>
                     <div class="col-4 col-md-2"><label>SpO2 %</label><input type="text" class="form-control" id="V_SpO2" inputmode="text"></div>
@@ -4168,6 +4221,7 @@ function applyTwoColumnFieldLayout(){
                 col.classList.contains('field-tint') ||
                 col.classList.contains('vertical-entry-group') ||
                 col.classList.contains('visit-subhead') ||
+                col.classList.contains('admission-strip-heading') ||
                 col.id==='visitMedDoses' ||
                 col.id==='vaccBlock' ||
                 direct(col,'hr') ||
@@ -7288,6 +7342,10 @@ function syncVisitServiceFlags(){
     var box=document.getElementById('visitRegisteredCheck');
     var hidden=document.getElementById('V_Registered_Visit');
     if(box&&hidden)hidden.value=box.checked?'Yes':'No';
+    var control=document.getElementById('registeredVisitControl');
+    var state=document.getElementById('registeredVisitState');
+    if(control)control.classList.toggle('is-registered',!!(box&&box.checked));
+    if(state)state.textContent=(box&&box.checked)?'YES':'NO';
 }
 function restoreVisitServiceFlags(data){
     data=data||{};
@@ -9102,8 +9160,6 @@ function _visitSnapshotInfo(snap){
         return ka<kb ? 1 : (ka>kb ? -1 : 0);
     });
     var latest=Object.assign({}, all[0]);
-    // Aggregate latest dose per vaccine across every visit so the card chips
-    // reflect the patient's true vaccination history.
     ['Influenza','COVID','RSV','PSV2','Shingrix'].forEach(function(vid){
         var best='';
         all.forEach(function(vis){
@@ -9640,7 +9696,7 @@ function generatePDF(data,visitsData,id){
     VISIT_MED_LIST.forEach(function(m){mf.push(m.id);mf.push(m.id+'_Status');mf.push(m.id+'_Custom');mf.push(m.id+'_Freq');mf.push(m.id+'_Change');});
     mf.push('V_Med_Others');
     visitsData.forEach(function(visit,idx){html+="<div style='border:2px solid #17a2b8;margin:15px 0;padding:15px;border-radius:8px;'><h4 style='color:#17a2b8;margin-top:0;'>Visit #"+(visitsData.length-idx)+": "+visit.visitDate+" ("+visit.visitType+")</h4>";
-    var vs=[{name:'Symptoms',fields:['V_Fatigue','V_NYHA','V_KCCQ','V_Edema']},{name:'Signs/Vitals',fields:['V_Pulse','V_BP','V_SpO2','V_Height','V_Weight','V_BMI','V_JVP','V_Rales','V_S3']},{name:'Risk Factors & Comorbidities',fields:['V_DM','V_HTN','V_AF','V_IHD','V_CKD','V_Dialysis','V_CVA','V_PVD','V_Smoker','V_Obese','V_OSA','V_Dyslipidemia','V_Thyroid_Dz','V_FH_Cardio','V_Genetics','V_Genetics_Type','V_Comorbid_Others','V_Procedures','V_Device_Done','V_Device_Type','V_Device_Date','V_Device_Info','V_Proc_CA_Done','V_Proc_CA_Date','V_Proc_CA_Details','V_Proc_PCI_Done','V_Proc_PCI_Date','V_Proc_PCI_Stents_Number','V_Proc_PCI_Details','V_Proc_CABG_Done','V_Proc_CABG_Date','V_Proc_CABG_Details','V_PCI_CABG','V_PCI_CABG_Date','V_PCI_CABG_Details','V_Proc_Ablation_Done','V_Proc_Ablation_Type','V_Procedures_Notes']},{name:'ECG',fields:['V_ECG_Done','V_LBBB','V_QRS','V_Arrhythmia','V_Pacing_ECG','V_Pacing_Mode']},{name:'Holter',fields:['V_Holter_Done','V_Holter_Date','V_Holter_Duration','V_Holter_MaxHR','V_Holter_MinHR','V_Holter_AvgHR','V_Holter_Arrhythmia','V_Holter_Findings']},{name:'Labs',fields:['V_HbA1c','V_Gluc','V_Urea','V_Creat','V_eGFR','V_Na','V_K','V_BNP','V_NTproBNP','V_INR','V_Iron','V_Transferrin','V_Ferritin','V_WBC','V_Hb','V_Plt','V_TSH','V_FreeT4','V_TotalChol','V_LDL','V_HDL','V_TG','V_Lab_Others']},{name:'F/U Echo',fields:['V_Echo_Done','V_EF_Change','V_Echo_EDVI','V_Echo_ESVI','V_Echo_EF','V_Echo_Other']},{name:'F/U CMR',fields:['V_CMR_Done','V_CMR_LVEDVI','V_CMR_LVESVI','V_CMR_LVEF','V_CMR_RVEDI','V_CMR_RVEF','V_CMR_LGE','V_CMR_LGE_Pct','V_CMR_Others']},{name:'F/U 6MWT',fields:['V_Walk_Completed','V_Walk_Meters']},{name:'F/U CPET',fields:['V_CPET_Done','V_CPET_PeakVO2','V_CPET_VEVCO2','V_CPET_RER','V_CPET_AT','V_CPET_VO2HR','V_CPET_PetCO2']},{name:'F/U Right Heart Cath',fields:['V_RHC_Done','V_RHC_CI','V_RHC_RAP','V_RHC_RVP','V_RHC_PCWP','V_RHC_PAP','V_RHC_PVR','V_RHC_PAPi','V_RHC_LV','V_RHC_MVO2']},{name:'F/U CAG/PCI',fields:['V_CAG_Done','V_CAG_Date','V_CAG_Findings','V_CAG_PCI_Done','V_CAG_PCI_Date','V_CAG_Stents_Number','V_CAG_PCI_Details']},{name:'Medications',fields:mf},{name:'Vaccinations',fields:['V_Vacc_Influenza','V_Vacc_Influenza_Date','V_Vacc_Pneumococcal','V_Vacc_Pneumococcal_Date','V_Vacc_COVID','V_Vacc_COVID_Date','V_Vacc_RSV','V_Vacc_RSV_Date','V_Vacc_Notes','V_Vacc_Influenza_Year','V_Vacc_Pneumococcal_Year','V_Vacc_COVID_Year','V_Vacc_Other']},{name:'Next Appointment',fields:['Next_Appt_Notes']},{name:'Plan',fields:['V_AdverseEffects','V_Compliance','V_ComplianceNotes','V_Adverse','V_Plan','V_Others','V_Referral','V_Referral_Other']},{name:'Outcomes & Management',fields:['V_Quad_GDMT','V_Max_GDMT','V_Recovered_LV','V_Recovered_LV_Type','V_Mortality','V_LostFU','V_LostFU_Reason','V_LostFU_Other','V_Advanced_HF_Outcome','V_Strong_HF','V_Adv_HF_Therapy','V_Adv_HF_Therapy_Type','V_Outcome_Notes']}];
+    var vs=[{name:'Symptoms',fields:['V_Fatigue','V_NYHA','V_KCCQ']},{name:'Signs/Vitals',fields:['V_Edema','V_Pulse','V_BP','V_SpO2','V_Height','V_Weight','V_BMI','V_JVP','V_Rales','V_S3']},{name:'Risk Factors & Comorbidities',fields:['V_DM','V_HTN','V_AF','V_IHD','V_CKD','V_Dialysis','V_CVA','V_PVD','V_Smoker','V_Obese','V_OSA','V_Dyslipidemia','V_Thyroid_Dz','V_FH_Cardio','V_Genetics','V_Genetics_Type','V_Comorbid_Others','V_Procedures','V_Device_Done','V_Device_Type','V_Device_Date','V_Device_Info','V_Proc_CA_Done','V_Proc_CA_Date','V_Proc_CA_Details','V_Proc_PCI_Done','V_Proc_PCI_Date','V_Proc_PCI_Stents_Number','V_Proc_PCI_Details','V_Proc_CABG_Done','V_Proc_CABG_Date','V_Proc_CABG_Details','V_PCI_CABG','V_PCI_CABG_Date','V_PCI_CABG_Details','V_Proc_Ablation_Done','V_Proc_Ablation_Type','V_Procedures_Notes']},{name:'ECG',fields:['V_ECG_Done','V_LBBB','V_QRS','V_Arrhythmia','V_Pacing_ECG','V_Pacing_Mode']},{name:'Holter',fields:['V_Holter_Done','V_Holter_Date','V_Holter_Duration','V_Holter_MaxHR','V_Holter_MinHR','V_Holter_AvgHR','V_Holter_Arrhythmia','V_Holter_Findings']},{name:'Labs',fields:['V_HbA1c','V_Gluc','V_Urea','V_Creat','V_eGFR','V_Na','V_K','V_BNP','V_NTproBNP','V_INR','V_Iron','V_Transferrin','V_Ferritin','V_WBC','V_Hb','V_Plt','V_TSH','V_FreeT4','V_TotalChol','V_LDL','V_HDL','V_TG','V_Lab_Others']},{name:'F/U Echo',fields:['V_Echo_Done','V_EF_Change','V_Echo_EDVI','V_Echo_ESVI','V_Echo_EF','V_Echo_Other']},{name:'F/U CMR',fields:['V_CMR_Done','V_CMR_LVEDVI','V_CMR_LVESVI','V_CMR_LVEF','V_CMR_RVEDI','V_CMR_RVEF','V_CMR_LGE','V_CMR_LGE_Pct','V_CMR_Others']},{name:'F/U 6MWT',fields:['V_Walk_Completed','V_Walk_Meters']},{name:'F/U CPET',fields:['V_CPET_Done','V_CPET_PeakVO2','V_CPET_VEVCO2','V_CPET_RER','V_CPET_AT','V_CPET_VO2HR','V_CPET_PetCO2']},{name:'F/U Right Heart Cath',fields:['V_RHC_Done','V_RHC_CI','V_RHC_RAP','V_RHC_RVP','V_RHC_PCWP','V_RHC_PAP','V_RHC_PVR','V_RHC_PAPi','V_RHC_LV','V_RHC_MVO2']},{name:'F/U CAG/PCI',fields:['V_CAG_Done','V_CAG_Date','V_CAG_Findings','V_CAG_PCI_Done','V_CAG_PCI_Date','V_CAG_Stents_Number','V_CAG_PCI_Details']},{name:'Medications',fields:mf},{name:'Vaccinations',fields:['V_Vacc_Influenza','V_Vacc_Influenza_Date','V_Vacc_Pneumococcal','V_Vacc_Pneumococcal_Date','V_Vacc_COVID','V_Vacc_COVID_Date','V_Vacc_RSV','V_Vacc_RSV_Date','V_Vacc_Notes','V_Vacc_Influenza_Year','V_Vacc_Pneumococcal_Year','V_Vacc_COVID_Year','V_Vacc_Other']},{name:'Next Appointment',fields:['Next_Appt_Notes']},{name:'Plan',fields:['V_AdverseEffects','V_Compliance','V_ComplianceNotes','V_Adverse','V_Plan','V_Others','V_Referral','V_Referral_Other']},{name:'Outcomes & Management',fields:['V_Quad_GDMT','V_Max_GDMT','V_Recovered_LV','V_Recovered_LV_Type','V_Mortality','V_LostFU','V_LostFU_Reason','V_LostFU_Other','V_Advanced_HF_Outcome','V_Strong_HF','V_Adv_HF_Therapy','V_Adv_HF_Therapy_Type','V_Outcome_Notes']}];
     vs.forEach(function(vsec){
         if(vsec.name==='Symptoms')vsec.fields=vsec.fields.filter(function(f){return f!=='V_NYHA';});
         if(vsec.name==='Risk Factors & Comorbidities')vsec.fields.push('V_Alcohol','V_Frail','V_Frailty_Deficits','V_Frailty_Items_Assessed','V_Frailty_Index');
