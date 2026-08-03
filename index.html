@@ -3498,12 +3498,7 @@ auth.onAuthStateChanged(function(user) {
         document.getElementById('userBadge').textContent = (user.email||'').split('@')[0];
         document.body.classList.remove('login-active');
         initFormUI();
-        if(typeof warmPatientSearchCache==='function')warmPatientSearchCache();
     } else {
-        if(typeof _activeSearchToken!=='undefined')_activeSearchToken++;
-        if(typeof _patientSearchCache==='object'){_patientSearchCache.rows=null;_patientSearchCache.loadedAt=0;_patientSearchCache.promise=null;}
-        if(typeof _patientVisitSearchCache==='object')_patientVisitSearchCache={};
-        PC={};
         document.getElementById('pageLogin').style.display = 'flex';
         document.body.classList.add('login-active');
         ['pageMain','pageAdmin','pageAnalytics','pageClinic','pageEducation'].forEach(function(p){var el=document.getElementById(p);if(el)el.classList.remove('active');});
@@ -3691,11 +3686,11 @@ function openPatientFromClinic(id){
 
 // Pre-load all patients into PC cache so Clinic-page Open buttons work without a registry visit
 function loadClinicCache(){
-    if(typeof _loadPatientSearchRows==='function'){
-        _loadPatientSearchRows(false).catch(function(){});
-        return;
-    }
-    db.collection("patients").get().then(function(snap){snap.forEach(function(docSnap){PC[docSnap.id]=docSnap.data();});}).catch(function(){});
+    // If admin already loaded, skip
+    if(Object.keys(PC).length>0)return;
+    db.collection("patients").get().then(function(snap){
+        snap.forEach(function(docSnap){PC[docSnap.id]=docSnap.data();});
+    }).catch(function(){});
 }
 
 function loadMainAlerts(){
@@ -7493,7 +7488,6 @@ function calcEGFR(){var age=parseFloat(document.getElementById("Age").value),gen
 function calcMAGGIC(){/* MAGGIC removed per user request — kept as no-op to preserve onchange handlers */}
 
 function clearSearchResults(){
-    if(typeof _activeSearchToken!=='undefined')_activeSearchToken++;
     document.getElementById("searchInput").value="";
     var sd=document.getElementById("searchVisitDate");if(sd)sd.value="";
     document.getElementById("searchResults").innerHTML="";
@@ -7640,7 +7634,6 @@ function _flashSaveToast(msg){
 }
 
 function showSaveSuccess(patientId, data, mode){
-    if(typeof _upsertPatientSearchRecord==='function')_upsertPatientSearchRecord(patientId,data);
     if(typeof propagateHeightToSavedVisits==='function')propagateHeightToSavedVisits(patientId, data&&data.Height);
     // SHORT-CIRCUIT: if the user was editing from the admin/search page and just updated,
     // skip the in-form success panel and route them straight back to admin. Ahmed asked
@@ -7804,7 +7797,6 @@ function _commitVisitInline(){
     var visitId = editingVisitId;
     return db.collection("patients").doc(pid).collection("visits").doc(visitId).update(visitData)
         .then(function(){
-            if(typeof invalidatePatientVisitSearchCache==='function')invalidatePatientVisitSearchCache(pid);
             return writeAuditEntry(pid, {action:'visit_edit', changes:[], note:'Visit '+visitId+' edited (via Save Patient, '+vDate+')'});
         })
         .catch(function(e){ console.warn('Inline visit save failed:', e.message); });
@@ -7837,7 +7829,6 @@ function _commitNewVisitInline(){
     var nextAppt = (document.getElementById('Next_Appt')||{}).value || '';
     return db.collection("patients").doc(pid).collection("visits").add(visitData)
         .then(function(ref){
-            if(typeof invalidatePatientVisitSearchCache==='function')invalidatePatientVisitSearchCache(pid);
             // Mirror Next_Appt onto the patient doc so the calendar / 14-day panel pick it up
             if(nextAppt){
                 db.collection("patients").doc(pid).update({Next_Appt:nextAppt});
@@ -7870,7 +7861,6 @@ function saveVisit(){
         visitData.lastEditBy = _currentAuditUser();
         visitData.lastEditDoctor = _currentDoctorSelection();
         db.collection("patients").doc(patientId).collection("visits").doc(editingVisitId).update(visitData).then(function(){
-            if(typeof invalidatePatientVisitSearchCache==='function')invalidatePatientVisitSearchCache(patientId);
             if(typeof persistFixedHeightForPatient==='function')persistFixedHeightForPatient(patientId, visitData.V_Height);
             if(nextAppt){
                 db.collection("patients").doc(patientId).update({Next_Appt:nextAppt,lastEditAt:new Date().toISOString(),lastEditBy:_currentAuditUser(),lastEditDoctor:_currentDoctorSelection()});
@@ -7889,7 +7879,6 @@ function saveVisit(){
         visitData.addedBy = _currentAuditUser();
         visitData.addedDoctor = _currentDoctorSelection();
         db.collection("patients").doc(patientId).collection("visits").add(visitData).then(function(){
-            if(typeof invalidatePatientVisitSearchCache==='function')invalidatePatientVisitSearchCache(patientId);
             if(typeof persistFixedHeightForPatient==='function')persistFixedHeightForPatient(patientId, visitData.V_Height);
             if(nextAppt){
                 db.collection("patients").doc(patientId).update({Next_Appt:nextAppt,lastEditAt:new Date().toISOString(),lastEditBy:_currentAuditUser(),lastEditDoctor:_currentDoctorSelection()});
@@ -8030,7 +8019,6 @@ function deleteVisit(visitId, visitDateLabel){
     // Capture a snapshot for the audit tombstone
     var v = visits.filter(function(x){return x.id===visitId;})[0] || {};
     db.collection("patients").doc(patientId).collection("visits").doc(visitId).delete().then(function(){
-        if(typeof invalidatePatientVisitSearchCache==='function')invalidatePatientVisitSearchCache(patientId);
         writeAuditEntry(patientId, {
             action:'visit_delete',
             changes:[],
@@ -8181,7 +8169,6 @@ function loadVisits(patientId){
         visits=[];
         var admissionItems=buildAdmissionHistoryItems(patientId);
         if(snapshot.size===0){
-            if(typeof _patientVisitSearchCache==='object')_patientVisitSearchCache[patientId]={info:{latest:null,all:[]},loadedAt:Date.now(),promise:null};
             if(admissionItems.length){
                 renderCollapsibleVisits([], admissionItems);
             }else{
@@ -8204,7 +8191,6 @@ function loadVisits(patientId){
             var ka=a._displayDate||'', kb=b._displayDate||'';
             return ka<kb ? 1 : (ka>kb ? -1 : 0); // descending
         });
-        if(typeof _patientVisitSearchCache==='object'&&typeof _visitInfoFromArray==='function')_patientVisitSearchCache[patientId]={info:_visitInfoFromArray(visits),loadedAt:Date.now(),promise:null};
         renderCollapsibleVisits(visits, admissionItems);
         // Recompute vaccination suppression now that visits are known, and
         // refresh the (Add Visit) vaccination block if we're not mid-edit.
@@ -9106,9 +9092,10 @@ function togglePatientCard(headerEl){
 
 
 
-function _visitInfoFromArray(source){
-    var all=(source||[]).map(function(v){return Object.assign({},v);});
-    if(!all.length)return {latest:null,all:[]};
+function _visitSnapshotInfo(snap){
+    if(!snap || snap.size===0) return {latest:null, all:[]};
+    var all=[];
+    snap.forEach(function(d){ all.push(Object.assign({id:d.id}, d.data())); });
     all.forEach(function(v){ v._displayDate = _normalizeDisplayDate(v.visitDate); });
     all.sort(function(a,b){
         var ka=a._displayDate||'', kb=b._displayDate||'';
@@ -9132,121 +9119,6 @@ function _visitInfoFromArray(source){
         }
     });
     return {latest:latest, all:all};
-}
-
-function _visitSnapshotInfo(snap){
-    if(!snap || snap.size===0) return {latest:null, all:[]};
-    var all=[];
-    snap.forEach(function(d){ all.push(Object.assign({id:d.id}, d.data())); });
-    return _visitInfoFromArray(all);
-}
-
-// Search caches keep repeated searches fast without changing stored data.
-var _patientSearchCache={rows:null,loadedAt:0,promise:null};
-var _patientVisitSearchCache={};
-var _activeSearchToken=0;
-var SEARCH_CACHE_TTL=5*60*1000;
-
-function _loadPatientSearchRows(force){
-    var fresh=_patientSearchCache.rows&&(Date.now()-_patientSearchCache.loadedAt<SEARCH_CACHE_TTL);
-    if(!force&&_patientSearchCache.rows){
-        // Stale-while-refresh: never hold up a search just because the five-minute
-        // freshness window elapsed. Return cached names now and refresh quietly.
-        if(!fresh&&!_patientSearchCache.promise)setTimeout(function(){_loadPatientSearchRows(true).catch(function(){});},0);
-        return Promise.resolve(_patientSearchCache.rows);
-    }
-    if(_patientSearchCache.promise)return _patientSearchCache.promise;
-    _patientSearchCache.promise=db.collection('patients').get().then(function(snap){
-        var rows=[];
-        snap.forEach(function(docSnap){
-            var data=docSnap.data();
-            rows.push({id:docSnap.id,data:data});
-            PC[docSnap.id]=data;
-        });
-        _patientSearchCache.rows=rows;
-        _patientSearchCache.loadedAt=Date.now();
-        _patientSearchCache.promise=null;
-        return rows;
-    }).catch(function(err){_patientSearchCache.promise=null;throw err;});
-    return _patientSearchCache.promise;
-}
-function warmPatientSearchCache(){_loadPatientSearchRows(false).catch(function(){});}
-function _upsertPatientSearchRecord(id,data){
-    if(!id||!data)return;
-    PC[id]=Object.assign({},PC[id]||{},data);
-    if(!_patientSearchCache.rows)return;
-    var found=false;
-    _patientSearchCache.rows.forEach(function(r){if(r.id===id){r.data=PC[id];found=true;}});
-    if(!found)_patientSearchCache.rows.push({id:id,data:PC[id]});
-    _patientSearchCache.loadedAt=Date.now();
-}
-function _removePatientSearchRecord(id){
-    if(_patientSearchCache.rows)_patientSearchCache.rows=_patientSearchCache.rows.filter(function(r){return r.id!==id;});
-    delete _patientVisitSearchCache[id];delete PC[id];
-}
-function invalidatePatientVisitSearchCache(id){if(id)delete _patientVisitSearchCache[id];}
-function _loadPatientVisitInfo(patientId,force){
-    var cached=_patientVisitSearchCache[patientId];
-    if(!force&&cached&&cached.info&&(Date.now()-cached.loadedAt<SEARCH_CACHE_TTL))return Promise.resolve(cached.info);
-    if(cached&&cached.promise)return cached.promise;
-    var entry=cached||{};
-    entry.promise=db.collection('patients').doc(patientId).collection('visits').get().then(function(snap){
-        var info=_visitSnapshotInfo(snap);
-        _patientVisitSearchCache[patientId]={info:info,loadedAt:Date.now(),promise:null};
-        return info;
-    }).catch(function(err){delete _patientVisitSearchCache[patientId];throw err;});
-    _patientVisitSearchCache[patientId]=entry;
-    return entry.promise;
-}
-
-function _visitDateVariants(iso){
-    var p=String(iso||'').split('-');if(p.length!==3)return [iso];
-    var y=p[0],m=String(parseInt(p[1],10)),d=String(parseInt(p[2],10));
-    return [iso,p[2]+'/'+p[1]+'/'+y,d+'/'+m+'/'+y];
-}
-function _findPatientsByVisitDate(targetDate,allPatients){
-    var variants=_visitDateVariants(targetDate);
-    // A collection-group query avoids downloading every patient's visit history.
-    return db.collectionGroup('visits').where('visitDate','in',variants).get().then(function(snap){
-        var ids={};
-        snap.forEach(function(vdoc){var parent=vdoc.ref&&vdoc.ref.parent&&vdoc.ref.parent.parent;if(parent)ids[parent.id]=true;});
-        return allPatients.filter(function(p){return !!ids[p.id];});
-    }).catch(function(){
-        // Safe compatibility fallback for projects where collection-group queries
-        // are not enabled. Cached histories still make subsequent searches fast.
-        return Promise.all(allPatients.map(function(p){
-            return _loadPatientVisitInfo(p.id,false).then(function(info){
-                var hit=info.all.some(function(v){return _normalizeDisplayDate(v.visitDate)===targetDate;});
-                return hit?p:null;
-            }).catch(function(){return null;});
-        })).then(function(rows){return rows.filter(Boolean);});
-    });
-}
-
-function _renderFastSearchResults(candidates,token){
-    var res=document.getElementById('searchResults');if(!res||token!==_activeSearchToken)return;
-    var html="<div class='mb-2 d-flex align-items-center flex-wrap gap-2'><button class='btn btn-sm btn-outline-dark fw-bold' onclick='clearSearchResults()'><i class='fa fa-arrow-left'></i> Back</button><small class='text-muted'>"+candidates.length+" result"+(candidates.length===1?'':'s')+"</small><span class='badge bg-light text-primary border' id='searchLoadState'><i class='fa fa-bolt me-1'></i>Names loaded · checking alarms…</span></div>";
-    candidates.forEach(function(m){
-        html+="<div id='searchCardSlot_"+m.id+"' class='card border-primary shadow-sm mb-3 p-3'><div class='d-flex justify-content-between align-items-center gap-2 flex-wrap'><div><div class='fw-bold text-primary' style='font-size:1rem;'>"+_escHtml(m.data.Patient_Name||'Unknown')+"</div><div class='small text-muted'>File: "+_escHtml(m.data.File_No||'-')+(m.data.Civil_ID?' · Civil: '+_escHtml(m.data.Civil_ID):'')+"</div></div><div class='d-flex align-items-center gap-2'><span class='small text-muted'><i class='fa fa-spinner fa-spin me-1'></i>Loading alarms</span><button class='btn btn-sm btn-primary' onclick='editPt(\""+m.id+"\")'><i class='fa fa-edit me-1'></i>Open</button></div></div></div>";
-    });
-    res.innerHTML=html;
-    var remaining=candidates.length;
-    candidates.forEach(function(m){
-        _loadPatientVisitInfo(m.id,false).then(function(info){
-            if(token!==_activeSearchToken)return;
-            var slot=document.getElementById('searchCardSlot_'+m.id);
-            if(slot)slot.outerHTML=generateCardHTML(m.data,m.id,info.latest,info.all);
-        }).catch(function(){
-            if(token!==_activeSearchToken)return;
-            var slot=document.getElementById('searchCardSlot_'+m.id);
-            if(slot)slot.outerHTML=generateCardHTML(m.data,m.id,null,[]);
-        }).then(function(){
-            if(token!==_activeSearchToken)return;
-            remaining--;
-            var state=document.getElementById('searchLoadState');
-            if(state)state.innerHTML=remaining>0?('<i class="fa fa-spinner fa-spin me-1"></i>Updating '+remaining+' card'+(remaining===1?'':'s')):'<i class="fa fa-circle-check me-1"></i>All alarms ready';
-        });
-    });
 }
 
 function searchPatient(){
@@ -9327,52 +9199,6 @@ function searchPatient(){
         });
     }).catch(function(e){res.innerHTML="<div class='alert alert-danger'>Error: "+e.message+"</div>";});
 }
-
-// Optimized search path: patient index is memory-cached, cards render before
-// visit histories finish loading, and date search uses a direct visit query.
-searchPatient=function(){
-    var rawVal=(document.getElementById('searchInput')||{}).value||'';rawVal=rawVal.trim();
-    var visitDateVal=(document.getElementById('searchVisitDate')||{}).value||'';
-    var res=document.getElementById('searchResults');if(!res)return;
-    if(!rawVal&&!visitDateVal){res.innerHTML='';return;}
-    var rawDateCandidate=(rawVal&&/[\d][\/\-\.\s][\d]/.test(rawVal))?_normalizeDisplayDate(rawVal):'';
-    var rawIsVisitDate=!visitDateVal&&/^\d{4}-\d{2}-\d{2}$/.test(rawDateCandidate);
-    var targetVisitDate=visitDateVal||(rawIsVisitDate?rawDateCandidate:'');
-    var hasTextQuery=!!rawVal&&!rawIsVisitDate;
-    var valLower=rawVal.toLowerCase().trim().replace(/\s+/g,' ');
-    var valDigits=rawVal.replace(/\D/g,'');
-    var token=++_activeSearchToken;
-    var cacheReady=!!_patientSearchCache.rows;
-    res.innerHTML="<div class='text-center py-3'><i class='fa fa-bolt text-warning me-1'></i>"+(cacheReady?(targetVisitDate?'Finding visits on this date…':'Finding patient…'):'Preparing fast patient search…')+"</div>";
-
-    function textMatch(p){
-        if(!hasTextQuery)return true;
-        var d=p.data||{},name=String(d.Patient_Name||'').toLowerCase().trim().replace(/\s+/g,' ');
-        var civil=String(d.Civil_ID||''),file=String(d.File_No||''),mobile=String(d.Mobile||'');
-        if(valDigits){
-            return [civil,file,mobile].some(function(v){var digits=v.replace(/\D/g,'');return digits&&(digits===valDigits||digits.indexOf(valDigits)>=0);});
-        }
-        return name.indexOf(valLower)>=0||String(d.Doctor_Name||'').toLowerCase().indexOf(valLower)>=0;
-    }
-    function show(rows){
-        if(token!==_activeSearchToken)return;
-        rows=(rows||[]).filter(textMatch);
-        rows.sort(function(a,b){return String((a.data||{}).Patient_Name||'').localeCompare(String((b.data||{}).Patient_Name||''));});
-        if(!rows.length){res.innerHTML="<div class='alert alert-warning'>No patient found. <button class='btn btn-sm btn-outline-dark ms-2' onclick='clearSearchResults()'>Back</button></div>";return;}
-        _renderFastSearchResults(rows,token);
-    }
-
-    _loadPatientSearchRows(false).then(function(allPatients){
-        if(token!==_activeSearchToken)return;
-        var textCandidates=hasTextQuery?allPatients.filter(textMatch):allPatients;
-        if(!targetVisitDate){show(textCandidates);return;}
-        _findPatientsByVisitDate(targetVisitDate,textCandidates).then(show).catch(function(e){
-            if(token===_activeSearchToken)res.innerHTML="<div class='alert alert-danger'>Search failed: "+_escHtml(e.message||e)+"</div>";
-        });
-    }).catch(function(e){
-        if(token===_activeSearchToken)res.innerHTML="<div class='alert alert-danger'>Search failed: "+_escHtml(e.message||e)+"</div>";
-    });
-};
 
 function showTrends(patientId){
     document.getElementById("chartModal").classList.remove("d-none");
@@ -9668,7 +9494,6 @@ function delPt(id){
     }).then(function(){
         return db.collection("patients").doc(id).delete();
     }).then(function(){
-        if(typeof _removePatientSearchRecord==='function')_removePatientSearchRecord(id);
         showPopup("success","Deleted","Patient record removed. Tombstone recorded in audit log.");
         loadAdmin();
     }).catch(function(e){
@@ -9731,10 +9556,6 @@ function loadAdmin(){
             if(da<=14){var color=da<=3?'danger':(da<=7?'warning':'info');
             upcomingHTML+="<div class='alert alert-"+color+" py-1 px-2 mb-1 d-flex justify-content-between' style='font-size:0.85rem;'><span><b>"+_escHtml(d.Patient_Name||'Unknown')+"</b> ("+_escHtml(d.File_No||'')+")</span><span><i class='fa fa-calendar'></i> "+_escHtml(d.Next_Appt)+" (in "+da+" days)</span></div>";}}
         });
-        if(typeof _patientSearchCache==='object'){
-            _patientSearchCache.rows=_adminPatientsCache.map(function(r){return {id:r.id,data:r.data};});
-            _patientSearchCache.loadedAt=Date.now();
-        }
         filterAdminPatients();
         document.getElementById('upcomingAppts').innerHTML=upcomingHTML||"<p class='text-muted small mb-0'>No appointments in the next 14 days.</p>";
     }).catch(function(){
