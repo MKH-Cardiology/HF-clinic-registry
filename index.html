@@ -1606,9 +1606,9 @@ img,canvas,table,svg{max-width:100%;}
                 <div class="col-4 col-md-2"><label>Pulse</label><input type="text" class="form-control" id="Pulse" inputmode="text"></div>
                 <div class="col-4 col-md-2"><label>BP</label><input type="text" class="form-control" id="BP" placeholder="120/80" oninput="calcMAGGIC()"></div>
                 <div class="col-4 col-md-2"><label>SpO2 (%)</label><input type="text" class="form-control" id="SpO2" inputmode="text"></div>
-                <div class="col-4 col-md-2"><label>Oedema</label><select class="form-select" id="Edema"><option>No</option><option>Mild feet</option><option>Moderate</option><option>Severe</option></select></div>
                 <div class="col-4 col-md-2"><label>JVP</label><select class="form-select" id="JVP"><option>Normal</option><option>Raised</option></select></div>
                 <div class="col-4 col-md-2"><label>Rales</label><select class="form-select" id="Rales"><option>No</option><option>Yes</option></select></div>
+                <div class="col-4 col-md-2"><label>Oedema</label><select class="form-select" id="Edema"><option>No</option><option>Mild feet</option><option>Moderate</option><option>Severe</option></select></div>
                 <div class="col-4 col-md-3"><label>S3 Gallop</label><select class="form-select" id="S3"><option>No</option><option>Yes</option></select></div>
                 <div class="col-8 col-md-3"><label>Murmur</label><input type="text" class="form-control" id="Murmur"></div>
             </div>
@@ -2295,7 +2295,6 @@ img,canvas,table,svg{max-width:100%;}
                     <div class="col-4 col-md-2"><label>KCCQ (0-100)</label><input type="text" class="form-control" id="V_KCCQ" min="0" max="100" inputmode="text" placeholder="0-100"></div>
                     <div class="col-12"><hr class="my-2"></div>
                     <h6 class="col-12 text-secondary">Signs / Vitals</h6>
-                    <div class="col-4 col-md-3"><label>Oedema</label><select class="form-select" id="V_Edema"><option>No</option><option>Mild feet</option><option>Moderate</option><option>Severe</option></select></div>
                     <div class="col-4 col-md-2"><label>Pulse</label><input type="text" class="form-control" id="V_Pulse" inputmode="text"></div>
                     <div class="col-4 col-md-2"><label>BP</label><input type="text" class="form-control" id="V_BP" placeholder="120/80"></div>
                     <div class="col-4 col-md-2"><label>SpO2 %</label><input type="text" class="form-control" id="V_SpO2" inputmode="text"></div>
@@ -2305,6 +2304,7 @@ img,canvas,table,svg{max-width:100%;}
                     <div class="col-4 col-md-2"><label class="text-success fw-bold">BMI <span class="auto-badge"><i class="fa fa-lock"></i> Auto</span></label><input type="text" class="form-control bg-light text-success fw-bold" id="V_BMI" readonly></div>
                     <div class="col-4 col-md-2"><label>JVP</label><select class="form-select" id="V_JVP"><option>N</option><option>Raised</option></select></div>
                     <div class="col-4 col-md-2"><label>Pulm. Rales</label><select class="form-select" id="V_Rales"><option>N</option><option>Y</option></select></div>
+                    <div class="col-4 col-md-3"><label>Oedema</label><select class="form-select" id="V_Edema"><option>No</option><option>Mild feet</option><option>Moderate</option><option>Severe</option></select></div>
                     <div class="col-4 col-md-2"><label>S3</label><select class="form-select" id="V_S3"><option>N</option><option>Y</option></select></div>
                     <div class="col-8 col-md-4"><label>Murmur</label><input type="text" class="form-control" id="V_Murmur" placeholder="e.g. ESM at apex, grade 3/6"></div>
                     <!-- ===== VISIT COMORBIDITIES (mirrors admission structure) — first visit only ===== -->
@@ -5304,9 +5304,9 @@ var EXTRA_ADM_SCHEMA=[
    {k:'Pulse',l:'Pulse',t:'text',w:'col-4 col-md-2'},
    {k:'BP',l:'BP',t:'text',w:'col-4 col-md-2',ph:'120/80'},
    {k:'SpO2',l:'SpO2 (%)',t:'num',w:'col-4 col-md-2'},
-   {k:'Edema',l:'Oedema',t:'sel',o:['No','Mild feet','Moderate','Severe'],w:'col-4 col-md-2'},
    {k:'JVP',l:'JVP',t:'sel',o:['Normal','Raised'],w:'col-4 col-md-2'},
    {k:'Rales',l:'Rales',t:'sel',o:['No','Yes'],w:'col-4 col-md-2'},
+   {k:'Edema',l:'Oedema',t:'sel',o:['No','Mild feet','Moderate','Severe'],w:'col-4 col-md-2'},
    {k:'S3',l:'S3 Gallop',t:'sel',o:['No','Yes'],w:'col-4 col-md-3'},
    {k:'Murmur',l:'Murmur',t:'text',w:'col-8 col-md-3'}
  ]},
