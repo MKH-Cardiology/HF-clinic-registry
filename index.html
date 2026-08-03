@@ -162,9 +162,9 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 .pill-toggle:hover{border-color:#aaa;}
 .pill-toggle.active:hover{border-color:#155724;}
 
-/* ===== PROMINENT REGISTERED CLINIC VISIT CONTROL ===== */
-.registered-visit-field{display:flex;align-items:stretch;}
-.section-card-body label.registered-visit-control{
+/* ===== PROMINENT VISIT SERVICE CONTROLS ===== */
+.visit-service-field{display:flex;align-items:stretch;}
+.section-card-body label.visit-service-control{
     width:100%;min-height:76px;margin:0;padding:10px 12px;
     display:flex;align-items:center;gap:11px;
     border:2px solid #dfa236;border-radius:10px;
@@ -173,37 +173,37 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
     box-shadow:0 2px 8px rgba(160,100,0,.08);
     transition:border-color .18s,background .18s,box-shadow .18s,transform .18s;
 }
-.registered-visit-control:hover{border-color:#bd7900;box-shadow:0 4px 12px rgba(160,100,0,.14);transform:translateY(-1px);}
-.registered-visit-icon{
+.visit-service-control:hover{border-color:#bd7900;box-shadow:0 4px 12px rgba(160,100,0,.14);transform:translateY(-1px);}
+.visit-service-icon{
     width:36px;height:36px;border-radius:50%;flex:0 0 36px;
     display:flex;align-items:center;justify-content:center;
     background:#d98b00;color:#fff;font-size:.92rem;
 }
-.registered-visit-copy{flex:1;min-width:0;line-height:1.2;}
-.registered-visit-title{display:block;color:#704600;font-size:.82rem;font-weight:800;margin-bottom:3px;}
-.registered-visit-help{display:block;color:#7b6850;font-size:.68rem;font-weight:500;}
-.registered-visit-switch{display:flex;align-items:center;flex:0 0 auto;margin:0;min-height:0;}
-.registered-visit-switch .form-check-input{
+.visit-service-copy{flex:1;min-width:0;line-height:1.2;}
+.visit-service-title{display:block;color:#704600;font-size:.82rem;font-weight:800;margin-bottom:3px;}
+.visit-service-help{display:block;color:#7b6850;font-size:.68rem;font-weight:500;}
+.visit-service-switch{display:flex;align-items:center;flex:0 0 auto;margin:0;min-height:0;}
+.visit-service-switch .form-check-input{
     width:3.25rem;height:1.65rem;margin:0;cursor:pointer;
     border-width:2px;border-color:#bd7900;background-color:#fff;
     box-shadow:0 0 0 3px rgba(217,139,0,.12);
 }
-.registered-visit-switch .form-check-input:checked{
+.visit-service-switch .form-check-input:checked{
     background-color:#198754;border-color:#198754;
     box-shadow:0 0 0 3px rgba(25,135,84,.16);
 }
-.registered-visit-state{
+.visit-service-state{
     min-width:42px;padding:4px 7px;border-radius:999px;text-align:center;
     background:#d98b00;color:#fff;font-size:.65rem;font-weight:900;letter-spacing:.06em;
 }
-.registered-visit-control.is-registered{
+.visit-service-control.is-active{
     border-color:#198754;background:linear-gradient(135deg,#eaf8f0,#f9fffb);
     color:#11633e;box-shadow:0 3px 10px rgba(25,135,84,.13);
 }
-.registered-visit-control.is-registered .registered-visit-icon,
-.registered-visit-control.is-registered .registered-visit-state{background:#198754;}
-.registered-visit-control.is-registered .registered-visit-title{color:#11633e;}
-.registered-visit-control.is-registered .registered-visit-help{color:#3e7058;}
+.visit-service-control.is-active .visit-service-icon,
+.visit-service-control.is-active .visit-service-state{background:#198754;}
+.visit-service-control.is-active .visit-service-title{color:#11633e;}
+.visit-service-control.is-active .visit-service-help{color:#3e7058;}
 
 /* ===== CLINICAL ALERTS ===== */
 .clinical-alert{display:none;padding:8px 12px;border-radius:8px;font-size:0.78rem;margin:6px 0;animation:fadeUp 0.3s ease;}
@@ -1343,7 +1343,7 @@ img,canvas,table,svg{max-width:100%;}
         padding-left:16px!important;
         padding-right:16px!important;
     }
-    #hfForm .row.g-2 > .registered-visit-field{
+    #hfForm .row.g-2 > .visit-service-field.field-2col{
         flex:0 0 100%!important;
         max-width:100%!important;
     }
@@ -2249,18 +2249,31 @@ img,canvas,table,svg{max-width:100%;}
                 <div class="row g-2">
                     <div class="col-6 col-md-3"><label>Visit Date *</label><input type="date" class="form-control" id="Visit_Date"></div>
                     <div class="col-6 col-md-3"><label>Visit Type</label><select class="form-select" id="Visit_Type"><option>Routine</option><option>Urgent</option><option>Post-Discharge</option><option>Telemedicine</option></select></div>
-                    <div class="col-6 col-md-3"><label>Medication Refill Today?</label><select class="form-select" id="V_Med_Refill_Today"><option>No</option><option>Yes</option></select><small class="text-muted">Yes starts the next 8-week refill reminder.</small></div>
-                    <div class="col-12 col-md-4 registered-visit-field">
-                        <label class="registered-visit-control" id="registeredVisitControl" for="visitRegisteredCheck">
-                            <span class="registered-visit-icon"><i class="fa fa-calendar-check"></i></span>
-                            <span class="registered-visit-copy">
-                                <span class="registered-visit-title">Registered Clinic Visit</span>
-                                <span class="registered-visit-help" id="registeredVisitHelp">Turn on to start the 6-month clinic-registration reminder.</span>
+                    <div class="col-12 col-md-4 visit-service-field medication-refill-field">
+                        <label class="visit-service-control medication-refill-control" id="medicationRefillControl" for="visitMedRefillCheck">
+                            <span class="visit-service-icon"><i class="fa fa-pills"></i></span>
+                            <span class="visit-service-copy">
+                                <span class="visit-service-title">Medication Refill Today</span>
+                                <span class="visit-service-help" id="medicationRefillHelp">Turn on to start the next 8-week medication-refill reminder.</span>
                             </span>
-                            <span class="form-check form-switch registered-visit-switch">
+                            <span class="form-check form-switch visit-service-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" id="visitMedRefillCheck" aria-describedby="medicationRefillHelp" onchange="syncVisitServiceFlags()">
+                            </span>
+                            <span class="visit-service-state" id="medicationRefillState">NO</span>
+                        </label>
+                        <input type="hidden" id="V_Med_Refill_Today" value="No">
+                    </div>
+                    <div class="col-12 col-md-4 visit-service-field registered-visit-field">
+                        <label class="visit-service-control registered-visit-control" id="registeredVisitControl" for="visitRegisteredCheck">
+                            <span class="visit-service-icon"><i class="fa fa-calendar-check"></i></span>
+                            <span class="visit-service-copy">
+                                <span class="visit-service-title">Registered Clinic Visit</span>
+                                <span class="visit-service-help" id="registeredVisitHelp">Turn on to start the 6-month clinic-registration reminder.</span>
+                            </span>
+                            <span class="form-check form-switch visit-service-switch">
                                 <input class="form-check-input" type="checkbox" role="switch" id="visitRegisteredCheck" aria-describedby="registeredVisitHelp" onchange="syncVisitServiceFlags()">
                             </span>
-                            <span class="registered-visit-state" id="registeredVisitState">NO</span>
+                            <span class="visit-service-state" id="registeredVisitState">NO</span>
                         </label>
                         <input type="hidden" id="V_Registered_Visit" value="No">
                     </div>
@@ -7339,18 +7352,25 @@ function carryForwardVisitOutcomeFields(){
 }
 
 function syncVisitServiceFlags(){
-    var box=document.getElementById('visitRegisteredCheck');
-    var hidden=document.getElementById('V_Registered_Visit');
-    if(box&&hidden)hidden.value=box.checked?'Yes':'No';
-    var control=document.getElementById('registeredVisitControl');
-    var state=document.getElementById('registeredVisitState');
-    if(control)control.classList.toggle('is-registered',!!(box&&box.checked));
-    if(state)state.textContent=(box&&box.checked)?'YES':'NO';
+    function syncOne(boxId,hiddenId,controlId,stateId){
+        var box=document.getElementById(boxId);
+        var hidden=document.getElementById(hiddenId);
+        var control=document.getElementById(controlId);
+        var state=document.getElementById(stateId);
+        var active=!!(box&&box.checked);
+        if(hidden)hidden.value=active?'Yes':'No';
+        if(control)control.classList.toggle('is-active',active);
+        if(state)state.textContent=active?'YES':'NO';
+    }
+    syncOne('visitMedRefillCheck','V_Med_Refill_Today','medicationRefillControl','medicationRefillState');
+    syncOne('visitRegisteredCheck','V_Registered_Visit','registeredVisitControl','registeredVisitState');
 }
 function restoreVisitServiceFlags(data){
     data=data||{};
-    var box=document.getElementById('visitRegisteredCheck');
-    if(box)box.checked=data.V_Registered_Visit==='Yes';
+    var refillBox=document.getElementById('visitMedRefillCheck');
+    var registeredBox=document.getElementById('visitRegisteredCheck');
+    if(refillBox)refillBox.checked=data.V_Med_Refill_Today==='Yes';
+    if(registeredBox)registeredBox.checked=data.V_Registered_Visit==='Yes';
     syncVisitServiceFlags();
 }
 
@@ -8215,7 +8235,7 @@ function clearVisitForm(){
     // First-visit-only: hide Comorbidities section on follow-up visits.
     if(typeof updateVisitComorbiditiesVisibility==='function') updateVisitComorbiditiesVisibility();
     if(typeof syncVisitHeightFromBaseline==='function')syncVisitHeightFromBaseline(true);
-    if(typeof restoreVisitServiceFlags==='function')restoreVisitServiceFlags({V_Registered_Visit:'No'});
+    if(typeof restoreVisitServiceFlags==='function')restoreVisitServiceFlags({V_Med_Refill_Today:'No',V_Registered_Visit:'No'});
     if(typeof carryForwardVisitOutcomeFields==='function')carryForwardVisitOutcomeFields();
 }
 
