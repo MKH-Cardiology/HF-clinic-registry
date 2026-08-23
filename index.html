@@ -1436,7 +1436,7 @@ img,canvas,table,svg{max-width:100%;}
     <div class="input-group">
         <input type="text" id="searchInput" class="form-control" placeholder="Name, Civil ID, File No, or Visit Date">
         <input type="date" id="searchVisitDate" class="form-control" title="Date of Visit" aria-label="Date of Visit">
-        <button class="btn btn-primary px-4" onclick="searchPatient()">Search</button>
+        <button class="btn btn-primary px-4" id="searchPatientBtn" onclick="searchPatient()">Search</button>
     </div>
     <div id="searchResults" class="mt-3"></div>
 </div>
@@ -3289,6 +3289,12 @@ firebase.initializeApp({
     appId:"1:898458296631:web:85fea7a2c6661ae0563ab2"
 });
 var db = firebase.firestore();
+// Some hospital/corporate networks interrupt Firestore's streaming transport.
+// Let the SDK detect that condition and fall back to long polling instead of
+// leaving reads pending indefinitely. Persistent multi-tab cache also gives
+// registry search an immediate local index after the first successful load.
+try { db.settings({experimentalAutoDetectLongPolling:true}); } catch(_firestoreSettingsError){}
+try { db.enablePersistence({synchronizeTabs:true}).catch(function(){}); } catch(_firestorePersistenceError){}
 var auth = firebase.auth();
 var editingDocId = null, currentPatientId = null, PC = {}, visits = [], editingVisitId = null;
 var weightChartInst = null, kccqChartInst = null, ntproChartInst = null;
@@ -3570,7 +3576,11 @@ auth.onAuthStateChanged(function(user) {
         document.getElementById('userBadge').textContent = (user.email||'').split('@')[0];
         document.body.classList.remove('login-active');
         initFormUI();
+        // Warm the lightweight patient index after login so the first search
+        // does not have to wait for the entire patients collection.
+        if(typeof warmRegistrySearch==='function')warmRegistrySearch();
     } else {
+        if(typeof resetRegistrySearchCache==='function')resetRegistrySearchCache();
         document.getElementById('pageLogin').style.display = 'flex';
         document.body.classList.add('login-active');
         ['pageMain','pageAdmin','pageAnalytics','pageClinic','pageEducation'].forEach(function(p){var el=document.getElementById(p);if(el)el.classList.remove('active');});
@@ -3758,11 +3768,13 @@ function openPatientFromClinic(id){
 
 // Pre-load all patients into PC cache so Clinic-page Open buttons work without a registry visit
 function loadClinicCache(){
-    // If admin already loaded, skip
+    // Reuse the same patient index as registry search when available.
+    if(typeof _loadRegistrySearchPatients==='function'){
+        _loadRegistrySearchPatients(false).catch(function(){});
+        return;
+    }
     if(Object.keys(PC).length>0)return;
-    db.collection("patients").get().then(function(snap){
-        snap.forEach(function(docSnap){PC[docSnap.id]=docSnap.data();});
-    }).catch(function(){});
+    db.collection("patients").get().then(function(snap){snap.forEach(function(docSnap){PC[docSnap.id]=docSnap.data();});}).catch(function(){});
 }
 
 function loadMainAlerts(){
@@ -3785,12 +3797,36 @@ function loadMainAlerts(){
         if(!dueDate||dueDate>todayStr)return;
         _mainAlertsData[key].push({name:d.Patient_Name,file:d.File_No,id:id,lastDate:lastDate||'',dueDate:dueDate,never:!!never,daysOverdue:Math.max(0,daysBetween(dueDate,todayStr))});
     }
-    db.collection("patients").get().then(function(snap){
+    var patientIndexPromise=(typeof _loadRegistrySearchPatients==='function')?_loadRegistrySearchPatients(false):db.collection("patients").get().then(function(snap){
+        var rows=[];snap.forEach(function(docSnap){rows.push({id:docSnap.id,data:docSnap.data()});});return rows;
+    });
+    patientIndexPromise.then(function(patientRows){
+        // Prefer one shared visit-index request for all alert calculations.
+        // This prevents the dashboard from launching a request per patient and
+        // competing with the clinician's search. Fall back only when project
+        // rules do not permit a collection-group read.
+        var bulkVisitsPromise=(typeof _loadRegistryAllVisits==='function')
+            ? _loadRegistryAllVisits(false).catch(function(){return null;})
+            : Promise.resolve(null);
+        return bulkVisitsPromise.then(function(bulkVisits){
         _mainAlertsData={upcoming:[],refill:[],registered:[],kccq:[],overdue:[],vacc:[],apptByDay:{}};
         var patientPromises=[];
-        snap.forEach(function(docSnap){
-            var d=docSnap.data();
-            var id=docSnap.id;
+        var fallbackQueue=[],fallbackActive=0;
+        function pumpFallbackVisits(){
+            while(fallbackActive<4&&fallbackQueue.length){
+                (function(job){
+                    fallbackActive++;
+                    _loadRegistryVisitInfo(job.id,false).then(job.resolve,job.reject).then(function(){fallbackActive--;pumpFallbackVisits();});
+                })(fallbackQueue.shift());
+            }
+        }
+        function limitedVisitInfo(id){
+            if(bulkVisits)return Promise.resolve(bulkVisits[id]||{latest:null,all:[]});
+            return new Promise(function(resolve,reject){fallbackQueue.push({id:id,resolve:resolve,reject:reject});pumpFallbackVisits();});
+        }
+        patientRows.forEach(function(patientRow){
+            var d=patientRow.data;
+            var id=patientRow.id;
             // Skip deceased patients from alerts
             if(d.Mortality&&d.Mortality!=='Alive'&&d.Mortality!=='')return;
             // Upcoming appointments (14-day list) AND full calendar map (all future)
@@ -3803,8 +3839,8 @@ function loadMainAlerts(){
             }
             // Service reminders and vaccinations use the full visit history.
             patientPromises.push(
-                db.collection("patients").doc(id).collection("visits").get().then(function(vsnap){
-                    var all=[];vsnap.forEach(function(vdoc){all.push(vdoc.data());});
+                limitedVisitInfo(id).then(function(visitInfo){
+                    var all=(visitInfo.all||[]).map(function(v){return Object.assign({},v);});
                     all.sort(function(a,b){return isoDate(b.visitDate).localeCompare(isoDate(a.visitDate));});
                     var lvDoc=all.length?all[0]:null;
                     var lastVisit=lvDoc?isoDate(lvDoc.visitDate):'';
@@ -3873,6 +3909,7 @@ function loadMainAlerts(){
             var oc=document.getElementById('mainOverdueCount');if(oc)oc.textContent=_mainAlertsData.overdue.length;
             var vc=document.getElementById('mainVaccCount');if(vc)vc.textContent=_mainAlertsData.vacc.length;
             renderMainAlertsBody();
+        });
         });
     }).catch(function(e){body.innerHTML='<p class="text-danger small mb-0">Error loading alerts: '+e.message+'</p>';});
 }
@@ -7572,9 +7609,11 @@ function calcEGFR(){var age=parseFloat(document.getElementById("Age").value),gen
 function calcMAGGIC(){/* MAGGIC removed per user request — kept as no-op to preserve onchange handlers */}
 
 function clearSearchResults(){
+    if(typeof _registrySearchToken!=='undefined')_registrySearchToken++;
     document.getElementById("searchInput").value="";
     var sd=document.getElementById("searchVisitDate");if(sd)sd.value="";
     document.getElementById("searchResults").innerHTML="";
+    if(typeof _setRegistrySearchBusy==='function')_setRegistrySearchBusy(_registrySearchToken,false);
 }
 function showPopup(type,title,msg){var old=document.getElementById("popOv");if(old)old.remove();var color=type==="success"?"#28a745":type==="delete"?"#dc3545":"#ffc107",icon=type==="success"?"fa-check-circle":type==="delete"?"fa-trash-alt":"fa-exclamation-triangle";var ov=document.createElement("div");ov.id="popOv";ov.className="modal-overlay";ov.innerHTML="<div class='modal-box'><div class='modal-icon' style='background:"+color+";width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;'><i class='fa-solid "+icon+"' style='color:#fff;font-size:1.2rem;'></i></div><h4 style='color:"+color+"'>"+title+"</h4><p class='text-muted'>"+msg+"</p><button class='btn btn-dark w-100' onclick='this.parentElement.parentElement.remove()'>OK</button></div>";document.body.appendChild(ov);}
 
@@ -7718,6 +7757,7 @@ function _flashSaveToast(msg){
 }
 
 function showSaveSuccess(patientId, data, mode){
+    if(typeof _upsertRegistrySearchPatient==='function')_upsertRegistrySearchPatient(patientId,data);
     if(typeof propagateHeightToSavedVisits==='function')propagateHeightToSavedVisits(patientId, data&&data.Height);
     // SHORT-CIRCUIT: if the user was editing from the admin/search page and just updated,
     // skip the in-form success panel and route them straight back to admin. Ahmed asked
@@ -7881,6 +7921,7 @@ function _commitVisitInline(){
     var visitId = editingVisitId;
     return db.collection("patients").doc(pid).collection("visits").doc(visitId).update(visitData)
         .then(function(){
+            if(typeof _invalidateRegistryVisitCache==='function')_invalidateRegistryVisitCache(pid);
             return writeAuditEntry(pid, {action:'visit_edit', changes:[], note:'Visit '+visitId+' edited (via Save Patient, '+vDate+')'});
         })
         .catch(function(e){ console.warn('Inline visit save failed:', e.message); });
@@ -7913,6 +7954,7 @@ function _commitNewVisitInline(){
     var nextAppt = (document.getElementById('Next_Appt')||{}).value || '';
     return db.collection("patients").doc(pid).collection("visits").add(visitData)
         .then(function(ref){
+            if(typeof _invalidateRegistryVisitCache==='function')_invalidateRegistryVisitCache(pid);
             // Mirror Next_Appt onto the patient doc so the calendar / 14-day panel pick it up
             if(nextAppt){
                 db.collection("patients").doc(pid).update({Next_Appt:nextAppt});
@@ -7945,6 +7987,7 @@ function saveVisit(){
         visitData.lastEditBy = _currentAuditUser();
         visitData.lastEditDoctor = _currentDoctorSelection();
         db.collection("patients").doc(patientId).collection("visits").doc(editingVisitId).update(visitData).then(function(){
+            if(typeof _invalidateRegistryVisitCache==='function')_invalidateRegistryVisitCache(patientId);
             if(typeof persistFixedHeightForPatient==='function')persistFixedHeightForPatient(patientId, visitData.V_Height);
             if(nextAppt){
                 db.collection("patients").doc(patientId).update({Next_Appt:nextAppt,lastEditAt:new Date().toISOString(),lastEditBy:_currentAuditUser(),lastEditDoctor:_currentDoctorSelection()});
@@ -7963,6 +8006,7 @@ function saveVisit(){
         visitData.addedBy = _currentAuditUser();
         visitData.addedDoctor = _currentDoctorSelection();
         db.collection("patients").doc(patientId).collection("visits").add(visitData).then(function(){
+            if(typeof _invalidateRegistryVisitCache==='function')_invalidateRegistryVisitCache(patientId);
             if(typeof persistFixedHeightForPatient==='function')persistFixedHeightForPatient(patientId, visitData.V_Height);
             if(nextAppt){
                 db.collection("patients").doc(patientId).update({Next_Appt:nextAppt,lastEditAt:new Date().toISOString(),lastEditBy:_currentAuditUser(),lastEditDoctor:_currentDoctorSelection()});
@@ -8103,6 +8147,7 @@ function deleteVisit(visitId, visitDateLabel){
     // Capture a snapshot for the audit tombstone
     var v = visits.filter(function(x){return x.id===visitId;})[0] || {};
     db.collection("patients").doc(patientId).collection("visits").doc(visitId).delete().then(function(){
+        if(typeof _invalidateRegistryVisitCache==='function')_invalidateRegistryVisitCache(patientId);
         writeAuditEntry(patientId, {
             action:'visit_delete',
             changes:[],
@@ -8253,6 +8298,7 @@ function loadVisits(patientId){
         visits=[];
         var admissionItems=buildAdmissionHistoryItems(patientId);
         if(snapshot.size===0){
+            if(typeof _setRegistryVisitCache==='function')_setRegistryVisitCache(patientId,{latest:null,all:[]});
             if(admissionItems.length){
                 renderCollapsibleVisits([], admissionItems);
             }else{
@@ -8275,6 +8321,7 @@ function loadVisits(patientId){
             var ka=a._displayDate||'', kb=b._displayDate||'';
             return ka<kb ? 1 : (ka>kb ? -1 : 0); // descending
         });
+        if(typeof _setRegistryVisitCache==='function')_setRegistryVisitCache(patientId,_visitArrayInfo(visits));
         renderCollapsibleVisits(visits, admissionItems);
         // Recompute vaccination suppression now that visits are known, and
         // refresh the (Add Visit) vaccination block if we're not mid-edit.
@@ -8836,12 +8883,13 @@ function renderOpenPatientAlarms(data,visitsArr){
 }
 function hideOpenPatientAlarms(){var wrap=document.getElementById('openPatientAlarms');if(wrap){wrap.style.display='none';wrap.innerHTML='';}}
 
-function generateCardHTML(data, id, latestVisit, allVisits){
+function generateCardHTML(data, id, latestVisit, allVisits, historyState){
     // ===== Card sections (now powered by the LATEST snapshot — baseline + most recent visit overlay) =====
     // latestVisit is OPTIONAL — when provided, its V_* labs/meds override the baseline equivalents
     // so the card shows the freshest clinical picture.
     var snap = _buildLatestSnapshot(data, latestVisit);
-    var patientAlarms=computePatientAlarms(data,allVisits||(latestVisit?[latestVisit]:[]));
+    var historyLoading=historyState==='loading', historyUnavailable=historyState==='unavailable';
+    var patientAlarms=(historyLoading||historyUnavailable)?[]:computePatientAlarms(data,allVisits||(latestVisit?[latestVisit]:[]));
 
     var allFields=[
         ['Patient_Name','Civil_ID','File_No','Age','Gender','Nationality','Mobile','Doctor_Name','Referred_From','Referred_From_Other'],
@@ -8931,7 +8979,11 @@ function generateCardHTML(data, id, latestVisit, allVisits){
     var bmiVal=parseFloat(data.BMI||0);
     if(bmiVal>30) headerBadges += "<span class='badge bg-warning text-dark me-1'><i class='fa fa-weight-scale me-1'></i>BMI "+bmiVal.toFixed(1)+"</span>";
 
-    var alarmBadges=renderPatientAlarmBadges(patientAlarms);
+    var alarmBadges=historyLoading
+        ? "<span class='badge bg-secondary'><i class='fa fa-spinner fa-spin me-1'></i>Checking visit history</span>"
+        : (historyUnavailable
+            ? "<span class='badge bg-warning text-dark'><i class='fa fa-triangle-exclamation me-1'></i>History temporarily unavailable</span>"
+            : renderPatientAlarmBadges(patientAlarms));
 
     // ===== ACCORDION HEADER (always visible) =====
     // Shows: Name, Nationality, MRN/File, badges, action buttons. Click anywhere on the row body
@@ -8966,7 +9018,13 @@ function generateCardHTML(data, id, latestVisit, allVisits){
         html += "<div class='alert alert-info py-1 px-2 mb-2' style='font-size:0.78rem;'><i class='fa fa-clock me-1'></i><strong>Latest visit:</strong> "+_escHtml(latestVisit.visitDate)+" ("+_escHtml(latestVisit.visitType||'Routine')+") &middot; labs &amp; meds shown reflect this visit.</div>";
     }
 
-    html += renderPatientAlarmPanelHTML(patientAlarms);
+    if(historyLoading){
+        html += "<div class='patient-alarm-panel'><div class='patient-alarm-title mb-0'><span><i class='fa fa-spinner fa-spin me-1'></i>Patient found. Loading visit history and alarms…</span></div></div>";
+    }else if(historyUnavailable){
+        html += "<div class='alert alert-warning py-2 mb-2'><i class='fa fa-wifi me-1'></i>The patient record was found, but visit history could not be refreshed. You can still open the patient; history will be retried there.</div>";
+    }else{
+        html += renderPatientAlarmPanelHTML(patientAlarms);
+    }
 
     html += "<div class='row'>";
     var totalFilled = 0;
@@ -9176,10 +9234,9 @@ function togglePatientCard(headerEl){
 
 
 
-function _visitSnapshotInfo(snap){
-    if(!snap || snap.size===0) return {latest:null, all:[]};
-    var all=[];
-    snap.forEach(function(d){ all.push(Object.assign({id:d.id}, d.data())); });
+function _visitArrayInfo(source){
+    var all=(source||[]).map(function(v){return Object.assign({},v);});
+    if(!all.length)return {latest:null,all:[]};
     all.forEach(function(v){ v._displayDate = _normalizeDisplayDate(v.visitDate); });
     all.sort(function(a,b){
         var ka=a._displayDate||'', kb=b._displayDate||'';
@@ -9203,83 +9260,389 @@ function _visitSnapshotInfo(snap){
     return {latest:latest, all:all};
 }
 
-function searchPatient(){
-    var rawVal=document.getElementById("searchInput").value.trim();
-    var visitDateVal=(document.getElementById("searchVisitDate")||{}).value||"";
-    var res=document.getElementById("searchResults");
-    if(!rawVal && !visitDateVal){res.innerHTML="";return;}
-    var rawDateCandidate=(rawVal && /[\d][\/\-\.\s][\d]/.test(rawVal))?_normalizeDisplayDate(rawVal):"";
-    var rawIsVisitDate=!visitDateVal && /^\d{4}-\d{2}-\d{2}$/.test(rawDateCandidate);
-    var targetVisitDate=visitDateVal || (rawIsVisitDate?rawDateCandidate:"");
-    var hasTextQuery=!!rawVal && !rawIsVisitDate;
-    var valLower=rawVal.toLowerCase().trim().replace(/\s+/g,' ');
-    var valDigits=rawVal.replace(/\D/g,""); // digits only — for civil/file ID comparison
-    res.innerHTML="<div class='text-center'><i class='fa fa-spinner fa-spin'></i> Searching...</div>";
-    db.collection("patients").get().then(function(s){
-        var allPatients=[], textMatched={};
-        s.forEach(function(d){
-            var data=d.data();
-            allPatients.push({id:d.id,data:data});
-            var name=String(data.Patient_Name||"").toLowerCase().trim().replace(/\s+/g,' ');
-            var civil=String(data.Civil_ID||"").trim();
-            var fno=String(data.File_No||"").trim();
-            var civilDigits=civil.replace(/\D/g,"");
-            var fnoDigits=fno.replace(/\D/g,"");
-            var match=false;
-            if(hasTextQuery && valDigits && (civilDigits===valDigits || fnoDigits===valDigits || (civilDigits&&civilDigits.indexOf(valDigits)>=0) || (fnoDigits&&fnoDigits.indexOf(valDigits)>=0))) match=true;
-            else if(hasTextQuery && name && name.indexOf(valLower)===0) match=true;
-            if(match){textMatched[d.id]=true;}
+function _visitSnapshotInfo(snap){
+    if(!snap || snap.size===0)return {latest:null,all:[]};
+    var all=[];
+    snap.forEach(function(d){all.push(Object.assign({id:d.id},d.data()));});
+    return _visitArrayInfo(all);
+}
+
+// Fast, race-safe registry search. The visible result cards are unchanged;
+// only the data-loading path is optimized and made deterministic.
+var _registryPatientIndex=null;
+var _registryPatientIndexPromise=null;
+var _registryPatientIndexLoadedAt=0;
+var _registryPatientIndexVerifiedAt=0;
+var _registryPatientServerRevision=0;
+var _registryVisitCache={};
+var _registryAllVisitsCache=null;
+var _registryAllVisitsPromise=null;
+var _registrySearchToken=0;
+var REGISTRY_PATIENT_CACHE_MS=5*60*1000;
+var REGISTRY_VISIT_CACHE_MS=2*60*1000;
+var REGISTRY_REQUEST_TIMEOUT_MS=6000;
+var REGISTRY_SEARCH_UI_TIMEOUT_MS=8000;
+
+function _registryWithTimeout(promise,timeoutMs,message){
+    return new Promise(function(resolve,reject){
+        var settled=false;
+        var timer=setTimeout(function(){
+            if(settled)return;settled=true;
+            reject(new Error(message||'The registry request timed out.'));
+        },timeoutMs);
+        Promise.resolve(promise).then(function(value){
+            if(settled)return;settled=true;clearTimeout(timer);resolve(value);
+        },function(err){
+            if(settled)return;settled=true;clearTimeout(timer);reject(err);
         });
-        var candidates=targetVisitDate?allPatients:allPatients.filter(function(p){return textMatched[p.id];});
-        if(candidates.length === 0){
+    });
+}
+function _registryRowsFromPatientSnapshot(snap){
+    var rows=[];
+    snap.forEach(function(d){var data=d.data();rows.push({id:d.id,data:data});PC[d.id]=data;});
+    return rows;
+}
+function _applyRegistryPatientSnapshot(snap,serverVerified){
+    var rows=_registryRowsFromPatientSnapshot(snap);
+    _registryPatientIndex=rows;_registryPatientIndexLoadedAt=Date.now();
+    if(serverVerified){_registryPatientIndexVerifiedAt=Date.now();_registryPatientServerRevision++;}
+    return rows;
+}
+
+function resetRegistrySearchCache(){
+    _registrySearchToken++;
+    _registryPatientIndex=null;_registryPatientIndexPromise=null;_registryPatientIndexLoadedAt=0;_registryPatientIndexVerifiedAt=0;_registryPatientServerRevision=0;
+    _registryVisitCache={};_registryAllVisitsCache=null;_registryAllVisitsPromise=null;
+}
+function warmRegistrySearch(){
+    // Prime only from IndexedDB. Starting a full-registry download at login can
+    // monopolize a weak connection and delay a clinician's targeted search.
+    try{
+        db.collection('patients').get({source:'cache'}).then(function(snap){
+            if(!_registryPatientIndex&&snap&&!snap.empty)_applyRegistryPatientSnapshot(snap,false);
+        }).catch(function(){});
+    }catch(_registryCacheReadError){}
+}
+function _loadRegistrySearchPatients(force){
+    var fresh=_registryPatientIndex&&(Date.now()-_registryPatientIndexLoadedAt<REGISTRY_PATIENT_CACHE_MS);
+    if(!force&&fresh)return Promise.resolve(_registryPatientIndex);
+    if(!force&&_registryPatientIndex){
+        if(!_registryPatientIndexPromise)setTimeout(function(){_loadRegistrySearchPatients(true).catch(function(){});},0);
+        return Promise.resolve(_registryPatientIndex);
+    }
+    if(_registryPatientIndexPromise)return _registryPatientIndexPromise;
+    var read;
+    // Explicit server source is important here: Firestore's default get() may
+    // silently return an old offline snapshot, which must never be accepted as
+    // proof that a patient does not exist.
+    try{read=db.collection('patients').get({source:'server'});}catch(err){return Promise.reject(err);}
+    _registryPatientIndexPromise=_registryWithTimeout(read,REGISTRY_REQUEST_TIMEOUT_MS,'Patient search connection timed out.').then(function(snap){
+        var rows=_applyRegistryPatientSnapshot(snap,true);_registryPatientIndexPromise=null;
+        return rows;
+    }).catch(function(err){_registryPatientIndexPromise=null;throw err;});
+    return _registryPatientIndexPromise;
+}
+function _upsertRegistrySearchPatient(id,data){
+    if(!id||!data)return;
+    PC[id]=Object.assign({},PC[id]||{},data);
+    if(!_registryPatientIndex)return;
+    var found=false;
+    _registryPatientIndex.forEach(function(row){if(row.id===id){row.data=PC[id];found=true;}});
+    if(!found)_registryPatientIndex.push({id:id,data:PC[id]});
+    _registryPatientIndexLoadedAt=Date.now();
+}
+function _removeRegistrySearchPatient(id){
+    if(_registryPatientIndex)_registryPatientIndex=_registryPatientIndex.filter(function(row){return row.id!==id;});
+    delete _registryVisitCache[id];delete PC[id];_registryAllVisitsCache=null;
+}
+function _invalidateRegistryVisitCache(id){
+    if(id)delete _registryVisitCache[id];
+    _registryAllVisitsCache=null;_registryAllVisitsPromise=null;
+}
+function _setRegistryVisitCache(id,info){
+    if(id)_registryVisitCache[id]={info:info||{latest:null,all:[]},loadedAt:Date.now(),promise:null};
+}
+function _loadRegistryVisitInfo(patientId,force){
+    var cached=_registryVisitCache[patientId];
+    if(!force&&cached&&cached.info&&(Date.now()-cached.loadedAt<REGISTRY_VISIT_CACHE_MS))return Promise.resolve(cached.info);
+    if(cached&&cached.promise)return cached.promise;
+    function run(attempt){
+        var read;
+        try{read=db.collection('patients').doc(patientId).collection('visits').get();}catch(err){return Promise.reject(err);}
+        return _registryWithTimeout(read,REGISTRY_REQUEST_TIMEOUT_MS,'Visit history timed out.').then(_visitSnapshotInfo).catch(function(err){
+            if(attempt<1)return new Promise(function(resolve){setTimeout(resolve,200);}).then(function(){return run(attempt+1);});
+            throw err;
+        });
+    }
+    var promise=run(0).then(function(info){_setRegistryVisitCache(patientId,info);return info;}).catch(function(err){delete _registryVisitCache[patientId];throw err;});
+    _registryVisitCache[patientId]={info:cached&&cached.info||null,loadedAt:cached&&cached.loadedAt||0,promise:promise};
+    return promise;
+}
+function _loadRegistryAllVisits(force){
+    if(!force&&_registryAllVisitsCache&&(Date.now()-_registryAllVisitsCache.loadedAt<REGISTRY_VISIT_CACHE_MS))return Promise.resolve(_registryAllVisitsCache.byPatient);
+    if(_registryAllVisitsPromise)return _registryAllVisitsPromise;
+    var read;
+    try{read=db.collectionGroup('visits').get();}catch(err){return Promise.reject(err);}
+    _registryAllVisitsPromise=_registryWithTimeout(read,REGISTRY_REQUEST_TIMEOUT_MS+2000,'Registry visit index timed out.').then(function(snap){
+        var raw={};
+        snap.forEach(function(d){
+            var patientRef=d.ref&&d.ref.parent&&d.ref.parent.parent;
+            if(!patientRef)return;
+            if(!raw[patientRef.id])raw[patientRef.id]=[];
+            raw[patientRef.id].push(Object.assign({id:d.id},d.data()));
+        });
+        var byPatient={};
+        Object.keys(raw).forEach(function(id){byPatient[id]=_visitArrayInfo(raw[id]);_setRegistryVisitCache(id,byPatient[id]);});
+        _registryAllVisitsCache={byPatient:byPatient,loadedAt:Date.now()};_registryAllVisitsPromise=null;
+        return byPatient;
+    }).catch(function(err){_registryAllVisitsPromise=null;throw err;});
+    return _registryAllVisitsPromise;
+}
+function _registryTextMatch(row,valLower,valDigits){
+    var data=row.data||{},name=String(data.Patient_Name||'').toLowerCase().trim().replace(/\s+/g,' ');
+    var civil=String(data.Civil_ID||'').replace(/\D/g,''),file=String(data.File_No||'').replace(/\D/g,'');
+    if(valDigits)return (civil&&(civil===valDigits||civil.indexOf(valDigits)>=0))||(file&&(file===valDigits||file.indexOf(valDigits)>=0));
+    return !!(name&&name.indexOf(valLower)===0);
+}
+function _registryDirectPatientLookup(rawVal,valLower,valDigits){
+    // Search only the relevant Firestore indexes first. This is especially
+    // important for short file-number searches such as "25": downloading every
+    // large patient document is no longer a prerequisite for showing matches.
+    var specs=[],seenSpecs={};
+    function addPrefix(field,prefix){
+        prefix=String(prefix||'').trim();if(!prefix)return;
+        var key=field+'|prefix|'+prefix;if(seenSpecs[key])return;seenSpecs[key]=1;
+        specs.push({field:field,type:'prefix',value:prefix});
+    }
+    function addExact(field,value){
+        if(value===null||value===undefined||value==='')return;
+        var key=field+'|exact|'+String(value);if(seenSpecs[key])return;seenSpecs[key]=1;
+        specs.push({field:field,type:'exact',value:value});
+    }
+    if(valDigits){
+        [String(rawVal||'').trim(),valDigits].forEach(function(prefix){addPrefix('File_No',prefix);addPrefix('Civil_ID',prefix);});
+        var numeric=Number(valDigits);
+        if(Number.isFinite(numeric)){addExact('File_No',numeric);addExact('Civil_ID',numeric);}
+    }else{
+        var normalized=String(rawVal||'').trim().replace(/\s+/g,' ');
+        var title=normalized.replace(/(^|\s)([^\s])/g,function(_,space,ch){return space+ch.toUpperCase();});
+        [normalized,title,normalized.toLowerCase(),normalized.toUpperCase()].forEach(function(prefix){addPrefix('Patient_Name',prefix);});
+    }
+    if(!specs.length)return Promise.resolve([]);
+    var succeeded=0,failed=0,byId={};
+    var reads=specs.map(function(spec){
+        var q=db.collection('patients');
+        q=spec.type==='exact'
+            ? q.where(spec.field,'==',spec.value).limit(40)
+            : q.where(spec.field,'>=',spec.value).where(spec.field,'<=',spec.value+'\uf8ff').limit(40);
+        var read;
+        try{read=q.get({source:'server'});}catch(err){failed++;return Promise.resolve();}
+        return _registryWithTimeout(read,4500,'Targeted patient lookup timed out.').then(function(snap){
+            succeeded++;
+            snap.forEach(function(d){var data=d.data();byId[d.id]={id:d.id,data:data};PC[d.id]=data;});
+        }).catch(function(){failed++;});
+    });
+    return Promise.all(reads).then(function(){
+        var rows=Object.keys(byId).map(function(id){return byId[id];});
+        rows=rows.filter(function(row){return _registryTextMatch(row,valLower,valDigits);});
+        if(!rows.length&&!succeeded&&failed)throw new Error('Targeted patient lookup could not connect.');
+        return rows;
+    });
+}
+function _loadRegistryVisitsByDate(targetVisitDate){
+    var read;
+    try{read=db.collectionGroup('visits').where('visitDate','==',targetVisitDate).get({source:'server'});}catch(err){return Promise.reject(err);}
+    return _registryWithTimeout(read,REGISTRY_REQUEST_TIMEOUT_MS+2000,'Visit-date search timed out.').then(function(snap){
+        var raw={};
+        snap.forEach(function(d){
+            var patientRef=d.ref&&d.ref.parent&&d.ref.parent.parent;
+            if(!patientRef)return;
+            if(!raw[patientRef.id])raw[patientRef.id]=[];
+            raw[patientRef.id].push(Object.assign({id:d.id},d.data()));
+        });
+        var byPatient={};Object.keys(raw).forEach(function(id){byPatient[id]=_visitArrayInfo(raw[id]);});
+        return byPatient;
+    });
+}
+function _registryFallbackVisitDateSearch(candidates,targetVisitDate){
+    // Used only if collection-group queries are unavailable. Requests are
+    // bounded so a slow patient never freezes the whole search.
+    return new Promise(function(resolve){
+        var next=0,active=0,completed=0,failed=0,rows=[],finished=false;
+        var timer=setTimeout(function(){finish(true);},12000);
+        function finish(incomplete){
+            if(finished)return;finished=true;clearTimeout(timer);
+            resolve({rows:rows,incomplete:!!incomplete||failed>0});
+        }
+        function pump(){
+            if(finished)return;
+            if(completed>=candidates.length){finish(false);return;}
+            while(active<6&&next<candidates.length){
+                (function(p){
+                    active++;
+                    _loadRegistryVisitInfo(p.id,false).then(function(info){
+                        if(finished)return;
+                        var hit=info.all.some(function(v){return _normalizeDisplayDate(v.visitDate)===targetVisitDate;});
+                        if(hit)rows.push({patient:p,latest:info.latest,allVisits:info.all,historyState:''});
+                    },function(){if(!finished)failed++;}).then(function(){
+                        if(finished)return;active--;completed++;pump();
+                    });
+                })(candidates[next++]);
+            }
+        }
+        if(!candidates.length){finish(false);return;}
+        pump();
+    });
+}
+function _registrySearchRowsByVisitDate(candidates,targetVisitDate){
+    return _loadRegistryVisitsByDate(targetVisitDate).then(function(byPatient){
+        var rows=[];
+        candidates.forEach(function(p){
+            var info=byPatient[p.id];
+            if(info)rows.push({patient:p,latest:info.latest,allVisits:info.all,historyState:'loading'});
+        });
+        return {rows:rows,incomplete:false};
+    }).catch(function(err){
+        var code=String((err&&err.code)||'').toLowerCase();
+        if(code.indexOf('permission-denied')>=0||code.indexOf('failed-precondition')>=0||code.indexOf('unimplemented')>=0){
+            return _registryFallbackVisitDateSearch(candidates,targetVisitDate);
+        }
+        throw err;
+    });
+}
+function _registryInitialTextRows(candidates){
+    return candidates.map(function(p){
+        var cached=_registryVisitCache[p.id];
+        var usable=cached&&cached.info;
+        var fresh=usable&&(Date.now()-cached.loadedAt<REGISTRY_VISIT_CACHE_MS);
+        return {patient:p,latest:usable?cached.info.latest:null,allVisits:usable?cached.info.all:[],historyState:fresh?'':'loading'};
+    });
+}
+function _replaceRegistrySearchCard(row,token,historyState){
+    if(token!==_registrySearchToken)return;
+    var old=document.getElementById('pdf-'+row.patient.id);if(!old)return;
+    var oldBody=old.querySelector('.patient-card-body');
+    var wasOpen=oldBody&&oldBody.style.display!=='none';
+    old.outerHTML=generateCardHTML(row.patient.data,row.patient.id,row.latest,row.allVisits||[],historyState||'');
+    if(wasOpen){
+        var updated=document.getElementById('pdf-'+row.patient.id);
+        var body=updated&&updated.querySelector('.patient-card-body');if(body)body.style.display='block';
+        var chev=updated&&updated.querySelector('.pc-chevron');if(chev)chev.style.transform='rotate(90deg)';
+    }
+}
+function _hydrateRegistrySearchCards(rows,token){
+    var queue=rows.filter(function(r){return r.historyState==='loading';}).slice();
+    function worker(){
+        if(token!==_registrySearchToken||!queue.length)return Promise.resolve();
+        var row=queue.shift();
+        return _loadRegistryVisitInfo(row.patient.id,false).then(function(info){
+            row.latest=info.latest;row.allVisits=info.all;row.historyState='';
+            _replaceRegistrySearchCard(row,token,'');
+        }).catch(function(){
+            row.historyState='unavailable';_replaceRegistrySearchCard(row,token,'unavailable');
+        }).then(worker);
+    }
+    var workerCount=Math.min(4,queue.length),workers=[];
+    for(var i=0;i<workerCount;i++)workers.push(worker());
+    Promise.all(workers).catch(function(){});
+}
+function _renderRegistrySearchResults(rows,token,incomplete){
+    if(token!==_registrySearchToken)return;
+    var res=document.getElementById('searchResults');
+    if(!rows.length){
+        if(incomplete){
+            res.innerHTML="<div class='alert alert-danger'>The connection was interrupted before the registry could be fully checked. No false ‘no result’ was shown. <button class='btn btn-sm btn-outline-danger ms-2' onclick='searchPatient()'>Try again</button></div>";
+        }else{
             res.innerHTML="<div class='alert alert-warning'>No patient found. <button class='btn btn-sm btn-outline-dark ms-2' onclick='clearSearchResults()'>Back</button></div>";
+        }
+        return;
+    }
+    var html="<div class='mb-2'><button class='btn btn-sm btn-outline-dark fw-bold' onclick='clearSearchResults()'><i class='fa fa-arrow-left'></i> Back</button> <small class='text-muted ms-2'>"+rows.length+" result"+(rows.length>1?'s':'')+" — tap a card to expand</small></div>";
+    if(incomplete)html+="<div class='alert alert-warning py-2'>Some visit histories could not be checked. The matches shown are valid; retry to check the remaining records.</div>";
+    rows.forEach(function(r){PC[r.patient.id]=r.patient.data;html+=generateCardHTML(r.patient.data,r.patient.id,r.latest,r.allVisits||[],r.historyState||'');});
+    res.innerHTML=html;
+}
+function _setRegistrySearchBusy(token,busy){
+    if(token!==_registrySearchToken)return;
+    var btn=document.getElementById('searchPatientBtn');if(!btn)return;
+    // Keep the button clickable: a second click intentionally cancels an older
+    // slow request, while the token prevents that old response changing the UI.
+    btn.disabled=false;
+    btn.setAttribute('aria-busy',busy?'true':'false');
+    btn.innerHTML=busy?'<i class="fa fa-spinner fa-spin me-1"></i>Searching':'Search';
+}
+
+function searchPatient(){
+    var rawVal=(document.getElementById('searchInput').value||'').trim();
+    var visitDateVal=(document.getElementById('searchVisitDate')||{}).value||'';
+    var res=document.getElementById('searchResults');
+    var token=++_registrySearchToken;
+    if(!rawVal&&!visitDateVal){res.innerHTML='';_setRegistrySearchBusy(token,false);return;}
+    var rawDateCandidate=(rawVal&&/[\d][\/\-\.\s][\d]/.test(rawVal))?_normalizeDisplayDate(rawVal):'';
+    var rawIsVisitDate=!visitDateVal&&/^\d{4}-\d{2}-\d{2}$/.test(rawDateCandidate);
+    var targetVisitDate=visitDateVal||(rawIsVisitDate?rawDateCandidate:'');
+    var hasTextQuery=!!rawVal&&!rawIsVisitDate;
+    var valLower=rawVal.toLowerCase().trim().replace(/\s+/g,' '),valDigits=rawVal.replace(/\D/g,'');
+    var patientRevisionAtSearchStart=_registryPatientServerRevision;
+    res.innerHTML="<div class='text-center'><i class='fa fa-spinner fa-spin'></i> Searching...</div>";
+    _setRegistrySearchBusy(token,true);
+    // Final UI safety net: even if the browser/Firebase transport itself fails
+    // to settle a promise, the visible search can never spin indefinitely.
+    var searchWatchdog=setTimeout(function(){
+        if(token!==_registrySearchToken)return;
+        res.innerHTML="<div class='alert alert-danger'>Search timed out because the registry connection did not respond. Please retry; no incorrect ‘no result’ was shown. <button class='btn btn-sm btn-outline-danger ms-2' onclick='searchPatient()'>Try again</button></div>";
+        _setRegistrySearchBusy(token,false);
+        _registrySearchToken++;
+    },REGISTRY_SEARCH_UI_TIMEOUT_MS);
+
+    function filterPatients(all){return hasTextQuery?all.filter(function(p){return _registryTextMatch(p,valLower,valDigits);}):all.slice();}
+    function ensureCandidates(all){
+        var rows=filterPatients(all);
+        // Never declare a miss from a local/stale index. Verify it once against
+        // the server; a failed verification becomes a connection message, not
+        // a false "No patient found" result.
+        if(hasTextQuery&&!rows.length&&_registryPatientServerRevision===patientRevisionAtSearchStart){
+            return _loadRegistrySearchPatients(true).then(filterPatients);
+        }
+        if(targetVisitDate&&!hasTextQuery&&Date.now()-_registryPatientIndexVerifiedAt>30000){
+            return _loadRegistrySearchPatients(true).then(filterPatients);
+        }
+        return Promise.resolve(rows);
+    }
+    function loadCandidates(){
+        var localSource=_registryPatientIndex||Object.keys(PC).map(function(id){return {id:id,data:PC[id]};});
+        var localRows=filterPatients(localSource);
+        if(localRows.length)return Promise.resolve(localRows);
+        if(!hasTextQuery)return _loadRegistrySearchPatients(false).then(ensureCandidates);
+        return _registryDirectPatientLookup(rawVal,valLower,valDigits).then(function(rows){
+            if(rows.length)return rows;
+            return _loadRegistrySearchPatients(false).then(ensureCandidates);
+        },function(){return _loadRegistrySearchPatients(false).then(ensureCandidates);});
+    }
+    loadCandidates().then(function(candidates){
+        if(token!==_registrySearchToken)return;
+        if(!candidates.length){_renderRegistrySearchResults([],token,false);return;}
+        if(hasTextQuery&&!valDigits)candidates.sort(function(a,b){
+            return String((a.data||{}).Patient_Name||'').localeCompare(String((b.data||{}).Patient_Name||''));
+        });
+        if(!targetVisitDate){
+            // The patient match is rendered immediately. Visit history and
+            // alarms update the same card in the background and can no longer
+            // block or erase the search result.
+            var rows=_registryInitialTextRows(candidates);
+            _renderRegistrySearchResults(rows,token,false);
+            _setRegistrySearchBusy(token,false);
+            _hydrateRegistrySearchCards(rows,token);
             return;
         }
-        var visitPromises = candidates.map(function(m){
-            return db.collection("patients").doc(m.id).collection("visits").orderBy("visitDate","desc").get()
-                .then(function(snap){
-                    var info=_visitSnapshotInfo(snap);
-                    var dateHit=!targetVisitDate;
-                    if(targetVisitDate){
-                        info.all.forEach(function(v){
-                            if(_normalizeDisplayDate(v.visitDate)===targetVisitDate) dateHit=true;
-                        });
-                    }
-                    return {patient:m, latest:info.latest, allVisits:info.all, dateHit:dateHit};
-                })
-                .catch(function(){ return {patient:m, latest:null, allVisits:[], dateHit:!targetVisitDate}; });
+        return _registrySearchRowsByVisitDate(candidates,targetVisitDate).then(function(result){
+            if(token!==_registrySearchToken)return;
+            _renderRegistrySearchResults(result.rows,token,result.incomplete);
+            _hydrateRegistrySearchCards(result.rows,token);
         });
-        Promise.all(visitPromises).then(function(rows){
-            var matchedRows=[];
-            rows.forEach(function(r){
-                var textOk=!hasTextQuery || textMatched[r.patient.id];
-                var dateOk=!targetVisitDate || r.dateHit;
-                if(textOk && dateOk){
-                    PC[r.patient.id]=r.patient.data;
-                    matchedRows.push(r);
-                }
-            });
-            if(hasTextQuery && !valDigits){
-                matchedRows.sort(function(a,b){
-                    var an=String((a.patient.data||{}).Patient_Name||'').trim().toLowerCase();
-                    var bn=String((b.patient.data||{}).Patient_Name||'').trim().toLowerCase();
-                    return an.localeCompare(bn);
-                });
-            }
-            var matches=matchedRows.map(function(r){return r.patient;});
-            var latestVisits=matchedRows.map(function(r){return r.latest;});
-            var allVisitHistories=matchedRows.map(function(r){return r.allVisits||[];});
-            if(matches.length === 0){
-                res.innerHTML="<div class='alert alert-warning'>No patient found. <button class='btn btn-sm btn-outline-dark ms-2' onclick='clearSearchResults()'>Back</button></div>";
-                return;
-            }
-            var html = "<div class='mb-2'><button class='btn btn-sm btn-outline-dark fw-bold' onclick='clearSearchResults()'><i class='fa fa-arrow-left'></i> Back</button> <small class='text-muted ms-2'>"+matches.length+" result"+(matches.length>1?'s':'')+" — tap a card to expand</small></div>";
-            matches.forEach(function(m, i){
-                html += generateCardHTML(m.data, m.id, latestVisits[i], allVisitHistories[i]);
-            });
-            res.innerHTML = html;
-        });
-    }).catch(function(e){res.innerHTML="<div class='alert alert-danger'>Error: "+e.message+"</div>";});
+    }).catch(function(e){
+        if(token===_registrySearchToken)res.innerHTML="<div class='alert alert-danger'>The registry connection did not respond. Please click Search to retry; this message is shown instead of an incorrect ‘no result’. <button class='btn btn-sm btn-outline-danger ms-2' onclick='searchPatient()'>Try again</button></div>";
+    }).then(function(){clearTimeout(searchWatchdog);_setRegistrySearchBusy(token,false);});
 }
 
 function showTrends(patientId){
@@ -9576,6 +9939,7 @@ function delPt(id){
     }).then(function(){
         return db.collection("patients").doc(id).delete();
     }).then(function(){
+        if(typeof _removeRegistrySearchPatient==='function')_removeRegistrySearchPatient(id);
         showPopup("success","Deleted","Patient record removed. Tombstone recorded in audit log.");
         loadAdmin();
     }).catch(function(e){
@@ -9638,6 +10002,12 @@ function loadAdmin(){
             if(da<=14){var color=da<=3?'danger':(da<=7?'warning':'info');
             upcomingHTML+="<div class='alert alert-"+color+" py-1 px-2 mb-1 d-flex justify-content-between' style='font-size:0.85rem;'><span><b>"+_escHtml(d.Patient_Name||'Unknown')+"</b> ("+_escHtml(d.File_No||'')+")</span><span><i class='fa fa-calendar'></i> "+_escHtml(d.Next_Appt)+" (in "+da+" days)</span></div>";}}
         });
+        if(typeof _registryPatientIndex!=='undefined'){
+            _registryPatientIndex=_adminPatientsCache.map(function(row){return {id:row.id,data:row.data};});
+            _registryPatientIndexLoadedAt=Date.now();
+            if(typeof _registryPatientIndexVerifiedAt!=='undefined')_registryPatientIndexVerifiedAt=Date.now();
+            if(typeof _registryPatientServerRevision!=='undefined')_registryPatientServerRevision++;
+        }
         filterAdminPatients();
         document.getElementById('upcomingAppts').innerHTML=upcomingHTML||"<p class='text-muted small mb-0'>No appointments in the next 14 days.</p>";
     }).catch(function(){
