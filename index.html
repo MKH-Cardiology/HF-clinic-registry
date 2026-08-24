@@ -106,8 +106,10 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 .ecg-viewer-controls{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap}
 .ecg-viewer-controls .btn{min-width:38px}
 .ecg-viewer-zoom-label{min-width:52px;text-align:center;font-size:.8rem;font-weight:800;color:#334e68}
-.ecg-viewer-stage{flex:1 1 auto;min-height:0;overflow:auto;padding:18px;background:#1f2933;overscroll-behavior:contain;touch-action:pan-x pan-y}
-.ecg-viewer-image{display:block;max-width:none;max-height:none;margin:auto;background:#fff;box-shadow:0 6px 24px rgba(0,0,0,.45);user-select:none;-webkit-user-drag:none}
+.ecg-viewer-stage{flex:1 1 auto;min-height:0;overflow:auto;padding:18px;background:#1f2933;overscroll-behavior:contain;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+.ecg-viewer-stage.ecg-dragging{cursor:grabbing}
+.ecg-viewer-canvas{position:relative;margin:auto;min-width:1px;min-height:1px}
+.ecg-viewer-image{display:block;position:absolute;left:50%;top:50%;max-width:none;max-height:none;margin:0;background:#fff;box-shadow:0 6px 24px rgba(0,0,0,.45);transform:translate(-50%,-50%) rotate(0deg);transform-origin:center center;user-select:none;-webkit-user-drag:none;pointer-events:none}
 .ecg-viewer-help{padding:6px 12px;background:#101820;color:#bcccdc;text-align:center;font-size:.72rem;flex:0 0 auto}
 @keyframes pop{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
 .page{display:none}.page.active{display:block}
@@ -3321,13 +3323,18 @@ img,canvas,table,svg{max-width:100%;}
                 <button type="button" class="btn btn-sm btn-outline-secondary" onclick="zoomEcgViewer(0.25)" aria-label="Zoom in" title="Zoom in"><i class="fa fa-plus"></i></button>
                 <button type="button" class="btn btn-sm btn-outline-primary" onclick="fitEcgViewer()">Fit</button>
                 <button type="button" class="btn btn-sm btn-outline-primary" onclick="setEcgViewerZoom(1)">100%</button>
+                <button type="button" class="btn btn-sm btn-outline-success" onclick="rotateEcgViewer(-90)" aria-label="Rotate left" title="Rotate left"><i class="fa fa-rotate-left"></i></button>
+                <span id="ecgViewerRotationLabel" class="ecg-viewer-zoom-label">0°</span>
+                <button type="button" class="btn btn-sm btn-outline-success" onclick="rotateEcgViewer(90)" aria-label="Rotate right" title="Rotate right"><i class="fa fa-rotate-right"></i></button>
                 <button type="button" class="btn btn-sm btn-danger" onclick="closeEcgViewer()" aria-label="Close ECG viewer"><i class="fa fa-times me-1"></i>Close</button>
             </div>
         </div>
-        <div id="ecgViewerStage" class="ecg-viewer-stage" ondblclick="toggleEcgViewerZoom()" onwheel="handleEcgViewerWheel(event)">
-            <img id="ecgViewerImage" class="ecg-viewer-image" alt="Expanded ECG image" draggable="false">
+        <div id="ecgViewerStage" class="ecg-viewer-stage" onwheel="handleEcgViewerWheel(event)">
+            <div id="ecgViewerCanvas" class="ecg-viewer-canvas">
+                <img id="ecgViewerImage" class="ecg-viewer-image" alt="Expanded ECG image" draggable="false">
+            </div>
         </div>
-        <div class="ecg-viewer-help">Use +/− or pinch/Control-scroll to zoom. Scroll to inspect the full ECG. Double-click toggles Fit and 100%.</div>
+        <div class="ecg-viewer-help">Pinch with two fingers to zoom · drag with one finger to move · double-tap to toggle Fit/100% · rotate with the green buttons</div>
     </div>
 </div>
 
@@ -8287,32 +8294,62 @@ function renderEcgImagePreview(previewId,dataUrl){
 
 var _ecgViewerZoom=1;
 var _ecgViewerFitZoom=1;
+var _ecgViewerRotation=0;
 var _ecgViewerPreviousBodyOverflow='';
+var _ecgViewerPointers={};
+var _ecgViewerGestureMode='';
+var _ecgViewerGestureStartDistance=0;
+var _ecgViewerGestureStartZoom=1;
+var _ecgViewerPanStart=null;
+var _ecgViewerHadMultiTouch=false;
+var _ecgViewerLastTap=null;
+var _ecgViewerLastTouchToggleAt=0;
 
-function _applyEcgViewerZoom(keepCenter){
+function _ecgViewerPointerList(){
+    return Object.keys(_ecgViewerPointers).map(function(id){return _ecgViewerPointers[id];});
+}
+
+function _ecgViewerNormalizedRotation(value){
+    value=Number(value)||0;
+    return ((value%360)+360)%360;
+}
+
+function _applyEcgViewerZoom(keepAnchor,anchorClientX,anchorClientY){
     var img=document.getElementById('ecgViewerImage');
     var stage=document.getElementById('ecgViewerStage');
-    if(!img||!stage||!img.naturalWidth)return;
+    var canvas=document.getElementById('ecgViewerCanvas');
+    if(!img||!stage||!canvas||!img.naturalWidth)return;
+    var rect=stage.getBoundingClientRect();
+    var localX=Number.isFinite(anchorClientX)?anchorClientX-rect.left:stage.clientWidth/2;
+    var localY=Number.isFinite(anchorClientY)?anchorClientY-rect.top:stage.clientHeight/2;
     var xRatio=0.5,yRatio=0.5;
-    if(keepCenter&&stage.scrollWidth&&stage.scrollHeight){
-        xRatio=(stage.scrollLeft+stage.clientWidth/2)/stage.scrollWidth;
-        yRatio=(stage.scrollTop+stage.clientHeight/2)/stage.scrollHeight;
+    if(keepAnchor&&stage.scrollWidth&&stage.scrollHeight){
+        xRatio=(stage.scrollLeft+localX)/stage.scrollWidth;
+        yRatio=(stage.scrollTop+localY)/stage.scrollHeight;
     }
-    img.style.width=Math.max(1,Math.round(img.naturalWidth*_ecgViewerZoom))+'px';
-    img.style.height='auto';
+    var imageW=Math.max(1,Math.round(img.naturalWidth*_ecgViewerZoom));
+    var imageH=Math.max(1,Math.round(img.naturalHeight*_ecgViewerZoom));
+    var swapped=_ecgViewerRotation%180!==0;
+    canvas.style.width=(swapped?imageH:imageW)+'px';
+    canvas.style.height=(swapped?imageW:imageH)+'px';
+    img.style.width=imageW+'px';
+    img.style.height=imageH+'px';
+    img.style.transform='translate(-50%,-50%) rotate('+_ecgViewerRotation+'deg)';
     var label=document.getElementById('ecgViewerZoomLabel');
     if(label)label.textContent=Math.round(_ecgViewerZoom*100)+'%';
-    if(keepCenter){
+    var rotationLabel=document.getElementById('ecgViewerRotationLabel');
+    if(rotationLabel)rotationLabel.textContent=_ecgViewerRotation+'°';
+    if(keepAnchor){
         requestAnimationFrame(function(){
-            stage.scrollLeft=Math.max(0,xRatio*stage.scrollWidth-stage.clientWidth/2);
-            stage.scrollTop=Math.max(0,yRatio*stage.scrollHeight-stage.clientHeight/2);
+            stage.scrollLeft=Math.max(0,xRatio*stage.scrollWidth-localX);
+            stage.scrollTop=Math.max(0,yRatio*stage.scrollHeight-localY);
         });
     }
 }
 
-function setEcgViewerZoom(value){
+function setEcgViewerZoom(value,anchorClientX,anchorClientY){
     _ecgViewerZoom=Math.max(0.1,Math.min(4,Number(value)||1));
-    _applyEcgViewerZoom(true);
+    _applyEcgViewerZoom(true,anchorClientX,anchorClientY);
 }
 
 function zoomEcgViewer(delta){setEcgViewerZoom(_ecgViewerZoom+delta);}
@@ -8323,7 +8360,10 @@ function fitEcgViewer(){
     if(!img||!stage||!img.naturalWidth||!img.naturalHeight)return;
     var availableW=Math.max(100,stage.clientWidth-36);
     var availableH=Math.max(100,stage.clientHeight-36);
-    _ecgViewerFitZoom=Math.max(0.1,Math.min(1.5,availableW/img.naturalWidth,availableH/img.naturalHeight));
+    var swapped=_ecgViewerRotation%180!==0;
+    var baseW=swapped?img.naturalHeight:img.naturalWidth;
+    var baseH=swapped?img.naturalWidth:img.naturalHeight;
+    _ecgViewerFitZoom=Math.max(0.1,Math.min(1.5,availableW/baseW,availableH/baseH));
     _ecgViewerZoom=_ecgViewerFitZoom;
     _applyEcgViewerZoom(false);
     stage.scrollLeft=0;stage.scrollTop=0;
@@ -8334,10 +8374,97 @@ function toggleEcgViewerZoom(){
     else fitEcgViewer();
 }
 
+function rotateEcgViewer(degrees){
+    var wasFit=Math.abs(_ecgViewerZoom-_ecgViewerFitZoom)<0.03;
+    _ecgViewerRotation=_ecgViewerNormalizedRotation(_ecgViewerRotation+degrees);
+    if(wasFit)fitEcgViewer();
+    else _applyEcgViewerZoom(true);
+}
+
 function handleEcgViewerWheel(event){
     if(!(event.ctrlKey||event.metaKey))return;
     event.preventDefault();
-    zoomEcgViewer(event.deltaY<0?0.15:-0.15);
+    setEcgViewerZoom(_ecgViewerZoom+(event.deltaY<0?0.15:-0.15),event.clientX,event.clientY);
+}
+
+function _ecgViewerDistance(a,b){
+    var dx=a.x-b.x,dy=a.y-b.y;return Math.sqrt(dx*dx+dy*dy);
+}
+
+function _ecgViewerStartPan(point,stage){
+    _ecgViewerGestureMode='pan';
+    _ecgViewerPanStart={x:point.x,y:point.y,scrollLeft:stage.scrollLeft,scrollTop:stage.scrollTop};
+}
+
+function _ecgViewerPointerDown(event){
+    var stage=document.getElementById('ecgViewerStage');if(!stage)return;
+    event.preventDefault();
+    try{stage.setPointerCapture(event.pointerId);}catch(_captureError){}
+    _ecgViewerPointers[event.pointerId]={x:event.clientX,y:event.clientY,startX:event.clientX,startY:event.clientY,downAt:Date.now(),pointerType:event.pointerType};
+    var points=_ecgViewerPointerList();
+    if(points.length===1){
+        _ecgViewerStartPan(points[0],stage);stage.classList.add('ecg-dragging');
+    }else if(points.length>=2){
+        _ecgViewerGestureMode='pinch';_ecgViewerHadMultiTouch=true;
+        _ecgViewerGestureStartDistance=Math.max(1,_ecgViewerDistance(points[0],points[1]));
+        _ecgViewerGestureStartZoom=_ecgViewerZoom;
+    }
+}
+
+function _ecgViewerPointerMove(event){
+    var point=_ecgViewerPointers[event.pointerId];
+    var stage=document.getElementById('ecgViewerStage');
+    if(!point||!stage)return;
+    event.preventDefault();point.x=event.clientX;point.y=event.clientY;
+    var points=_ecgViewerPointerList();
+    if(points.length>=2){
+        if(_ecgViewerGestureMode!=='pinch'){
+            _ecgViewerGestureMode='pinch';_ecgViewerHadMultiTouch=true;
+            _ecgViewerGestureStartDistance=Math.max(1,_ecgViewerDistance(points[0],points[1]));
+            _ecgViewerGestureStartZoom=_ecgViewerZoom;
+        }
+        var distance=Math.max(1,_ecgViewerDistance(points[0],points[1]));
+        var midX=(points[0].x+points[1].x)/2,midY=(points[0].y+points[1].y)/2;
+        setEcgViewerZoom(_ecgViewerGestureStartZoom*(distance/_ecgViewerGestureStartDistance),midX,midY);
+    }else if(points.length===1&&_ecgViewerGestureMode==='pan'&&_ecgViewerPanStart){
+        stage.scrollLeft=_ecgViewerPanStart.scrollLeft-(points[0].x-_ecgViewerPanStart.x);
+        stage.scrollTop=_ecgViewerPanStart.scrollTop-(points[0].y-_ecgViewerPanStart.y);
+    }
+}
+
+function _ecgViewerPointerEnd(event){
+    var stage=document.getElementById('ecgViewerStage');
+    var ended=_ecgViewerPointers[event.pointerId];
+    if(!stage||!ended)return;
+    event.preventDefault();
+    delete _ecgViewerPointers[event.pointerId];
+    var points=_ecgViewerPointerList();
+    if(points.length===1){
+        _ecgViewerStartPan(points[0],stage);
+    }else if(!points.length){
+        stage.classList.remove('ecg-dragging');_ecgViewerGestureMode='';_ecgViewerPanStart=null;
+        var moved=Math.hypot(ended.x-ended.startX,ended.y-ended.startY);
+        var now=Date.now();
+        if(ended.pointerType==='touch'&&!_ecgViewerHadMultiTouch&&moved<14&&now-ended.downAt<350){
+            if(_ecgViewerLastTap&&now-_ecgViewerLastTap.time<320&&Math.hypot(ended.x-_ecgViewerLastTap.x,ended.y-_ecgViewerLastTap.y)<32){
+                _ecgViewerLastTouchToggleAt=now;toggleEcgViewerZoom();_ecgViewerLastTap=null;
+            }else _ecgViewerLastTap={time:now,x:ended.x,y:ended.y};
+        }
+        _ecgViewerHadMultiTouch=false;
+    }
+}
+
+function initEcgViewerGestures(){
+    var stage=document.getElementById('ecgViewerStage');
+    if(!stage||stage.dataset.gesturesReady==='1')return;
+    stage.dataset.gesturesReady='1';
+    stage.addEventListener('pointerdown',_ecgViewerPointerDown,{passive:false});
+    stage.addEventListener('pointermove',_ecgViewerPointerMove,{passive:false});
+    stage.addEventListener('pointerup',_ecgViewerPointerEnd,{passive:false});
+    stage.addEventListener('pointercancel',_ecgViewerPointerEnd,{passive:false});
+    stage.addEventListener('dblclick',function(){
+        if(Date.now()-_ecgViewerLastTouchToggleAt>500)toggleEcgViewerZoom();
+    });
 }
 
 function openEcgViewer(dataUrl){
@@ -8347,6 +8474,8 @@ function openEcgViewer(dataUrl){
     if(!modal||!img)return;
     _ecgViewerPreviousBodyOverflow=document.body.style.overflow||'';
     document.body.style.overflow='hidden';
+    _ecgViewerRotation=0;_ecgViewerZoom=1;_ecgViewerFitZoom=1;
+    _ecgViewerPointers={};_ecgViewerGestureMode='';_ecgViewerHadMultiTouch=false;_ecgViewerLastTap=null;_ecgViewerLastTouchToggleAt=0;
     modal.classList.remove('d-none');
     img.onload=function(){requestAnimationFrame(fitEcgViewer);};
     img.src=dataUrl;
@@ -8358,8 +8487,12 @@ function closeEcgViewer(){
     var img=document.getElementById('ecgViewerImage');
     if(modal)modal.classList.add('d-none');
     if(img){img.onload=null;img.removeAttribute('src');img.style.width='';}
+    _ecgViewerPointers={};_ecgViewerGestureMode='';_ecgViewerHadMultiTouch=false;_ecgViewerLastTap=null;_ecgViewerLastTouchToggleAt=0;
+    var stage=document.getElementById('ecgViewerStage');if(stage)stage.classList.remove('ecg-dragging');
     document.body.style.overflow=_ecgViewerPreviousBodyOverflow;
 }
+
+initEcgViewerGestures();
 
 document.addEventListener('keydown',function(event){
     var modal=document.getElementById('ecgViewerModal');
@@ -8368,6 +8501,7 @@ document.addEventListener('keydown',function(event){
     else if(event.key==='+'||event.key==='='){event.preventDefault();zoomEcgViewer(0.25);}
     else if(event.key==='-'||event.key==='_'){event.preventDefault();zoomEcgViewer(-0.25);}
     else if(event.key==='0'){event.preventDefault();setEcgViewerZoom(1);}
+    else if(event.key.toLowerCase()==='r'){event.preventDefault();rotateEcgViewer(event.shiftKey?-90:90);}
 });
 
 function clearEcgImage(hiddenId,fileId,previewId,metaId){
