@@ -2172,10 +2172,10 @@ img,canvas,table,svg{max-width:100%;}
                 <div class="ft-body">
 
             <div class="row g-2">
-                <div class="col-6 col-md-3"><label>Quadruple GDMT?</label><select class="form-select" id="Quad_GDMT"><option>No</option><option>Yes</option><option>N/A</option></select></div>
-                <div class="col-6 col-md-3"><label>On Maximum GDMT Doses?</label><select class="form-select" id="Max_GDMT"><option>No</option><option>Yes</option></select></div>
-                <div class="col-6 col-md-3"><label>Recovered LV?</label><select class="form-select" id="Recovered_LV" onchange="toggleRecoveredLVType()"><option>No</option><option>Yes</option><option>N/A</option></select></div>
-                <div class="col-6 col-md-3" id="recoveredLVTypeWrap" style="display:none;"><label>Recovery Type</label><select class="form-select" id="Recovered_LV_Type"><option value="">Select...</option><option>Fully recovered</option><option>Partially recovered</option></select></div>
+                <div class="col-6 col-md-3"><label>Quadruple GDMT?</label><select class="form-select" id="Quad_GDMT" onchange="syncLongitudinalOutcomeFromMainAdmission()"><option>No</option><option>Yes</option><option>N/A</option></select></div>
+                <div class="col-6 col-md-3"><label>On Maximum GDMT Doses?</label><select class="form-select" id="Max_GDMT" onchange="syncLongitudinalOutcomeFromMainAdmission()"><option>No</option><option>Yes</option></select></div>
+                <div class="col-6 col-md-3"><label>Recovered LV?</label><select class="form-select" id="Recovered_LV" onchange="toggleRecoveredLVType();syncLongitudinalOutcomeFromMainAdmission()"><option>No</option><option>Yes</option><option>N/A</option></select></div>
+                <div class="col-6 col-md-3" id="recoveredLVTypeWrap" style="display:none;"><label>Recovery Type</label><select class="form-select" id="Recovered_LV_Type" onchange="syncLongitudinalOutcomeFromMainAdmission()"><option value="">Select...</option><option>Fully recovered</option><option>Partially recovered</option></select></div>
                 <div class="col-6 col-md-3"><label>Mortality</label><select class="form-select" id="Mortality"><option>Alive</option><option>In-hospital</option><option>Out-of-hospital</option></select></div>
                 <div class="col-6 col-md-3"><label>Lost to Follow-up</label><select class="form-select" id="LostFU" onchange="toggleLostFU()"><option>No</option><option>Yes</option></select></div>
                 <div class="col-6 col-md-3" id="lostFUReasonWrap" style="display:none;"><label>Reason</label><select class="form-select" id="LostFU_Reason" onchange="toggleLostFU()"><option value="">Select...</option><option>Travel back home</option><option>Others</option></select></div>
@@ -2197,7 +2197,7 @@ img,canvas,table,svg{max-width:100%;}
                 <div class="col-12"><hr class="my-2"></div>
                 <h6 class="col-12 text-secondary m-0"><i class="fa fa-heart-circle-bolt"></i> Advanced HF</h6>
                 <div class="col-6 col-md-3"><label class="fw-bold text-danger">Advanced HF?</label><select class="form-select border-danger" id="Advanced_HF_Outcome" onchange="syncAdvancedHF('outcome')"><option>No</option><option>Yes</option></select><small class="text-muted" style="font-size:0.65rem;">Mirrors HF Diagnosis · Step 2</small></div>
-                <div class="col-6 col-md-3"><label class="fw-bold text-danger">Strong HF eligible?</label><select class="form-select border-danger" id="Strong_HF"><option>No</option><option>Yes</option></select></div>
+                <div class="col-6 col-md-3"><label class="fw-bold text-danger">Strong HF eligible?</label><select class="form-select border-danger" id="Strong_HF" onchange="syncLongitudinalOutcomeFromMainAdmission()"><option>No</option><option>Yes</option></select></div>
                 <div class="col-6 col-md-3"><label class="fw-bold text-danger">Advanced HF Therapy?</label><select class="form-select border-danger" id="Adv_HF_Therapy" onchange="toggleAdvHFTherapy()"><option>No</option><option>Yes</option></select></div>
                 <div class="col-12" id="advHFTherapyWrap" style="display:none;">
                     <label class="fw-bold text-danger">Therapy Type <small class="text-muted fw-normal">(multi-select — tap to toggle)</small></label>
@@ -2251,6 +2251,7 @@ img,canvas,table,svg{max-width:100%;}
                     <div class="extra-adm-section-hint">The panels above record Admission #1. Add any further admissions for this patient here — each is a full admission record.</div>
                     <div id="extraAdmissionsWrap"></div>
                     <input type="hidden" id="Extra_Admissions" value="[]">
+                    <input type="hidden" id="Longitudinal_Outcome_Date" value="">
                   </div>
                 </div>
               </div>
@@ -2729,10 +2730,10 @@ img,canvas,table,svg{max-width:100%;}
                     <div class="col-12"><hr class="my-2"></div>
                     <!-- ===== VISIT OUTCOMES & MANAGEMENT (mirrors admission Step-3 Outcomes section) ===== -->
                     <h6 class="col-12 text-secondary"><i class="fa fa-flag-checkered"></i> Outcomes &amp; Management</h6>
-                    <div class="col-6 col-md-3"><label>Quadruple GDMT?</label><select class="form-select" id="V_Quad_GDMT"><option>No</option><option>Yes</option><option>N/A</option></select></div>
-                    <div class="col-6 col-md-3"><label>On Maximum GDMT Doses?</label><select class="form-select" id="V_Max_GDMT"><option>No</option><option>Yes</option></select></div>
-                    <div class="col-6 col-md-3"><label>Recovered LV?</label><select class="form-select" id="V_Recovered_LV" onchange="toggleVisitRecoveredLVType()"><option>No</option><option>Yes</option><option>N/A</option></select></div>
-                    <div class="col-6 col-md-3" id="vRecoveredLVTypeWrap" style="display:none;"><label>Recovery Type</label><select class="form-select" id="V_Recovered_LV_Type"><option value="">Select...</option><option>Fully recovered</option><option>Partially recovered</option></select></div>
+                    <div class="col-6 col-md-3"><label>Quadruple GDMT?</label><select class="form-select" id="V_Quad_GDMT" onchange="syncLongitudinalOutcomeFromVisitForm()"><option>No</option><option>Yes</option><option>N/A</option></select></div>
+                    <div class="col-6 col-md-3"><label>On Maximum GDMT Doses?</label><select class="form-select" id="V_Max_GDMT" onchange="syncLongitudinalOutcomeFromVisitForm()"><option>No</option><option>Yes</option></select></div>
+                    <div class="col-6 col-md-3"><label>Recovered LV?</label><select class="form-select" id="V_Recovered_LV" onchange="toggleVisitRecoveredLVType();syncLongitudinalOutcomeFromVisitForm()"><option>No</option><option>Yes</option><option>N/A</option></select></div>
+                    <div class="col-6 col-md-3" id="vRecoveredLVTypeWrap" style="display:none;"><label>Recovery Type</label><select class="form-select" id="V_Recovered_LV_Type" onchange="syncLongitudinalOutcomeFromVisitForm()"><option value="">Select...</option><option>Fully recovered</option><option>Partially recovered</option></select></div>
                     <div class="col-6 col-md-3"><label>Mortality</label><select class="form-select" id="V_Mortality"><option>Alive</option><option>In-hospital</option><option>Out-of-hospital</option></select></div>
                     <div class="col-6 col-md-3"><label>Lost to Follow-up</label><select class="form-select" id="V_LostFU" onchange="toggleVisitLostFU()"><option>No</option><option>Yes</option></select></div>
                     <div class="col-6 col-md-3" id="vLostFUReasonWrap" style="display:none;"><label>Reason</label><select class="form-select" id="V_LostFU_Reason" onchange="toggleVisitLostFU()"><option value="">Select...</option><option>Travel back home</option><option>Others</option></select></div>
@@ -2740,7 +2741,7 @@ img,canvas,table,svg{max-width:100%;}
                     <div class="col-12"><hr class="my-2"></div>
                     <h6 class="col-12 text-secondary m-0"><i class="fa fa-heart-circle-bolt"></i> Advanced HF</h6>
                     <div class="col-6 col-md-3"><label class="fw-bold text-danger">Advanced HF?</label><select class="form-select border-danger" id="V_Advanced_HF_Outcome"><option>No</option><option>Yes</option></select></div>
-                    <div class="col-6 col-md-3"><label class="fw-bold text-danger">Strong HF eligible?</label><select class="form-select border-danger" id="V_Strong_HF"><option>No</option><option>Yes</option></select></div>
+                    <div class="col-6 col-md-3"><label class="fw-bold text-danger">Strong HF eligible?</label><select class="form-select border-danger" id="V_Strong_HF" onchange="syncLongitudinalOutcomeFromVisitForm()"><option>No</option><option>Yes</option></select></div>
                     <div class="col-6 col-md-3"><label class="fw-bold text-danger">Advanced HF Therapy?</label><select class="form-select border-danger" id="V_Adv_HF_Therapy" onchange="toggleVisitAdvHFTherapy()"><option>No</option><option>Yes</option></select></div>
                     <div class="col-12 col-md-6" id="vAdvHFTherapyWrap" style="display:none;"><label class="fw-bold text-danger">Therapy Type</label><input type="text" class="form-control" id="V_Adv_HF_Therapy_Type" placeholder="e.g. LVAD, RVDS, Heart Transplant"></div>
                     <div class="col-12 col-md-12"><label>Management Plan / Notes</label><textarea class="form-control" id="V_Outcome_Notes" rows="2" placeholder="Outcome-related management plan / notes for this visit..."></textarea></div>
@@ -6150,24 +6151,20 @@ function _harvestAdmissionOne(){
     return rec;
 }
 
-// Add a new admission. Per request, this DUPLICATES the previous admission's
-// data: it copies from the last extra admission if any exist, otherwise from
-// Admission #1 (the Step-3 panels). The new card opens ready to edit.
+// Add a genuinely new admission. Clinical details must never be copied from a
+// previous admission; height is the only patient-level value carried forward.
 function addExtraAdmission(){
     var arr=_readExtraAdmissions();
-    var source;
-    if(arr.length>0){
-        // copy the most recent extra admission
-        source=JSON.parse(JSON.stringify(arr[arr.length-1]));
-    } else {
-        // copy Admission #1 from the Step-3 panels
-        source=_harvestAdmissionOne();
+    var fresh={};
+    var height=(typeof getBaselineHeightValue==='function')?getBaselineHeightValue():((document.getElementById('Height')||{}).value||'');
+    if(height&&parseFloat(height))fresh.Height=String(height);
+    if(typeof getLongitudinalOutcomeCarryForward==='function'){
+        var fixedOutcomes=getLongitudinalOutcomeCarryForward();
+        (LONGITUDINAL_OUTCOME_FIELDS||[]).forEach(function(key){
+            if(fixedOutcomes[key]!==undefined&&fixedOutcomes[key]!==null&&String(fixedOutcomes[key])!=='')fresh[key]=fixedOutcomes[key];
+        });
     }
-    // Carry over all values; clear the admission-identifying dates so the new
-    // record is clearly a fresh admission (reason is kept as a starting point).
-    source.date='';
-    source.dischargeDate='';
-    arr.push(source);
+    arr.push(fresh);
     _writeExtraAdmissions(arr);
     _renderExtraAdmissions();
     var newIdx=arr.length-1;
@@ -6201,6 +6198,12 @@ function updateExtraAdmission(idx, field, value){
             arr[idx].Frailty_Index=(isFinite(d)&&isFinite(a)&&a>0&&d>=0&&d<=a)?(d/a).toFixed(3):'';
         }
         _writeExtraAdmissions(arr);
+        if(field==='Height'&&typeof syncFixedHeightAcrossForms==='function'){
+            syncFixedHeightAcrossForms(value,idx);
+        }
+        if(typeof LONGITUDINAL_OUTCOME_FIELDS!=='undefined'&&LONGITUDINAL_OUTCOME_FIELDS.indexOf(field)>=0&&typeof syncLongitudinalOutcomeFromExtraAdmission==='function'){
+            syncLongitudinalOutcomeFromExtraAdmission(arr[idx]);
+        }
         if(field==='date'||field==='reason'){
             var card=document.querySelector('.extra-adm-card[data-extra-idx="'+idx+'"] .ea-summary');
             if(card){
@@ -6337,6 +6340,9 @@ function restoreExtraAdmissions(savedJson){
     var hid=document.getElementById('Extra_Admissions');
     if(hid)hid.value=savedJson||'[]';
     _renderExtraAdmissions();
+    if(typeof getBaselineHeightValue==='function'&&typeof syncFixedHeightAcrossForms==='function'){
+        syncFixedHeightAcrossForms(getBaselineHeightValue());
+    }
 }
 
 function _val(id){
@@ -7439,21 +7445,138 @@ function carryForwardVisitMedicationsFromLatestVisit(){
     if(other)other.value=latest.V_Med_Others||'';
 }
 
-// These longitudinal outcome fields carry forward automatically so the
-// investigator does not have to re-enter stable values at every visit.
-function carryForwardVisitOutcomeFields(){
-    if(editingVisitId)return;
+// Stable longitudinal outcomes. Once recorded in an admission or visit, the
+// latest dated value becomes the default for every later admission and visit.
+var LONGITUDINAL_OUTCOME_FIELDS=['Quad_GDMT','Max_GDMT','Strong_HF','Recovered_LV','Recovered_LV_Type'];
+
+function _longitudinalOutcomeDate(value){
+    var raw=String(value||'').trim();
+    if(!raw)return '';
+    if(typeof _normalizeDisplayDate==='function')return _normalizeDisplayDate(raw)||raw;
+    return raw;
+}
+
+function _longitudinalOutcomeStateFrom(source,prefix){
+    source=source||{};prefix=prefix||'';
+    var state={};
+    LONGITUDINAL_OUTCOME_FIELDS.forEach(function(key){
+        var value=source[prefix+key];
+        if(value!==undefined&&value!==null&&String(value)!=='')state[key]=String(value);
+    });
+    if(state.Recovered_LV&&state.Recovered_LV!=='Yes')state.Recovered_LV_Type='';
+    return state;
+}
+
+function getLongitudinalOutcomeCarryForward(){
+    var events=[],seq=0;
+    function addEvent(date,source,prefix){
+        var state=_longitudinalOutcomeStateFrom(source,prefix);
+        if(Object.keys(state).length)events.push({date:_longitudinalOutcomeDate(date),seq:seq++,state:state});
+    }
+
     var patientId=currentPatientId||editingDocId;
-    var baseline=(patientId&&PC&&PC[patientId])?PC[patientId]:{};
-    var latest=(visits&&visits.length)?visits[0]:{};
-    ['Quad_GDMT','Max_GDMT','Strong_HF','Recovered_LV','Recovered_LV_Type'].forEach(function(key){
-        var target=document.getElementById('V_'+key);if(!target)return;
-        var visitKey='V_'+key;
-        var value=(latest[visitKey]!==undefined&&latest[visitKey]!=='')?latest[visitKey]:
-                  ((baseline[key]!==undefined&&baseline[key]!=='')?baseline[key]:(document.getElementById(key)||{}).value);
-        if(value!==undefined&&value!==null&&String(value)!=='')target.value=value;
+    var baseline=(patientId&&typeof PC==='object'&&PC[patientId])?Object.assign({},PC[patientId]):{};
+    LONGITUDINAL_OUTCOME_FIELDS.forEach(function(key){
+        var el=document.getElementById(key);
+        if(el&&el.value!==undefined&&String(el.value)!=='')baseline[key]=el.value;
+    });
+    addEvent((document.getElementById('Longitudinal_Outcome_Date')||{}).value||baseline.Longitudinal_Outcome_Date||(document.getElementById('Admission_Date')||{}).value||baseline.Admission_Date,baseline,'');
+
+    if(typeof _readExtraAdmissions==='function'){
+        _readExtraAdmissions().forEach(function(adm){addEvent(adm.date||adm.Admission_Date,adm,'');});
+    }
+    (typeof visits!=='undefined'&&visits||[]).forEach(function(visit){addEvent(visit.visitDate,visit,'V_');});
+
+    // Include an in-progress dated visit, so an admission added immediately
+    // afterwards receives the values even before that visit is reloaded.
+    var currentVisitDate=(document.getElementById('Visit_Date')||{}).value||'';
+    if(currentVisitDate){
+        var currentVisit={};
+        LONGITUDINAL_OUTCOME_FIELDS.forEach(function(key){
+            var el=document.getElementById('V_'+key);if(el)currentVisit['V_'+key]=el.value;
+        });
+        addEvent(currentVisitDate,currentVisit,'V_');
+    }
+
+    events.sort(function(a,b){
+        if(a.date&&b.date&&a.date!==b.date)return a.date<b.date?-1:1;
+        if(a.date&&!b.date)return 1;
+        if(!a.date&&b.date)return -1;
+        return a.seq-b.seq;
+    });
+    var result={};
+    events.forEach(function(event){Object.keys(event.state).forEach(function(key){result[key]=event.state[key];});});
+    if(result.Recovered_LV!=='Yes')result.Recovered_LV_Type='';
+    return result;
+}
+
+function _applyLongitudinalOutcomeStateToMain(state){
+    state=state||{};
+    LONGITUDINAL_OUTCOME_FIELDS.forEach(function(key){
+        if(state[key]===undefined)return;
+        var el=document.getElementById(key);if(el)el.value=state[key];
+    });
+    if(typeof toggleRecoveredLVType==='function')toggleRecoveredLVType();
+}
+
+function _applyLongitudinalOutcomeStateToVisit(state){
+    state=state||{};
+    LONGITUDINAL_OUTCOME_FIELDS.forEach(function(key){
+        if(state[key]===undefined)return;
+        var el=document.getElementById('V_'+key);if(el)el.value=state[key];
     });
     if(typeof toggleVisitRecoveredLVType==='function')toggleVisitRecoveredLVType();
+}
+
+function syncLongitudinalOutcomeFromMainAdmission(){
+    var marker=document.getElementById('Longitudinal_Outcome_Date');
+    if(marker)marker.value=(document.getElementById('Admission_Date')||{}).value||marker.value||'';
+    if(editingVisitId||(document.getElementById('Visit_Date')||{}).value)return;
+    _applyLongitudinalOutcomeStateToVisit(_longitudinalOutcomeStateFrom({
+        Quad_GDMT:(document.getElementById('Quad_GDMT')||{}).value,
+        Max_GDMT:(document.getElementById('Max_GDMT')||{}).value,
+        Strong_HF:(document.getElementById('Strong_HF')||{}).value,
+        Recovered_LV:(document.getElementById('Recovered_LV')||{}).value,
+        Recovered_LV_Type:(document.getElementById('Recovered_LV_Type')||{}).value
+    },''));
+}
+
+function syncLongitudinalOutcomeFromExtraAdmission(admission){
+    var state=_longitudinalOutcomeStateFrom(admission,'');
+    var marker=document.getElementById('Longitudinal_Outcome_Date');
+    if(marker&&admission&&(admission.date||admission.Admission_Date))marker.value=admission.date||admission.Admission_Date;
+    _applyLongitudinalOutcomeStateToMain(state);
+    if(!editingVisitId&&!(document.getElementById('Visit_Date')||{}).value)_applyLongitudinalOutcomeStateToVisit(state);
+}
+
+function syncLongitudinalOutcomeFromVisitForm(){
+    var state={};
+    LONGITUDINAL_OUTCOME_FIELDS.forEach(function(key){
+        var el=document.getElementById('V_'+key);if(el)state[key]=el.value;
+    });
+    state=_longitudinalOutcomeStateFrom(Object.keys(state).reduce(function(out,key){out['V_'+key]=state[key];return out;},{}),'V_');
+    var marker=document.getElementById('Longitudinal_Outcome_Date');
+    if(marker&&(document.getElementById('Visit_Date')||{}).value)marker.value=(document.getElementById('Visit_Date')||{}).value;
+    _applyLongitudinalOutcomeStateToMain(state);
+}
+
+function mirrorLongitudinalOutcomesFromVisit(patientId,visitData,persist){
+    var state=_longitudinalOutcomeStateFrom(visitData,'V_');
+    var outcomeDate=visitData.visitDate||(document.getElementById('Visit_Date')||{}).value||'';
+    var update=Object.assign({},state);
+    if(outcomeDate)update.Longitudinal_Outcome_Date=outcomeDate;
+    var marker=document.getElementById('Longitudinal_Outcome_Date');if(marker&&outcomeDate)marker.value=outcomeDate;
+    _applyLongitudinalOutcomeStateToMain(state);
+    if(patientId&&typeof PC==='object'&&PC[patientId])Object.keys(update).forEach(function(key){PC[patientId][key]=update[key];});
+    if(!persist||!patientId||typeof db==='undefined'||!Object.keys(state).length)return null;
+    return db.collection('patients').doc(patientId).update(update).catch(function(error){console.warn('Outcome carry-forward update failed:',error.message||error);});
+}
+
+function carryForwardVisitOutcomeFields(){
+    if(editingVisitId)return;
+    var state=getLongitudinalOutcomeCarryForward();
+    _applyLongitudinalOutcomeStateToMain(state);
+    _applyLongitudinalOutcomeStateToVisit(state);
 }
 
 function syncVisitServiceFlags(){
@@ -7553,9 +7676,7 @@ function setFixedHeightFromVisit(){
     var vEl=document.getElementById('V_Height');
     var h=(vEl&&vEl.value)||'';
     if(h&&parseFloat(h)){
-        var hEl=document.getElementById('Height');
-        if(hEl&&hEl.value!==h)hEl.value=h;
-        if(typeof _updateAdmissionBMIFromHeightWeight==='function')_updateAdmissionBMIFromHeightWeight();
+        syncFixedHeightAcrossForms(h);
         if(typeof calcMAGGIC==='function')calcMAGGIC();
     }
     if(typeof calcVisitBMI==='function')calcVisitBMI();
@@ -7571,14 +7692,46 @@ function getBaselineHeightValue(){
     return h;
 }
 
+// Height is a patient-level constant. Keep it identical in the index
+// admission, every repeat admission and the clinic-visit form while leaving
+// all other clinical fields independent.
+function syncFixedHeightAcrossForms(height){
+    var h=String(height==null?'':height).trim();
+    var hn=parseFloat(h);
+    if(!h||!hn)return;
+
+    var baseline=document.getElementById('Height');
+    if(baseline&&baseline.value!==h)baseline.value=h;
+    if(typeof _updateAdmissionBMIFromHeightWeight==='function')_updateAdmissionBMIFromHeightWeight();
+
+    var visitHeight=document.getElementById('V_Height');
+    if(visitHeight&&visitHeight.value!==h)visitHeight.value=h;
+    if(typeof calcVisitBMI==='function')calcVisitBMI();
+
+    if(typeof _readExtraAdmissions!=='function'||typeof _writeExtraAdmissions!=='function')return;
+    var arr=_readExtraAdmissions(),changed=false;
+    arr.forEach(function(adm,idx){
+        if(String(adm.Height||'')!==h){adm.Height=h;changed=true;}
+        var weight=parseFloat(adm.Weight);
+        var bmi=weight?(weight/((hn/100)*(hn/100))).toFixed(1):'';
+        if(String(adm.BMI||'')!==bmi){adm.BMI=bmi;changed=true;}
+        var heightEl=document.getElementById('ea_'+idx+'_Height');
+        if(heightEl&&heightEl.value!==h)heightEl.value=h;
+        var bmiEl=document.getElementById('ea_'+idx+'_BMI');
+        if(bmiEl&&bmiEl.value!==bmi)bmiEl.value=bmi;
+    });
+    if(changed)_writeExtraAdmissions(arr);
+}
+
 function syncVisitHeightFromBaseline(force){
     var h=getBaselineHeightValue();
     var vEl=document.getElementById('V_Height');
-    if(!vEl||!h)return;
-    if(force||!vEl.value){
+    if(!h)return;
+    if(vEl&&(force||!vEl.value)){
         vEl.value=h;
         if(typeof calcVisitBMI==='function')calcVisitBMI();
     }
+    syncFixedHeightAcrossForms(h);
 }
 
 function applyBaselineHeightToVisitData(visitData){
@@ -7974,6 +8127,7 @@ function _commitVisitInline(){
     if(typeof syncVisitServiceFlags==='function')syncVisitServiceFlags();
     document.querySelectorAll('[id^="V_"]').forEach(function(el){ if(el.id && el.type!=='file') visitData[el.id] = el.value; });
     if(typeof applyBaselineHeightToVisitData==='function')applyBaselineHeightToVisitData(visitData);
+    if(typeof mirrorLongitudinalOutcomesFromVisit==='function')mirrorLongitudinalOutcomesFromVisit(pid,visitData,false);
     visitData.visitDate = vDate;
     visitData.visitType = (document.getElementById('Visit_Type')||{}).value || 'Routine';
     var _nan1=document.getElementById('Next_Appt_Notes'); if(_nan1) visitData.Next_Appt_Notes=_nan1.value||'';
@@ -8007,6 +8161,7 @@ function _commitNewVisitInline(){
     if(typeof syncVisitServiceFlags==='function')syncVisitServiceFlags();
     document.querySelectorAll('[id^="V_"]').forEach(function(el){ if(el.id && el.type!=='file') visitData[el.id] = el.value; });
     if(typeof applyBaselineHeightToVisitData==='function')applyBaselineHeightToVisitData(visitData);
+    if(typeof mirrorLongitudinalOutcomesFromVisit==='function')mirrorLongitudinalOutcomesFromVisit(pid,visitData,false);
     visitData.visitDate = vDate;
     visitData.visitType = (document.getElementById('Visit_Type')||{}).value || 'Routine';
     var _nan2=document.getElementById('Next_Appt_Notes'); if(_nan2) visitData.Next_Appt_Notes=_nan2.value||'';
@@ -8039,6 +8194,7 @@ function saveVisit(){
     if(!visitDate){showPopup("error","Error","Please enter visit date.");return;}
     document.querySelectorAll('[id^="V_"]').forEach(function(el){if(el.id&&el.type!=='file')visitData[el.id]=el.value;});
     if(typeof applyBaselineHeightToVisitData==='function')applyBaselineHeightToVisitData(visitData);
+    if(typeof mirrorLongitudinalOutcomesFromVisit==='function')mirrorLongitudinalOutcomesFromVisit(patientId,visitData,false);
     visitData.visitDate=visitDate;visitData.visitType=document.getElementById("Visit_Type").value;
     // Capture Next Appointment Notes on the visit record (the date itself mirrors onto the patient doc below)
     var _nextApptNotesEl=document.getElementById("Next_Appt_Notes");
@@ -8051,6 +8207,7 @@ function saveVisit(){
         db.collection("patients").doc(patientId).collection("visits").doc(editingVisitId).update(visitData).then(function(){
             if(typeof _invalidateRegistryVisitCache==='function')_invalidateRegistryVisitCache(patientId);
             if(typeof persistFixedHeightForPatient==='function')persistFixedHeightForPatient(patientId, visitData.V_Height);
+            if(typeof mirrorLongitudinalOutcomesFromVisit==='function')mirrorLongitudinalOutcomesFromVisit(patientId,visitData,true);
             if(nextAppt){
                 db.collection("patients").doc(patientId).update({Next_Appt:nextAppt,lastEditAt:new Date().toISOString(),lastEditBy:_currentAuditUser(),lastEditDoctor:_currentDoctorSelection()});
                 if(PC[patientId])PC[patientId].Next_Appt=nextAppt;
@@ -8070,6 +8227,7 @@ function saveVisit(){
         db.collection("patients").doc(patientId).collection("visits").add(visitData).then(function(){
             if(typeof _invalidateRegistryVisitCache==='function')_invalidateRegistryVisitCache(patientId);
             if(typeof persistFixedHeightForPatient==='function')persistFixedHeightForPatient(patientId, visitData.V_Height);
+            if(typeof mirrorLongitudinalOutcomesFromVisit==='function')mirrorLongitudinalOutcomesFromVisit(patientId,visitData,true);
             if(nextAppt){
                 db.collection("patients").doc(patientId).update({Next_Appt:nextAppt,lastEditAt:new Date().toISOString(),lastEditBy:_currentAuditUser(),lastEditDoctor:_currentDoctorSelection()});
                 if(PC[patientId])PC[patientId].Next_Appt=nextAppt;
