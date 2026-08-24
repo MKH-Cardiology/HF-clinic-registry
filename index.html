@@ -94,6 +94,21 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 .admission-accordion-wrap .ft-body{padding-top:8px}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;justify-content:center;align-items:center}
 .modal-box{background:#fff;border-radius:16px;padding:30px 20px;max-width:500px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.4);animation:pop .3s ease;max-height:90vh;overflow-y:auto;}
+.ecg-preview-card{width:100%;border:1px solid #cfd8e3;border-radius:10px;background:#f8fafc;padding:8px;box-shadow:0 2px 8px rgba(16,42,67,.08)}
+.ecg-preview-open{display:block;width:100%;padding:0;border:0;border-radius:7px;background:#fff;cursor:zoom-in;overflow:hidden}
+.ecg-preview-open img{display:block;width:100%;height:auto;max-height:min(56vh,560px);object-fit:contain;background:#fff}
+.ecg-preview-actions{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:7px 2px 0;font-size:.76rem;color:#52606d}
+.ecg-mini-preview .ecg-preview-open img{max-height:320px}
+.ecg-viewer-modal{padding:12px;background:rgba(4,12,22,.94);z-index:12000}
+.ecg-viewer-shell{width:min(98vw,1900px);height:calc(100vh - 24px);max-height:96vh;background:#101820;border:1px solid rgba(255,255,255,.2);border-radius:14px;box-shadow:0 24px 80px rgba(0,0,0,.7);display:flex;flex-direction:column;overflow:hidden;animation:pop .2s ease}
+.ecg-viewer-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;background:#fff;color:#172b4d;border-bottom:1px solid #d9e2ec;flex:0 0 auto}
+.ecg-viewer-title{font-weight:800;font-size:.95rem;display:flex;align-items:center;gap:7px}
+.ecg-viewer-controls{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap}
+.ecg-viewer-controls .btn{min-width:38px}
+.ecg-viewer-zoom-label{min-width:52px;text-align:center;font-size:.8rem;font-weight:800;color:#334e68}
+.ecg-viewer-stage{flex:1 1 auto;min-height:0;overflow:auto;padding:18px;background:#1f2933;overscroll-behavior:contain;touch-action:pan-x pan-y}
+.ecg-viewer-image{display:block;max-width:none;max-height:none;margin:auto;background:#fff;box-shadow:0 6px 24px rgba(0,0,0,.45);user-select:none;-webkit-user-drag:none}
+.ecg-viewer-help{padding:6px 12px;background:#101820;color:#bcccdc;text-align:center;font-size:.72rem;flex:0 0 auto}
 @keyframes pop{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
 .page{display:none}.page.active{display:block}
 .loading{opacity:0.6;pointer-events:none}
@@ -228,6 +243,17 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 .gdmt-rationale{display:none;margin-top:3px;}
 .gdmt-rationale.visible{display:block;}
 .gdmt-rationale select{font-size:0.78rem;padding:3px 6px;border:1px dashed #dc3545;background:#fff5f5;}
+
+@media (max-width:767px){
+    .ecg-preview-open img{max-height:440px}
+    .ecg-viewer-modal{padding:0}
+    .ecg-viewer-shell{width:100vw;height:100vh;max-height:none;border-radius:0;border:0}
+    .ecg-viewer-head{align-items:flex-start;padding:8px}
+    .ecg-viewer-title{font-size:.82rem;padding-top:7px}
+    .ecg-viewer-controls{gap:4px}
+    .ecg-viewer-controls .btn{padding:5px 8px;min-width:34px;font-size:.75rem}
+    .ecg-viewer-stage{padding:8px}
+}
 
 /* ===== NT-proBNP TRAJECTORY FLAG ===== */
 .trajectory-flag{display:inline-flex;align-items:center;gap:4px;font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:12px;animation:pulse-flag 1.5s ease-in-out infinite;}
@@ -1534,7 +1560,7 @@ img,canvas,table,svg{max-width:100%;}
                 <div class="col-6 col-md-3"><label>Last Admission Date</label><input type="date" class="form-control" id="Last_Admission"></div>
                 <div class="col-6 col-md-3"><label>Length of Stay (Days)</label><input type="text" class="form-control" id="LOS" inputmode="text"></div>
                 <div class="col-12">
-                    <label class="form-label mb-1" style="font-size:0.82rem;"><i class="fa fa-camera me-1"></i>ECG Image <small class="text-muted fw-normal">(auto-compressed)</small></label>
+                    <label class="form-label mb-1" style="font-size:0.82rem;"><i class="fa fa-camera me-1"></i>ECG Image <small class="text-muted fw-normal">(enhanced-detail compression)</small></label>
                     <div class="d-flex gap-2 align-items-center flex-wrap">
                         <button type="button" class="btn btn-sm btn-outline-primary" onclick="document.getElementById('ECG_Image_FilePick').click()"><i class="fa fa-image me-1"></i>Gallery</button>
                         <button type="button" class="btn btn-sm btn-outline-secondary" onclick="document.getElementById('ECG_Image_FileCam').click()"><i class="fa fa-camera me-1"></i>Camera</button>
@@ -1545,7 +1571,7 @@ img,canvas,table,svg{max-width:100%;}
                     <input type="file" id="ECG_Image_FileCam" accept="image/*" capture="environment" style="display:none" onchange="handleEcgImageUpload(this,'ECG_Image','ecgImagePreview','ecgImageMeta')">
                     <input type="hidden" id="ECG_Image_File">
                     <input type="hidden" id="ECG_Image">
-                    <div id="ecgImagePreview" class="mt-1" style="max-width:100%;"></div>
+                    <div id="ecgImagePreview" class="mt-2"></div>
                 </div>
             </div>
             <div id="riskFactorsSection2Mount" class="mt-3"></div>
@@ -2493,14 +2519,22 @@ img,canvas,table,svg{max-width:100%;}
                                 <div class="col-12"><label>Arrhythmia</label><input type="text" class="form-control" id="V_Arrhythmia"></div>
                                 <div class="col-12"><label>Pacing in ECG</label><select class="form-select" id="V_Pacing_ECG" onchange="toggleVisitPacingMode()"><option>No</option><option>Yes</option></select></div>
                                 <div class="col-12" id="vPacingModeWrap" style="display:none;"><label>Pacing Mode</label><input type="text" class="form-control" id="V_Pacing_Mode" placeholder="e.g. AAI, VVI, DDD, BiV"></div>
+                                <div class="col-12">
+                                    <label class="form-label mb-1"><i class="fa fa-camera me-1"></i>ECG Image <small class="text-muted fw-normal">(enhanced-detail compression)</small></label>
+                                    <div class="d-flex gap-2 align-items-center flex-wrap">
+                                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="document.getElementById('V_ECG_Image_FilePick').click()"><i class="fa fa-image me-1"></i>Gallery</button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="document.getElementById('V_ECG_Image_FileCam').click()"><i class="fa fa-camera me-1"></i>Camera</button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearEcgImage('V_ECG_Image','V_ECG_Image_File','vEcgImagePreview','vEcgImageMeta')" title="Remove image"><i class="fa fa-times"></i></button>
+                                        <span id="vEcgImageMeta" class="text-muted small"></span>
+                                    </div>
+                                    <input type="file" id="V_ECG_Image_FilePick" accept="image/*" style="display:none" onchange="handleEcgImageUpload(this,'V_ECG_Image','vEcgImagePreview','vEcgImageMeta')">
+                                    <input type="file" id="V_ECG_Image_FileCam" accept="image/*" capture="environment" style="display:none" onchange="handleEcgImageUpload(this,'V_ECG_Image','vEcgImagePreview','vEcgImageMeta')">
+                                    <input type="hidden" id="V_ECG_Image_File">
+                                    <input type="hidden" id="V_ECG_Image">
+                                    <div id="vEcgImagePreview" class="mt-2"></div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div style="display:none;">
-                        <span id="vEcgImageMeta" class="text-muted small"></span>
-                        <input type="hidden" id="V_ECG_Image_File">
-                        <input type="hidden" id="V_ECG_Image">
-                        <div id="vEcgImagePreview" class="mt-1" style="max-width:100%;"></div>
                     </div>
                     <div class="col-12"><hr class="my-2"></div>
                     <div class="col-12 text-secondary m-0 visit-subhead"><i class="fa fa-wave-square"></i> Holter Results</div>
@@ -3273,6 +3307,27 @@ img,canvas,table,svg{max-width:100%;}
         <div class="chart-container"><canvas id="weightChart"></canvas></div>
         <div class="chart-container"><canvas id="ntproChart"></canvas></div>
         <div class="chart-container"><canvas id="kccqChart"></canvas></div>
+    </div>
+</div>
+
+<!-- Full-screen ECG viewer — keeps fine grid/waveform details readable -->
+<div id="ecgViewerModal" class="modal-overlay ecg-viewer-modal d-none" role="dialog" aria-modal="true" aria-labelledby="ecgViewerTitle" onclick="if(event.target===this)closeEcgViewer()">
+    <div class="ecg-viewer-shell">
+        <div class="ecg-viewer-head">
+            <div class="ecg-viewer-title" id="ecgViewerTitle"><i class="fa fa-heart-pulse text-danger"></i> ECG Image Viewer</div>
+            <div class="ecg-viewer-controls">
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="zoomEcgViewer(-0.25)" aria-label="Zoom out" title="Zoom out"><i class="fa fa-minus"></i></button>
+                <span id="ecgViewerZoomLabel" class="ecg-viewer-zoom-label">100%</span>
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="zoomEcgViewer(0.25)" aria-label="Zoom in" title="Zoom in"><i class="fa fa-plus"></i></button>
+                <button type="button" class="btn btn-sm btn-outline-primary" onclick="fitEcgViewer()">Fit</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" onclick="setEcgViewerZoom(1)">100%</button>
+                <button type="button" class="btn btn-sm btn-danger" onclick="closeEcgViewer()" aria-label="Close ECG viewer"><i class="fa fa-times me-1"></i>Close</button>
+            </div>
+        </div>
+        <div id="ecgViewerStage" class="ecg-viewer-stage" ondblclick="toggleEcgViewerZoom()" onwheel="handleEcgViewerWheel(event)">
+            <img id="ecgViewerImage" class="ecg-viewer-image" alt="Expanded ECG image" draggable="false">
+        </div>
+        <div class="ecg-viewer-help">Use +/− or pinch/Control-scroll to zoom. Scroll to inspect the full ECG. Double-click toggles Fit and 100%.</div>
     </div>
 </div>
 
@@ -6333,7 +6388,7 @@ function restoreBaselineInvestigationFlags(data){
 
 function restoreVisitInvestigationFlags(data){
     data=data||{};
-    if(_dataHasAny(data,['V_QRS','V_Arrhythmia','V_Pacing_Mode'])||data.V_LBBB==='Yes'||data.V_Pacing_ECG==='Yes')_setVal('V_ECG_Done','Yes');
+    if(_dataHasAny(data,['V_QRS','V_Arrhythmia','V_Pacing_Mode','V_ECG_Image'])||data.V_LBBB==='Yes'||data.V_Pacing_ECG==='Yes')_setVal('V_ECG_Done','Yes');
     if(_dataHasAny(data,['V_Holter_Date','V_Holter_Duration','V_Holter_MaxHR','V_Holter_MinHR','V_Holter_AvgHR','V_Holter_Arrhythmia','V_Holter_Findings']))_setVal('V_Holter_Done','Yes');
     if(_dataHasAny(data,['V_EF_Change','V_Echo_EDVI','V_Echo_ESVI','V_Echo_EF','V_Echo_Other']))_setVal('V_Echo_Done','Yes');
     if(_dataHasAny(data,['V_CMR_LVEDVI','V_CMR_LVESVI','V_CMR_LVEF','V_CMR_RVEDI','V_CMR_RVEF','V_CMR_LGE_Pct','V_CMR_Others'])||data.V_CMR_LGE==='Yes')_setVal('V_CMR_Done','Yes');
@@ -8163,8 +8218,8 @@ function deleteVisit(visitId, visitDateLabel){
 
 // ===== ECG IMAGE COMPRESSION & UPLOAD =====
 // Compresses ECG images client-side to keep Firestore docs lean (<1 MB limit).
-// Targets long edge ~1400 px, JPEG quality 0.55 — typical output 40–120 KB,
-// readable for arrhythmia/QRS review on phone or desktop.
+// Keeps a 2000 px long edge and starts at JPEG quality 0.78 so waveform/grid
+// detail survives enlargement, then lowers quality only when the file is large.
 function handleEcgImageUpload(inputEl,hiddenId,previewId,metaId){
     var file=inputEl&&inputEl.files&&inputEl.files[0];
     if(!file)return;
@@ -8174,7 +8229,7 @@ function handleEcgImageUpload(inputEl,hiddenId,previewId,metaId){
     reader.onload=function(e){
         var img=new Image();
         img.onload=function(){
-            var maxEdge=1400;
+            var maxEdge=2000;
             var w=img.width,h=img.height;
             if(Math.max(w,h)>maxEdge){
                 if(w>=h){var r=maxEdge/w;w=maxEdge;h=Math.round(h*r);}
@@ -8185,13 +8240,16 @@ function handleEcgImageUpload(inputEl,hiddenId,previewId,metaId){
             var ctx=canvas.getContext('2d');
             ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h); // flatten transparency for JPEG
             ctx.drawImage(img,0,0,w,h);
-            var dataUrl=canvas.toDataURL('image/jpeg',0.55);
+            var quality=0.78;
+            var dataUrl=canvas.toDataURL('image/jpeg',quality);
             // Approximate byte size from base64 length
             var b64=dataUrl.split(',')[1]||'';
             var bytes=Math.round(b64.length*3/4);
-            // If still > 700 KB, try a tighter pass
-            if(bytes>700*1024){
-                dataUrl=canvas.toDataURL('image/jpeg',0.4);
+            // Preserve resolution; reduce JPEG quality progressively only when
+            // needed to leave safe room inside Firestore's document limit.
+            while(bytes>520*1024&&quality>0.46){
+                quality=Math.max(0.46,quality-0.08);
+                dataUrl=canvas.toDataURL('image/jpeg',quality);
                 b64=dataUrl.split(',')[1]||'';
                 bytes=Math.round(b64.length*3/4);
             }
@@ -8210,12 +8268,107 @@ function handleEcgImageUpload(inputEl,hiddenId,previewId,metaId){
     reader.readAsDataURL(file);
 }
 
+function ecgImagePreviewHTML(dataUrl,compact){
+    if(!dataUrl)return '';
+    return '<div class="ecg-preview-card'+(compact?' ecg-mini-preview':'')+'">'
+        +'<button type="button" class="ecg-preview-open" onclick="event.stopPropagation();openEcgViewer(this.querySelector(&quot;img&quot;).src)" aria-label="Open ECG image full screen">'
+        +'<img src="'+dataUrl+'" alt="Uploaded ECG image">'
+        +'</button>'
+        +'<div class="ecg-preview-actions"><span><i class="fa fa-magnifying-glass-plus me-1"></i>Click the ECG to open full screen and zoom</span><span class="badge bg-primary">Open ECG</span></div>'
+        +'</div>';
+}
+
 function renderEcgImagePreview(previewId,dataUrl){
     var preview=document.getElementById(previewId);
     if(!preview)return;
     if(!dataUrl){preview.innerHTML='';return;}
-    preview.innerHTML='<a href="'+dataUrl+'" target="_blank" rel="noopener" title="Open full size"><img src="'+dataUrl+'" style="max-width:100%;max-height:280px;border:1px solid #dee2e6;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,0.1);" alt="ECG"></a>';
+    preview.innerHTML=ecgImagePreviewHTML(dataUrl,false);
 }
+
+var _ecgViewerZoom=1;
+var _ecgViewerFitZoom=1;
+var _ecgViewerPreviousBodyOverflow='';
+
+function _applyEcgViewerZoom(keepCenter){
+    var img=document.getElementById('ecgViewerImage');
+    var stage=document.getElementById('ecgViewerStage');
+    if(!img||!stage||!img.naturalWidth)return;
+    var xRatio=0.5,yRatio=0.5;
+    if(keepCenter&&stage.scrollWidth&&stage.scrollHeight){
+        xRatio=(stage.scrollLeft+stage.clientWidth/2)/stage.scrollWidth;
+        yRatio=(stage.scrollTop+stage.clientHeight/2)/stage.scrollHeight;
+    }
+    img.style.width=Math.max(1,Math.round(img.naturalWidth*_ecgViewerZoom))+'px';
+    img.style.height='auto';
+    var label=document.getElementById('ecgViewerZoomLabel');
+    if(label)label.textContent=Math.round(_ecgViewerZoom*100)+'%';
+    if(keepCenter){
+        requestAnimationFrame(function(){
+            stage.scrollLeft=Math.max(0,xRatio*stage.scrollWidth-stage.clientWidth/2);
+            stage.scrollTop=Math.max(0,yRatio*stage.scrollHeight-stage.clientHeight/2);
+        });
+    }
+}
+
+function setEcgViewerZoom(value){
+    _ecgViewerZoom=Math.max(0.1,Math.min(4,Number(value)||1));
+    _applyEcgViewerZoom(true);
+}
+
+function zoomEcgViewer(delta){setEcgViewerZoom(_ecgViewerZoom+delta);}
+
+function fitEcgViewer(){
+    var img=document.getElementById('ecgViewerImage');
+    var stage=document.getElementById('ecgViewerStage');
+    if(!img||!stage||!img.naturalWidth||!img.naturalHeight)return;
+    var availableW=Math.max(100,stage.clientWidth-36);
+    var availableH=Math.max(100,stage.clientHeight-36);
+    _ecgViewerFitZoom=Math.max(0.1,Math.min(1.5,availableW/img.naturalWidth,availableH/img.naturalHeight));
+    _ecgViewerZoom=_ecgViewerFitZoom;
+    _applyEcgViewerZoom(false);
+    stage.scrollLeft=0;stage.scrollTop=0;
+}
+
+function toggleEcgViewerZoom(){
+    if(Math.abs(_ecgViewerZoom-_ecgViewerFitZoom)<0.03)setEcgViewerZoom(1);
+    else fitEcgViewer();
+}
+
+function handleEcgViewerWheel(event){
+    if(!(event.ctrlKey||event.metaKey))return;
+    event.preventDefault();
+    zoomEcgViewer(event.deltaY<0?0.15:-0.15);
+}
+
+function openEcgViewer(dataUrl){
+    if(!dataUrl)return;
+    var modal=document.getElementById('ecgViewerModal');
+    var img=document.getElementById('ecgViewerImage');
+    if(!modal||!img)return;
+    _ecgViewerPreviousBodyOverflow=document.body.style.overflow||'';
+    document.body.style.overflow='hidden';
+    modal.classList.remove('d-none');
+    img.onload=function(){requestAnimationFrame(fitEcgViewer);};
+    img.src=dataUrl;
+    if(img.complete&&img.naturalWidth)requestAnimationFrame(fitEcgViewer);
+}
+
+function closeEcgViewer(){
+    var modal=document.getElementById('ecgViewerModal');
+    var img=document.getElementById('ecgViewerImage');
+    if(modal)modal.classList.add('d-none');
+    if(img){img.onload=null;img.removeAttribute('src');img.style.width='';}
+    document.body.style.overflow=_ecgViewerPreviousBodyOverflow;
+}
+
+document.addEventListener('keydown',function(event){
+    var modal=document.getElementById('ecgViewerModal');
+    if(!modal||modal.classList.contains('d-none'))return;
+    if(event.key==='Escape'){event.preventDefault();closeEcgViewer();}
+    else if(event.key==='+'||event.key==='='){event.preventDefault();zoomEcgViewer(0.25);}
+    else if(event.key==='-'||event.key==='_'){event.preventDefault();zoomEcgViewer(-0.25);}
+    else if(event.key==='0'){event.preventDefault();setEcgViewerZoom(1);}
+});
 
 function clearEcgImage(hiddenId,fileId,previewId,metaId){
     var h=document.getElementById(hiddenId);if(h)h.value='';
@@ -8636,6 +8789,9 @@ function buildVisitDetailHTML(v){
         });
         if(rows){html+='<tr><td colspan="2"><div class="vh-section-label">'+sec.name+'</div></td></tr>'+rows;}
     });
+    if(v.V_ECG_Image){
+        html+='<tr><td colspan="2"><div class="vh-section-label">ECG Image</div>'+ecgImagePreviewHTML(v.V_ECG_Image,true)+'</td></tr>';
+    }
     // Medications with non-empty values
     var medRows='';
     VISIT_MED_LIST.forEach(function(m){
@@ -9057,6 +9213,11 @@ function generateCardHTML(data, id, latestVisit, allVisits, historyState){
         html += "<div class='col-12 mb-3'><h6 class='text-secondary border-bottom pb-1'>"+sn[idx]+" <small class='text-muted fw-normal'>("+filledInSection+" field"+(filledInSection>1?'s':'')+")</small></h6><table class='table table-sm table-bordered mb-0'>"+rows+"</table></div>";
     });
 
+    if(snap.ECG_Image){
+        html += "<div class='col-12 mb-3'><h6 class='text-secondary border-bottom pb-1'>ECG Image <small class='text-muted fw-normal'>(click to enlarge)</small></h6>"+ecgImagePreviewHTML(snap.ECG_Image,true)+"</div>";
+        totalFilled++;
+    }
+
     // ===== MEDICATIONS — pretty-formatted from latest visit (if any) else baseline =====
     var medsRows = _buildMedsRowsForCard(data, latestVisit);
     if(medsRows){
@@ -9088,7 +9249,7 @@ function _buildLatestSnapshot(data, latestVisit){
         V_NYHA:'NYHA', V_KCCQ:'KCCQ', V_Edema:'Edema', V_Pulse:'Pulse', V_BP:'BP', V_SpO2:'SpO2',
         V_Weight:'Weight', V_JVP:'JVP', V_Rales:'Rales', V_S3:'S3',
         V_Device_Done:'Device_Done', V_Device_Type:'Device_Type', V_Device_Date:'Device_Date', V_Device_Info:'Device_Info',
-        V_ECG_Done:'ECG_Done',
+        V_ECG_Done:'ECG_Done', V_ECG_Image:'ECG_Image',
         V_LBBB:'ECG_LBBB', V_QRS:'ECG_QRS', V_Arrhythmia:'ECG_Arrhythmia',
         V_Echo_Done:'Echo_Done', V_Echo_EDVI:'Echo_EDVI', V_Echo_ESVI:'Echo_ESVI', V_Echo_EF:'Echo_EF', V_Echo_Other:'ECHO',
         V_CMR_Done:'CMR_Done',
