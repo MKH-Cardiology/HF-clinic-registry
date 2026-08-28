@@ -8422,6 +8422,21 @@ function deleteVisit(visitId, visitDateLabel){
 // name/date/URL metadata is saved with the patient or visit record. Existing
 // single-image data URLs are migrated into the gallery automatically.
 var ECG_INLINE_GALLERY_LIMIT=430*1024;
+var ECG_STORAGE_UPLOAD_TIMEOUT_MS=12000;
+var _ecgPendingTargets={};
+var _ecgPendingUploadCount=0;
+
+function _setEcgUploadBusy(delta){
+    _ecgPendingUploadCount=Math.max(0,_ecgPendingUploadCount+(Number(delta)||0));
+    var busy=_ecgPendingUploadCount>0;
+    ['submitBtn','visitSaveBtn'].forEach(function(id){
+        var button=document.getElementById(id);
+        if(!button)return;
+        button.disabled=busy;
+        if(busy)button.setAttribute('title','Please wait for the ECG image upload to finish.');
+        else if(button.getAttribute('title')==='Please wait for the ECG image upload to finish.')button.removeAttribute('title');
+    });
+}
 
 function _ecgDataUrlBytes(dataUrl){
     var b64=String(dataUrl||'').split(',')[1]||'';
@@ -8624,13 +8639,36 @@ function _ecgStoragePath(target,id){
     return 'ecg-images/'+user+'/'+patient+'/'+String(target).replace(/[^a-zA-Z0-9_-]/g,'_')+'/'+Date.now()+'_'+id+'.jpg';
 }
 
-function _uploadCompressedEcg(target,file,result){
-    var id=_ecgGalleryId(),path=_ecgStoragePath(target,id);
+function _uploadCompressedEcg(target,file,result,onProgress,entryId){
+    var id=entryId||_ecgGalleryId(),path=_ecgStoragePath(target,id);
     if(!ecgStorage)return Promise.reject(new Error('Image storage is unavailable'));
-    return ecgStorage.ref(path).put(result.blob,{contentType:'image/jpeg'}).then(function(snapshot){
-        return snapshot.ref.getDownloadURL();
-    }).then(function(url){
-        return {id:id,name:String(file.name||'ECG').replace(/\.[^.]+$/,''),date:_ecgDefaultDate(target),url:url,path:path,width:result.width,height:result.height,bytes:result.bytes};
+    return new Promise(function(resolve,reject){
+        var task,settled=false;
+        var timer=setTimeout(function(){
+            if(settled)return;
+            settled=true;
+            try{if(task&&typeof task.cancel==='function')task.cancel();}catch(_ecgCancelError){}
+            reject(new Error('Online image storage timed out'));
+        },ECG_STORAGE_UPLOAD_TIMEOUT_MS);
+        function fail(error){
+            if(settled)return;
+            settled=true;clearTimeout(timer);reject(error||new Error('Image upload failed'));
+        }
+        try{
+            task=ecgStorage.ref(path).put(result.blob,{contentType:'image/jpeg'});
+            task.on('state_changed',function(snapshot){
+                if(typeof onProgress==='function'&&snapshot&&snapshot.totalBytes){
+                    onProgress(Math.max(0,Math.min(100,Math.round(snapshot.bytesTransferred/snapshot.totalBytes*100))));
+                }
+            },fail,function(){
+                if(settled)return;
+                task.snapshot.ref.getDownloadURL().then(function(url){
+                    if(settled)return;
+                    settled=true;clearTimeout(timer);
+                    resolve({id:id,name:String(file.name||'ECG').replace(/\.[^.]+$/,''),date:_ecgDefaultDate(target),url:url,path:path,width:result.width,height:result.height,bytes:result.bytes});
+                }).catch(fail);
+            });
+        }catch(error){fail(error);}
     });
 }
 
@@ -8641,27 +8679,61 @@ function _ecgInlineBytes(entries){
 function handleEcgGalleryUpload(inputEl,target,previewId,metaId){
     var files=Array.prototype.slice.call(inputEl&&inputEl.files||[]).filter(function(file){return /^image\//.test(file.type||'image/unknown');});
     if(!files.length)return;
+    if(_ecgPendingTargets[target]){
+        inputEl.value='';
+        if(typeof showPopup==='function')showPopup('warning','ECG upload in progress','Please wait for the current ECG upload to finish, then add more images.');
+        return;
+    }
+    _ecgPendingTargets[target]=true;
+    _setEcgUploadBusy(1);
     var meta=document.getElementById(metaId),entries=_readEcgGalleryTarget(target),completed=0,failed=[];
     var chain=Promise.resolve();
     files.forEach(function(file,index){
         chain=chain.then(function(){
             if(meta)meta.textContent='Preparing '+(index+1)+' of '+files.length+'…';
             return _compressEcgGalleryFile(file).then(function(result){
-                if(meta)meta.textContent='Uploading '+(index+1)+' of '+files.length+'…';
-                return _uploadCompressedEcg(target,file,result).catch(function(){
-                    if(_ecgInlineBytes(entries)+result.fallbackBytes>ECG_INLINE_GALLERY_LIMIT)throw new Error('Online image storage is unavailable and the safe offline image limit has been reached.');
-                    return {id:_ecgGalleryId(),name:String(file.name||'ECG').replace(/\.[^.]+$/,''),date:_ecgDefaultDate(target),url:result.fallbackDataUrl,path:'',width:result.width,height:result.height,bytes:result.fallbackBytes};
+                entries=_readEcgGalleryTarget(target);
+                var entryId=_ecgGalleryId();
+                var canKeepInline=_ecgInlineBytes(entries)+result.fallbackBytes<=ECG_INLINE_GALLERY_LIMIT;
+                var draftEntry=null;
+                if(canKeepInline){
+                    draftEntry={id:entryId,name:String(file.name||'ECG').replace(/\.[^.]+$/,''),date:_ecgDefaultDate(target),url:result.fallbackDataUrl,path:'',width:result.width,height:result.height,bytes:result.fallbackBytes};
+                    entries.push(draftEntry);
+                    _writeEcgGalleryTarget(target,entries);
+                    renderEcgGallery(target,previewId,metaId);
+                }
+                if(meta)meta.textContent=(canKeepInline?'Preview ready · ':'')+'Uploading '+(index+1)+' of '+files.length+'…';
+                return _uploadCompressedEcg(target,file,result,function(percent){
+                    if(meta)meta.textContent=(canKeepInline?'Preview ready · ':'')+'Uploading '+(index+1)+' of '+files.length+' · '+percent+'%';
+                },entryId).then(function(uploadedEntry){
+                    entries=_readEcgGalleryTarget(target);
+                    var draftIndex=entries.findIndex(function(entry){return entry.id===entryId;});
+                    if(draftEntry&&draftIndex<0){
+                        if(uploadedEntry.path&&ecgStorage)ecgStorage.ref(uploadedEntry.path).delete().catch(function(){});
+                        return;
+                    }
+                    if(draftIndex>=0){
+                        uploadedEntry.name=entries[draftIndex].name||uploadedEntry.name;
+                        uploadedEntry.date=entries[draftIndex].date||uploadedEntry.date;
+                        entries[draftIndex]=uploadedEntry;
+                    }
+                    else entries.push(uploadedEntry);
+                    _writeEcgGalleryTarget(target,entries);
+                    renderEcgGallery(target,previewId,metaId);
+                    completed++;
+                }).catch(function(){
+                    if(!draftEntry)throw new Error('Online image storage is unavailable and the safe patient-record image limit has been reached.');
+                    if(meta)meta.textContent='Online storage unavailable · safe preview retained for the patient record';
+                    completed++;
                 });
-            }).then(function(entry){
-                entries.push(entry);completed++;
-                _writeEcgGalleryTarget(target,entries);
-                renderEcgGallery(target,previewId,metaId);
             }).catch(function(error){failed.push(error.message||String(error));});
         });
     });
     chain.then(function(){
         inputEl.value='';
-        if(meta)meta.textContent=completed+' added · '+entries.length+' total'+(failed.length?' · '+failed.length+' failed':'');
+        delete _ecgPendingTargets[target];
+        _setEcgUploadBusy(-1);
+        if(meta)meta.textContent=completed+' added · '+entries.length+' total'+(completed?' · ready to save':'')+(failed.length?' · '+failed.length+' failed':'');
         if(failed.length&&typeof showPopup==='function')showPopup('warning','Some ECG images were not added',failed.join(' '));
     });
 }
