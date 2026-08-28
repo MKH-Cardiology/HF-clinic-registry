@@ -20,6 +20,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-storage-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root{--primary:#8b0000;--primary-dark:#5c0000;--secondary:#6c757d;--accent:#c0392b;--success:#1d6f42;--info:#17a2b8;--warning-soft:#fff3cd;--danger-soft:#f8d7da;}
@@ -99,6 +100,15 @@ label{font-weight:600;font-size:.75rem;color:#495057;display:block;margin-bottom
 .ecg-preview-open img{display:block;width:100%;height:auto;max-height:min(56vh,560px);object-fit:contain;background:#fff}
 .ecg-preview-actions{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:7px 2px 0;font-size:.76rem;color:#52606d}
 .ecg-mini-preview .ecg-preview-open img{max-height:320px}
+.ecg-gallery-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-top:9px}
+.ecg-gallery-item{border:1px solid #cfd8e3;border-radius:11px;background:#f8fafc;padding:8px;box-shadow:0 2px 8px rgba(16,42,67,.08);min-width:0}
+.ecg-gallery-item .ecg-preview-open img{height:190px;max-height:190px;object-fit:contain}
+.ecg-gallery-fields{display:grid;grid-template-columns:minmax(0,1fr) 145px auto;gap:6px;align-items:end;margin-top:7px}
+.ecg-gallery-fields label{font-size:.67rem;margin-bottom:2px}
+.ecg-gallery-display-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:7px 2px 0;font-size:.75rem;color:#334e68}
+.ecg-gallery-display-name{font-weight:800;overflow-wrap:anywhere}
+.ecg-gallery-empty{border:1px dashed #b8c5d1;border-radius:9px;background:#fff;padding:12px;text-align:center;color:#6c757d;font-size:.76rem}
+@media(max-width:575.98px){.ecg-gallery-grid{grid-template-columns:1fr}.ecg-gallery-fields{grid-template-columns:1fr 1fr}.ecg-gallery-fields .ecg-gallery-remove{grid-column:1/-1}.ecg-gallery-item .ecg-preview-open img{height:auto;max-height:310px}}
 .ecg-viewer-modal{padding:12px;background:rgba(4,12,22,.94);z-index:12000}
 .ecg-viewer-shell{width:min(98vw,1900px);height:calc(100vh - 24px);max-height:96vh;background:#101820;border:1px solid rgba(255,255,255,.2);border-radius:14px;box-shadow:0 24px 80px rgba(0,0,0,.7);display:flex;flex-direction:column;overflow:hidden;animation:pop .2s ease}
 .ecg-viewer-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;background:#fff;color:#172b4d;border-bottom:1px solid #d9e2ec;flex:0 0 auto}
@@ -1562,17 +1572,18 @@ img,canvas,table,svg{max-width:100%;}
                 <div class="col-6 col-md-3"><label>Last Admission Date</label><input type="date" class="form-control" id="Last_Admission"></div>
                 <div class="col-6 col-md-3"><label>Length of Stay (Days)</label><input type="text" class="form-control" id="LOS" inputmode="text"></div>
                 <div class="col-12">
-                    <label class="form-label mb-1" style="font-size:0.82rem;"><i class="fa fa-camera me-1"></i>ECG Image <small class="text-muted fw-normal">(enhanced-detail compression)</small></label>
+                    <label class="form-label mb-1" style="font-size:0.82rem;"><i class="fa fa-images me-1"></i>ECG Images <small class="text-muted fw-normal">(multiple images · name and date editable)</small></label>
                     <div class="d-flex gap-2 align-items-center flex-wrap">
-                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="document.getElementById('ECG_Image_FilePick').click()"><i class="fa fa-image me-1"></i>Gallery</button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="document.getElementById('ECG_Image_FileCam').click()"><i class="fa fa-camera me-1"></i>Camera</button>
-                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearEcgImage('ECG_Image','ECG_Image_File','ecgImagePreview','ecgImageMeta')" title="Remove image"><i class="fa fa-times"></i></button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="document.getElementById('ECG_Image_FilePick').click()"><i class="fa fa-images me-1"></i>Add from Gallery</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="document.getElementById('ECG_Image_FileCam').click()"><i class="fa fa-camera me-1"></i>Add from Camera</button>
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearEcgGallery('ECG_Images','ecgImagePreview','ecgImageMeta')" title="Remove all ECG images"><i class="fa fa-trash me-1"></i>Clear All</button>
                         <span id="ecgImageMeta" class="text-muted small"></span>
                     </div>
-                    <input type="file" id="ECG_Image_FilePick" accept="image/*" style="display:none" onchange="handleEcgImageUpload(this,'ECG_Image','ecgImagePreview','ecgImageMeta')">
-                    <input type="file" id="ECG_Image_FileCam" accept="image/*" capture="environment" style="display:none" onchange="handleEcgImageUpload(this,'ECG_Image','ecgImagePreview','ecgImageMeta')">
+                    <input type="file" id="ECG_Image_FilePick" accept="image/*" multiple style="display:none" onchange="handleEcgGalleryUpload(this,'ECG_Images','ecgImagePreview','ecgImageMeta')">
+                    <input type="file" id="ECG_Image_FileCam" accept="image/*" capture="environment" style="display:none" onchange="handleEcgGalleryUpload(this,'ECG_Images','ecgImagePreview','ecgImageMeta')">
                     <input type="hidden" id="ECG_Image_File">
                     <input type="hidden" id="ECG_Image">
+                    <input type="hidden" id="ECG_Images" value="[]">
                     <div id="ecgImagePreview" class="mt-2"></div>
                 </div>
             </div>
@@ -2523,17 +2534,18 @@ img,canvas,table,svg{max-width:100%;}
                                 <div class="col-12"><label>Pacing in ECG</label><select class="form-select" id="V_Pacing_ECG" onchange="toggleVisitPacingMode()"><option>No</option><option>Yes</option></select></div>
                                 <div class="col-12" id="vPacingModeWrap" style="display:none;"><label>Pacing Mode</label><input type="text" class="form-control" id="V_Pacing_Mode" placeholder="e.g. AAI, VVI, DDD, BiV"></div>
                                 <div class="col-12">
-                                    <label class="form-label mb-1"><i class="fa fa-camera me-1"></i>ECG Image <small class="text-muted fw-normal">(enhanced-detail compression)</small></label>
+                                    <label class="form-label mb-1"><i class="fa fa-images me-1"></i>ECG Images <small class="text-muted fw-normal">(multiple images · name and date editable)</small></label>
                                     <div class="d-flex gap-2 align-items-center flex-wrap">
-                                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="document.getElementById('V_ECG_Image_FilePick').click()"><i class="fa fa-image me-1"></i>Gallery</button>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="document.getElementById('V_ECG_Image_FileCam').click()"><i class="fa fa-camera me-1"></i>Camera</button>
-                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearEcgImage('V_ECG_Image','V_ECG_Image_File','vEcgImagePreview','vEcgImageMeta')" title="Remove image"><i class="fa fa-times"></i></button>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="document.getElementById('V_ECG_Image_FilePick').click()"><i class="fa fa-images me-1"></i>Add from Gallery</button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="document.getElementById('V_ECG_Image_FileCam').click()"><i class="fa fa-camera me-1"></i>Add from Camera</button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearEcgGallery('V_ECG_Images','vEcgImagePreview','vEcgImageMeta')" title="Remove all ECG images"><i class="fa fa-trash me-1"></i>Clear All</button>
                                         <span id="vEcgImageMeta" class="text-muted small"></span>
                                     </div>
-                                    <input type="file" id="V_ECG_Image_FilePick" accept="image/*" style="display:none" onchange="handleEcgImageUpload(this,'V_ECG_Image','vEcgImagePreview','vEcgImageMeta')">
-                                    <input type="file" id="V_ECG_Image_FileCam" accept="image/*" capture="environment" style="display:none" onchange="handleEcgImageUpload(this,'V_ECG_Image','vEcgImagePreview','vEcgImageMeta')">
+                                    <input type="file" id="V_ECG_Image_FilePick" accept="image/*" multiple style="display:none" onchange="handleEcgGalleryUpload(this,'V_ECG_Images','vEcgImagePreview','vEcgImageMeta')">
+                                    <input type="file" id="V_ECG_Image_FileCam" accept="image/*" capture="environment" style="display:none" onchange="handleEcgGalleryUpload(this,'V_ECG_Images','vEcgImagePreview','vEcgImageMeta')">
                                     <input type="hidden" id="V_ECG_Image_File">
                                     <input type="hidden" id="V_ECG_Image">
+                                    <input type="hidden" id="V_ECG_Images" value="[]">
                                     <div id="vEcgImagePreview" class="mt-2"></div>
                                 </div>
                             </div>
@@ -3352,6 +3364,8 @@ firebase.initializeApp({
     appId:"1:898458296631:web:85fea7a2c6661ae0563ab2"
 });
 var db = firebase.firestore();
+var ecgStorage = null;
+try { ecgStorage = firebase.storage(); } catch(_ecgStorageInitError){}
 // Some hospital/corporate networks interrupt Firestore's streaming transport.
 // Let the SDK detect that condition and fall back to long polling instead of
 // leaving reads pending indefinitely. Persistent multi-tab cache also gives
@@ -5423,6 +5437,7 @@ var EXTRA_ADM_SCHEMA=[
    {k:'ECG_QRS',l:'QRS Duration (ms)',t:'num',w:'col-6 col-md-3',ph:'e.g. 120'},
    {k:'ECG_Arrhythmia',l:'Arrhythmia',t:'text',w:'col-6 col-md-3',ph:'Type, if any'},
    {k:'ECG_Pacing',l:'Pacing Rhythm',t:'sel',o:['','None','AAI','VVI','DDD','BiV','Other'],w:'col-6 col-md-3'},
+   {k:'ECG_Images',l:'ECG Images',t:'ecgimages',w:'col-12'},
    // ===== HOLTER =====
    {k:'_sub_Holter',t:'subhead',l:'Holter',i:'fa-wave-square'},
    {k:'Holter_Done',l:'Holter Performed',t:'sel',o:['No','Yes'],w:'col-6 col-md-3'},
@@ -5730,6 +5745,25 @@ function _migrateExtraAdmissionData(adm){
 // Optional `sub:{i:'fa-X', t:'Title'}` on any field prepends an <h6 col-12>
 // subsection header inline above the field (used for ECG, Holter, Echo, CMR,
 // CT, CAG, 6MWT, CPET, Device, RHC subsections inside Investigations).
+function _extraEcgGalleryEditorHtml(idx,adm){
+    var target='extra:'+idx;
+    var previewId='ea_'+idx+'_ECG_Images_Preview';
+    var metaId='ea_'+idx+'_ECG_Images_Meta';
+    var galleryId='ea_'+idx+'_ECG_Images_FilePick';
+    var cameraId='ea_'+idx+'_ECG_Images_FileCam';
+    var entries=(typeof _parseEcgGalleryEntries==='function')?_parseEcgGalleryEntries(adm.ECG_Images,adm.ECG_Image):[];
+    var html='<div class="col-12"><label><i class="fa fa-images me-1"></i>ECG Images <small class="text-muted fw-normal">(multiple images · name and date editable)</small></label>';
+    html+='<div class="d-flex gap-2 align-items-center flex-wrap">';
+    html+='<button type="button" class="btn btn-sm btn-outline-primary" onclick="document.getElementById(\''+galleryId+'\').click()"><i class="fa fa-images me-1"></i>Add from Gallery</button>';
+    html+='<button type="button" class="btn btn-sm btn-outline-secondary" onclick="document.getElementById(\''+cameraId+'\').click()"><i class="fa fa-camera me-1"></i>Add from Camera</button>';
+    html+='<button type="button" class="btn btn-sm btn-outline-danger" onclick="clearEcgGallery(\''+target+'\',\''+previewId+'\',\''+metaId+'\')"><i class="fa fa-trash me-1"></i>Clear All</button>';
+    html+='<span id="'+metaId+'" class="text-muted small">'+(entries.length?(entries.length+' image'+(entries.length===1?'':'s')):'')+'</span></div>';
+    html+='<input type="file" id="'+galleryId+'" accept="image/*" multiple style="display:none" onchange="handleEcgGalleryUpload(this,\''+target+'\',\''+previewId+'\',\''+metaId+'\')">';
+    html+='<input type="file" id="'+cameraId+'" accept="image/*" capture="environment" style="display:none" onchange="handleEcgGalleryUpload(this,\''+target+'\',\''+previewId+'\',\''+metaId+'\')">';
+    html+='<div id="'+previewId+'" class="mt-2">'+((typeof ecgGalleryHTML==='function')?ecgGalleryHTML(entries,target,true):'')+'</div></div>';
+    return html;
+}
+
 function _extraMedicationEditorHtml(idx, adm){
     var html='<div class="col-12"><div class="alert alert-light border py-2 px-3 mb-2" style="font-size:0.78rem;"><i class="fa fa-circle-info text-primary me-1"></i>Same medication workflow as the index admission and OPD visit.</div>';
     ADMISSION_MED_GROUPS.forEach(function(group){
@@ -5836,6 +5870,9 @@ function _extraFieldHtml(idx, f, adm){
     }
     if(f.t==='fullmeds'){
         return out+_extraMedicationEditorHtml(idx,adm||{});
+    }
+    if(f.t==='ecgimages'){
+        return out+_extraEcgGalleryEditorHtml(idx,adm||{});
     }
     // Pill group — many binary Yes/No fields in one row of pills.
     if(f.t==='pills'){
@@ -6401,7 +6438,7 @@ function restoreBaselineInvestigationFlags(data){
 
 function restoreVisitInvestigationFlags(data){
     data=data||{};
-    if(_dataHasAny(data,['V_QRS','V_Arrhythmia','V_Pacing_Mode','V_ECG_Image'])||data.V_LBBB==='Yes'||data.V_Pacing_ECG==='Yes')_setVal('V_ECG_Done','Yes');
+    if(_dataHasAny(data,['V_QRS','V_Arrhythmia','V_Pacing_Mode','V_ECG_Image','V_ECG_Images'])||data.V_LBBB==='Yes'||data.V_Pacing_ECG==='Yes')_setVal('V_ECG_Done','Yes');
     if(_dataHasAny(data,['V_Holter_Date','V_Holter_Duration','V_Holter_MaxHR','V_Holter_MinHR','V_Holter_AvgHR','V_Holter_Arrhythmia','V_Holter_Findings']))_setVal('V_Holter_Done','Yes');
     if(_dataHasAny(data,['V_EF_Change','V_Echo_EDVI','V_Echo_ESVI','V_Echo_EF','V_Echo_Other']))_setVal('V_Echo_Done','Yes');
     if(_dataHasAny(data,['V_CMR_LVEDVI','V_CMR_LVESVI','V_CMR_LVEF','V_CMR_RVEDI','V_CMR_RVEF','V_CMR_LGE_Pct','V_CMR_Others'])||data.V_CMR_LGE==='Yes')_setVal('V_CMR_Done','Yes');
@@ -8278,9 +8315,8 @@ function editVisit(visitId){
     if(cancelBtn) cancelBtn.style.display = 'block';
     var formTitle = document.getElementById("visitFormTitle");
     if(formTitle) formTitle.innerHTML = '<i class="fa fa-edit me-1"></i>Editing Visit ('+ (v.visitDate||'') +')';
-    // Restore visit ECG image preview (if any)
-    renderEcgImagePreview('vEcgImagePreview', v.V_ECG_Image||'');
-    var _vem=document.getElementById('vEcgImageMeta'); if(_vem) _vem.textContent = v.V_ECG_Image?'Saved image':'';
+    // Restore all visit ECG images, including legacy single-image records.
+    if(typeof restoreEcgGalleryForm==='function')restoreEcgGalleryForm('V_ECG_Images',v,'vEcgImagePreview','vEcgImageMeta');
     var _vef=document.getElementById('V_ECG_Image_File'); if(_vef) _vef.value='';
     // Restore visit Other Symptoms checkboxes from hidden field
     if(typeof unpackVisitOtherSymptoms==='function')unpackVisitOtherSymptoms();
@@ -8381,56 +8417,258 @@ function deleteVisit(visitId, visitDateLabel){
     }).catch(function(e){ showPopup("error","Error",e.message); });
 }
 
-// ===== ECG IMAGE COMPRESSION & UPLOAD =====
-// Compresses ECG images client-side to keep Firestore docs lean (<1 MB limit).
-// Keeps a 2000 px long edge and starts at JPEG quality 0.78 so waveform/grid
-// detail survives enlargement, then lowers quality only when the file is large.
-function handleEcgImageUpload(inputEl,hiddenId,previewId,metaId){
-    var file=inputEl&&inputEl.files&&inputEl.files[0];
-    if(!file)return;
-    var meta=document.getElementById(metaId);
-    if(meta)meta.textContent='Compressing…';
-    var reader=new FileReader();
-    reader.onload=function(e){
-        var img=new Image();
-        img.onload=function(){
-            var maxEdge=2000;
-            var w=img.width,h=img.height;
-            if(Math.max(w,h)>maxEdge){
-                if(w>=h){var r=maxEdge/w;w=maxEdge;h=Math.round(h*r);}
-                else{var r2=maxEdge/h;h=maxEdge;w=Math.round(w*r2);}
-            }
-            var canvas=document.createElement('canvas');
-            canvas.width=w;canvas.height=h;
-            var ctx=canvas.getContext('2d');
-            ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h); // flatten transparency for JPEG
-            ctx.drawImage(img,0,0,w,h);
-            var quality=0.78;
-            var dataUrl=canvas.toDataURL('image/jpeg',quality);
-            // Approximate byte size from base64 length
-            var b64=dataUrl.split(',')[1]||'';
-            var bytes=Math.round(b64.length*3/4);
-            // Preserve resolution; reduce JPEG quality progressively only when
-            // needed to leave safe room inside Firestore's document limit.
-            while(bytes>520*1024&&quality>0.46){
-                quality=Math.max(0.46,quality-0.08);
-                dataUrl=canvas.toDataURL('image/jpeg',quality);
-                b64=dataUrl.split(',')[1]||'';
-                bytes=Math.round(b64.length*3/4);
-            }
-            var hidden=document.getElementById(hiddenId);
-            if(hidden)hidden.value=dataUrl;
-            renderEcgImagePreview(previewId,dataUrl);
-            if(meta){
-                var kb=(bytes/1024).toFixed(0);
-                meta.textContent=w+'×'+h+' · ~'+kb+' KB';
-            }
-        };
-        img.onerror=function(){if(meta)meta.textContent='Could not load image.';};
-        img.src=e.target.result;
+// ===== ECG IMAGE GALLERIES =====
+// New ECGs are stored as image files in Firebase Storage; only compact
+// name/date/URL metadata is saved with the patient or visit record. Existing
+// single-image data URLs are migrated into the gallery automatically.
+var ECG_INLINE_GALLERY_LIMIT=430*1024;
+
+function _ecgDataUrlBytes(dataUrl){
+    var b64=String(dataUrl||'').split(',')[1]||'';
+    return Math.round(b64.length*3/4);
+}
+
+function _ecgDataUrlToBlob(dataUrl){
+    var parts=String(dataUrl||'').split(','),mime=((parts[0]||'').match(/data:([^;]+)/)||[])[1]||'image/jpeg';
+    var binary=atob(parts[1]||''),bytes=new Uint8Array(binary.length);
+    for(var i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+    return new Blob([bytes],{type:mime});
+}
+
+function _ecgGalleryId(){
+    return 'ecg_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,9);
+}
+
+function _normalizeEcgGalleryEntry(entry,index){
+    if(typeof entry==='string')entry={url:entry};
+    entry=entry||{};
+    var url=entry.url||entry.src||entry.data||'';
+    if(!url)return null;
+    var normalizedId=String(entry.id||('legacy_'+index+'_'+Math.abs(String(url).length))).replace(/[^a-zA-Z0-9_-]/g,'_');
+    return {
+        id:normalizedId||('ecg_'+index),
+        name:String(entry.name||entry.title||('ECG '+(index+1))),
+        date:String(entry.date||entry.ecgDate||''),
+        url:String(url),
+        path:String(entry.path||''),
+        width:Number(entry.width)||0,
+        height:Number(entry.height)||0,
+        bytes:Number(entry.bytes)||_ecgDataUrlBytes(url)
     };
-    reader.onerror=function(){if(meta)meta.textContent='Could not read file.';};
-    reader.readAsDataURL(file);
+}
+
+function _parseEcgGalleryEntries(raw,legacyImage){
+    var parsed=[];
+    if(Array.isArray(raw))parsed=raw;
+    else if(raw&&typeof raw==='string'){
+        try{var candidate=JSON.parse(raw);parsed=Array.isArray(candidate)?candidate:[];}
+        catch(_galleryParseError){if(/^data:image\//.test(raw)||/^https?:\/\//.test(raw))parsed=[{url:raw}];}
+    }
+    if(!parsed.length&&legacyImage)parsed=[{id:'legacy_single',name:'ECG 1',date:'',url:legacyImage}];
+    return parsed.map(_normalizeEcgGalleryEntry).filter(Boolean);
+}
+
+function _readEcgGalleryTarget(target){
+    if(String(target).indexOf('extra:')===0){
+        var idx=parseInt(String(target).split(':')[1],10),arr=_readExtraAdmissions();
+        return (idx>=0&&idx<arr.length)?_parseEcgGalleryEntries(arr[idx].ECG_Images,arr[idx].ECG_Image):[];
+    }
+    var hidden=document.getElementById(target);
+    var legacyId=(target==='V_ECG_Images')?'V_ECG_Image':'ECG_Image';
+    return _parseEcgGalleryEntries(hidden&&hidden.value,(document.getElementById(legacyId)||{}).value||'');
+}
+
+function _writeEcgGalleryTarget(target,entries){
+    entries=(entries||[]).map(_normalizeEcgGalleryEntry).filter(Boolean);
+    if(String(target).indexOf('extra:')===0){
+        var idx=parseInt(String(target).split(':')[1],10),arr=_readExtraAdmissions();
+        if(idx>=0&&idx<arr.length){
+            arr[idx].ECG_Images=entries;
+            arr[idx].ECG_Image=(entries[0]&&!/^data:/.test(entries[0].url))?entries[0].url:'';
+            _writeExtraAdmissions(arr);
+        }
+        return;
+    }
+    var hidden=document.getElementById(target);if(hidden)hidden.value=JSON.stringify(entries);
+    var legacyId=(target==='V_ECG_Images')?'V_ECG_Image':'ECG_Image';
+    var legacy=document.getElementById(legacyId);
+    if(legacy)legacy.value=(entries[0]&&!/^data:/.test(entries[0].url))?entries[0].url:'';
+}
+
+function _ecgGalleryUi(target){
+    if(String(target).indexOf('extra:')===0){
+        var idx=String(target).split(':')[1];
+        return {preview:'ea_'+idx+'_ECG_Images_Preview',meta:'ea_'+idx+'_ECG_Images_Meta'};
+    }
+    return target==='V_ECG_Images'?{preview:'vEcgImagePreview',meta:'vEcgImageMeta'}:{preview:'ecgImagePreview',meta:'ecgImageMeta'};
+}
+
+function _ecgDefaultDate(target){
+    if(String(target).indexOf('extra:')===0){
+        var idx=parseInt(String(target).split(':')[1],10),arr=_readExtraAdmissions();
+        return (idx>=0&&idx<arr.length)?String(arr[idx].date||''):'';
+    }
+    if(target==='V_ECG_Images')return String((document.getElementById('Visit_Date')||{}).value||'');
+    return String((document.getElementById('Admission_Date')||{}).value||(document.getElementById('Last_Admission')||{}).value||'');
+}
+
+function ecgGalleryHTML(entries,target,editable,compact){
+    entries=(entries||[]).map(_normalizeEcgGalleryEntry).filter(Boolean);
+    if(!entries.length)return '<div class="ecg-gallery-empty"><i class="fa fa-images me-1"></i>No ECG images added yet.</div>';
+    var html='<div class="ecg-gallery-grid">';
+    entries.forEach(function(entry){
+        var safeId=String(entry.id).replace(/[^a-zA-Z0-9_-]/g,'');
+        html+='<div class="ecg-gallery-item'+(compact?' ecg-mini-preview':'')+'">';
+        html+='<button type="button" class="ecg-preview-open" onclick="event.stopPropagation();openEcgViewer(this.querySelector(&quot;img&quot;).src)" aria-label="Open '+_esc(entry.name)+' full screen"><img src="'+_esc(entry.url)+'" alt="'+_esc(entry.name)+'"></button>';
+        if(editable){
+            html+='<div class="ecg-gallery-fields"><div><label>Name</label><input type="text" class="form-control form-control-sm" value="'+_esc(entry.name)+'" onchange="updateEcgGalleryEntry(\''+target+'\',\''+safeId+'\',\'name\',this.value)"></div>';
+            html+='<div><label>ECG Date</label><input type="date" class="form-control form-control-sm" value="'+_esc(entry.date)+'" onchange="updateEcgGalleryEntry(\''+target+'\',\''+safeId+'\',\'date\',this.value)"></div>';
+            html+='<button type="button" class="btn btn-sm btn-outline-danger ecg-gallery-remove" onclick="event.stopPropagation();removeEcgGalleryEntry(\''+target+'\',\''+safeId+'\')" title="Remove this ECG"><i class="fa fa-trash"></i></button></div>';
+        }else{
+            html+='<div class="ecg-gallery-display-meta"><span class="ecg-gallery-display-name">'+_esc(entry.name)+'</span><span>'+(entry.date?'<i class="fa fa-calendar me-1"></i>'+_esc(entry.date):'Date not recorded')+'</span></div>';
+        }
+        html+='</div>';
+    });
+    return html+'</div>';
+}
+
+function renderEcgGallery(target,previewId,metaId){
+    var entries=_readEcgGalleryTarget(target),preview=document.getElementById(previewId),meta=document.getElementById(metaId);
+    if(preview)preview.innerHTML=ecgGalleryHTML(entries,target,true,false);
+    if(meta)meta.textContent=entries.length?(entries.length+' image'+(entries.length===1?'':'s')):'';
+}
+
+function ecgGalleryDisplayHTML(raw,legacyImage,compact){
+    var entries=_parseEcgGalleryEntries(raw,legacyImage);
+    return entries.length?ecgGalleryHTML(entries,'',false,compact!==false):'';
+}
+
+function updateEcgGalleryEntry(target,id,field,value){
+    var entries=_readEcgGalleryTarget(target),entry=entries.filter(function(x){return String(x.id)===String(id);})[0];
+    if(!entry||['name','date'].indexOf(field)<0)return;
+    entry[field]=String(value||'');
+    _writeEcgGalleryTarget(target,entries);
+}
+
+function removeEcgGalleryEntry(target,id){
+    var entries=_readEcgGalleryTarget(target),removed=entries.filter(function(x){return String(x.id)===String(id);})[0];
+    if(!removed)return;
+    if(typeof window!=='undefined'&&window.confirm&&!window.confirm('Remove "'+(removed.name||'this ECG')+'"?'))return;
+    entries=entries.filter(function(x){return String(x.id)!==String(id);});
+    _writeEcgGalleryTarget(target,entries);
+    var ui=_ecgGalleryUi(target);renderEcgGallery(target,ui.preview,ui.meta);
+    if(removed.path&&ecgStorage)ecgStorage.ref(removed.path).delete().catch(function(){});
+}
+
+function clearEcgGallery(target,previewId,metaId){
+    var entries=_readEcgGalleryTarget(target);
+    if(entries.length&&typeof window!=='undefined'&&window.confirm&&!window.confirm('Remove all '+entries.length+' ECG images?'))return;
+    _writeEcgGalleryTarget(target,[]);
+    renderEcgGallery(target,previewId,metaId);
+    entries.forEach(function(entry){if(entry.path&&ecgStorage)ecgStorage.ref(entry.path).delete().catch(function(){});});
+    ['ECG_Image_FilePick','ECG_Image_FileCam','V_ECG_Image_FilePick','V_ECG_Image_FileCam'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+}
+
+// Clear only the form draft. This deliberately does not delete stored files;
+// it is used after save and when switching patients.
+function resetEcgGalleryForm(target,previewId,metaId){
+    _writeEcgGalleryTarget(target,[]);
+    var preview=document.getElementById(previewId);if(preview)preview.innerHTML='';
+    var meta=document.getElementById(metaId);if(meta)meta.textContent='';
+    var prefix=target==='V_ECG_Images'?'V_':'';
+    [prefix+'ECG_Image_FilePick',prefix+'ECG_Image_FileCam',prefix+'ECG_Image_File'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+}
+
+function restoreEcgGalleryForm(target,record,previewId,metaId){
+    record=record||{};
+    var legacyKey=target==='V_ECG_Images'?'V_ECG_Image':'ECG_Image';
+    var entries=_parseEcgGalleryEntries(record[target],record[legacyKey]);
+    _writeEcgGalleryTarget(target,entries);
+    renderEcgGallery(target,previewId,metaId);
+}
+
+function _compressEcgGalleryFile(file){
+    return new Promise(function(resolve,reject){
+        var reader=new FileReader();
+        reader.onerror=function(){reject(new Error('Could not read '+file.name));};
+        reader.onload=function(event){
+            var img=new Image();
+            img.onerror=function(){reject(new Error('Could not load '+file.name));};
+            img.onload=function(){
+                var maxEdge=2000,w=img.width,h=img.height;
+                if(Math.max(w,h)>maxEdge){var ratio=maxEdge/Math.max(w,h);w=Math.round(w*ratio);h=Math.round(h*ratio);}
+                var canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+                var ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);ctx.drawImage(img,0,0,w,h);
+                var quality=.78,dataUrl=canvas.toDataURL('image/jpeg',quality),bytes=_ecgDataUrlBytes(dataUrl);
+                while(bytes>520*1024&&quality>.46){quality=Math.max(.46,quality-.08);dataUrl=canvas.toDataURL('image/jpeg',quality);bytes=_ecgDataUrlBytes(dataUrl);}
+                var fallbackCanvas=canvas;
+                if(Math.max(w,h)>1400){
+                    var fr=1400/Math.max(w,h),fw=Math.round(w*fr),fh=Math.round(h*fr);
+                    fallbackCanvas=document.createElement('canvas');fallbackCanvas.width=fw;fallbackCanvas.height=fh;
+                    var fctx=fallbackCanvas.getContext('2d');fctx.fillStyle='#fff';fctx.fillRect(0,0,fw,fh);fctx.drawImage(canvas,0,0,fw,fh);
+                }
+                var fq=.62,fallback=fallbackCanvas.toDataURL('image/jpeg',fq),fallbackBytes=_ecgDataUrlBytes(fallback);
+                while(fallbackBytes>135*1024&&fq>.30){fq=Math.max(.30,fq-.06);fallback=fallbackCanvas.toDataURL('image/jpeg',fq);fallbackBytes=_ecgDataUrlBytes(fallback);}
+                resolve({blob:_ecgDataUrlToBlob(dataUrl),dataUrl:dataUrl,bytes:bytes,width:w,height:h,fallbackDataUrl:fallback,fallbackBytes:fallbackBytes});
+            };
+            img.src=event.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+function _ecgStoragePath(target,id){
+    var user=(typeof auth!=='undefined'&&auth.currentUser&&auth.currentUser.uid)||'authenticated';
+    var patient=(currentPatientId||editingDocId||(document.getElementById('Civil_ID')||{}).value||(document.getElementById('File_No')||{}).value||'draft');
+    patient=String(patient).replace(/[^a-zA-Z0-9_-]/g,'_');
+    return 'ecg-images/'+user+'/'+patient+'/'+String(target).replace(/[^a-zA-Z0-9_-]/g,'_')+'/'+Date.now()+'_'+id+'.jpg';
+}
+
+function _uploadCompressedEcg(target,file,result){
+    var id=_ecgGalleryId(),path=_ecgStoragePath(target,id);
+    if(!ecgStorage)return Promise.reject(new Error('Image storage is unavailable'));
+    return ecgStorage.ref(path).put(result.blob,{contentType:'image/jpeg'}).then(function(snapshot){
+        return snapshot.ref.getDownloadURL();
+    }).then(function(url){
+        return {id:id,name:String(file.name||'ECG').replace(/\.[^.]+$/,''),date:_ecgDefaultDate(target),url:url,path:path,width:result.width,height:result.height,bytes:result.bytes};
+    });
+}
+
+function _ecgInlineBytes(entries){
+    return (entries||[]).reduce(function(sum,entry){return sum+(String(entry.url||'').indexOf('data:')===0?_ecgDataUrlBytes(entry.url):0);},0);
+}
+
+function handleEcgGalleryUpload(inputEl,target,previewId,metaId){
+    var files=Array.prototype.slice.call(inputEl&&inputEl.files||[]).filter(function(file){return /^image\//.test(file.type||'image/unknown');});
+    if(!files.length)return;
+    var meta=document.getElementById(metaId),entries=_readEcgGalleryTarget(target),completed=0,failed=[];
+    var chain=Promise.resolve();
+    files.forEach(function(file,index){
+        chain=chain.then(function(){
+            if(meta)meta.textContent='Preparing '+(index+1)+' of '+files.length+'…';
+            return _compressEcgGalleryFile(file).then(function(result){
+                if(meta)meta.textContent='Uploading '+(index+1)+' of '+files.length+'…';
+                return _uploadCompressedEcg(target,file,result).catch(function(){
+                    if(_ecgInlineBytes(entries)+result.fallbackBytes>ECG_INLINE_GALLERY_LIMIT)throw new Error('Online image storage is unavailable and the safe offline image limit has been reached.');
+                    return {id:_ecgGalleryId(),name:String(file.name||'ECG').replace(/\.[^.]+$/,''),date:_ecgDefaultDate(target),url:result.fallbackDataUrl,path:'',width:result.width,height:result.height,bytes:result.fallbackBytes};
+                });
+            }).then(function(entry){
+                entries.push(entry);completed++;
+                _writeEcgGalleryTarget(target,entries);
+                renderEcgGallery(target,previewId,metaId);
+            }).catch(function(error){failed.push(error.message||String(error));});
+        });
+    });
+    chain.then(function(){
+        inputEl.value='';
+        if(meta)meta.textContent=completed+' added · '+entries.length+' total'+(failed.length?' · '+failed.length+' failed':'');
+        if(failed.length&&typeof showPopup==='function')showPopup('warning','Some ECG images were not added',failed.join(' '));
+    });
+}
+
+// Backward-compatible single-image entry point used by older cached markup.
+function handleEcgImageUpload(inputEl,hiddenId,previewId,metaId){
+    handleEcgGalleryUpload(inputEl,hiddenId==='V_ECG_Image'?'V_ECG_Images':'ECG_Images',previewId,metaId);
 }
 
 function ecgImagePreviewHTML(dataUrl,compact){
@@ -8698,8 +8936,8 @@ function clearVisitForm(){
     document.querySelectorAll('[id^="V_"]').forEach(function(el){if(el.tagName==='SELECT'){el.selectedIndex=0;}else if(el.type==='checkbox'){el.checked=false;}else{el.value="";}});
     document.getElementById("Visit_Date").value="";document.getElementById("Next_Appt").value="";document.getElementById("Visit_Type").value="Routine";
     var _napt=document.getElementById("Next_Appt_Notes");if(_napt)_napt.value="";
-    // Clear ECG image preview/meta
-    clearEcgImage('V_ECG_Image','V_ECG_Image_File','vEcgImagePreview','vEcgImageMeta');
+    // Clear only the ECG gallery draft; saved files remain attached to history.
+    if(typeof resetEcgGalleryForm==='function')resetEcgGalleryForm('V_ECG_Images','vEcgImagePreview','vEcgImageMeta');
     // Reset visit med _Status selectors to "No" and collapse their sub-fields
     if(typeof VISIT_MED_LIST !== 'undefined'){
         VISIT_MED_LIST.forEach(function(m){
@@ -8852,6 +9090,7 @@ function buildAdmissionHistoryItems(patientId){
     var data=(patientId && typeof PC==='object' && PC[patientId]) ? PC[patientId] : {};
     var items=[];
     var main=_fillAdmissionFromSchema({}, data);
+    main.ECG_Image=_readPatientOrFormValue(data,'ECG_Image');
     main.Last_Admission=_readPatientOrFormValue(data,'Last_Admission');
     main.Admissions=_readPatientOrFormValue(data,'Admissions');
     main._admissionSeq=1;
@@ -9030,6 +9269,11 @@ function buildAdmissionDetailHTML(adm){
         var rows='';
         (sec.fields||[]).forEach(function(f){
             if(!f || !f.k || f.t==='subhead') return;
+            if(f.t==='ecgimages'){
+                var gallery=ecgGalleryDisplayHTML(adm.ECG_Images,adm.ECG_Image,true);
+                if(gallery)rows+='<tr><td colspan="2">'+gallery+'</td></tr>';
+                return;
+            }
             if(f.t==='pills' && Array.isArray(f.items)){
                 f.items.forEach(function(it){
                     var pv=adm[it.k];
@@ -9081,9 +9325,8 @@ function buildVisitDetailHTML(v){
         });
         if(rows){html+='<tr><td colspan="2"><div class="vh-section-label">'+sec.name+'</div></td></tr>'+rows;}
     });
-    if(v.V_ECG_Image){
-        html+='<tr><td colspan="2"><div class="vh-section-label">ECG Image</div>'+ecgImagePreviewHTML(v.V_ECG_Image,true)+'</td></tr>';
-    }
+    var visitEcgGallery=ecgGalleryDisplayHTML(v.V_ECG_Images,v.V_ECG_Image,true);
+    if(visitEcgGallery)html+='<tr><td colspan="2"><div class="vh-section-label">ECG Images</div>'+visitEcgGallery+'</td></tr>';
     // Medications with non-empty values
     var medRows='';
     VISIT_MED_LIST.forEach(function(m){
@@ -9186,10 +9429,10 @@ function resetForm(){
     document.querySelectorAll('#valvularTypeBox button, #pciCabgBox button, #inHospProceduresBox button').forEach(function(b){ b.classList.remove('btn-primary'); b.classList.add('btn-outline-primary'); });
     // Reset extra in-hospital admissions list
     var _ea=document.getElementById('Extra_Admissions'); if(_ea){ _ea.value='[]'; var _ew=document.getElementById('extraAdmissionsWrap'); if(_ew) _ew.innerHTML=''; }
-    // Clear ECG image previews
-    if(typeof clearEcgImage==='function'){
-        clearEcgImage('ECG_Image','ECG_Image_File','ecgImagePreview','ecgImageMeta');
-        clearEcgImage('V_ECG_Image','V_ECG_Image_File','vEcgImagePreview','vEcgImageMeta');
+    // Clear ECG gallery drafts without deleting already-saved Storage files.
+    if(typeof resetEcgGalleryForm==='function'){
+        resetEcgGalleryForm('ECG_Images','ecgImagePreview','ecgImageMeta');
+        resetEcgGalleryForm('V_ECG_Images','vEcgImagePreview','vEcgImageMeta');
     }
     goToWizardStep(1);
 }
@@ -9505,8 +9748,9 @@ function generateCardHTML(data, id, latestVisit, allVisits, historyState){
         html += "<div class='col-12 mb-3'><h6 class='text-secondary border-bottom pb-1'>"+sn[idx]+" <small class='text-muted fw-normal'>("+filledInSection+" field"+(filledInSection>1?'s':'')+")</small></h6><table class='table table-sm table-bordered mb-0'>"+rows+"</table></div>";
     });
 
-    if(snap.ECG_Image){
-        html += "<div class='col-12 mb-3'><h6 class='text-secondary border-bottom pb-1'>ECG Image <small class='text-muted fw-normal'>(click to enlarge)</small></h6>"+ecgImagePreviewHTML(snap.ECG_Image,true)+"</div>";
+    var cardEcgGallery=ecgGalleryDisplayHTML(snap.ECG_Images,snap.ECG_Image,true);
+    if(cardEcgGallery){
+        html += "<div class='col-12 mb-3'><h6 class='text-secondary border-bottom pb-1'>ECG Images <small class='text-muted fw-normal'>(click to enlarge)</small></h6>"+cardEcgGallery+"</div>";
         totalFilled++;
     }
 
@@ -9541,7 +9785,7 @@ function _buildLatestSnapshot(data, latestVisit){
         V_NYHA:'NYHA', V_KCCQ:'KCCQ', V_Edema:'Edema', V_Pulse:'Pulse', V_BP:'BP', V_SpO2:'SpO2',
         V_Weight:'Weight', V_JVP:'JVP', V_Rales:'Rales', V_S3:'S3',
         V_Device_Done:'Device_Done', V_Device_Type:'Device_Type', V_Device_Date:'Device_Date', V_Device_Info:'Device_Info',
-        V_ECG_Done:'ECG_Done', V_ECG_Image:'ECG_Image',
+        V_ECG_Done:'ECG_Done', V_ECG_Image:'ECG_Image', V_ECG_Images:'ECG_Images',
         V_LBBB:'ECG_LBBB', V_QRS:'ECG_QRS', V_Arrhythmia:'ECG_Arrhythmia',
         V_Echo_Done:'Echo_Done', V_Echo_EDVI:'Echo_EDVI', V_Echo_ESVI:'Echo_ESVI', V_Echo_EF:'Echo_EF', V_Echo_Other:'ECHO',
         V_CMR_Done:'CMR_Done',
@@ -10185,9 +10429,9 @@ function _clearPatientFormFields(){
     document.querySelectorAll('#pciCabgBox button').forEach(function(b){ b.classList.remove('btn-primary'); b.classList.add('btn-outline-primary'); });
     // Reset In-Hospital Procedures multi-select buttons
     document.querySelectorAll('#inHospProceduresBox button').forEach(function(b){ b.classList.remove('btn-primary'); b.classList.add('btn-outline-primary'); });
-    // Clear ECG image preview
-    if(typeof clearEcgImage==='function'){
-        try { clearEcgImage('ECG_Image','ECG_Image_File','ecgImagePreview','ecgImageMeta'); } catch(e){}
+    // Clear the ECG gallery draft without deleting saved image files.
+    if(typeof resetEcgGalleryForm==='function'){
+        try { resetEcgGalleryForm('ECG_Images','ecgImagePreview','ecgImageMeta'); } catch(e){}
     }
     // Clear ID-validation error states
     var ci=document.getElementById('Civil_ID'); if(ci) ci.classList.remove('input-error');
@@ -10336,9 +10580,8 @@ function editPt(id){
     if(typeof updateAgeFromCivilID==='function')updateAgeFromCivilID();
     applyPhenotypeEmphasis();updateGDMTRationale();checkGDMTAlerts();checkCRTIndication();calcBMI();
     if(typeof calcDischargeEGFR==='function') calcDischargeEGFR();
-    // Restore baseline ECG image preview (if any)
-    renderEcgImagePreview('ecgImagePreview', d.ECG_Image||'');
-    var _em=document.getElementById('ecgImageMeta'); if(_em) _em.textContent = d.ECG_Image?'Saved image':'';
+    // Restore all baseline/admission ECG images, including legacy records.
+    if(typeof restoreEcgGalleryForm==='function')restoreEcgGalleryForm('ECG_Images',d,'ecgImagePreview','ecgImageMeta');
     var _ef=document.getElementById('ECG_Image_File'); if(_ef) _ef.value='';
     document.getElementById("formTitle").innerText="Editing: "+d.Patient_Name;
     document.getElementById("cancelEditBtn").classList.remove("d-none");
