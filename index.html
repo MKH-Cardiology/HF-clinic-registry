@@ -1712,6 +1712,18 @@ details.cf-ov-legacy>summary{cursor:pointer;font-weight:700;color:var(--cf-navy)
 .cf-st-badge:empty{display:none;}
 .cf-rv-inline{margin-top:3px;display:flex;flex-direction:column;gap:2px;font-size:.66rem;color:var(--cf-ink-2);}
 .cf-rv-inline .cf-st{align-self:flex-start;}
+/* Calendar history */
+.cf-cal-tag{display:inline-block;font-size:.66rem;font-weight:700;border-radius:999px;padding:1px 7px;margin-right:4px;vertical-align:1px;}
+.cf-cal-tag.seen{background:#E7F6EC;color:#1B7F3B;}
+.cf-cal-tag.missed{background:#FDECEC;color:#B42318;}
+.cf-cal-tag.booked{background:#E8F1FB;color:#0B2D5B;}
+/* Back to overview bar (Edit record) */
+.cf-ov-bar{position:fixed;top:10px;left:10px;z-index:1040;display:flex;align-items:center;gap:10px;background:#0B2D5B;color:#fff;border-radius:999px;padding:5px 14px 5px 5px;box-shadow:0 6px 18px rgba(11,45,91,.28);font-size:.82rem;max-width:calc(100vw - 20px);}
+.cf-ov-bar span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+@media (max-width:576px){.cf-ov-bar span{display:none;}.cf-ov-bar{padding:5px;}}
+.cf-ov-bar .cf-ov-back{background:#fff;color:#0B2D5B;font-weight:600;border-radius:999px;padding:3px 12px;}
+.cf-ov-bar .cf-ov-back:hover{background:#E8F1FB;}
+.cf-trend.cf-bmi-flag b{color:#b45309;}
 
 </style>
 
@@ -3153,7 +3165,7 @@ details.cf-ov-legacy>summary{cursor:pointer;font-weight:700;color:var(--cf-navy)
                         </div>
                         <div class="col-12 col-md-8">
                             <label class="text-muted">Notes (optional)</label>
-                            <input type="text" class="form-control" id="Next_Appt_Notes" placeholder="e.g. clinic name, reason, special instructions...">
+                            <input type="text" class="form-control" id="Next_Appt_Notes" placeholder="e.g. clinic name, reason, special instructions..."><input type="hidden" id="V_Next_Appt_Set">
                         </div>
                     </div>
                 </div>
@@ -3231,7 +3243,6 @@ details.cf-ov-legacy>summary{cursor:pointer;font-weight:700;color:var(--cf-navy)
                 <li class="nav-item"><button class="nav-link" onclick="showMainAlertsTab('kccq',this)" style="font-weight:600;"><i class="fa fa-heart-pulse text-secondary"></i> KCCQ 6 mo <span class="badge bg-secondary ms-1" id="mainKCCQCount">0</span></button></li>
                 <li class="nav-item"><button class="nav-link" onclick="showMainAlertsTab('overdue',this)" style="font-weight:600;"><i class="fa fa-user-clock text-danger"></i> Lost F/U 6 mo <span class="badge bg-danger ms-1" id="mainOverdueCount">0</span></button></li>
                 <li class="nav-item"><button class="nav-link" onclick="showMainAlertsTab('vacc',this)" style="font-weight:600;"><i class="fa fa-syringe text-primary"></i> Vaccinations Due <span class="badge bg-primary ms-1" id="mainVaccCount">0</span></button></li>
-                <li class="nav-item"><button class="nav-link" onclick="showMainAlertsTab('labs',this)" style="font-weight:600;"><i class="fa fa-vials text-danger"></i> Labs Due <span class="badge bg-danger ms-1" id="mainLabsCount">0</span></button></li>
             </ul>
             <div id="mainAlertsBody" style="min-height:300px;font-size:0.85rem;">
                 <div class="text-muted small text-center py-2"><i class="fa fa-spinner fa-spin"></i> Loading alerts...</div>
@@ -3911,7 +3922,7 @@ var VISIT_MED_GROUPS = [
         label: 'Potassium Chelators',
         meds: [
             {id:'V_Veltassa', label:'Veltassa', doses:['','8.4 g PO OD','16.8 g PO OD','25.2 g PO OD']},
-            {id:'V_Lokelma',  label:'Lokelma',  doses:['','5 g PO OD','10 g PO OD']}
+            {id:'V_Lokelma',  label:'Lokelma',  doses:['','5 g PO OD','10 g PO OD','10 g PO TID (loading, 48 h)']}
         ]
     }
 ];
@@ -4142,10 +4153,6 @@ function renderMainAlertsBody(){
         renderApptCalendar();
         return;
     }
-    if(_mainAlertsActiveTab==='labs'){
-        body.innerHTML=CFUI.renderClinicLabs(_mainAlertsData.labs||[]);
-        return;
-    }
     var list=_mainAlertsData[_mainAlertsActiveTab]||[];
     if(list.length===0){
         var msg={
@@ -4275,7 +4282,10 @@ function loadMainAlerts(){
             var d=patientRow.data;
             var id=patientRow.id;
             // Skip deceased patients from alerts
-            if(d.Mortality&&d.Mortality!=='Alive'&&d.Mortality!=='')return;
+            if(d.Mortality&&d.Mortality!=='Alive'&&d.Mortality!==''){
+                if(typeof CFUI!=='undefined')patientPromises.push(limitedVisitInfo(id).then(function(vi){CFUI.calHistory(d,id,(vi&&vi.all)||[],todayStr,_mainAlertsData.apptByDay);}).catch(function(){}));
+                return;
+            }
             // Upcoming appointments (14-day list) AND full calendar map (all future)
             if(d.Next_Appt&&d.Next_Appt>=todayStr){
                 var da=Math.floor((new Date(d.Next_Appt)-new Date(todayStr))/(1000*60*60*24));
@@ -4289,9 +4299,11 @@ function loadMainAlerts(){
                 limitedVisitInfo(id).then(function(visitInfo){
                     var all=(visitInfo.all||[]).map(function(v){return Object.assign({},v);});
                     all.sort(function(a,b){return isoDate(b.visitDate).localeCompare(isoDate(a.visitDate));});
+                    // Calendar history: past visits (seen) and past bookings with no visit (missed)
+                    if(typeof CFUI!=='undefined')CFUI.calHistory(d,id,all,todayStr,_mainAlertsData.apptByDay);
                     // Deaths recorded at a visit (or with a date) leave every clinic list
                     if(typeof CF!=='undefined'&&CF.vitalStatus(d,all).dead)return;
-                    if(typeof CFUI!=='undefined'){var _labs=CFUI.clinicLabs(d,all);if(_labs)_mainAlertsData.labs.push({name:d.Patient_Name,file:d.File_No,id:id,items:_labs});}
+
                     var lvDoc=all.length?all[0]:null;
                     var lastVisit=lvDoc?isoDate(lvDoc.visitDate):'';
                     var enrolled=isoDate(d.timestamp)||isoDate(d.lastEditAt);
@@ -4358,8 +4370,6 @@ function loadMainAlerts(){
             var kc=document.getElementById('mainKCCQCount');if(kc)kc.textContent=_mainAlertsData.kccq.length;
             var oc=document.getElementById('mainOverdueCount');if(oc)oc.textContent=_mainAlertsData.overdue.length;
             var vc=document.getElementById('mainVaccCount');if(vc)vc.textContent=_mainAlertsData.vacc.length;
-            _mainAlertsData.labs.sort(function(a,b){var ua=a.items.some(function(x){return x.level==='urgent';}),ub=b.items.some(function(x){return x.level==='urgent';});return (ub-ua)||(a.name||'').localeCompare(b.name||'');});
-            var lc=document.getElementById('mainLabsCount');if(lc)lc.textContent=_mainAlertsData.labs.length;
             renderMainAlertsBody();
         });
         });
@@ -16078,7 +16088,8 @@ var CF = (function () {
     var bmi = last(S, 'BMI');
     var w = last(S, 'Weight');
     var h = num(p.Height) || num((visits[0] || {}).V_Height);
-    var bmiVal = bmi ? bmi.value : (w && h ? w.value / Math.pow(h / 100, 2) : null);
+    // Latest weight with the height is the current BMI; a stored BMI is the fallback.
+    var bmiVal = w && h ? w.value / Math.pow(h / 100, 2) : (bmi ? bmi.value : null);
     var ihd = s(p.IHD) || s(v0.V_IHD);
     var ascvd = (ihd && !/^no$/i.test(ihd)) || flag('CVA') || flag('PVD') || !!s(p.PCI_CABG) || /CABG|PCI/i.test(s(v0.V_PCI_CABG));
     var hfType = s(p.HF_Type);
@@ -16087,7 +16098,7 @@ var CF = (function () {
     var age = num(p.Age);
     return {
       hfType: hfType, esc2026: esc2026, ef: efVal, efDate: ef ? ef.date : '',
-      bmi: bmiVal, weight: w ? w.value : null, age: age, female: /^f/i.test(s(p.Gender)),
+      bmi: bmiVal, height: h || null, weight: w ? w.value : null, age: age, female: /^f/i.test(s(p.Gender)),
       dm: flag('DM'), ckd: flag('CKD'), dialysis: flag('Dialysis'), af: flag('AF'), htn: flag('HTN'),
       ascvd: !!ascvd, obese: flag('Obese') || (bmiVal != null && bmiVal >= 30),
       smoker: s(p.Smoker) || s(v0.V_Smoker)
@@ -16194,6 +16205,14 @@ var CF = (function () {
     // H. drug-specific
     if (onClass(hist, 'amiodarone').length) { var tsh = last(S, 'TSH'); push('amio', 'TSH + liver tests', dueFrom(tsh, RULES.amioEveryMonths), 'On amiodarone'); }
     if (onClass(hist, 'vka').length) { var inr = last(S, 'INR'); push('inr', 'INR', inr ? addDays(inr.date, RULES.inrEveryDays) : today, 'On warfarin' + (inr ? ' · last INR ' + inr.value + ' on ' + fmt(inr.date) : '')); }
+    var kb = onClass(hist, 'kbinder')[0];
+    if (kb && kb.lastChange && !(S.K || []).some(function (o) { return o.date > kb.lastChange.date; }) && !out.some(function (o) { return o.key === 'k-high' || o.key === 'k-mild'; }))
+      push('k-binder', 'Potassium' + (kb.key === 'Veltassa' ? ' + magnesium' : ''), addDays(kb.lastChange.date, 7), drugLabel(kb.key) + ' ' + (kb.lastChange.type || 'changed').toLowerCase() + ' on ' + fmt(kb.lastChange.date) + ': check K at 1 week, then monthly', 'due');
+    else if (kb) {
+      var kL = last(S, 'K'), kr = out.filter(function (o) { return o.key === 'k-routine'; })[0];
+      if (kr) { kr.due = dueFrom(kL, 1); kr.labs = 'Potassium' + (kb.key === 'Veltassa' ? ' + magnesium' : '') + ' + creatinine'; kr.because += '; on ' + drugLabel(kb.key) + ': monthly K'; }
+      else if (!out.some(function (o) { return /^k-/.test(o.key); })) push('k-binder', 'Potassium' + (kb.key === 'Veltassa' ? ' + magnesium' : ''), dueFrom(kL, 1), 'On ' + drugLabel(kb.key) + ': monthly K');
+    }
     if (onClass(hist, 'digoxin').length) push('dig', 'Potassium + creatinine (digoxin)', dueFrom(K, 6), 'On digoxin: keep K normal and watch kidney function');
     // Show what matters: due / urgent first, then the next 60 days.
     var horizon = addDays(today, 60);
@@ -16205,7 +16224,7 @@ var CF = (function () {
   }
 
   function nextPreset(key, entry, dir) {
-    var list = presetsFor(key).map(function (d) { var q = parseDose(d); return { text: d, v: q ? (q.perDay != null ? q.perDay : q.mg) : null }; }).filter(function (x) { return x.v != null; });
+    var list = presetsFor(key).filter(function (d) { return !/loading/i.test(d); }).map(function (d) { var q = parseDose(d); return { text: d, v: q ? (q.perDay != null ? q.perDay : q.mg) : null }; }).filter(function (x) { return x.v != null; });
     var cur = entry.parsed ? (entry.parsed.perDay != null ? entry.parsed.perDay : entry.parsed.mg) : null;
     if (cur == null) return null;
     list.sort(function (a, b) { return a.v - b.v; });
@@ -16341,7 +16360,9 @@ var CF = (function () {
     kHoldMRA: 5.5, kHalveMRA: 5.0, kHoldRAS: 6.0, kHalveRAS: 5.5, kRisingFrom: 4.8,
     creatRiseHalve: 50, creatRiseHold: 100, creatHoldRAS: 310, creatHoldMRA: 221, egfrHoldMRA: 20, egfrReduceMRA: 30, egfrHoldRAS: 20,
     sbpLow: 90, sbpUp: 100, sbpFirstRAS: 130, hrLowBB: 50, hrUpBB: 60, hrPreferBB: 70, hrIvabradine: 70,
-    weightGainKg: 2, weightGainDays: 14, belowDryKg: 1, naLow: 130, minDaysBetweenChanges: 14, statinWeeks: 6
+    weightGainKg: 2, weightGainDays: 14, belowDryKg: 1, naLow: 130, minDaysBetweenChanges: 14, statinWeeks: 6,
+    // Potassium binders (Lokelma / Veltassa): consider when K is the barrier to RAS inhibitor / MRA
+    kBinderConsider: 5.0, kBinderUp: 5.0, kBinderLow: 4.0, kBinderAcute: 6.0, binderMinDaysBetweenChanges: 7
   };
   var REASON_FOR = { k: 'Hyperkalaemia', bp: 'Hypotension', hr: 'Bradycardia', renal: 'Worsening kidney function', contra: 'Contraindication', other: 'Other' };
   function latestVisitRec(visits) { return (visits || [])[0] || {}; }
@@ -16397,26 +16418,30 @@ var CF = (function () {
     function higher(h) { return nextPreset(h.key, h.current, +1); }
     function vtxt(label, o, unit) { return o ? label + ' ' + o.value + (unit || '') + ' (' + fmt(o.date, false) + ')' : ''; }
     var onLoop = onClass(hist, 'loop').length > 0;
+    var binder = onClass(hist, 'kbinder')[0] || null;
+    var binderHint = !binder && reducedEF ? ' If K is the only barrier, consider a potassium binder (Lokelma / Veltassa) to keep this drug.' : '';
+    var binderRestart = !binder && reducedEF ? ' Consider a potassium binder (Lokelma / Veltassa) to allow the restart.' : '';
     hist.current.forEach(function (h) {
       var d = DRUGS[h.key] || {}, cls = d.cls, pct = pctTarget(h.current), room = pct != null && pct < 100, sc = sinceChange(h);
       var start = h.lastChange && (h.lastChange.type === 'Start' || h.lastChange.type === 'Increase' || h.lastChange.type === 'Restart') ? h.lastChange.date : onStreakStart(h);
       var base = creatBaseline(S, start), rise = base && cV != null && base.value > 0 && C.date >= base.date ? Math.round((cV - base.value) / base.value * 100) : null;
       if (cls === 'mra') {
-        if (kV != null && kV > REVIEW.kHoldMRA) return put(h, 'hold', vtxt('K', K) + ' > ' + REVIEW.kHoldMRA + '. Hold; repeat K in 72 h; restart at a lower dose once K < 5.0.', { act: 'Hold', why: 'k' });
+        if (kV != null && kV > REVIEW.kHoldMRA) return put(h, 'hold', vtxt('K', K) + ' > ' + REVIEW.kHoldMRA + '. Hold; repeat K in 72 h; restart at a lower dose once K < 5.0.' + binderRestart, { act: 'Hold', why: 'k' });
         if ((rise != null && rise > REVIEW.creatRiseHold) || (cV != null && cV > REVIEW.creatHoldMRA) || (eV != null && eV < REVIEW.egfrHoldMRA)) return put(h, 'hold', [vtxt('Creatinine', C, ' µmol/L'), rise != null ? '+' + rise + '% from ' + base.value : '', vtxt('eGFR', E)].filter(Boolean).join(' · ') + '. Hold and review kidney function.', { act: 'Hold', why: 'renal' });
-        if (kV != null && kV > REVIEW.kHalveMRA) return put(h, 'reduce', vtxt('K', K) + ' (5.1–5.5): halve the dose and recheck K in 1 week.', { act: 'Decrease', next: lower(h), why: 'k' });
+        if (kV != null && kV > REVIEW.kHalveMRA && binder && higher(binder)) return put(h, 'continue', vtxt('K', K) + ' on ' + binder.key + ': keep this dose and increase the binder first; halve only if K stays > 5.5.');
+        if (kV != null && kV > REVIEW.kHalveMRA) return put(h, 'reduce', vtxt('K', K) + ' (5.1–5.5): halve the dose and recheck K in 1 week.' + binderHint, { act: 'Decrease', next: lower(h), why: 'k' });
         if (eV != null && eV < REVIEW.egfrReduceMRA) return put(h, 'reduce', vtxt('eGFR', E) + ': use the lowest dose (e.g. 12.5 mg or alternate days) with close K monitoring.', { act: 'Decrease', next: lower(h), why: 'renal' });
         if (kRising) return put(h, 'continue', 'K rising: ' + ks.map(function (o) { return o.value; }).join(' → ') + '. Recheck in 1–2 weeks before any increase.');
         if (reducedEF && room && sc >= REVIEW.minDaysBetweenChanges && (kV != null && kV <= 5.0) && (eV == null || eV >= 30)) return put(h, 'up', 'K ' + kV + (eV != null ? ', eGFR ' + eV : '') + ': room to reach the target dose.', { act: 'Increase', next: higher(h), pillar: 'MRA', pct: pct });
         return put(h, 'continue', [vtxt('K', K), vtxt('eGFR', E)].filter(Boolean).join(' · ') || 'No recent K / eGFR: check before any change.');
       }
       if (cls === 'acei' || cls === 'arb' || cls === 'arni') {
-        if (kV != null && kV > REVIEW.kHoldRAS) return put(h, 'hold', vtxt('K', K) + ' > 6.0: hold, treat hyperkalaemia, repeat K urgently.', { act: 'Hold', why: 'k' });
+        if (kV != null && kV > REVIEW.kHoldRAS) return put(h, 'hold', vtxt('K', K) + ' > 6.0: hold, treat hyperkalaemia, repeat K urgently.' + binderRestart, { act: 'Hold', why: 'k' });
         if ((rise != null && rise > REVIEW.creatRiseHold) || (cV != null && cV > REVIEW.creatHoldRAS) || (eV != null && eV < REVIEW.egfrHoldRAS)) return put(h, 'hold', [vtxt('Creatinine', C, ' µmol/L'), rise != null ? '+' + rise + '% from ' + base.value : '', vtxt('eGFR', E)].filter(Boolean).join(' · ') + '. Hold; look for dehydration, nephrotoxic drugs, renal artery stenosis.', { act: 'Hold', why: 'renal' });
         if (rise != null && rise > REVIEW.creatRiseHalve) return put(h, 'reduce', 'Creatinine +' + rise + '% since ' + fmt(base.date, false) + ' (' + base.value + ' → ' + cV + '). Halve the dose; recheck in 1–2 weeks.', { act: 'Decrease', next: lower(h), why: 'renal' });
         if (kV != null && kV > REVIEW.kHalveRAS) {
           if (onPillar(hist, 'MRA').length) return put(h, 'continue', vtxt('K', K) + ': hold the MRA first; halve this dose only if K stays > 5.5.');
-          return put(h, 'reduce', vtxt('K', K) + ': halve the dose, recheck K.', { act: 'Decrease', next: lower(h), why: 'k' });
+          return put(h, 'reduce', vtxt('K', K) + ': halve the dose, recheck K.' + binderHint, { act: 'Decrease', next: lower(h), why: 'k' });
         }
         if (sV != null && sV < REVIEW.sbpLow) {
           if (onLoop && !congested) return put(h, 'continue', vtxt('SBP', SB) + ': reduce the diuretic and other BP-lowering drugs first; reduce this only if still symptomatic.');
@@ -16466,7 +16491,24 @@ var CF = (function () {
       if (cls === 'ccb_nondhp' && reducedEF) return put(h, 'avoid', 'Rate-limiting CCB with LVEF < 50% worsens outcomes (ESC class III). Replace with a beta-blocker (or digoxin) for rate control.', { act: 'Stop', why: 'contra' });
       if (cls === 'class_ic' && reducedEF) return put(h, 'avoid', 'Class Ic antiarrhythmic with reduced EF is harmful. Amiodarone is the usual alternative.', { act: 'Stop', why: 'contra' });
       if ((cls === 'ccb_dhp' || cls === 'vaso') && reducedEF && sV != null && sV < 110) return put(h, 'reduce', vtxt('SBP', SB) + ': this drug adds no HF benefit; reduce or stop it to make BP room for GDMT.', { act: cls === 'ccb_dhp' ? 'Stop' : 'Decrease', next: lower(h), why: 'bp' });
-      if (cls === 'kbinder' && kV != null && kV < 4.0) return put(h, 'reduce', vtxt('K', K) + ': reduce the binder dose (keep the MRA / RAS inhibitor).', { act: 'Decrease', next: lower(h), why: 'other' });
+      if (cls === 'kbinder') {
+        var lok = h.key === 'Lokelma', loading = /loading|TID/i.test(doseText(h.current));
+        var caution = lok ? (congested ? ' Lokelma carries a sodium load (about 400 mg per 5 g): the patient is congested (' + cong.join(', ') + '), so review the diuretic or consider Veltassa.' : ' Sodium load (about 400 mg per 5 g): watch weight and oedema.')
+                          : ' Check magnesium; take 3 h apart from other oral drugs.';
+        var enables = onPillar(hist, 'MRA').length || onPillar(hist, 'RAS').length;
+        if (!enables && !gdmtReason(p, visits, 'MRA')) caution += ' Not on an MRA or RAS inhibitor now: restart GDMT or review whether the binder is still needed.';
+        if (kV == null) return put(h, 'continue', 'No K in the last 90 days: check K (and ' + (lok ? 'weight' : 'Mg') + ').' + caution);
+        if (kV < REVIEW.kBinderLow) return put(h, 'reduce', vtxt('K', K) + ' < 4.0: reduce the binder dose (keep the MRA / RAS inhibitor).' + caution, { act: 'Decrease', next: lower(h), why: 'other' });
+        if (loading) return put(h, 'reduce', 'On the Lokelma loading dose: after 48 h change to 5 g OD (10 g OD if K stays > 5.0).', { act: 'Decrease', next: '5 g PO OD', why: 'other' });
+        if (kV > REVIEW.kBinderAcute) return put(h, 'continue', vtxt('K', K) + ' > 6.0 on a binder: treat acute hyperkalaemia now and hold the MRA / RAS inhibitor; the binder alone is too slow.' + caution);
+        if (kV > REVIEW.kBinderUp) {
+          var up = higher(h);
+          if (up && sc >= REVIEW.binderMinDaysBetweenChanges) return put(h, 'up', vtxt('K', K) + ' still > 5.0 on the binder: increase to ' + up + ' and recheck K in 1 week.' + caution, { act: 'Increase', next: up });
+          if (up) return put(h, 'continue', vtxt('K', K) + ': dose changed ' + sc + ' days ago; recheck K before increasing.' + caution);
+          return put(h, 'continue', vtxt('K', K) + ' on the maximum binder dose: reduce the MRA first, then the RAS inhibitor.' + caution);
+        }
+        return put(h, 'continue', vtxt('K', K) + ': controlled (4.0–5.0). Keep the binder so the MRA / RAS inhibitor can continue or be uptitrated.' + caution);
+      }
       if (cls === 'glp1') {
         var b = pr.bmi;
         if (b != null && b < 25) return put(h, 'continue', 'BMI ' + Math.round(b * 10) / 10 + ': weight goal reached; review the dose and the indication.');
@@ -16500,6 +16542,22 @@ var CF = (function () {
     if (reducedEF && ef && ef.value <= 35 && !af && hV != null && hV >= REVIEW.hrIvabradine && !onClass(hist, 'ivab').length) {
       var bb = onClass(hist, 'bb')[0], bbPct = bb ? pctTarget(bb.current) : null;
       if (!bb || (bbPct != null && bbPct >= 100) || gdmtReason(p, visits, 'BB')) sugg.push({ key: 'ivab', title: 'Consider ivabradine', detail: 'Sinus rhythm, HR ' + hV + ' bpm, LVEF ' + ef.value + '% ' + (bb ? 'on the target beta-blocker dose' : 'with beta-blocker not tolerated') + ' (ESC class IIa). Start 5 mg BID (2.5 mg if > 75 years).', drug: 'Procorolan', act: 'Start', next: '5 mg PO BID' });
+    }
+    // Potassium binder as an enabler (not a current drug)
+    if (!binder && reducedEF && kV != null && kV > REVIEW.kBinderConsider && !(eV != null && eV < 15) && !pr.dialysis) {
+      var rasOn = onPillar(hist, 'RAS').length > 0, mraOn = onPillar(hist, 'MRA').length > 0;
+      var mraHeldForK = !mraOn && /hyperkal|potassium|\bK\b/i.test(gdmtReason(p, visits, 'MRA'));
+      var mraStopK = hist.drugs && Object.keys(hist.drugs).some(function (k) { var dd = hist.drugs[k]; return (DRUGS[k] || {}).pillar === 'MRA' && dd.events && dd.events.length && /Stop|Hold/.test(dd.events[dd.events.length - 1].type) && /hyperkal/i.test(dd.events[dd.events.length - 1].reason || ''); });
+      if (rasOn || mraOn || mraHeldForK || mraStopK) {
+        var useVelt = congested;
+        var acute = kV > REVIEW.kHalveRAS;
+        sugg.push({ key: 'kbinder', title: 'Consider a potassium binder',
+          detail: vtxt('K', K) + ' is limiting ' + [rasOn ? 'the RAS inhibitor' : '', (mraOn || mraHeldForK || mraStopK) ? 'the MRA' : ''].filter(Boolean).join(' and ') + '. A binder lets GDMT continue or restart (ESC HF, class IIb). ' +
+            (useVelt ? 'Congested: prefer Veltassa 8.4 g OD (Lokelma adds sodium). Check Mg; 3 h apart from other drugs.'
+                     : (acute ? 'Lokelma 10 g TID for up to 48 h, then 5 g OD; or Veltassa 8.4 g OD.' : 'Lokelma 5 g OD or Veltassa 8.4 g OD.')) +
+            ' Recheck K in 1 week.',
+          drug: useVelt ? 'Veltassa' : 'Lokelma', act: 'Start', next: useVelt ? '8.4 g PO OD' : (acute ? '10 g PO TID (loading, 48 h)' : '5 g PO OD') });
+      }
     }
     // Which change first (tailored sequencing)
     var ups = items.filter(function (x) { return x.status === 'up' && x.pillar; });
@@ -16536,10 +16594,11 @@ var CF = (function () {
     if (has('mra')) tips.push(['MRA', 'At iftar. Avoid potassium-rich drinks in excess at iftar; check K with the RAS inhibitor check.']);
     if (has('bb') || has('ivab')) tips.push(['Beta-blocker / ivabradine', 'Twice-daily doses at iftar and suhoor; once-daily at iftar.']);
     if (has('doac') || has('vka')) tips.push(['Anticoagulant', 'Apixaban / dabigatran at iftar and suhoor; rivaroxaban with the iftar meal; warfarin at the same time each iftar and check INR after 1–2 weeks.']);
+    if (has('kbinder')) tips.push(['Potassium binder', 'Once daily at iftar with food (Veltassa 3 h apart from other drugs). Check K 1–2 weeks into fasting.']);
     if (has('digoxin')) tips.push(['Digoxin', 'At iftar; dehydration raises levels: check K and kidney function.']);
     if (has('glp1')) tips.push(['GLP-1', 'Do not start or increase just before or during Ramadan; nausea plus fasting raises dehydration risk.']);
     if (hist.current.some(function (h) { return (DRUGS[h.key] || {}).metformin; })) tips.push(['Metformin component', 'Largest dose at iftar.']);
-    if (hist.current.some(function (h) { return /TID/i.test(h.current.freq || h.current.dose); })) tips.push(['Three-times-daily drugs', 'Switch to once- or twice-daily alternatives for the fasting month.']);
+    if (hist.current.some(function (h) { return /TID/i.test(h.current.freq || h.current.dose) && !/loading/i.test(h.current.dose || ''); })) tips.push(['Three-times-daily drugs', 'Switch to once- or twice-daily alternatives for the fasting month.']);
     tips.push(['Break the fast if', 'chest pain, fainting, worsening breathlessness, dizziness, or weight gain > 2 kg. NYHA III–IV or a recent admission: advise against fasting.']);
     tips.push(['Sick-day rule', 'During vomiting, diarrhoea or fever: hold SGLT2i, diuretic, ACEi/ARB/ARNI, MRA and metformin; restart after 24–48 h of normal intake.']);
     return tips;
@@ -16762,7 +16821,7 @@ var CF = (function () {
     readDrug: readDrug, doseText: doseText, pctTarget: pctTarget, presetsFor: presetsFor, nextPreset: nextPreset,
     medSnapshots: medSnapshots, medHistory: medHistory, onClass: onClass, onPillar: onPillar,
     series: series, last: last, profile: profile, vitalStatus: vitalStatus, followUpStatus: followUpStatus,
-    labSuggestions: labSuggestions, medSuggestions: medSuggestions, medReview: medReview, REVIEW: REVIEW, deviceSuggestions: deviceSuggestions, latestECG: latestECG, currentDevice: currentDevice, omtSince: omtSince, DEVICE: DEVICE, glp1Plan: glp1Plan,
+    labSuggestions: labSuggestions, medSuggestions: medSuggestions, medReview: medReview, fastingAdvice: fastingAdvice, REVIEW: REVIEW, deviceSuggestions: deviceSuggestions, latestECG: latestECG, currentDevice: currentDevice, omtSince: omtSince, DEVICE: DEVICE, glp1Plan: glp1Plan,
     readmitBand: readmitBand, analyse: analyse, pillarStatus: pillarStatus, parseExtraAdmissions: parseExtraAdmissions, yes: yes
   };
 })();
@@ -17080,6 +17139,8 @@ var CFUI = (function () {
     if (!cp.data) { box.innerHTML = '<div class="cf-assist-empty">Open or save a patient to see medication and lab suggestions.</div>'; return; }
     var vlist = contextVisits(true);
     var A = CF.analyse(cp.data, vlist);
+    // The fasting switch applies to this visit even before a visit date is entered.
+    if (A.review) A.review.fasting = val('V_Fasting') === 'Yes' ? CF.fastingAdvice(A.hist, [{ V_Fasting: 'Yes' }]) : null;
     var pillars = CF.pillarStatus(cp.data, vlist, A);
     var quad = pillars.filter(function (p) { return p.on; }).length;
     var html = '<div class="cf-assist-head"><span><i class="fa fa-wand-magic-sparkles"></i> Treatment assistant</span><small>Suggestions only · based on this visit\'s entries and the full record</small></div>';
@@ -17247,6 +17308,7 @@ var CFUI = (function () {
       if (pr.ef != null) c.push('<span class="cf-chip">LVEF ' + pr.ef + '%</span>');
       if (lastN) c.push('<span class="cf-chip">NYHA ' + ['', 'I', 'II', 'III', 'IV'][lastN.value] + '</span>');
       if (lastK) c.push('<span class="cf-chip">KCCQ ' + lastK.value + '</span>');
+      if (pr.bmi != null) c.push('<span class="cf-chip">BMI ' + Math.round(pr.bmi * 10) / 10 + '</span>');
       if (A.vital.dead) c.push('<span class="cf-chip dead"><i class="fa fa-cross"></i> Died' + (A.vital.date ? ' ' + CF.fmt(A.vital.date) : '') + '</span>');
       else if (A.followUp.status !== 'Active') c.push('<span class="cf-chip lost">' + esc(A.followUp.status) + '</span>');
       var urgent = A.labs.filter(function (l) { return l.level === 'urgent'; }).length + A.meds.filter(function (m) { return m.level === 'danger'; }).length;
@@ -17385,30 +17447,66 @@ var CFUI = (function () {
   }
 
   // ------------------------------------------------------------------
-  // 6. Clinic "Labs due" list
+  // 6. Calendar history: past clinic days (seen / missed), not only future bookings
   // ------------------------------------------------------------------
-  function clinicLabs(p, allVisits) {
-    try {
-      var A = CF.analyse(p, allVisits || []);
-      if (A.vital.dead || A.followUp.status === 'Transferred') return null;
-      var due = A.labs.filter(function (l) { return l.level !== 'upcoming'; });
-      return due.length ? due : null;
-    } catch (e) { return null; }
+  function isoOf(x) {
+    var v = String(x || '').trim();
+    if (/^\d{4}-\d{2}-\d{2}/.test(v)) return v.slice(0, 10);
+    try { if (typeof isoDate === 'function') return isoDate(v) || ''; } catch (e) {}
+    return '';
   }
-  function renderClinicLabs(list) {
-    if (!list.length) return '<p class="text-muted small mb-0 text-center py-2"><i class="fa fa-check-circle text-success me-1"></i>No labs are due.</p>';
-    return list.map(function (it) {
-      return '<div class="cf-clinic-lab ' + (it.items.some(function (x) { return x.level === 'urgent'; }) ? 'urgent' : '') + '"><div class="cf-cl-who"><b>' + esc(it.name || 'Unknown') + '</b> <small>File ' + esc(it.file || '-') + '</small>' +
-        (it.id ? ' <button class="btn btn-sm btn-outline-primary py-0 px-2 ms-2" style="font-size:0.72rem;" onclick="openPatientFromClinic(\'' + it.id + '\')"><i class="fa fa-edit"></i> Open</button>' : '') + '</div>' +
-        '<ul>' + it.items.map(function (l) { return '<li class="' + l.level + '"><b>' + esc(l.labs) + '</b> · ' + (l.level === 'urgent' ? 'urgent, ' : '') + 'due ' + CF.fmt(l.due) + '<br><small>' + esc(l.because) + '</small></li>'; }).join('') + '</ul></div>';
-    }).join('');
+  function calHistory(d, id, all, todayStr, byDay) {
+    try {
+      var seenDates = [];
+      function list(day) { if (!byDay[day]) byDay[day] = []; return byDay[day]; }
+      (all || []).forEach(function (v) {
+        var day = isoOf(v.visitDate);
+        if (!day || day > todayStr) return;
+        seenDates.push(day);
+        var L = list(day), ex = L.filter(function (a) { return a.id === id; })[0];
+        var doc = v.lastEditDoctor || v.addedDoctor || d.Doctor_Name || '';
+        if (ex) { ex.kind = 'seen'; ex.type = v.visitType || ex.type; return; }
+        L.push({ name: d.Patient_Name, file: d.File_No, doctor: doc, id: id, kind: 'seen', type: v.visitType || 'Visit' });
+      });
+      // Bookings in the past with no visit on that day or within 14 days after: missed
+      var booked = (all || []).map(function (v) { return isoOf(v.V_Next_Appt_Set); }).concat([isoOf(d.Next_Appt)]).filter(Boolean);
+      booked.filter(function (x, i) { return booked.indexOf(x) === i && x < todayStr; }).forEach(function (day) {
+        var came = seenDates.some(function (s) { return s >= day && CF.daysBetween(day, s) <= 14; });
+        if (came) return;
+        var L = list(day);
+        if (L.some(function (a) { return a.id === id; })) return;
+        L.push({ name: d.Patient_Name, file: d.File_No, doctor: d.Doctor_Name, id: id, kind: 'missed' });
+      });
+    } catch (e) {}
+  }
+  function renderCalendarDayList(dateStr) {
+    if (!dateStr) return '<div class="appt-cal-day-list-empty">Select a day to see appointments.</div>';
+    var appts = (_mainAlertsData.apptByDay[dateStr] || []).slice();
+    var today = new Date().toISOString().split('T')[0], past = dateStr < today;
+    var seen = appts.filter(function (a) { return a.kind === 'seen'; }).length, missed = appts.filter(function (a) { return a.kind === 'missed'; }).length;
+    var rank = { seen: 0, missed: 1 };
+    appts.sort(function (a, b) { return ((rank[a.kind] != null ? rank[a.kind] : 2) - (rank[b.kind] != null ? rank[b.kind] : 2)) || String(a.name || '').localeCompare(String(b.name || '')); });
+    var label = new Date(dateStr).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+    var sum = past || seen || missed ? [seen ? seen + ' seen' : '', missed ? missed + ' missed' : '', appts.length - seen - missed ? (appts.length - seen - missed) + ' booked' : ''].filter(Boolean).join(' · ') : appts.length + ' appointment' + (appts.length === 1 ? '' : 's');
+    var html = '<div class="appt-cal-day-list-title"><i class="fa fa-calendar-day me-1"></i>' + esc(label) + ' — ' + (sum || '0 appointments') + '</div>';
+    if (!appts.length) return html + '<div class="appt-cal-day-list-empty">' + (past ? 'No clinic visits recorded.' : 'No appointments scheduled.') + '</div>';
+    appts.forEach(function (a) {
+      var tag = a.kind === 'seen' ? '<span class="cf-cal-tag seen">Seen · ' + esc(a.type || 'Visit') + '</span>' : a.kind === 'missed' ? '<span class="cf-cal-tag missed">Missed</span>' : '<span class="cf-cal-tag booked">Booked</span>';
+      html += '<div class="alert alert-light border py-1 px-2 mb-1 d-flex justify-content-between align-items-center" style="font-size:0.82rem;">' +
+        '<span>' + tag + ' <b>' + esc(a.name || 'Unknown') + '</b> <small class="text-muted">(File: ' + esc(a.file || '-') + ')</small>' +
+        (a.doctor ? ' <small class="text-muted ms-1"><i class="fa fa-user-md"></i> ' + esc(a.doctor) + '</small>' : '') + '</span>' +
+        (a.id ? '<button class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size:0.72rem;" onclick="openPatientFromClinic(\'' + a.id + '\')"><i class="fa fa-edit"></i> Open</button>' : '') + '</div>';
+    });
+    return html;
   }
 
   // ------------------------------------------------------------------
   // 7. Autosave of unsaved entries (this device only)
   // ------------------------------------------------------------------
   var DRAFT_KEY = 'hfreg-draft-v1', dirty = false;
-  function markDirty() { dirty = true; }
+  var unsaved = false;
+  function markDirty() { dirty = true; unsaved = true; }
+  function markClean() { setTimeout(function () { unsaved = false; }, 200); }
   function draftId() { var cp = currentPatient(); return cp.id || 'new'; }
   function saveDraft() {
     if (!dirty) return;
@@ -17423,7 +17521,7 @@ var CFUI = (function () {
       localStorage.setItem(DRAFT_KEY, JSON.stringify({ at: new Date().toISOString(), pid: draftId(), name: data.Patient_Name || '', editingVisitId: (typeof editingVisitId !== 'undefined' && editingVisitId) || null, data: data }));
     } catch (e) {}
   }
-  function clearDraft() { try { localStorage.removeItem(DRAFT_KEY); } catch (e) {} dirty = false; }
+  function clearDraft() { try { localStorage.removeItem(DRAFT_KEY); } catch (e) {} dirty = false; unsaved = false; }
   function offerDraft() {
     var raw = null;
     try { raw = localStorage.getItem(DRAFT_KEY); } catch (e) {}
@@ -17484,8 +17582,9 @@ var CFUI = (function () {
     if (pageId !== 'pageMain' && typeof hideStickySave === 'function') hideStickySave();
     window.scrollTo(0, 0);
   }
-  function openOverview(id) {
+  function openOverview(id, fresh) {
     if (!id) return;
+    if (fresh && typeof PC !== 'undefined') delete PC[id];
     ovState.id = id;
     showPage('pageOverview');
     var box = $('cfOverview');
@@ -17559,6 +17658,13 @@ var CFUI = (function () {
       var l = a[a.length - 1];
       return '<div class="cf-trend"><small>' + r[1] + '</small><b>' + l.value + (r[2] ? ' <i>' + r[2] + '</i>' : '') + '</b>' + sparkline(a, '#0B2D5B') + '<em>' + CF.fmt(l.date, false) + (a.length > 1 ? ' · n=' + a.length : '') + '</em></div>';
     }).join('');
+    // BMI: from each recorded weight and the height; stored BMI values if no height
+    var bmiS = pr.height ? (S.Weight || []).map(function (o) { return { date: o.date, value: Math.round(o.value / Math.pow(pr.height / 100, 2) * 10) / 10 }; }) : (S.BMI || []).map(function (o) { return { date: o.date, value: Math.round(o.value * 10) / 10 }; });
+    if (bmiS.length) {
+      var bl = bmiS[bmiS.length - 1], bv = bl.value;
+      var bc = bv < 18.5 ? 'Underweight' : bv < 25 ? 'Normal' : bv < 30 ? 'Overweight' : bv < 35 ? 'Obesity I' : bv < 40 ? 'Obesity II' : 'Obesity III';
+      vit += '<div class="cf-trend' + (bv >= 30 || bv < 18.5 ? ' cf-bmi-flag' : '') + '"><small>BMI</small><b>' + bv + ' <i>kg/m² · ' + bc + '</i></b>' + sparkline(bmiS, '#0B2D5B') + '<em>' + CF.fmt(bl.date, false) + (pr.height ? ' · height ' + pr.height + ' cm' : '') + '</em></div>';
+    }
     return (rows ? '<div class="table-responsive"><table class="cf-labs"><thead><tr><th>Test</th><th>Latest</th><th>Change</th><th>Trend</th><th>Date</th><th>Next</th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '<div class="cf-empty">No results recorded yet.</div>') +
       (vit ? '<div class="cf-trends mt-2">' + vit + '</div>' : '');
   }
@@ -17609,7 +17715,7 @@ var CFUI = (function () {
       '<div class="cf-ov-meta">' + esc(ageSex(p)) + ' · File ' + esc(p.File_No || '—') + ' · Civil ' + esc(p.Civil_ID || '—') + (s(p.Doctor_Name) ? ' · ' + esc(p.Doctor_Name) : '') + '</div>' +
       '<div class="cf-chips">' + (pr.hfType ? '<span class="cf-chip type">' + esc(pr.hfType) + (pr.esc2026 && pr.esc2026 !== pr.hfType ? ' <small>→ ' + pr.esc2026 + '</small>' : '') + '</span>' : '') +
       (pr.ef != null ? '<span class="cf-chip">LVEF ' + pr.ef + '%</span>' : '') + (ny ? '<span class="cf-chip">NYHA ' + ['', 'I', 'II', 'III', 'IV'][ny.value] + '</span>' : '') +
-      (kq ? '<span class="cf-chip">KCCQ ' + kq.value + '</span>' : '') + status +
+      (kq ? '<span class="cf-chip">KCCQ ' + kq.value + '</span>' : '') + (pr.bmi != null ? '<span class="cf-chip">BMI ' + Math.round(pr.bmi * 10) / 10 + '</span>' : '') + status +
       (appt && !A.vital.dead ? '<span class="cf-chip appt"><i class="fa fa-calendar"></i> Next ' + CF.fmt(appt) + '</span>' : '') + '</div></div>' +
       '<div class="cf-ov-btns"><button class="btn btn-primary" data-ov="visit"><i class="fa fa-stethoscope me-1"></i>Start visit</button>' +
       '<button class="btn btn-outline-primary" data-ov="edit"><i class="fa fa-pen me-1"></i>Edit record</button>' +
@@ -17738,7 +17844,31 @@ var CFUI = (function () {
     renderAssist(); renderKccqHint(); toggleDeath(''); toggleDeath('V_'); readmitSuggest();
     setTimeout(offerDraft, 1500);
   }
+  function ovBar() {
+    var b = $('cfOvBar');
+    if (!b) {
+      var host = document.querySelector('#pageMain .container') || $('pageMain');
+      if (!host) return null;
+      b = document.createElement('div'); b.id = 'cfOvBar'; b.className = 'cf-ov-bar'; b.style.display = 'none';
+      host.insertBefore(b, host.firstChild);
+    }
+    return b;
+  }
+  function showOvBar() {
+    var b = ovBar(), cp = currentPatient();
+    if (!b) return;
+    if (!cp.id || !cp.data) { b.style.display = 'none'; return; }
+    b.innerHTML = '<button type="button" class="btn btn-sm cf-ov-back"><i class="fa fa-arrow-left me-1"></i>Patient overview</button>' +
+      '<span><b>' + esc(cp.data.Patient_Name || '') + '</b> · File ' + esc(cp.data.File_No || '-') + '</span>';
+    b.style.display = '';
+    b.querySelector('button').onclick = function () {
+      if (unsaved && !confirm('You have unsaved changes in this form. Go to the overview without saving?\n(A copy is kept on this device and can be restored later.)')) return;
+      if (unsaved) { dirty = true; saveDraft(); }
+      openOverview(cp.id, true);
+    };
+  }
   function afterPatientLoad() {
+    showOvBar(); markClean();
     refreshEditor('A_');
     toggleDeath(''); readmitSuggest();
   }
@@ -17749,10 +17879,10 @@ var CFUI = (function () {
   function install() {
     wrap('initFormUI', function () { init(); });
     wrap('editPt', function () { afterPatientLoad(); setTimeout(function () { renderAssist(); }, 50); });
-    wrap('editVisit', function () { afterVisitFormChange(false); });
-    wrap('clearVisitForm', function () { var info = $('cfCarryInfo'); if (info) info.textContent = ''; afterVisitFormChange(true); });
+    wrap('editVisit', function () { afterVisitFormChange(false); markClean(); });
+    wrap('clearVisitForm', function () { markClean(); var info = $('cfCarryInfo'); if (info) info.textContent = ''; afterVisitFormChange(true); });
     wrap('renderOpenPatientAlarms', function () { renderAssist(); renderKccqHint(); if (pendingVisit && pendingVisit.id === ((typeof currentPatientId !== 'undefined' && currentPatientId) || '')) applyPendingVisit(); });
-    wrap('resetForm', function () { refreshEditor('A_'); refreshEditor('V_'); renderAssist(); toggleDeath(''); toggleDeath('V_'); readmitSuggest(); });
+    wrap('resetForm', function () { var ob = $('cfOvBar'); if (ob) ob.style.display = 'none'; markClean(); refreshEditor('A_'); refreshEditor('V_'); renderAssist(); toggleDeath(''); toggleDeath('V_'); readmitSuggest(); });
     // clear the local draft after a successful save
     wrap('showSaveSuccess', function () { clearDraft(); });
     wrap('updateExtraAdmission', function (r, idx, field) { if (field === 'HF_Readmission' || field === 'date') extraReadmitAuto(idx); });
@@ -17770,10 +17900,13 @@ var CFUI = (function () {
     window._visitMedDisplayText = medDisplayText;
     window.cfToggleDeath = toggleDeath;
     window.cfReadmitSuggest = readmitSuggest;
+    window.renderCalendarDayList = renderCalendarDayList;
+    // Keep the booked date on the visit record (V_Next_Appt_Set) so past bookings show as seen / missed.
+    document.addEventListener('change', function (e) { if (e.target && e.target.id === 'Next_Appt') { var h = $('V_Next_Appt_Set'); if (h) h.value = e.target.value || ''; } }, true);
   }
   return {
     install: install, openOverview: openOverview, startVisit: startVisit, headerChips: headerChips, smartBody: smartBody, renderAssist: renderAssist,
-    clinicLabs: clinicLabs, renderClinicLabs: renderClinicLabs, refreshEditor: refreshEditor, clearDraft: clearDraft
+    calHistory: calHistory, refreshEditor: refreshEditor, clearDraft: clearDraft
   };
 })();
 CFUI.install();
