@@ -1724,6 +1724,7 @@ details.cf-ov-legacy>summary{cursor:pointer;font-weight:700;color:var(--cf-navy)
 .cf-ov-bar .cf-ov-back{background:#fff;color:#0B2D5B;font-weight:600;border-radius:999px;padding:3px 12px;}
 .cf-ov-bar .cf-ov-back:hover{background:#E8F1FB;}
 .cf-trend.cf-bmi-flag b{color:#b45309;}
+.cf-labs td.d small.cf-d-abs{display:block;font-size:.66rem;color:#667085;font-weight:400;white-space:nowrap;}
 
 </style>
 
@@ -16757,20 +16758,6 @@ var CF = (function () {
     }
     // Existing device with recovered EF
     if (hasICD && ef.value > 50) add('info', 'recovered', 'ICD in place, LVEF now ' + ef.value + '%', 'At generator replacement, review whether the ICD is still needed (shared decision).', facts, []);
-    // Advanced HF
-    var hfAdm = parseExtraAdmissions(p).filter(function (a) { return (a.Admission_HF_Related || 'HF related') === 'HF related' && daysBetween(iso(a.date), today) <= 365; }).length +
-      (s(p.Admission_HF_Related) === 'HF related' && daysBetween(iso(p.Admission_Date), today) <= 365 ? 1 : 0);
-    var intolerant = PILLARS.some(function (pl) { return /intoler|hypotension|kidney|hyperkal/i.test(gdmtReason(p, visits, pl.key)); });
-    var signs = [];
-    if (ny && ny.value >= 3) signs.push('NYHA ' + ['', 'I', 'II', 'III', 'IV'][ny.value]);
-    if (hfAdm >= 2) signs.push(hfAdm + ' HF admissions in 12 months');
-    if (ef.value <= 30) signs.push('LVEF ' + ef.value + '%');
-    if (intolerant) signs.push('GDMT limited by intolerance');
-    if (yes(p.Advanced_HF)) signs.push('marked as advanced HF');
-    var kq = last(S, 'KCCQ'); if (kq && kq.value < 25) signs.push('KCCQ ' + kq.value);
-    if (yes(p.Advanced_HF) || (pr.esc2026 === 'HFrEF' && ((ny && ny.value >= 3 && (hfAdm >= 1 || ef.value <= 30)) || hfAdm >= 2))) {
-      add('danger', 'advanced', 'Advanced HF: consider referral', signs.join(' · ') + '. Refer to an advanced HF centre early to assess LVAD / transplant candidacy; if not a candidate, plan palliative care. Check inotrope dependence, kidney and liver function, and frailty.', facts, []);
-    }
     // Secondary MR
     var mr = /\bMR\b/.test(s(p.Valvular_Type)) && yes(p.Valvular_Disease);
     if (mr && pr.esc2026 === 'HFrEF') {
@@ -17648,7 +17635,12 @@ var CFUI = (function () {
       var age = l ? CF.daysBetween(l.date, CF.todayIso()) : null;
       return '<tr class="' + flag + '"><th>' + r[1] + '</th>' +
         '<td class="v">' + (l ? '<b>' + l.value + '</b> <small>' + r[2] + '</small>' : '<span class="cf-none">not recorded</span>') + '</td>' +
-        '<td class="d">' + (delta != null ? '<span class="' + (delta > 0 ? 'up' : delta < 0 ? 'down' : '') + '">' + (delta > 0 ? '▲ +' : delta < 0 ? '▼ ' : '= ') + (delta !== 0 ? delta : '') + '</span>' : '') + '</td>' +
+        '<td class="d">' + (delta != null ? (function () {
+          var pc = prev.value ? Math.round((l.value - prev.value) / Math.abs(prev.value) * 100) : null;
+          var main = pc == null ? (delta > 0 ? '+' : '') + delta : pc === 0 ? '0%' : (pc > 0 ? '+' : '') + pc + '%';
+          return '<span class="' + (delta > 0 ? 'up' : delta < 0 ? 'down' : '') + '">' + (delta > 0 ? '▲ ' : delta < 0 ? '▼ ' : '= ') + main + '</span>' +
+            '<small class="cf-d-abs">' + (delta > 0 ? '+' : '') + delta + ' vs ' + prev.value + ' · ' + CF.fmt(prev.date, false) + '</small>';
+        })() : '') + '</td>' +
         '<td class="t">' + sparkline(a, flag === 'crit' ? '#B42318' : flag === 'abn' ? '#B54708' : '#1E88E5') + '</td>' +
         '<td class="w">' + (l ? CF.fmt(l.date) + '<small>' + (age === 0 ? 'today' : age + ' d ago') + ' · ' + esc(l.source) + '</small>' : '') + '</td>' +
         '<td class="n">' + (due ? '<span class="cf-due ' + due.level + '">' + (due.level === 'urgent' ? 'urgent' : 'due ' + CF.fmt(due.due, false)) + '</span>' : '') + '</td></tr>';
