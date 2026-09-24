@@ -1725,6 +1725,94 @@ details.cf-ov-legacy>summary{cursor:pointer;font-weight:700;color:var(--cf-navy)
 .cf-ov-bar .cf-ov-back:hover{background:#E8F1FB;}
 .cf-trend.cf-bmi-flag b{color:#b45309;}
 .cf-labs td.d small.cf-d-abs{display:block;font-size:.66rem;color:#667085;font-weight:400;white-space:nowrap;}
+/* ---- Current medications: grouped compact rows ---- */
+.cf-mg-h{font-size:.66rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--cf-ink-3);margin:10px 0 2px;padding-bottom:3px;border-bottom:1px solid var(--cf-line);}
+.cf-mr{padding:6px 0 7px;border-bottom:1px dashed #edf1f6;font-size:.8rem;}
+.cf-mr:last-child{border-bottom:0;}
+.cf-mr-top{display:grid;grid-template-columns:minmax(120px,1.3fr) minmax(90px,1fr) 92px auto;gap:8px;align-items:center;}
+.cf-mr-name b{color:var(--cf-ink);font-weight:600;}
+.cf-mr-dose{color:var(--cf-ink);}
+.cf-mr-pct{display:flex;align-items:center;gap:5px;}
+.cf-mr-pct .cf-bar{flex:1;margin:0;}
+.cf-mr-pct em{font-style:normal;font-size:.68rem;color:var(--cf-ink-3);min-width:28px;text-align:right;}
+.cf-mr-st{justify-self:end;}
+.cf-mr-hist{font-size:.7rem;color:var(--cf-ink-3);margin-top:2px;}
+.cf-mr-hist i{font-style:normal;color:#98a2b3;}
+.cf-mr-hist .cf-lc .fa{font-size:.62rem;}
+.cf-lc.increase .fa{color:var(--cf-green);}.cf-lc.decrease .fa,.cf-lc.hold .fa{color:var(--cf-amber);}.cf-lc.stop .fa{color:var(--cf-danger);}
+.cf-mr-why{font-size:.72rem;color:var(--cf-ink-2);margin-top:2px;line-height:1.35;}
+.cf-check{display:inline-block;font-size:.6rem;font-weight:700;background:#FFFAEB;color:#B54708;border:1px solid #FEDF89;border-radius:999px;padding:0 6px;margin-left:4px;vertical-align:1px;cursor:help;white-space:nowrap;}
+.cf-stopped2{margin-top:6px;font-size:.74rem;}
+.cf-stopped2>div:not(.cf-mg-h){padding:3px 0;color:var(--cf-ink-2);}
+.cf-stopped2 b{color:var(--cf-ink);font-weight:600;}
+.cf-stopped2 i{font-style:normal;color:#98a2b3;}
+@media (max-width:640px){.cf-mr-top{grid-template-columns:1fr auto;}.cf-mr-dose{grid-column:1;}.cf-mr-pct{grid-column:1;}.cf-mr-st{grid-row:1;grid-column:2;}}
+
+/* ---- Medication history chart ---- */
+.cf-mh{font-size:.76rem;}
+.cf-mh-lane{display:grid;grid-template-columns:170px 1fr 150px;gap:10px;align-items:center;min-height:32px;border-bottom:1px solid #f2f4f7;}
+.cf-mh-lane.off .cf-mh-name b{color:#98a2b3;}
+.cf-mh-name b{display:block;color:var(--cf-ink);font-weight:600;line-height:1.15;}
+.cf-mh-name small{color:var(--cf-ink-3);font-size:.64rem;}
+.cf-mh-track{position:relative;height:28px;}
+.cf-mh-track svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;}
+.cf-mh-track [data-tip]{cursor:pointer;}
+.cf-mh-now{font-size:.72rem;line-height:1.2;}
+.cf-mh-now b{color:var(--cf-ink);font-weight:600;}
+.cf-mh-now em{display:block;font-style:normal;color:var(--cf-ink-3);font-size:.66rem;}
+.cf-mh-now em.off{color:#98a2b3;}
+.cf-mh-axisrow{border-bottom:1px solid var(--cf-line);min-height:30px;}
+.cf-mh-axis{height:30px;}
+.cf-mh-year{position:absolute;top:0;height:100%;border-left:2px solid #98a2b3;padding-left:5px;}
+.cf-mh-year:first-child{border-left-color:transparent;}
+.cf-mh-year b{font-size:.78rem;color:var(--cf-navy);}
+.cf-mh-mline{position:absolute;bottom:0;height:8px;border-left:1px solid #d0d5dd;}
+.cf-mh-mline span{position:absolute;left:3px;bottom:-1px;font-size:.58rem;color:#98a2b3;font-style:normal;}
+.cf-mh-yline{display:none;}
+.cf-mh-adm{position:absolute;bottom:0;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:8px solid #D92D20;transform:translateX(-5px);cursor:help;}
+.cf-mh-body{position:relative;}
+.cf-mh-tip{margin-top:6px;font-size:.74rem;color:var(--cf-ink-3);background:#f8fafc;border:1px solid var(--cf-line);border-radius:8px;padding:5px 9px;min-height:28px;}
+.cf-mh-tip.on{color:var(--cf-ink);background:#eef4fb;border-color:#cfe2f7;}
+.cf-mh-legend{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:6px;font-size:.66rem;color:var(--cf-ink-3);}
+.cf-mh-legend .lg{display:inline-block;vertical-align:middle;margin-right:4px;}
+.lg.bar{width:18px;height:8px;background:#0B2D5B;border-radius:2px;}
+.lg.chk{width:18px;height:8px;background:rgba(11,45,91,.3);border:1px dashed #B54708;border-radius:2px;}
+.lg.up{width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:8px solid #12B76A;}
+.lg.down{width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:8px solid #F79009;}
+.lg.start{width:9px;height:9px;border-radius:50%;border:2px solid #0B2D5B;background:#fff;}
+.lg.stop{width:8px;height:8px;background:#D92D20;}
+.lg.hold{width:8px;height:8px;background:#F79009;}
+.lg.adm{width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:8px solid #D92D20;}
+@media (max-width:760px){.cf-mh-lane{grid-template-columns:110px 1fr;}.cf-mh-now{display:none;}}
+
+/* ---- Journey by year ---- */
+.cf-tl-y{margin-bottom:6px;}
+.cf-tl-yh{display:flex;align-items:baseline;gap:8px;padding:6px 0 4px;border-bottom:1px solid var(--cf-line);margin-bottom:4px;cursor:default;}
+details.cf-tl-y>summary.cf-tl-yh{cursor:pointer;list-style:none;}
+details.cf-tl-y>summary.cf-tl-yh::-webkit-details-marker{display:none;}
+details.cf-tl-y>summary.cf-tl-yh:before{content:'\25B8';color:var(--cf-ink-3);font-size:.8rem;}
+details.cf-tl-y[open]>summary.cf-tl-yh:before{content:'\25BE';}
+.cf-tl-year{font-weight:700;font-size:.95rem;color:var(--cf-navy);}
+.cf-tl-yh small{color:var(--cf-ink-3);font-size:.7rem;}
+.cf-tl-meds{display:flex;flex-direction:column;gap:2px;margin-top:3px;}
+.cf-tl-med{font-size:.72rem;color:var(--cf-ink-2);}
+.cf-tl-med b{font-weight:600;color:var(--cf-ink);}
+.cf-tl-med em{font-style:normal;color:var(--cf-ink-3);}
+.cf-tl-med .fa{font-size:.6rem;width:12px;color:var(--cf-blue);}
+.cf-tl-med.increase .fa{color:var(--cf-green);}.cf-tl-med.decrease .fa,.cf-tl-med.hold .fa{color:var(--cf-amber);}.cf-tl-med.stop .fa{color:var(--cf-danger);}
+.cf-tl li{grid-template-columns:26px 96px 1fr;}
+.cf-tl-body .cf-tl-med{display:block;}
+.cf-tl-body .cf-tl-med b{display:inline;}
+.cf-tl-body .cf-tl-med span,.cf-tl-body .cf-tl-med em{display:inline;}
+.lg.chg{width:9px;height:9px;border:1.5px solid #667085;background:#fff;transform:rotate(45deg);}
+/* Risk factors row (overview header) */
+.cf-risk{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin-top:8px;}
+.cf-risk-h{font-size:.68rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--cf-ink-3);margin-right:2px;}
+.cf-risk-h .fa{color:#F79009;}
+.cf-rtag{font-size:.72rem;background:#F2F4F7;color:#344054;border-radius:999px;padding:2px 9px;}
+.cf-rtag.hi{background:#FEF3F2;color:#B42318;}
+.cf-rnone{font-size:.72rem;color:var(--cf-ink-3);}
+.cf-ov-h .cf-fast-toggle{margin-left:auto;font-size:.74rem;font-weight:600;}
 
 </style>
 
@@ -15811,6 +15899,13 @@ var CF = (function () {
   function parseDose(text, freqText) {
     var t = s(text);
     if (!t) return null;
+    // split doses written as "125+80 mg" (e.g. morning + afternoon): the daily total
+    var sp = t.match(/(\d+(?:[.,]\d+)?)\s*(mg|g)?\s*\+\s*(\d+(?:[.,]\d+)?)(?:\s*\+\s*(\d+(?:[.,]\d+)?))?\s*(mg|g)?/i);
+    if (sp) {
+      var u = (sp[5] || sp[2] || 'mg').toLowerCase(), k = u === 'g' ? 1000 : 1;
+      var tot = (parseFloat(sp[1].replace(',', '.')) + parseFloat(sp[3].replace(',', '.')) + (sp[4] ? parseFloat(sp[4].replace(',', '.')) : 0)) * k;
+      return { mg: tot, unit: 'mg', freq: 'split', mult: 1, perDay: tot, readable: true, halfTab: false, split: true };
+    }
     var m = t.match(/(\d+(?:[.,]\d+)?)(?:\s*\/\s*\d+(?:[.,]\d+)?)?\s*(mg|mcg|µg|g|units?|iu)?/i);
     var val = m ? parseFloat(m[1].replace(',', '.')) : null;
     var unit = m && m[2] ? m[2].toLowerCase() : 'mg';
@@ -15869,13 +15964,26 @@ var CF = (function () {
         dose = cm[2].toLowerCase() === 'custom dose' ? (custom || preset) : cm[2];
       }
     }
+    var rawFreq = freq;
     if (!freq) freq = freqFromPreset(dose);
     var parsed = parseDose(dose, freq);
+    var check = doseNeedsCheck(dose, rawFreq, parsed);
+    if (check) parsed = null;
     return {
       id: id, key: baseKey(id), status: st, action: action, reason: reason,
-      dose: dose, freq: freq, prevDose: prev, parsed: parsed,
+      dose: dose, freq: freq, prevDose: prev, parsed: parsed, check: check,
       bothFilled: !!(custom && preset && !change)
     };
+  }
+  // Free text in a dose field ("just in case", "125+80mg", "Increased 5OD", "5mg twice a week" + BID)
+  // is shown as written but flagged, and never used for % of target, titration or review maths.
+  function doseNeedsCheck(dose, rawFreq, parsed) {
+    var t = s(dose);
+    if (!t) return false;
+    if (!parsed || !parsed.readable) return true;
+    if (/\b(just|case|stop|stopped|start|started|active|increased?|decreased?|hold|held|prn|as needed)\b|\?/i.test(t)) return true;
+    if (/week|\bEOD\b|alternate/i.test(t) && /^(OD|BID|TID|QID|once daily|twice daily)$/i.test(s(rawFreq))) return true;
+    return false;
   }
   function doseText(e) {
     if (!e || !e.dose) return '';
@@ -15968,23 +16076,39 @@ var CF = (function () {
         var h = drugs[k] || (drugs[k] = { key: k, points: [], events: [] });
         var last = h.points.length ? h.points[h.points.length - 1] : null;
         var state = e ? e.status : 'unlisted';
-        var point = { date: sn.date, source: sn.label, state: state, entry: e || null };
+        if (e && e.status === 'on' && last && last.state === 'unlisted' && last.soft && last.snap === i - 1) {
+          // single gap: drop the soft "not listed" event and carry the drug through that record
+          var before = h.points.length > 1 ? h.points[h.points.length - 2] : null;
+          if (before && before.state === 'on') {
+            h.events = h.events.filter(function (x) { return x !== last.softEvent; });
+            last.state = 'on'; last.entry = before.entry; last.inferred = true; delete last.soft; delete last.softEvent;
+          }
+        }
+        var point = { date: sn.date, source: sn.label, state: state, entry: e || null, snap: i };
         if (!e && (!last || last.state !== 'on')) return; // nothing to say
         h.points.push(point);
         var mg = e && e.parsed ? (e.parsed.perDay != null ? e.parsed.perDay : e.parsed.mg) : null;
-        var lastMg = last && last.entry && last.entry.parsed ? (last.entry.parsed.perDay != null ? last.entry.parsed.perDay : last.entry.parsed.mg) : null;
+        // compare only with the immediately previous record (never skip back over an unreadable entry)
+        var lastEntry = last && last.state === 'on' ? last.entry : null;
+        var lastMg = lastEntry && lastEntry.parsed ? (lastEntry.parsed.perDay != null ? lastEntry.parsed.perDay : lastEntry.parsed.mg) : null;
         var ev = null;
         if (state === 'on') {
           if (!last || last.state === 'none' || last.state === 'unlisted') ev = (last && last.state !== 'none') ? 'Restart' : 'Start';
           else if (last.state === 'stopped' || last.state === 'held') ev = 'Restart';
           else if (mg != null && lastMg != null && mg > lastMg) ev = 'Increase';
           else if (mg != null && lastMg != null && mg < lastMg) ev = 'Decrease';
+          else if (mg != null && lastMg != null) ev = null;
           else if (e.action === 'Increase' || e.action === 'Decrease') ev = e.action; // same visit recorded change
+          else if (lastEntry && doseText(lastEntry).replace(/\s+/g, '').toLowerCase() !== doseText(e).replace(/\s+/g, '').toLowerCase()) ev = 'Change'; // direction unknown
           if (ev === 'Start' && i === 0) ev = 'On';
         } else if (state === 'stopped' && last && (last.state === 'on' || last.state === 'held')) ev = 'Stop';
         else if (state === 'held' && last && last.state === 'on') ev = 'Hold';
         else if (state === 'unlisted' && last && last.state === 'on') ev = 'Not listed';
-        if (ev) h.events.push({ date: sn.date, type: ev, dose: e ? doseText(e) : '', prev: last && last.entry ? doseText(last.entry) : '', reason: e ? e.reason : '', source: sn.label });
+        if (ev) {
+          var evo = { date: sn.date, type: ev, dose: e ? doseText(e) : '', prev: last && last.entry ? doseText(last.entry) : '', reason: e ? e.reason : '', source: sn.label, check: !!(e && e.check) };
+          h.events.push(evo);
+          if (ev === 'Not listed') { point.soft = true; point.softEvent = evo; }
+        }
       });
     });
     var latest = snaps.length ? snaps[snaps.length - 1] : null;
@@ -16644,13 +16768,9 @@ var CF = (function () {
     var bmi = pr.bmi != null ? Math.round(pr.bmi * 10) / 10 : null;
     var ind = [];
     if (pr.ef != null && pr.ef >= 45 && bmi != null && bmi >= 30) ind.push({ key: 'hfpef', text: 'HF with LVEF ' + pr.ef + '% and BMI ' + bmi + ': semaglutide or tirzepatide improves symptoms, exercise capacity and weight (ESC 2026 HF, class IIa; STEP-HFpEF, SUMMIT)', prefer: 'semaglutide' });
-    if (pr.dm && pr.ascvd) ind.push({ key: 'dm-ascvd', text: 'Type 2 diabetes with atherosclerotic disease: GLP-1 RA with proven CV benefit reduces MACE independent of HbA1c (ESC 2023 diabetes, class I)', prefer: 'semaglutide' });
-    if (!pr.dm && pr.ascvd && bmi != null && bmi >= 27) ind.push({ key: 'select', text: 'Established ASCVD with BMI ' + bmi + ' and no diabetes: semaglutide 2.4 mg weekly reduces MACE (SELECT; ESC consensus IIa)', prefer: 'semaglutide' });
+    // HF indication only (the diabetes / ASCVD indications are left to the diabetes and lipid teams).
     if (!ind.length) {
-      if (bmi != null && bmi >= 30 && pr.ef != null && pr.ef < 45) {
-        return { level: 'info', title: 'Obesity with LVEF ' + pr.ef + '%', detail: 'BMI ' + bmi + '. GLP-1 benefit in reduced EF is not established; weight-loss referral first. Consider GLP-1 if diabetes or ASCVD is also present.' };
-      }
-      if (bmi == null && (pr.dm || pr.ascvd)) return { level: 'info', title: 'BMI not available', detail: 'Record height and weight to check GLP-1 eligibility.' };
+      if (bmi == null && pr.ef != null && pr.ef >= 45) return { level: 'info', title: 'BMI not available', detail: 'LVEF ' + pr.ef + '%: record height and weight to check GLP-1 eligibility (HF with obesity).' };
       return null;
     }
     return {
@@ -17303,7 +17423,7 @@ var CFUI = (function () {
       return c.length ? '<div class="cf-chips">' + c.join('') + '</div>' : '';
     } catch (e) { console.warn('CF header', e); return ''; }
   }
-  var EVENT_ICON = { Start: 'fa-play', Restart: 'fa-rotate-right', Increase: 'fa-arrow-up', Decrease: 'fa-arrow-down', Stop: 'fa-stop', Hold: 'fa-pause', 'Not listed': 'fa-question' };
+  var EVENT_ICON = { Change: 'fa-right-left', Start: 'fa-play', Restart: 'fa-rotate-right', Increase: 'fa-arrow-up', Decrease: 'fa-arrow-down', Stop: 'fa-stop', Hold: 'fa-pause', 'Not listed': 'fa-question' };
   function smartBody(p, id, latestVisit, allVisits, historyState) {
     try {
       if (historyState === 'loading') return '<div class="cf-card-loading"><i class="fa fa-spinner fa-spin"></i> Building the patient journey…</div>';
@@ -17337,34 +17457,10 @@ var CFUI = (function () {
         h += '<div class="cf-sec"><div class="cf-sec-h"><i class="fa fa-wand-magic-sparkles"></i> Suggestions <small>for the doctor to decide</small></div><div class="cf-assist-cols">' +
           '<div><div class="cf-col-h">Medications</div>' + suggestionList(A.meds) + '</div><div><div class="cf-col-h">Labs due</div>' + labList(A.labs) + '</div></div></div>';
       }
-      // --- medications
-      var byClass = {};
-      A.hist.current.forEach(function (d) { var c = (CF.DRUGS[d.key] || {}).cls || 'other'; (byClass[c] = byClass[c] || []).push(d); });
-      var med = '';
-      Object.keys(byClass).forEach(function (c) {
-        byClass[c].forEach(function (d) {
-          var e = d.current, pct = CF.pctTarget(e), lc = d.lastChange;
-          var rv = reviewFor(A, d.key);
-          med += '<div class="cf-medrow"><div class="cf-medname"><b>' + esc(CF.drugLabel(d.key)) + '</b><small>' + esc(CF.CLASS_LABEL[c] || '') + '</small>' + (rv && rv.status !== 'continue' ? '<div class="cf-rv-inline">' + statusPill(rv) + '</div>' : '') + '</div>' +
-            '<div class="cf-meddose">' + esc(CF.doseText(e) || 'dose not recorded') + (pct != null ? '<i class="cf-bar"><i style="width:' + Math.min(100, pct) + '%"></i></i><em>' + pct + '% of target</em>' : '') + '</div>' +
-            '<div class="cf-medlast">' + (lc ? '<i class="fa ' + (EVENT_ICON[lc.type] || 'fa-circle') + '"></i> ' + lc.type + ' ' + CF.fmt(lc.date, false) : '') + '</div></div>';
-        });
-      });
-      var stopped = A.hist.stopped.filter(function (d) { var lc = d.lastChange; return lc && CF.daysBetween(lc.date, CF.todayIso()) <= 183; });
-      if (med || stopped.length) {
-        h += '<div class="cf-sec"><div class="cf-sec-h"><i class="fa fa-pills"></i> Medications ' + (A.hist.latest ? '<small>as of ' + esc(A.hist.latest.label) + ' · ' + CF.fmt(A.hist.latest.date) + '</small>' : '') + '</div>' + (med || '<div class="cf-empty">No current medications recorded.</div>');
-        if (stopped.length) h += '<div class="cf-stopped"><b>Recently stopped / held:</b> ' + stopped.map(function (d) { var lc = d.lastChange; return esc(CF.drugLabel(d.key)) + ' ' + ({ Stop: 'stopped', Hold: 'held', 'Not listed': 'no longer listed' }[lc.type] || lc.type.toLowerCase()) + ' ' + CF.fmt(lc.date, false) + (lc.reason ? ' (' + esc(lc.reason) + ')' : ''); }).join(' · ') + '</div>';
-        h += '</div>';
-      }
-      // --- dose journey
-      var journeys = Object.keys(A.hist.drugs).map(function (k) { return A.hist.drugs[k]; }).filter(function (d) { return d.events.filter(function (e) { return e.type !== 'On'; }).length; });
-      if (journeys.length) {
-        h += '<div class="cf-sec"><div class="cf-sec-h"><i class="fa fa-chart-line"></i> Dose journey</div>' + journeys.map(function (d) {
-          return '<div class="cf-journey"><b>' + esc(CF.drugLabel(d.key)) + '</b><div class="cf-steps">' + d.events.map(function (e) {
-            return '<span class="cf-step ' + e.type.replace(' ', '-').toLowerCase() + '"><small>' + CF.fmt(e.date, false) + '</small>' + (e.type === 'On' ? '' : '<i class="fa ' + (EVENT_ICON[e.type] || 'fa-circle') + '"></i>') + esc(e.type === 'Stop' || e.type === 'Hold' || e.type === 'Not listed' ? e.type.toLowerCase() : (e.dose || e.type)) + (e.reason ? ' <em>(' + esc(e.reason) + ')</em>' : '') + '</span>';
-          }).join('<span class="cf-arrow">→</span>') + '</div></div>';
-        }).join('') + '</div>';
-      }
+      // --- medications (same grouped rows as the overview)
+      if (A.hist.current.length || A.hist.stopped.length) h += '<div class="cf-sec"><div class="cf-sec-h"><i class="fa fa-pills"></i> Medications</div>' + medsBlock(p, A, true) + '</div>';
+      // --- medication history
+      if (Object.keys(A.hist.drugs).length) h += '<div class="cf-sec"><div class="cf-sec-h"><i class="fa fa-chart-gantt"></i> Medication history</div>' + medHistoryChart(A, { p: p }) + '</div>';
       // --- trends
       var tr = [['Weight', 'Weight', 'kg', '#1E88E5'], ['NT-proBNP', 'NTproBNP', 'pg/mL', '#E53935'], ['eGFR', 'eGFR', '', '#0B2D5B'], ['K', 'K', 'mmol/L', '#7c3aed'], ['KCCQ', 'KCCQ', '', '#059669'], ['SBP', 'SBP', 'mmHg', '#b45309']];
       var trends = tr.map(function (t) {
@@ -17379,6 +17475,128 @@ var CFUI = (function () {
       return '<div class="cf-smart"><button type="button" class="btn btn-primary btn-sm cf-open-ov" onclick="CFUI.openOverview(\'' + esc(id) + '\')"><i class="fa fa-up-right-and-down-left-from-center me-1"></i>Open full patient overview</button>' + h + '</div>';
     } catch (e) { console.warn('CF card', e); return ''; }
   }
+  // ---------- medication display helpers ----------
+  function ago(date) {
+    var d = CF.daysBetween(date, CF.todayIso());
+    if (d == null) return '';
+    if (d < 1) return 'today';
+    if (d < 45) return d + ' d ago';
+    if (d < 548) return Math.round(d / 30.4) + ' mo ago';
+    return (Math.round(d / 365.25 * 10) / 10) + ' y ago';
+  }
+  function medGroup(key) {
+    var d = CF.DRUGS[key] || {};
+    if (d.pillar) return 0;
+    if (d.cls === 'loop' || d.cls === 'thiazide') return 1;
+    return 2;
+  }
+  var GROUP_LABEL = ['Heart failure therapy (GDMT)', 'Diuretics', 'Other medications'];
+  var GROUP_COLOR = ['#0B2D5B', '#1E88E5', '#64748B'];
+  var PILLAR_ORDER = { RAS: 0, BB: 1, MRA: 2, SGLT2: 3 };
+  function medSort(a, b) {
+    var ga = medGroup(a.key), gb = medGroup(b.key);
+    if (ga !== gb) return ga - gb;
+    var pa = PILLAR_ORDER[(CF.DRUGS[a.key] || {}).pillar], pb = PILLAR_ORDER[(CF.DRUGS[b.key] || {}).pillar];
+    if (pa != null && pb != null && pa !== pb) return pa - pb;
+    return CF.drugLabel(a.key).localeCompare(CF.drugLabel(b.key));
+  }
+  function onSince(d) {
+    var st = null;
+    for (var i = d.points.length - 1; i >= 0; i--) { if (d.points[i].state === 'on') st = d.points[i].date; else break; }
+    return st;
+  }
+  function checkTag(e) { return e && e.check ? ' <span class="cf-check" title="This dose was typed as free text. It is shown as written and not used for % of target or suggestions.">check dose</span>' : ''; }
+  var EV_WORD = { Change: 'Dose changed', Start: 'Started', Restart: 'Restarted', Increase: 'Increased', Decrease: 'Decreased', Stop: 'Stopped', Hold: 'Held', 'Not listed': 'Not on the latest list' };
+
+  // ---------- medication history chart: one lane per drug across time ----------
+  function medHistoryChart(A, opts) {
+    opts = opts || {};
+    var drugs = Object.keys(A.hist.drugs).map(function (k) { return A.hist.drugs[k]; }).filter(function (d) { return d.points.some(function (x) { return x.state === 'on'; }); });
+    if (!drugs.length) return '<div class="cf-empty">No medication lists recorded yet.</div>';
+    var today = CF.todayIso();
+    var cur = {}; A.hist.current.forEach(function (h) { cur[h.key] = h; });
+    drugs.sort(function (a, b) { var ca = cur[a.key] ? 0 : 1, cb = cur[b.key] ? 0 : 1; return ca - cb || medSort(a, b); });
+    var first = drugs.reduce(function (m, d) { return !m || d.points[0].date < m ? d.points[0].date : m; }, null);
+    var t0 = new Date(first + 'T00:00:00').getTime(), t1 = new Date(today + 'T00:00:00').getTime();
+    // start at the beginning of that month; at least 6 months wide
+    var s0 = new Date(first + 'T00:00:00'); s0.setDate(1); t0 = s0.getTime();
+    if (t1 - t0 < 183 * 864e5) t0 = t1 - 183 * 864e5;
+    var W = 1000;
+    function X(date) { var v = new Date(date + 'T00:00:00').getTime(); return Math.max(0, Math.min(W, (v - t0) / (t1 - t0) * W)); }
+    // axis: year boundaries and month ticks
+    var y0 = new Date(t0).getFullYear(), y1 = new Date(t1).getFullYear(), axis = '', grid = '';
+    for (var y = y0; y <= y1; y++) {
+      var ys = y + '-01-01', xs = new Date(ys + 'T00:00:00').getTime() < t0 ? 0 : X(ys);
+      var ye = (y + 1) + '-01-01', xe = new Date(ye + 'T00:00:00').getTime() > t1 ? W : X(ye);
+      if (xe - xs < 1) continue;
+      axis += '<div class="cf-mh-year" style="left:' + (xs / W * 100) + '%;width:' + ((xe - xs) / W * 100) + '%"><b>' + y + '</b></div>';
+      if (xs > 0) grid += '<i class="cf-mh-yline" style="left:' + (xs / W * 100) + '%"></i>';
+      for (var m = 1; m < 12; m++) {
+        var ms = y + '-' + (m < 9 ? '0' : '') + (m + 1) + '-01', tm = new Date(ms + 'T00:00:00').getTime();
+        if (tm > t0 && tm < t1 && (m === 3 || m === 6 || m === 9)) grid += '<i class="cf-mh-mline" style="left:' + (X(ms) / W * 100) + '%"><span>' + ['', '', '', 'Apr', '', '', 'Jul', '', '', 'Oct'][m] + '</span></i>';
+      }
+    }
+    // admissions as red ticks on the axis
+    var adm = [];
+    var p = opts.p || {};
+    if (CF.iso(p.Admission_Date)) adm.push(CF.iso(p.Admission_Date));
+    CF.parseExtraAdmissions(p).forEach(function (a) { if (CF.iso(a.date)) adm.push(CF.iso(a.date)); });
+    adm.forEach(function (d) { if (d >= CF.iso(new Date(t0).toISOString())) grid += '<i class="cf-mh-adm" style="left:' + (X(d) / W * 100) + '%" title="Admission ' + CF.fmt(d) + '"></i>'; });
+    var lanes = drugs.map(function (d) {
+      var g = medGroup(d.key), color = GROUP_COLOR[g], segs = '', marks = '';
+      // merge consecutive records with the same state and dose into one bar
+      var pts = [];
+      d.points.forEach(function (x) {
+        var prev = pts[pts.length - 1];
+        if (prev && prev.state === x.state && CF.doseText(prev.entry) === CF.doseText(x.entry)) return;
+        pts.push(x);
+      });
+      var target = (CF.DRUGS[d.key] || {}).target, maxDay = 0;
+      d.points.forEach(function (x) { var q = x.entry && x.entry.parsed; var v = q ? (q.perDay != null ? q.perDay : q.mg) : null; if (v != null && v > maxDay) maxDay = v; });
+      for (var i = 0; i < pts.length; i++) {
+        var a = pts[i], bDate = i + 1 < pts.length ? pts[i + 1].date : (cur[d.key] ? today : a.date);
+        if (a.state !== 'on' && a.state !== 'held') continue;
+        var xa = X(a.date), xb = X(bDate);
+        if (xb - xa < 0.5) xb = xa + 0.5;
+        if (a.state === 'held') { segs += '<rect x="' + xa.toFixed(1) + '" y="13" width="' + (xb - xa).toFixed(1) + '" height="2" fill="#F79009"/>'; continue; }
+        var e = a.entry, pct = CF.pctTarget(e), q = e && e.parsed, dv = q ? (q.perDay != null ? q.perDay : q.mg) : null;
+        // thickness: % of target dose; for drugs without a target, relative to the highest dose this patient had
+        var hgt = pct != null ? 4 + Math.min(100, pct) / 100 * 10 : (!target && dv != null && maxDay ? 4 + dv / maxDay * 10 : 7);
+        var tip = CF.fmt(a.date) + (bDate !== a.date ? ' – ' + CF.fmt(bDate) : '') + ': ' + (CF.doseText(e) || 'dose not recorded') + (pct != null ? ' (' + pct + '% of target)' : '') + (e && e.check ? ' · dose needs checking' : '');
+        segs += '<rect x="' + xa.toFixed(1) + '" y="' + (14 - hgt / 2).toFixed(1) + '" width="' + (xb - xa).toFixed(1) + '" height="' + hgt.toFixed(1) + '" rx="2" fill="' + color + '" opacity="' + (e && e.check ? '.35' : (pct == null && target) ? '.55' : '.9') + '"' + (e && e.check ? ' stroke="#B54708" stroke-dasharray="3 2" stroke-width="1"' : '') + ' data-tip="' + esc(tip) + '"><title>' + esc(tip) + '</title></rect>';
+      }
+      d.events.forEach(function (ev) {
+        if (ev.type === 'On') return;
+        var x = X(ev.date), tip = CF.fmt(ev.date) + ' · ' + (EV_WORD[ev.type] || ev.type) + (ev.type === 'Increase' || ev.type === 'Decrease' || ev.type === 'Change' ? (ev.prev ? ' from ' + ev.prev : '') + ' to ' + ev.dose : ev.dose && ev.type !== 'Stop' && ev.type !== 'Hold' ? ' ' + ev.dose : '') + (ev.reason ? ' (' + ev.reason + ')' : '');
+        var shape = ev.type === 'Increase' ? '<path d="M' + x.toFixed(1) + ' 3 l5 8 h-10z" fill="#12B76A"/>' :
+          ev.type === 'Decrease' ? '<path d="M' + x.toFixed(1) + ' 25 l5 -8 h-10z" fill="#F79009"/>' :
+          ev.type === 'Stop' ? '<rect x="' + (x - 4).toFixed(1) + '" y="10" width="8" height="8" fill="#D92D20"/>' :
+          ev.type === 'Hold' ? '<rect x="' + (x - 4).toFixed(1) + '" y="10" width="8" height="8" fill="#F79009"/>' :
+          ev.type === 'Not listed' ? '' :
+          ev.type === 'Change' ? '<path d="M' + x.toFixed(1) + ' 8 l5 6 l-5 6 l-5 -6z" fill="#fff" stroke="#667085" stroke-width="1.5"/>' :
+          '<circle cx="' + x.toFixed(1) + '" cy="14" r="4.5" fill="#fff" stroke="' + color + '" stroke-width="2"/>';
+        if (shape) marks += '<g class="cf-mh-ev" data-tip="' + esc(tip) + '"><title>' + esc(tip) + '</title>' + shape + '</g>';
+      });
+      var h = cur[d.key], e = h ? h.current : null, pct = e ? CF.pctTarget(e) : null;
+      var lastEv = d.events.length ? d.events[d.events.length - 1] : null;
+      var right = h ? '<b>' + esc(CF.doseText(e) || '—') + '</b>' + checkTag(e) + (pct != null ? '<em>' + pct + '% of target</em>' : '')
+        : '<em class="off">' + (lastEv ? (EV_WORD[lastEv.type] || lastEv.type).toLowerCase() + ' ' + CF.fmt(lastEv.date) : 'not current') + '</em>';
+      return '<div class="cf-mh-lane' + (h ? '' : ' off') + '"><div class="cf-mh-name"><b>' + esc(CF.drugLabel(d.key)) + '</b><small>' + esc(CF.CLASS_LABEL[(CF.DRUGS[d.key] || {}).cls] || '') + '</small></div>' +
+        '<div class="cf-mh-track"><svg viewBox="0 0 ' + W + ' 28" preserveAspectRatio="none" aria-hidden="true">' + segs + marks + '</svg></div><div class="cf-mh-now">' + right + '</div></div>';
+    }).join('');
+    return '<div class="cf-mh"><div class="cf-mh-lane cf-mh-axisrow"><div class="cf-mh-name"></div><div class="cf-mh-track cf-mh-axis">' + axis + grid + '</div><div class="cf-mh-now"><small>Now</small></div></div>' +
+      '<div class="cf-mh-body">' + lanes + '</div>' +
+      '<div class="cf-mh-tip">Tap a bar or marker for details.</div>' +
+      '<div class="cf-mh-legend"><span><i class="lg bar"></i>On (thicker = closer to target dose)</span><span><i class="lg chk"></i>Dose needs checking</span><span><i class="lg up"></i>Increase</span><span><i class="lg down"></i>Decrease</span><span><i class="lg start"></i>Start</span><span><i class="lg chg"></i>Dose changed</span><span><i class="lg stop"></i>Stop</span><span><i class="lg hold"></i>Hold</span><span><i class="lg adm"></i>Admission</span></div></div>';
+  }
+  // one delegated handler for every chart (overview and patient card)
+  document.addEventListener('click', function (e) {
+    var el = e.target && e.target.closest ? e.target.closest('.cf-mh [data-tip]') : null;
+    if (!el) return;
+    var tip = el.closest('.cf-mh').querySelector('.cf-mh-tip');
+    if (tip) { tip.textContent = el.getAttribute('data-tip'); tip.classList.add('on'); }
+  });
+
   function timeline(p, A) {
     var ev = [];
     function add(date, icon, cls, title, detail) { if (date) ev.push({ date: date, icon: icon, cls: cls, title: title, detail: detail || '' }); }
@@ -17403,24 +17621,37 @@ var CFUI = (function () {
       if (s(v.V_Device_Type)) add(CF.iso(v.V_Device_Date) || CF.iso(v.visitDate), 'fa-microchip', 'dev', esc(v.V_Device_Type) + ' implanted', '');
     });
     if (s(p.Device_Type)) add(CF.iso(p.Device_Date) || admD, 'fa-microchip', 'dev', esc(p.Device_Type) + ' implanted', '');
+    // medication decisions, attached to the record of the same day
+    var medByDate = {};
     Object.keys(A.hist.drugs).forEach(function (k) {
       A.hist.drugs[k].events.forEach(function (e) {
-        if (e.type === 'On') return;
-        add(e.date, EVENT_ICON[e.type] || 'fa-pills', 'med', CF.drugLabel(k) + ': ' + e.type.toLowerCase(),
-          esc(e.type === 'Increase' || e.type === 'Decrease' ? (e.prev ? e.prev + ' → ' : '') + e.dose : e.dose) + (e.reason ? ' · ' + esc(e.reason) : ''));
+        if (e.type === 'On' || e.type === 'Not listed') return;
+        var txt = '<span class="cf-tl-med ' + e.type.toLowerCase() + '"><i class="fa ' + (EVENT_ICON[e.type] || 'fa-pills') + '"></i> <b>' + esc(CF.drugLabel(k)) + '</b> ' + (EV_WORD[e.type] || e.type).toLowerCase() +
+          (e.type === 'Increase' || e.type === 'Decrease' || e.type === 'Change' ? (e.prev ? ' ' + esc(e.prev) + ' → ' : ' to ') + esc(e.dose) : (e.type === 'Start' || e.type === 'Restart') && e.dose ? ' ' + esc(e.dose) : '') +
+          (e.check ? ' <span class="cf-check">check dose</span>' : '') + (e.reason ? ' <em>(' + esc(e.reason) + ')</em>' : '') + '</span>';
+        (medByDate[e.date] = medByDate[e.date] || []).push(txt);
       });
+    });
+    Object.keys(medByDate).forEach(function (d) {
+      var host = ev.filter(function (x) { return x.date === d && (x.cls === 'visit' || x.cls === 'adm'); })[0];
+      if (host) host.meds = medByDate[d];
+      else ev.push({ date: d, icon: 'fa-pills', cls: 'med', title: 'Medication change', detail: '', meds: medByDate[d] });
     });
     if (A.vital.dead) { add(A.vital.date || '9999-12-31', 'fa-cross', 'dead', 'Died' + (A.vital.place ? ' (' + esc(A.vital.place.toLowerCase()) + ')' : ''), A.vital.date ? esc(A.vital.cause) : 'Date of death not recorded: add it in Outcomes so survival analysis is exact'); }
     ev.sort(function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
     if (!ev.length) return '<div class="cf-empty">No dated events yet.</div>';
-    var html = '<ol class="cf-tl">', shown = 0;
-    ev.forEach(function (e, i) {
-      if (i === 12) html += '</ol><details class="cf-details"><summary>Show ' + (ev.length - 12) + ' earlier events</summary><ol class="cf-tl">';
-      html += '<li class="' + e.cls + '"><span class="cf-tl-dot"><i class="fa ' + e.icon + '"></i></span><span class="cf-tl-date">' + (e.date === '9999-12-31' ? 'Date unknown' : CF.fmt(e.date)) + '</span><span class="cf-tl-body"><b>' + e.title + '</b>' + (e.detail ? '<span>' + e.detail + '</span>' : '') + '</span></li>';
-      shown++;
-    });
-    html += ev.length > 12 ? '</ol></details>' : '</ol>';
-    return html;
+    // group by year: the latest year open, earlier years folded
+    var years = [], byYear = {};
+    ev.forEach(function (e) { var y = e.date === '9999-12-31' ? 'Undated' : e.date.slice(0, 4); if (!byYear[y]) { byYear[y] = []; years.push(y); } byYear[y].push(e); });
+    function item(e) {
+      return '<li class="' + e.cls + '"><span class="cf-tl-dot"><i class="fa ' + e.icon + '"></i></span><span class="cf-tl-date">' + (e.date === '9999-12-31' ? 'Date unknown' : CF.fmt(e.date)) + '</span><span class="cf-tl-body"><b>' + e.title + '</b>' + (e.detail ? '<span>' + e.detail + '</span>' : '') +
+        (e.meds ? '<div class="cf-tl-meds">' + e.meds.join('') + '</div>' : '') + '</span></li>';
+    }
+    return years.map(function (y, i) {
+      var list = '<ol class="cf-tl">' + byYear[y].map(item).join('') + '</ol>';
+      var head = '<span class="cf-tl-year">' + y + '</span><small>' + byYear[y].length + ' event' + (byYear[y].length === 1 ? '' : 's') + '</small>';
+      return i === 0 || y === 'Undated' ? '<div class="cf-tl-y"><div class="cf-tl-yh">' + head + '</div>' + list + '</div>' : '<details class="cf-tl-y"><summary class="cf-tl-yh">' + head + '</summary>' + list + '</details>';
+    }).join('');
   }
 
   // Replacement for the visit-history medication text: custom dose wins, no doubled frequency.
@@ -17660,26 +17891,67 @@ var CFUI = (function () {
     return (rows ? '<div class="table-responsive"><table class="cf-labs"><thead><tr><th>Test</th><th>Latest</th><th>Change</th><th>Trend</th><th>Date</th><th>Next</th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '<div class="cf-empty">No results recorded yet.</div>') +
       (vit ? '<div class="cf-trends mt-2">' + vit + '</div>' : '');
   }
-  function medsBlock(p, A) {
-    var html = pillarChips(CF.pillarStatus(p, A.visits, A), false);
-    var rows = A.hist.current.slice().sort(function (a, b) {
-      var pa = (CF.DRUGS[a.key] || {}).pillar ? 0 : 1, pb = (CF.DRUGS[b.key] || {}).pillar ? 0 : 1; return pa - pb;
-    }).map(function (d) {
-      var e = d.current, pct = CF.pctTarget(e), lc = d.lastChange, started = null;
-      for (var i = d.points.length - 1; i >= 0; i--) { if (d.points[i].state === 'on') started = d.points[i].date; else break; }
-      var c = (CF.DRUGS[d.key] || {}).cls;
+  // Risk factors and comorbidities from the record (any visit saying Yes counts; smoking takes the worst status)
+  function riskFactors(p, A) {
+    var vs = A.visits || [], out = [];
+    function any(key) { return CF.yes(p[key]) || vs.some(function (v) { return CF.yes(v['V_' + key]); }); }
+    function val(key) { var x = s(p[key]); vs.forEach(function (v) { if (!x || /^no$/i.test(x)) x = s(v['V_' + key]) || x; }); return x && !/^no$/i.test(x) ? x : ''; }
+    var smk = [s(p.Smoker)].concat(vs.map(function (v) { return s(v.V_Smoker); }));
+    var sm = smk.indexOf('Current') >= 0 ? (s(vs[0] && vs[0].V_Smoker) === 'Former' ? 'Former' : 'Current') : smk.indexOf('Former') >= 0 ? 'Former' : '';
+    if (sm === 'Current') out.push(['Current smoker', 'hi']); else if (sm === 'Former') out.push(['Ex-smoker', '']);
+    if (any('DM')) out.push(['Diabetes', 'hi']);
+    if (any('HTN')) out.push(['Hypertension', 'hi']);
+    if (any('Dyslipidemia')) out.push(['Dyslipidaemia', '']);
+    var bmi = A.profile.bmi;
+    if ((bmi != null && bmi >= 30) || any('Obese')) out.push(['Obesity' + (bmi != null ? ' (BMI ' + Math.round(bmi * 10) / 10 + ')' : ''), 'hi']);
+    var ihd = val('IHD'); if (ihd) out.push(['IHD' + (/^yes$/i.test(ihd) ? '' : ' · ' + ihd), 'hi']);
+    if (any('CKD')) out.push(['CKD', 'hi']);
+    if (any('Dialysis')) out.push(['Dialysis', 'hi']);
+    if (any('AF')) out.push(['AF', '']);
+    if (any('CVA')) out.push(['Stroke / TIA', '']);
+    if (any('PVD')) out.push(['PAD', '']);
+    if (any('OSA')) out.push(['OSA', '']);
+    if (any('Lung_Dz')) out.push(['Lung disease', '']);
+    if (any('Liver_Dz')) out.push(['Liver disease', '']);
+    var thy = val('Thyroid_Dz'); if (thy) out.push([thy, '']);
+    if (any('Alcohol')) out.push(['Alcohol', '']);
+    if (any('FH_Cardio')) out.push(['Family history of heart disease', '']);
+    return out;
+  }
+  function riskRow(p, A) {
+    var rf = riskFactors(p, A);
+    return '<div class="cf-risk"><span class="cf-risk-h"><i class="fa fa-triangle-exclamation"></i> Risk factors</span>' +
+      (rf.length ? rf.map(function (r) { return '<span class="cf-rtag ' + r[1] + '">' + esc(r[0]) + '</span>'; }).join('') : '<span class="cf-rnone">none recorded</span>') + '</div>';
+  }
+  function medsBlock(p, A, noPillars) {
+    var html = noPillars ? '' : pillarChips(CF.pillarStatus(p, A.visits, A), false);
+    var list = A.hist.current.slice().sort(medSort), lastG = -1, rows = '';
+    list.forEach(function (d) {
+      var g = medGroup(d.key);
+      if (g !== lastG) { rows += '<div class="cf-mg-h">' + GROUP_LABEL[g] + '</div>'; lastG = g; }
+      var e = d.current, pct = CF.pctTarget(e), lc = d.lastChange && d.lastChange.type !== 'On' ? d.lastChange : null, since = onSince(d);
       var rv = reviewFor(A, d.key);
-      return '<div class="cf-medrow"><div class="cf-medname"><b>' + esc(CF.drugLabel(d.key)) + '</b><small>' + esc(CF.CLASS_LABEL[c] || '') + (started ? ' · on since ' + CF.fmt(started) : '') + '</small>' +
-        (rv ? '<div class="cf-rv-inline">' + statusPill(rv) + (rv.reason ? '<span>' + esc(rv.reason) + '</span>' : '') + '</div>' : '') + '</div>' +
-        '<div class="cf-meddose">' + esc(CF.doseText(e) || 'dose not recorded') + (pct != null ? '<i class="cf-bar"><i style="width:' + Math.min(100, pct) + '%"></i></i><em>' + pct + '% of target</em>' : '') + '</div>' +
-        '<div class="cf-medlast">' + (lc && lc.type !== 'On' ? '<i class="fa ' + (EVENT_ICON[lc.type] || 'fa-circle') + '"></i> ' + lc.type + ' ' + CF.fmt(lc.date) + (lc.prev && (lc.type === 'Increase' || lc.type === 'Decrease') ? '<small>from ' + esc(lc.prev) + '</small>' : '') : '<small>no change recorded</small>') + '</div></div>';
-    }).join('');
+      var hist = [since && !(lc && lc.date === since && (lc.type === 'Start' || lc.type === 'Restart')) ? 'On since ' + CF.fmt(since) + ' <i>(' + ago(since) + ')</i>' : ''];
+      if (lc) hist.push('<span class="cf-lc ' + lc.type.toLowerCase() + '"><i class="fa ' + (EVENT_ICON[lc.type] || 'fa-circle') + '"></i> ' + (EV_WORD[lc.type] || lc.type) + ' ' + CF.fmt(lc.date) + ' <i>(' + ago(lc.date) + ')</i>' +
+        (lc.prev && (lc.type === 'Increase' || lc.type === 'Decrease' || lc.type === 'Change') ? ' from ' + esc(lc.prev) : '') + '</span>');
+      rows += '<div class="cf-mr">' +
+        '<div class="cf-mr-top"><div class="cf-mr-name"><b>' + esc(CF.drugLabel(d.key)) + '</b></div>' +
+        '<div class="cf-mr-dose">' + esc(CF.doseText(e) || 'dose not recorded') + checkTag(e) + '</div>' +
+        '<div class="cf-mr-pct">' + (pct != null ? '<i class="cf-bar"><i style="width:' + Math.min(100, pct) + '%"></i></i><em>' + pct + '%</em>' : '') + '</div>' +
+        '<div class="cf-mr-st">' + (rv ? statusPill(rv) : '') + '</div></div>' +
+        '<div class="cf-mr-hist">' + hist.filter(Boolean).join(' · ') + '</div>' +
+        (rv && rv.reason ? '<div class="cf-mr-why">' + esc(rv.reason) + '</div>' : '') + '</div>';
+    });
     html += rows || '<div class="cf-empty">No current medications recorded.</div>';
-    var stopped = A.hist.stopped.filter(function (d) { return d.lastChange && CF.daysBetween(d.lastChange.date, CF.todayIso()) <= 365; });
-    if (stopped.length) html += '<div class="cf-stopped"><b>Stopped / held in the last year:</b> ' + stopped.map(function (d) { var lc = d.lastChange; return esc(CF.drugLabel(d.key)) + ' ' + ({ Stop: 'stopped', Hold: 'held', 'Not listed': 'no longer listed' }[lc.type] || lc.type) + ' ' + CF.fmt(lc.date) + (lc.reason ? ' (' + esc(lc.reason) + ')' : ''); }).join(' · ') + '</div>';
+    var stopped = A.hist.stopped.filter(function (d) { return d.lastChange && CF.daysBetween(d.lastChange.date, CF.todayIso()) <= 365; })
+      .sort(function (a, b) { return a.lastChange.date < b.lastChange.date ? 1 : -1; });
+    if (stopped.length) html += '<div class="cf-stopped2"><div class="cf-mg-h">Stopped or held in the last 12 months</div>' + stopped.map(function (d) {
+      var lc = d.lastChange;
+      return '<div><b>' + esc(CF.drugLabel(d.key)) + '</b> <span>' + ({ Stop: 'stopped', Hold: 'held', 'Not listed': 'not on the latest list' }[lc.type] || lc.type.toLowerCase()) + ' ' + CF.fmt(lc.date) + ' <i>(' + ago(lc.date) + ')</i>' + (lc.reason ? ' · ' + esc(lc.reason) : '') + '</span></div>';
+    }).join('') + '</div>';
     if (A.review && A.review.sequence) html += '<div class="cf-seq"><i class="fa fa-list-ol"></i> ' + esc(A.review.sequence) + '</div>';
-    html += fastingBlock(A);
-    if (A.hist.latest) html += '<div class="cf-src">Medication list from the ' + esc(A.hist.latest.kind === 'visit' ? A.hist.latest.label.toLowerCase() + ' visit' : A.hist.latest.label.toLowerCase()) + ' of ' + CF.fmt(A.hist.latest.date) + '</div>';
+    html += '<div class="cf-fast-slot">' + fastingBlock(A) + '</div>';
+    if (A.hist.latest) html += '<div class="cf-src">Medication list from the ' + esc(A.hist.latest.kind === 'visit' ? A.hist.latest.label.toLowerCase() + ' visit' : A.hist.latest.label.toLowerCase()) + ' of ' + CF.fmt(A.hist.latest.date) + ' (' + ago(A.hist.latest.date) + ')</div>';
     return html;
   }
   function deviceBlock(p, A) {
@@ -17708,7 +17980,7 @@ var CFUI = (function () {
       '<div class="cf-chips">' + (pr.hfType ? '<span class="cf-chip type">' + esc(pr.hfType) + (pr.esc2026 && pr.esc2026 !== pr.hfType ? ' <small>→ ' + pr.esc2026 + '</small>' : '') + '</span>' : '') +
       (pr.ef != null ? '<span class="cf-chip">LVEF ' + pr.ef + '%</span>' : '') + (ny ? '<span class="cf-chip">NYHA ' + ['', 'I', 'II', 'III', 'IV'][ny.value] + '</span>' : '') +
       (kq ? '<span class="cf-chip">KCCQ ' + kq.value + '</span>' : '') + (pr.bmi != null ? '<span class="cf-chip">BMI ' + Math.round(pr.bmi * 10) / 10 + '</span>' : '') + status +
-      (appt && !A.vital.dead ? '<span class="cf-chip appt"><i class="fa fa-calendar"></i> Next ' + CF.fmt(appt) + '</span>' : '') + '</div></div>' +
+      (appt && !A.vital.dead ? '<span class="cf-chip appt"><i class="fa fa-calendar"></i> Next ' + CF.fmt(appt) + '</span>' : '') + '</div>' + riskRow(p, A) + '</div>' +
       '<div class="cf-ov-btns"><button class="btn btn-primary" data-ov="visit"><i class="fa fa-stethoscope me-1"></i>Start visit</button>' +
       '<button class="btn btn-outline-primary" data-ov="edit"><i class="fa fa-pen me-1"></i>Edit record</button>' +
       '<button class="btn btn-outline-primary" data-ov="trends"><i class="fa fa-chart-line me-1"></i>Trends</button>' +
@@ -17716,18 +17988,22 @@ var CFUI = (function () {
     var items = actionItems(A, A.vital.dead ? [] : alarms);
     h += '<div class="cf-ov-grid"><section class="cf-ov-card"><div class="cf-ov-h"><i class="fa fa-bolt"></i> Needs action <small>alarms and suggestions · the doctor decides</small></div>' + renderActions(items) + '</section>' +
       '<section class="cf-ov-card"><div class="cf-ov-h"><i class="fa fa-vials"></i> Recent labs and trends</div>' + labsTable(A) + '</section></div>';
-    h += '<div class="cf-ov-grid"><section class="cf-ov-card"><div class="cf-ov-h"><i class="fa fa-pills"></i> Current medications</div>' + medsBlock(p, A) + '</section>' +
+    ovState.fasting = !!(A.review && A.review.fasting);
+    h += '<div class="cf-ov-grid"><section class="cf-ov-card"><div class="cf-ov-h"><i class="fa fa-pills"></i> Current medications' +
+      '<label class="cf-fast-toggle ms-auto"><input type="checkbox" id="cfOvFasting"' + (ovState.fasting ? ' checked' : '') + '> <i class="fa fa-moon"></i> Ramadan / fasting</label></div>' + medsBlock(p, A) + '</section>' +
       '<section class="cf-ov-card"><div class="cf-ov-h"><i class="fa fa-microchip"></i> Device and advanced therapy</div>' + deviceBlock(p, A) + '</section></div>';
-    var journeys = Object.keys(A.hist.drugs).map(function (k) { return A.hist.drugs[k]; }).filter(function (d) { return d.events.filter(function (e) { return e.type !== 'On'; }).length; });
-    h += '<section class="cf-ov-card"><div class="cf-ov-h"><i class="fa fa-timeline"></i> Patient journey</div><div class="cf-ov-journey"><div>' + timeline(p, A) + '</div>' +
-      (journeys.length ? '<div><div class="cf-col-h">Dose journey</div>' + journeys.map(function (d) {
-        return '<div class="cf-journey"><b>' + esc(CF.drugLabel(d.key)) + '</b><div class="cf-steps">' + d.events.map(function (e) {
-          return '<span class="cf-step ' + e.type.replace(' ', '-').toLowerCase() + '"><small>' + CF.fmt(e.date, false) + '</small>' + (e.type === 'On' ? '' : '<i class="fa ' + (EVENT_ICON[e.type] || 'fa-circle') + '"></i>') + esc(e.type === 'Stop' || e.type === 'Hold' || e.type === 'Not listed' ? e.type.toLowerCase() : (e.dose || e.type)) + (e.reason ? ' <em>(' + esc(e.reason) + ')</em>' : '') + '</span>';
-        }).join('<span class="cf-arrow">→</span>') + '</div></div>';
-      }).join('') + '</div>' : '') + '</div></section>';
+    h += '<section class="cf-ov-card"><div class="cf-ov-h"><i class="fa fa-chart-gantt"></i> Medication history <small>each drug over time · tap for details</small></div>' + medHistoryChart(A, { p: p }) + '</section>';
+    h += '<section class="cf-ov-card"><div class="cf-ov-h"><i class="fa fa-timeline"></i> Patient journey <small>by year · medication decisions shown with the visit or admission of that day</small></div>' + timeline(p, A) + '</section>';
     h += '<details class="cf-ov-card cf-ov-legacy"><summary><i class="fa fa-table-list"></i> All recorded fields</summary>' + generateCardHTML(p, id, latest || (A.visits[0] || null), A.visits, '') + '</details>';
     var box = $('cfOverview');
     box.innerHTML = h;
+    var ft = $('cfOvFasting');
+    if (ft) ft.addEventListener('change', function () {
+      ovState.fasting = ft.checked;
+      A.review.fasting = ft.checked ? CF.fastingAdvice(A.hist, [{ V_Fasting: 'Yes' }]) : null;
+      var slot = ft.closest('.cf-ov-card').querySelector('.cf-fast-slot');
+      if (slot) slot.innerHTML = fastingBlock(A);
+    });
     box.querySelectorAll('[data-ov]').forEach(function (b) {
       b.addEventListener('click', function () {
         var k = b.getAttribute('data-ov');
@@ -17762,7 +18038,9 @@ var CFUI = (function () {
   // Opens the patient in the visit form and waits for history + carry-forward before applying.
   var pendingVisit = null;
   function startVisit(id, opts) {
-    pendingVisit = { id: id, opts: opts || {} };
+    opts = opts || {};
+    if (opts.fasting == null && ovState.id === id && ovState.fasting) opts.fasting = true;
+    pendingVisit = { id: id, opts: opts };
     editPt(id);
     goToMain();
     if (typeof goToWizardStep === 'function') goToWizardStep(4);
@@ -17775,6 +18053,7 @@ var CFUI = (function () {
     setTimeout(function () {
       if (!val('Visit_Date')) { setVal('Visit_Date', CF.todayIso()); var vd = $('Visit_Date'); if (vd) vd.dispatchEvent(new Event('change', { bubbles: true })); }
       if (opts.refill) { var r = $('visitMedRefillCheck'); if (r && !r.checked) { r.checked = true; r.dispatchEvent(new Event('change', { bubbles: true })); } }
+      if (opts.fasting) setVal('V_Fasting', 'Yes');
       if (opts.registered) { var g = $('visitRegisteredCheck'); if (g && !g.checked) { g.checked = true; g.dispatchEvent(new Event('change', { bubbles: true })); } }
       renderAssist();
       if (opts.drug) applyToRow(opts.drug, opts.act || 'Continue', opts.next, opts.reason); else if (opts.field) focusEl($(opts.field));
