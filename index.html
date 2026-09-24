@@ -3451,7 +3451,7 @@ details.cf-tl-y[open]>summary.cf-tl-yh:before{content:'\25BE';}
             <div class="analytics-panel active" id="tab-overview">
                 <div class="row g-3">
                     <div class="col-12 col-md-6"><div class="analytics-card"><div class="analytics-card-title"><i class="fa fa-heart"></i> HF Type Distribution</div><div class="analytics-chart-wrap"><canvas id="chartHFType"></canvas></div></div></div>
-                    <div class="col-12 col-md-6"><div class="analytics-card"><div class="analytics-card-title"><i class="fa fa-user-group"></i> NYHA Class Distribution</div><div class="analytics-chart-wrap"><canvas id="chartNYHA"></canvas></div></div></div>
+                    <div class="col-12 col-md-6"><div class="analytics-card"><div class="analytics-card-title"><i class="fa fa-user-group"></i> NYHA Class Distribution <small class="text-muted" style="text-transform:none;font-weight:500;">(latest)</small></div><div class="analytics-chart-wrap"><canvas id="chartNYHA"></canvas></div></div></div>
                     <div class="col-12 col-md-6"><div class="analytics-card"><div class="analytics-card-title"><i class="fa fa-venus-mars"></i> Gender Distribution</div><div class="analytics-chart-wrap-sm"><canvas id="chartGender"></canvas></div></div></div>
                     <div class="col-12 col-md-6"><div class="analytics-card"><div class="analytics-card-title"><i class="fa fa-users"></i> Age Group Distribution</div><div class="analytics-chart-wrap-sm"><canvas id="chartAge"></canvas></div></div></div>
                     <div class="col-12 col-md-6"><div class="analytics-card"><div class="analytics-card-title"><i class="fa fa-layer-group"></i> ESC 2026 grouping (latest LVEF)</div><div class="analytics-chart-wrap-sm"><canvas id="cfEsc2026Chart"></canvas></div><div class="small text-muted mt-1" id="cfEsc2026Note"></div></div></div>
@@ -11457,7 +11457,7 @@ function buildKPIs(d,n){
     kpis.forEach(function(k){html+="<div class='col-4 col-md-2'><div class='stat-kpi' style='border-top-color:"+k.color+"'><div class='kpi-num' style='color:"+k.color+"'>"+k.num+"</div><div class='kpi-label'>"+k.label+"</div><div class='kpi-sub'>"+k.sub+"</div></div></div>";});
     document.getElementById('kpiRow').innerHTML=html;
 }
-function buildOverview(d,n){var hfTypes={HFrEF:0,HFmrEF:0,HFpEF:0,Other:0};d.forEach(function(p){if(hfTypes[p.HF_Type]!==undefined)hfTypes[p.HF_Type]++;else if(p.HF_Type)hfTypes.Other++;});makeChart('chartHFType','doughnut',Object.keys(hfTypes),[{data:Object.values(hfTypes),backgroundColor:['#0B2D5B','#1E88E5','#e74c3c','#aaa'],borderWidth:2}],{plugins:{legend:{position:'bottom'}}});var nyha={I:0,II:0,III:0,IV:0,Unknown:0};d.forEach(function(p){if(nyha[p.NYHA]!==undefined)nyha[p.NYHA]++;else nyha.Unknown++;});makeChart('chartNYHA','bar',Object.keys(nyha),[{label:'Patients',data:Object.values(nyha),backgroundColor:['#27ae60','#f39c12','#e74c3c','#0B2D5B','#aaa'],borderRadius:6}],{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}});var male=d.filter(function(p){return p.Gender==='Male';}).length,female=d.filter(function(p){return p.Gender==='Female';}).length;makeChart('chartGender','pie',['Male','Female','Unknown'],[{data:[male,female,n-male-female],backgroundColor:['#2980b9','#e91e63','#aaa'],borderWidth:2}],{});var ag={'<40':0,'40-49':0,'50-59':0,'60-69':0,'70-79':0,'≥80':0};d.forEach(function(p){var a=parseInt(p.Age)||0;if(a<40)ag['<40']++;else if(a<50)ag['40-49']++;else if(a<60)ag['50-59']++;else if(a<70)ag['60-69']++;else if(a<80)ag['70-79']++;else ag['≥80']++;});makeChart('chartAge','bar',Object.keys(ag),[{label:'Patients',data:Object.values(ag),backgroundColor:'#0f3460',borderRadius:6}],{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}});}
+function buildOverview(d,n){var hfTypes={HFrEF:0,HFmrEF:0,HFpEF:0,Other:0};d.forEach(function(p){if(hfTypes[p.HF_Type]!==undefined)hfTypes[p.HF_Type]++;else if(p.HF_Type)hfTypes.Other++;});makeChart('chartHFType','doughnut',Object.keys(hfTypes),[{data:Object.values(hfTypes),backgroundColor:['#0B2D5B','#1E88E5','#e74c3c','#aaa'],borderWidth:2}],{plugins:{legend:{position:'bottom'}}});var nyha={I:0,II:0,III:0,IV:0,Unknown:0};d.forEach(function(p){var _ny=(typeof _cfLatestNYHA==='function')?_cfLatestNYHA(p):p.NYHA;if(nyha[_ny]!==undefined)nyha[_ny]++;else nyha.Unknown++;});makeChart('chartNYHA','bar',Object.keys(nyha),[{label:'Patients',data:Object.values(nyha),backgroundColor:['#27ae60','#f39c12','#e74c3c','#0B2D5B','#aaa'],borderRadius:6}],{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}});var male=d.filter(function(p){return p.Gender==='Male';}).length,female=d.filter(function(p){return p.Gender==='Female';}).length;makeChart('chartGender','pie',['Male','Female','Unknown'],[{data:[male,female,n-male-female],backgroundColor:['#2980b9','#e91e63','#aaa'],borderWidth:2}],{});var ag={'<40':0,'40-49':0,'50-59':0,'60-69':0,'70-79':0,'≥80':0};d.forEach(function(p){var a=parseInt(p.Age)||0;if(a<40)ag['<40']++;else if(a<50)ag['40-49']++;else if(a<60)ag['50-59']++;else if(a<70)ag['60-69']++;else if(a<80)ag['70-79']++;else ag['≥80']++;});makeChart('chartAge','bar',Object.keys(ag),[{label:'Patients',data:Object.values(ag),backgroundColor:'#0f3460',borderRadius:6}],{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}});}
 function buildGDMT(d,n){
     // Use _latestMeds (computed in loadAnalytics) which overlays the most recent visit's medications
     // on top of baseline. Falls back gracefully if a patient has no visits yet.
@@ -11849,7 +11849,7 @@ function buildTable2(){
     var d=allPatientsData, groups=['HFrEF','HFmrEF','HFpEF'], MIN_N=10;
     var byG={}; groups.forEach(function(g){ byG[g]=d.filter(function(p){return _hfPheno(p)===g;}); });
     var OUTCOMES = [
-        {label:'Any HF readmission', fn:function(p){return (parseInt(p.Admissions,10)||0)>0?'Yes':'No';}, type:'cat'},
+        {label:'Any HF readmission', fn:function(p){return (typeof _cfReadmissions==='function'?_cfReadmissions(p).length>0:(parseInt(p.Admissions,10)||0)>0)?'Yes':'No';}, type:'cat'},
         {label:'LV recovery', fn:function(p){return p.Recovered_LV==='Yes'?'Yes':'No';}, type:'cat'},
         {label:'Quadruple GDMT', fn:function(p){return _cfQuad(p)?'Yes':'No';}, type:'cat'},
         {label:'On maximum GDMT doses', fn:function(p){return p.Max_GDMT==='Yes'?'Yes':'No';}, type:'cat'},
@@ -12144,7 +12144,7 @@ function buildLongitudinal(){
             });
         });
         // Build datasets: x = visit number, y = mean, error bars = 95% CI
-        var palette={'HFrEF':'#0B2D5B','HFmrEF':'#0f3460','HFpEF':'#27ae60'};
+        var palette={'HFrEF':'#0B2D5B','HFmrEF':'#1E88E5','HFpEF':'#27ae60'};
         var datasets=[];
         Object.keys(byGroup).forEach(function(g){
             var means=[], lower=[], upper=[];
@@ -18147,6 +18147,164 @@ var CFUI = (function () {
     refreshEditor('V_', isNew);
     renderAssist(); renderKccqHint(); toggleDeath('V_');
   }
+
+  // ------------------------------------------------------------------
+  // 9. PDF output: robust renderer + patient report
+  // ------------------------------------------------------------------
+  // Renders an HTML string to an A4 PDF. The element sits at the top-left of the page
+  // (no centring, no fixed container), the window is scrolled to the top while rendering,
+  // and every page gets a footer with page numbers. This avoids the shifted / blank pages.
+  var PDF_W = 718; // A4 width minus 2 x 10 mm margins, in CSS px
+  function renderPdf(html, filename, footer) {
+    if (typeof html2pdf === 'undefined') { if (typeof showPopup === 'function') showPopup('error', 'PDF', 'The PDF library did not load. Check the internet connection and try again.'); return Promise.resolve(); }
+    var host = document.createElement('div');
+    host.className = 'cf-pdf-host';
+    host.setAttribute('style', 'position:absolute;left:0;top:0;width:' + PDF_W + 'px;background:#fff;z-index:-1;');
+    host.innerHTML = '<div class="cf-pdf" style="width:' + PDF_W + 'px;">' + html + '</div>';
+    document.body.appendChild(host);
+    var sx = window.scrollX, sy = window.scrollY;
+    window.scrollTo(0, 0);
+    var el = host.firstChild;
+    var opts = {
+      margin: [10, 10, 14, 10], filename: filename,
+      image: { type: 'jpeg', quality: 0.95 },
+      html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0, windowWidth: PDF_W, x: 0, y: 0 },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', '.pdf-keep', 'h2', 'h3'] }
+    };
+    function done() { if (host.parentNode) host.parentNode.removeChild(host); window.scrollTo(sx, sy); }
+    return html2pdf().set(opts).from(el).toPdf().get('pdf').then(function (pdf) {
+      var n = pdf.internal.getNumberOfPages();
+      for (var i = 1; i <= n; i++) {
+        pdf.setPage(i); pdf.setFontSize(7.5); pdf.setTextColor(120);
+        pdf.text((footer || 'HF Registry') + '   ·   page ' + i + ' of ' + n, 105, 290, { align: 'center' });
+      }
+    }).save().then(done, function (e) { done(); if (typeof showPopup === 'function') showPopup('error', 'PDF', 'Could not create the PDF: ' + (e && e.message || e)); });
+  }
+  function pdfCss() {
+    return '<style>.cf-pdf{font-family:Arial,Helvetica,sans-serif;color:#1d2939;font-size:10.5px;line-height:1.35;}' +
+      '.cf-pdf h1{font-size:17px;margin:0;color:#0B2D5B;}.cf-pdf h2{font-size:12.5px;color:#0B2D5B;margin:14px 0 5px;padding-bottom:3px;border-bottom:2px solid #0B2D5B;}' +
+      '.cf-pdf .top{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #0B2D5B;padding-bottom:6px;margin-bottom:8px;}' +
+      '.cf-pdf .brand{font-size:9px;color:#667085;text-align:right;}.cf-pdf .brand b{color:#0B2D5B;font-size:11px;}' +
+      '.cf-pdf table{width:100%;border-collapse:collapse;margin:2px 0 4px;}.cf-pdf th{background:#EEF3FA;color:#0B2D5B;text-align:left;font-size:9.5px;padding:4px 5px;border-bottom:1px solid #cfd8e6;}' +
+      '.cf-pdf td{padding:3.5px 5px;border-bottom:1px solid #edf0f4;vertical-align:top;}.cf-pdf td.k{width:30%;color:#475467;font-weight:bold;background:#fafbfc;}' +
+      '.cf-pdf .grid{display:flex;gap:16px;}.cf-pdf .grid>div{flex:1;min-width:0;}.cf-pdf .tag{display:inline-block;background:#F2F4F7;border-radius:9px;padding:1px 7px;margin:1px 2px;font-size:9.5px;}' +
+      '.cf-pdf .tag.hi{background:#FEF3F2;color:#B42318;}.cf-pdf .muted{color:#667085;}.cf-pdf .small{font-size:9px;}' +
+      '.cf-pdf .st{display:inline-block;border-radius:8px;padding:0 6px;font-size:9px;font-weight:bold;}.cf-pdf .st.up{background:#E7F6EC;color:#1B7F3B;}.cf-pdf .st.continue{background:#F2F4F7;color:#475467;}' +
+      '.cf-pdf .st.reduce{background:#FFFAEB;color:#B54708;}.cf-pdf .st.hold,.cf-pdf .st.avoid{background:#FEF3F2;color:#B42318;}' +
+      '.cf-pdf .abn{color:#B54708;font-weight:bold;}.cf-pdf .crit{color:#B42318;font-weight:bold;}.cf-pdf .note{font-size:8.5px;color:#667085;margin-top:10px;border-top:1px solid #e4e7ec;padding-top:5px;}</style>';
+  }
+  function pdfKV(rows) {
+    rows = rows.filter(function (r) { return r[1] != null && String(r[1]).trim() !== '' && r[1] !== '—'; });
+    if (!rows.length) return '';
+    return '<table>' + rows.map(function (r) { return '<tr><td class="k">' + esc(r[0]) + '</td><td>' + r[1] + '</td></tr>'; }).join('') + '</table>';
+  }
+  function medChangeText(A) {
+    var by = {};
+    Object.keys(A.hist.drugs).forEach(function (k) {
+      A.hist.drugs[k].events.forEach(function (e) {
+        if (e.type === 'On' || e.type === 'Not listed') return;
+        var t = CF.drugLabel(k).replace(/ \(.*\)$/, '') + ' ' + (EV_WORD[e.type] || e.type).toLowerCase() +
+          (e.type === 'Increase' || e.type === 'Decrease' || e.type === 'Change' ? ' to ' + e.dose : (e.type === 'Start' || e.type === 'Restart') && e.dose ? ' ' + e.dose : '') + (e.reason ? ' (' + e.reason + ')' : '');
+        (by[e.date] = by[e.date] || []).push(t);
+      });
+    });
+    return by;
+  }
+  var STATUS_WORD = { up: 'Room to increase', continue: 'Continue', reduce: 'Reduce', hold: 'Hold', avoid: 'Stop / avoid' };
+  function patientReportHtml(id, p, visits) {
+    var A = CF.analyse(p, visits), pr = A.profile, S = A.S, today = CF.todayIso();
+    var ny = CF.last(S, 'NYHA'), kq = S.KCCQ || [], ef = S.EF || [];
+    var dev = CF.currentDevice(p, A.visits);
+    var status = A.vital.dead ? 'Died' + (A.vital.date ? ' ' + CF.fmt(A.vital.date) : '') + (A.vital.place ? ' (' + A.vital.place.toLowerCase() + ')' : '') + (A.vital.cause ? ' · ' + A.vital.cause : '')
+      : A.followUp.status === 'Active' ? 'Alive · active follow-up' : 'Alive · ' + A.followUp.status + (A.followUp.reason ? ' (' + A.followUp.reason + ')' : '');
+    var h = pdfCss();
+    h += '<div class="top"><div><h1>Heart failure clinic · patient summary</h1><div class="muted">Mubarak Al-Kabeer Hospital · Sabah Al-Ahmad Cardiac Center</div></div>' +
+      '<div class="brand"><b>HF Registry</b><br>by CardioFlow<br>' + CF.fmt(today) + '</div></div>';
+    // identity
+    h += '<div class="grid pdf-keep"><div>' + pdfKV([
+      ['Name', '<b>' + esc(p.Patient_Name || '') + '</b>'], ['Age / sex', esc([s(p.Age) ? s(p.Age) + ' y' : '', s(p.Gender)].filter(Boolean).join(' · '))],
+      ['Nationality', esc(p.Nationality)], ['File no.', esc(p.File_No)], ['Civil ID', esc(p.Civil_ID)]]) + '</div><div>' + pdfKV([
+      ['Mobile', esc(p.Mobile)], ['Doctor', esc(p.Doctor_Name)], ['Registered', CF.iso(p.timestamp) ? CF.fmt(p.timestamp) : ''],
+      ['Status', esc(status)], ['Next appointment', !A.vital.dead && s(p.Next_Appt) ? CF.fmt(p.Next_Appt) : '']]) + '</div></div>';
+    // HF profile
+    h += '<h2>Heart failure profile</h2><div class="grid pdf-keep"><div>' + pdfKV([
+      ['HF type', esc(pr.hfType || '') + (pr.esc2026 && pr.esc2026 !== pr.hfType ? ' → ' + esc(pr.esc2026) + ' (ESC 2026)' : '')],
+      ['Aetiology', esc([s(p.HF_Cause), CF.yes(p.DeNovo_HF) ? 'de novo' : ''].filter(Boolean).join(' · '))],
+      ['LVEF', ef.length ? ef.map(function (x) { return x.value + '% (' + CF.fmt(x.date, true) + ')'; }).slice(-4).join(' → ') : (s(p.EF_Diagnosis) ? s(p.EF_Diagnosis) + '% at diagnosis' : '')],
+      ['Valve disease', CF.yes(p.Valvular_Disease) ? esc(s(p.Valvular_Type) || 'Yes') : '']]) + '</div><div>' + pdfKV([
+      ['NYHA', ny ? ['', 'I', 'II', 'III', 'IV'][ny.value] + ' (' + CF.fmt(ny.date) + ')' : ''],
+      ['KCCQ', kq.length ? kq[kq.length - 1].value + ' (' + CF.fmt(kq[kq.length - 1].date) + ')' + (kq.length > 1 ? ' · change ' + (kq[kq.length - 1].value - kq[kq.length - 2].value >= 0 ? '+' : '') + (kq[kq.length - 1].value - kq[kq.length - 2].value) : '') : ''],
+      ['Weight / BMI', [pr.weight != null ? pr.weight + ' kg' : '', pr.bmi != null ? 'BMI ' + Math.round(pr.bmi * 10) / 10 : ''].filter(Boolean).join(' · ')],
+      ['Device', dev ? esc(dev.type) + (dev.date ? ' (' + CF.fmt(dev.date) + ')' : '') : 'None recorded']]) + '</div></div>';
+    var rf = riskFactors(p, A);
+    h += '<div class="pdf-keep"><b class="muted small">RISK FACTORS AND COMORBIDITIES</b><br>' + (rf.length ? rf.map(function (r) { return '<span class="tag ' + r[1] + '">' + esc(r[0]) + '</span>'; }).join('') : '<span class="muted">none recorded</span>') + '</div>';
+    // medications
+    h += '<h2>Current medications' + (A.hist.latest ? ' <span class="muted small">(list from the ' + esc(A.hist.latest.label.toLowerCase()) + ' of ' + CF.fmt(A.hist.latest.date) + ')</span>' : '') + '</h2>';
+    var meds = A.hist.current.slice().sort(medSort);
+    if (meds.length) {
+      h += '<table><tr><th>Drug</th><th>Dose</th><th>% target</th><th>On since</th><th>Last change</th><th>Review</th></tr>' + meds.map(function (d) {
+        var e = d.current, pct = CF.pctTarget(e), lc = d.lastChange && d.lastChange.type !== 'On' ? d.lastChange : null, rv = reviewFor(A, d.key), since = onSince(d);
+        return '<tr><td><b>' + esc(CF.drugLabel(d.key)) + '</b></td><td>' + esc(CF.doseText(e) || '—') + (e && e.check ? ' <span class="abn">(check dose)</span>' : '') + '</td><td>' + (pct != null ? pct + '%' : '') + '</td><td>' + (since ? CF.fmt(since) : '') + '</td>' +
+          '<td>' + (lc ? (EV_WORD[lc.type] || lc.type) + ' ' + CF.fmt(lc.date) + (lc.prev && /Increase|Decrease|Change/.test(lc.type) ? '<br><span class="muted small">from ' + esc(lc.prev) + '</span>' : '') : '') + '</td>' +
+          '<td>' + (rv ? '<span class="st ' + rv.status + '">' + STATUS_WORD[rv.status] + '</span>' + (rv.reason ? '<br><span class="small">' + esc(rv.reason) + '</span>' : '') : '') + '</td></tr>';
+      }).join('') + '</table>';
+    } else h += '<p class="muted">No current medications recorded.</p>';
+    var stopped = A.hist.stopped.filter(function (d) { return d.lastChange && CF.daysBetween(d.lastChange.date, today) <= 365; });
+    if (stopped.length) h += '<p class="small"><b>Stopped or held in the last 12 months:</b> ' + stopped.map(function (d) { var lc = d.lastChange; return esc(CF.drugLabel(d.key)) + ' ' + ({ Stop: 'stopped', Hold: 'held', 'Not listed': 'not on the latest list' }[lc.type] || lc.type) + ' ' + CF.fmt(lc.date) + (lc.reason ? ' (' + esc(lc.reason) + ')' : ''); }).join(' · ') + '</p>';
+    // suggestions
+    var sug = [];
+    if (A.review && A.review.sequence) sug.push('<b>Sequence:</b> ' + esc(A.review.sequence));
+    A.meds.filter(function (m) { return !m.review; }).forEach(function (m) { sug.push('<b>' + esc(m.title) + '</b>' + (m.detail ? ': ' + esc(m.level === 'glp1' ? m.indications.map(function (x) { return x.text; }).join(' · ') : m.detail) : '')); });
+    A.devices.forEach(function (d) { sug.push('<b>' + esc(d.title) + '</b>: ' + esc(d.detail) + (d.missing.length ? ' <span class="muted">Missing: ' + esc(d.missing.join(', ')) + '.</span>' : '')); });
+    A.labs.filter(function (l) { return l.level !== 'upcoming'; }).forEach(function (l) { sug.push('<b>' + esc(l.labs) + '</b> ' + (l.level === 'urgent' ? '(urgent)' : 'due ' + CF.fmt(l.due)) + ': ' + esc(l.because)); });
+    if (sug.length && !A.vital.dead) h += '<h2>Suggestions <span class="muted small">(advisory · the treating cardiologist decides)</span></h2><ul style="margin:2px 0 4px 16px;padding:0;">' + sug.map(function (x) { return '<li class="pdf-keep" style="margin-bottom:2px;">' + x + '</li>'; }).join('') + '</ul>';
+    // labs
+    var labRows = LAB_ROWS.map(function (r) {
+      var a = S[r[0]] || []; if (!a.length) return '';
+      var l = a[a.length - 1], pv = a.length > 1 ? a[a.length - 2] : null, fl = r[3](l.value, pr);
+      var pc = pv && pv.value ? Math.round((l.value - pv.value) / Math.abs(pv.value) * 100) : null;
+      return '<tr><td><b>' + r[1] + '</b></td><td class="' + fl + '">' + l.value + ' <span class="muted small">' + r[2] + '</span></td><td>' + CF.fmt(l.date) + '</td><td>' + (pv ? pv.value + ' (' + CF.fmt(pv.date) + ')' : '') + '</td><td>' + (pc != null ? (pc > 0 ? '+' : '') + pc + '%' : '') + '</td></tr>';
+    }).join('');
+    if (labRows) h += '<h2>Laboratory results</h2><table><tr><th>Test</th><th>Latest</th><th>Date</th><th>Previous</th><th>Change</th></tr>' + labRows + '</table>';
+    // admissions
+    var adm = [];
+    if (CF.iso(p.Admission_Date)) adm.push({ d: CF.iso(p.Admission_Date), dis: CF.iso(p.Admission_Discharge_Date), hf: s(p.Admission_HF_Related), re: CF.yes(p.HF_Readmission) ? (s(p.HF_Readmission_Interval) || 'yes') : '', why: s(p.Admission_Reason), label: 'Index' });
+    CF.parseExtraAdmissions(p).forEach(function (a, i) { if (CF.iso(a.date)) adm.push({ d: CF.iso(a.date), dis: CF.iso(a.dischargeDate), hf: s(a.Admission_HF_Related), re: a.HF_Readmission === 'Yes' ? (s(a.HF_Readmission_Interval) || 'yes') : '', why: s(a.reason), label: '#' + (i + 2) }); });
+    if (adm.length) {
+      adm.sort(function (a, b) { return a.d < b.d ? 1 : -1; });
+      h += '<h2>Admissions</h2><table><tr><th>Admitted</th><th>Discharged</th><th>Days</th><th>HF related</th><th>HF readmission</th><th>Reason</th></tr>' + adm.map(function (a) {
+        var los = a.dis ? CF.daysBetween(a.d, a.dis) : null;
+        return '<tr><td>' + CF.fmt(a.d) + ' <span class="muted small">' + a.label + '</span></td><td>' + (a.dis ? CF.fmt(a.dis) : '') + '</td><td>' + (los != null ? los : '') + '</td><td>' + esc(a.hf) + '</td><td>' + esc(a.re) + '</td><td>' + esc(a.why) + '</td></tr>';
+      }).join('') + '</table>';
+    }
+    // visits
+    var mc = medChangeText(A);
+    if (A.visits.length) {
+      h += '<h2>Clinic visits (' + A.visits.length + ')</h2><table><tr><th>Date</th><th>Type</th><th>NYHA</th><th>KCCQ</th><th>Wt</th><th>BP</th><th>HR</th><th>K</th><th>Cr</th><th>eGFR</th><th>NT-proBNP</th><th>Medication changes</th></tr>' +
+        A.visits.map(function (v) {
+          var d = CF.iso(v.visitDate);
+          return '<tr><td style="white-space:nowrap">' + CF.fmt(d) + '</td><td>' + esc(v.visitType || '') + '</td><td>' + esc(v.V_NYHA || '') + '</td><td>' + esc(v.V_KCCQ || '') + '</td><td>' + esc(v.V_Weight || '') + '</td><td>' + esc(v.V_BP || '') + '</td><td>' + esc(v.V_Pulse || '') + '</td><td>' + esc(v.V_K || '') + '</td><td>' + esc(v.V_Creat || '') + '</td><td>' + esc(v.V_eGFR || '') + '</td><td>' + esc(v.V_NTproBNP || '') + '</td>' +
+            '<td class="small">' + esc((mc[d] || []).join('; ')) + (s(v.V_Plan) ? '<br><span class="muted">Plan: ' + esc(s(v.V_Plan).slice(0, 220)) + '</span>' : '') + '</td></tr>';
+        }).join('') + '</table>';
+    }
+    h += '<div class="note">Generated ' + new Date().toLocaleString() + ' from the HF Registry. Suggestions are decision support only and follow ESC guidance; thresholds are under clinical review. Values show what was recorded; missing data is left blank, not assumed normal.</div>';
+    return h;
+  }
+  function patientReport(id, preP, preVisits) {
+    var pP = preP ? Promise.resolve(preP) : (PC[id] ? Promise.resolve(PC[id]) : db.collection('patients').doc(id).get().then(function (snap) { if (!snap.exists) throw new Error('Patient record not found'); PC[id] = snap.data(); return PC[id]; }));
+    if (typeof showPopup === 'function') showPopup('warning', 'Preparing PDF', 'Building the patient report…');
+    return pP.then(function (p) {
+      var vP = preVisits ? Promise.resolve(preVisits) : _loadRegistryVisitInfo(id, true).then(function (info) { return info.all || []; }).catch(function () { return []; });
+      return vP.then(function (visits) {
+        var html = patientReportHtml(id, p, visits);
+        var name = ('HF_Report_' + (p.File_No || 'unknown') + '_' + (p.Patient_Name || 'patient')).replace(/[^\w\-]+/g, '_') + '.pdf';
+        var pop = document.getElementById('popOv'); if (pop) pop.remove();
+        return renderPdf(html, name, 'HF Registry · ' + (p.Patient_Name || '') + ' · File ' + (p.File_No || '-'));
+      });
+    }).catch(function (e) { var pop = document.getElementById('popOv'); if (pop) pop.remove(); if (typeof showPopup === 'function') showPopup('error', 'PDF', e.message || String(e)); });
+  }
+
   function install() {
     wrap('initFormUI', function () { init(); });
     wrap('editPt', function () { afterPatientLoad(); setTimeout(function () { renderAssist(); }, 50); });
@@ -18172,12 +18330,15 @@ var CFUI = (function () {
     window.cfToggleDeath = toggleDeath;
     window.cfReadmitSuggest = readmitSuggest;
     window.renderCalendarDayList = renderCalendarDayList;
+    // Patient PDF: the new report replaces the field dump (which shifted and printed blank pages)
+    window.pdfFromAdmin = function (id) { return patientReport(id); };
+    window.generatePDF = function (data, visitsData, id) { return patientReport(id, data, (visitsData || []).length ? visitsData : null); };
     // Keep the booked date on the visit record (V_Next_Appt_Set) so past bookings show as seen / missed.
     document.addEventListener('change', function (e) { if (e.target && e.target.id === 'Next_Appt') { var h = $('V_Next_Appt_Set'); if (h) h.value = e.target.value || ''; } }, true);
   }
   return {
     install: install, openOverview: openOverview, startVisit: startVisit, headerChips: headerChips, smartBody: smartBody, renderAssist: renderAssist,
-    calHistory: calHistory, refreshEditor: refreshEditor, clearDraft: clearDraft
+    calHistory: calHistory, renderPdf: renderPdf, pdfCss: pdfCss, patientReport: patientReport, riskFactors: riskFactors, refreshEditor: refreshEditor, clearDraft: clearDraft
   };
 })();
 CFUI.install();
@@ -18212,6 +18373,26 @@ CFUI.install();
     var x = p._cfPillars.filter(function (y) { return y.key === k; })[0];
     if (!x || !x.on) return undefined;
     return x.pct == null ? 100 : x.pct;
+  };
+  // HF readmissions: admissions flagged as HF readmission, or HF-related admissions after a recorded discharge.
+  // Interval as recorded, otherwise worked out from the previous discharge date ('' = unknown).
+  window._cfReadmissions = function (p) {
+    var adm = [];
+    if (CF.iso(p.Admission_Date)) adm.push({ d: CF.iso(p.Admission_Date), dis: CF.iso(p.Admission_Discharge_Date), hf: (p.Admission_HF_Related || 'HF related') === 'HF related', flag: CF.yes(p.HF_Readmission), band: p.HF_Readmission_Interval || '' });
+    CF.parseExtraAdmissions(p).forEach(function (a) { if (CF.iso(a.date)) adm.push({ d: CF.iso(a.date), dis: CF.iso(a.dischargeDate), hf: (a.Admission_HF_Related || 'HF related') === 'HF related', flag: a.HF_Readmission === 'Yes', band: a.HF_Readmission_Interval || '' }); });
+    adm.sort(function (a, b) { return a.d < b.d ? -1 : 1; });
+    var out = [];
+    adm.forEach(function (a, i) {
+      var prev = i > 0 ? adm[i - 1] : null;
+      if (!(a.flag || (a.hf && prev && prev.dis))) return;
+      var band = CF.READMIT_BANDS.indexOf(a.band) >= 0 ? a.band : (prev && prev.dis ? CF.readmitBand(prev.dis, a.d) : '');
+      out.push({ date: a.d, band: band });
+    });
+    return out;
+  };
+  window._cfLatestNYHA = function (p) {
+    var n = p && p._cf ? CF.last(p._cf.S, 'NYHA') : null;
+    return n ? ['', 'I', 'II', 'III', 'IV'][n.value] : (p ? p.NYHA : '');
   };
   window._cfIronTreated = function (p) {
     if (p && p._cf && p._cf.hist.drugs.Ferinject) return true;
@@ -18292,6 +18473,13 @@ CFUI.install();
           p._latest = typeof _buildLatestSnapshot === 'function' ? _buildLatestSnapshot(p, p._latestVisit) : Object.assign({}, p);
           try { p._cf = CF.analyse(p, p._visits); p._cfPillars = CF.pillarStatus(p, p._visits, p._cf); } catch (e) { p._cf = null; p._cfPillars = null; }
           p._latestMeds = _computeLatestMedFlags(p, p._latestVisit);
+          // display-only fill-ins (never saved): admissions count and length of stay from the recorded dates
+          var nAdm = (CF.iso(p.Admission_Date) ? 1 : 0) + CF.parseExtraAdmissions(p).filter(function (a) { return CF.iso(a.date); }).length;
+          if (!String(p.Admissions || '').trim() && nAdm) p.Admissions = String(nAdm);
+          if (!String(p.LOS || '').trim() && CF.iso(p.Admission_Date) && CF.iso(p.Admission_Discharge_Date)) {
+            var los = CF.daysBetween(CF.iso(p.Admission_Date), CF.iso(p.Admission_Discharge_Date));
+            if (los != null && los >= 0) p.LOS = String(los);
+          }
           _allVisitsCache[p.id] = p._visits.slice().reverse();
         });
         var d = allPatientsData, n = d.length;
@@ -18301,6 +18489,34 @@ CFUI.install();
         buildKPIs(d, n); buildOverview(d, n); buildGDMT(d, n); buildRisk(d, n); buildDemographics(d, n); buildComorbidities(d, n); buildOutcomes(d, n); buildGDMTGap(d, n); buildEnrollment(d, n);
       });
     }).catch(function (e) { document.getElementById('analyticsSpinner').innerHTML = '<div class="text-danger">Error: ' + e.message + '</div>'; });
+  };
+
+  // ---- GDMT gap table: reduced EF by latest LVEF, alive patients, all four pillars (ACEi/ARB count for the RAS pillar) ----
+  window.buildGDMTGap = function (d, n) {
+    var wrap = document.getElementById('gdmtGapTableWrap');
+    if (!wrap) return;
+    var rows = d.filter(function (p) { return p._cf && p._cf.profile.esc2026 === 'HFrEF' && !p._cf.vital.dead; });
+    if (!rows.length) { wrap.innerHTML = '<p class="text-muted small">No living patients with LVEF <50%.</p>'; return; }
+    var html = '<table class="gap-table table table-sm table-bordered"><thead><tr><th>Patient</th><th>File</th><th>LVEF</th><th>ARNI / ACEi / ARB</th><th>Beta-blocker</th><th>MRA</th><th>SGLT2i</th><th>Gaps</th><th>Recorded reason</th><th>Medication list</th></tr></thead><tbody>';
+    var shown = 0;
+    rows.forEach(function (p) {
+      var pl = p._cfPillars || [], miss = pl.filter(function (x) { return !x.on; });
+      if (!miss.length) return;
+      shown++;
+      function cell(k) {
+        var x = pl.filter(function (y) { return y.key === k; })[0];
+        if (!x || !x.on) return '<td class="gap-miss">✗</td>';
+        return '<td class="gap-check" title="' + CF.esc(x.drug + ' ' + x.dose) + '">✓' + (x.pct != null ? ' <small>' + x.pct + '%</small>' : '') + '</td>';
+      }
+      var latest = p._cf.hist.latest;
+      html += '<tr><td style="text-align:left;font-weight:600;">' + CF.esc(p.Patient_Name || '?') + '</td><td>' + CF.esc(p.File_No || '-') + '</td><td>' + (p._cf.profile.ef != null ? p._cf.profile.ef + '%' : '') + '</td>' +
+        cell('RAS') + cell('BB') + cell('MRA') + cell('SGLT2') +
+        '<td><span class="risk-badge ' + (miss.length >= 3 ? 'risk-high' : miss.length >= 2 ? 'risk-mid' : 'risk-low') + '">' + miss.length + ' missing</span></td>' +
+        '<td style="text-align:left;font-size:.75rem;">' + miss.map(function (x) { return CF.esc(x.label) + ': ' + (x.reason ? CF.esc(x.reason) : '<i class="text-muted">none recorded</i>'); }).join('<br>') + '</td>' +
+        '<td style="font-size:.75rem;">' + (latest ? CF.esc(latest.label) + ' ' + CF.fmt(latest.date) : 'none') + '</td></tr>';
+    });
+    html += '</tbody></table><div class="small text-muted">Living patients with latest LVEF <50% (ESC 2026). ✓ shows % of target dose. Medications from the latest record that lists them.</div>';
+    wrap.innerHTML = shown ? html : '<p class="text-muted small">Every living patient with LVEF <50% is on all four pillars.</p>';
   };
 
   // ---- extra cards ----
@@ -18322,16 +18538,14 @@ CFUI.install();
   window.buildOutcomes = function (d, n) {
     origOutcomes(d, n);
     var bands = {}; CF.READMIT_BANDS.forEach(function (b) { bands[b] = 0; });
-    var hfReadmits = 0;
+    var hfReadmits = 0, unknown = 0;
     d.forEach(function (p) {
-      var list = [];
-      if (CF.yes(p.HF_Readmission)) list.push(p.HF_Readmission_Interval || '');
-      CF.parseExtraAdmissions(p).forEach(function (a) { if (a.HF_Readmission === 'Yes') list.push(a.HF_Readmission_Interval || ''); });
-      list.forEach(function (b) { hfReadmits++; if (bands[b] !== undefined) bands[b]++; });
+      window._cfReadmissions(p).forEach(function (r) { hfReadmits++; if (bands[r.band] !== undefined) bands[r.band]++; else unknown++; });
     });
     chart('cfReadmitChart', 'bar', CF.READMIT_BANDS, CF.READMIT_BANDS.map(function (b) { return bands[b]; }), ['#E53935', '#f79009', '#1E88E5', '#0B2D5B']);
     var rn = document.getElementById('cfReadmitNote');
-    if (rn) rn.innerHTML = hfReadmits + ' HF readmission' + (hfReadmits === 1 ? '' : 's') + ' recorded · 30-day: <b>' + bands['≤30 days'] + '</b> · 90-day: <b>' + (bands['≤30 days'] + bands['31–90 days']) + '</b>';
+    if (rn) rn.innerHTML = hfReadmits + ' HF readmission' + (hfReadmits === 1 ? '' : 's') + ' · 30-day: <b>' + bands['≤30 days'] + '</b> · 90-day: <b>' + (bands['≤30 days'] + bands['31–90 days']) + '</b>' +
+      (unknown ? ' · ' + unknown + ' without a previous discharge date (interval unknown)' : '') + '<br><small>Interval as recorded, otherwise worked out from the previous discharge date.</small>';
     var st = { Active: 0, 'Lost to follow-up': 0, Transferred: 0, Died: 0 }, withDate = 0;
     d.forEach(function (p) {
       if (!p._cf) return;
@@ -18343,6 +18557,498 @@ CFUI.install();
     if (sn) sn.innerHTML = 'Death and loss to follow-up are now separate. ' + (st.Died ? withDate + ' of ' + st.Died + ' deaths have a recorded date (used in survival curves).' : '');
   };
 })();
+
+</script>
+<script id="cf-exports">
+/* =====================================================================
+   HF Registry · exports rebuilt on the CardioFlow engine
+   - one loader: every patient + all visits (bulk read) + engine analysis
+   - analytics PDF / Excel and clinic-day PDF from computed medications
+   - SPSS patient file: Yes/No fields coded 1/0 (detected from the form),
+     computed calc_* variables, a codebook that matches the data
+   - SPSS visit file: original columns + visit-level GDMT and new visit fields
+   - full Excel export: original sheets + calc_* columns
+   ===================================================================== */
+var CFX = (function () {
+  'use strict';
+  function s(v) { return v == null ? '' : String(v).trim(); }
+  function today() { return new Date().toISOString().split('T')[0]; }
+  function popWait(msg) { if (typeof showPopup === 'function') showPopup('warning', 'Preparing export', msg); }
+  function popClose() { var o = document.getElementById('popOv'); if (o) o.remove(); }
+  function popErr(e) { popClose(); if (typeof showPopup === 'function') showPopup('error', 'Export failed', (e && e.message) || String(e)); }
+  function csvEsc(v) { if (v == null) return ''; var t = String(v); return /[",\n\r]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t; }
+  function download(text, name, type) {
+    var blob = new Blob([text], { type: type || 'text/csv;charset=utf-8;' });
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  }
+  function r1(x) { return x == null || isNaN(x) ? '' : Math.round(x * 10) / 10; }
+
+  // ---------- loader ----------
+  function loadAll() {
+    return db.collection('patients').get().then(function (snap) {
+      var pts = [];
+      snap.forEach(function (d) { pts.push(Object.assign({ id: d.id }, d.data())); });
+      var bulk = typeof _loadRegistryAllVisits === 'function' ? _loadRegistryAllVisits(false).catch(function () { return null; }) : Promise.resolve(null);
+      return bulk.then(function (by) {
+        var jobs = pts.map(function (p) {
+          if (by) return Promise.resolve((by[p.id] && by[p.id].all) || []);
+          return db.collection('patients').doc(p.id).collection('visits').get().then(function (vs) {
+            var a = []; vs.forEach(function (v) { a.push(Object.assign({ id: v.id }, v.data())); }); return a;
+          }).catch(function () { return []; });
+        });
+        return Promise.all(jobs).then(function (all) {
+          return pts.map(function (p, i) {
+            var visits = (all[i] || []).slice().sort(function (a, b) { return s(b.visitDate).localeCompare(s(a.visitDate)); });
+            var A = null, pillars = null;
+            try { A = CF.analyse(p, visits); pillars = CF.pillarStatus(p, visits, A); } catch (e) { console.warn('CFX analyse', p.id, e); }
+            return { id: p.id, p: p, visits: visits, A: A, pillars: pillars };
+          });
+        });
+      });
+    });
+  }
+  // analytics page data when loaded (respects its filters), otherwise a fresh load
+  function analyticsRecords() {
+    if (typeof allPatientsData !== 'undefined' && allPatientsData.length && allPatientsData.every(function (p) { return p._cf !== undefined; })) {
+      return Promise.resolve(allPatientsData.map(function (p) { return { id: p.id, p: p, visits: p._visits || [], A: p._cf, pillars: p._cfPillars }; }));
+    }
+    return loadAll();
+  }
+
+  // ---------- computed variables ----------
+  var PK = ['RAS', 'BB', 'MRA', 'SGLT2'];
+  var CALC = [
+    ['calc_ESC2026_Group', 'string', 'HF group by latest LVEF (ESC 2026: LVEF <50% = HFrEF, ≥50% = HFpEF)'],
+    ['calc_LVEF_Latest', 'numeric', 'Latest LVEF %, any source (echo, CMR, admission)'],
+    ['calc_LVEF_Latest_Date', 'date', 'YYYY-MM-DD'],
+    ['calc_NYHA_Latest', 'numeric', '1 = I, 2 = II, 3 = III, 4 = IV'],
+    ['calc_KCCQ_First', 'numeric', 'First KCCQ score (0–100)'],
+    ['calc_KCCQ_Latest', 'numeric', 'Latest KCCQ score (0–100)'],
+    ['calc_Weight_Latest', 'numeric', 'kg'],
+    ['calc_BMI_Latest', 'numeric', 'kg/m² from latest weight and height'],
+    ['calc_RAS_On', 'binary', '1 = on ARNI/ACEi/ARB at the latest medication list, 0 = not'],
+    ['calc_BB_On', 'binary', '1 = on beta-blocker'],
+    ['calc_MRA_On', 'binary', '1 = on MRA'],
+    ['calc_SGLT2_On', 'binary', '1 = on SGLT2 inhibitor'],
+    ['calc_RAS_PctTarget', 'numeric', '% of ESC target daily dose (blank = not on / dose unreadable)'],
+    ['calc_BB_PctTarget', 'numeric', '% of ESC target daily dose'],
+    ['calc_MRA_PctTarget', 'numeric', '% of ESC target daily dose'],
+    ['calc_SGLT2_PctTarget', 'numeric', '% of target dose'],
+    ['calc_GDMT_Pillars', 'numeric', 'Number of GDMT pillars on (0–4)'],
+    ['calc_Quad_GDMT', 'binary', '1 = all four pillars on'],
+    ['calc_Max_GDMT', 'binary', '1 = all four pillars at target dose, or reduced for a recorded reason'],
+    ['calc_Dead', 'binary', '1 = died (vital status or date of death recorded)'],
+    ['calc_Death_Date', 'date', 'YYYY-MM-DD'],
+    ['calc_Death_Cause', 'string', 'HF / sudden cardiac death / other CV / non-CV / unknown'],
+    ['calc_FU_Status', 'string', 'Active / Lost to follow-up / Transferred / Died'],
+    ['calc_Enrol_Date', 'date', 'Registration date'],
+    ['calc_Last_Contact', 'date', 'Latest visit, or registration if no visit'],
+    ['calc_FU_Days', 'numeric', 'Days from registration to death, or to last contact if alive (blank if died without a recorded date)'],
+    ['calc_Visits_N', 'numeric', 'Number of recorded visits'],
+    ['calc_HF_Admissions_N', 'numeric', 'HF-related admissions recorded (index + additional)'],
+    ['calc_HF_Readm_30d', 'binary', '1 = any HF readmission ≤30 days after a discharge'],
+    ['calc_HF_Readm_90d', 'binary', '1 = any HF readmission ≤90 days after a discharge']
+  ];
+  function b(x) { return x ? 1 : 0; }
+  function admissions(p) {
+    var a = [];
+    if (CF.iso(p.Admission_Date)) a.push({ d: CF.iso(p.Admission_Date), dis: CF.iso(p.Admission_Discharge_Date), hf: s(p.Admission_HF_Related) || 'HF related', re: s(p.HF_Readmission), band: s(p.HF_Readmission_Interval) });
+    CF.parseExtraAdmissions(p).forEach(function (x) { if (CF.iso(x.date)) a.push({ d: CF.iso(x.date), dis: CF.iso(x.dischargeDate), hf: s(x.Admission_HF_Related) || 'HF related', re: s(x.HF_Readmission), band: s(x.HF_Readmission_Interval) }); });
+    a.sort(function (x, y) { return x.d < y.d ? -1 : 1; });
+    return a;
+  }
+  function derive(r) {
+    var p = r.p, A = r.A, out = {};
+    if (!A) { CALC.forEach(function (c) { out[c[0]] = ''; }); return out; }
+    var pr = A.profile, S = A.S;
+    var ef = CF.last(S, 'EF'), ny = CF.last(S, 'NYHA'), kq = S.KCCQ || [];
+    out.calc_ESC2026_Group = pr.esc2026 || '';
+    out.calc_LVEF_Latest = ef ? ef.value : '';
+    out.calc_LVEF_Latest_Date = ef ? ef.date : '';
+    out.calc_NYHA_Latest = ny ? ny.value : '';
+    out.calc_KCCQ_First = kq.length ? kq[0].value : '';
+    out.calc_KCCQ_Latest = kq.length ? kq[kq.length - 1].value : '';
+    out.calc_Weight_Latest = pr.weight != null ? pr.weight : '';
+    out.calc_BMI_Latest = pr.bmi != null ? r1(pr.bmi) : '';
+    var pl = r.pillars || [], on = 0;
+    PK.forEach(function (k) {
+      var x = pl.filter(function (y) { return y.key === k; })[0];
+      out['calc_' + k + '_On'] = x && x.on ? 1 : 0;
+      out['calc_' + k + '_PctTarget'] = x && x.on && x.pct != null ? x.pct : '';
+      if (x && x.on) on++;
+    });
+    out.calc_GDMT_Pillars = on;
+    out.calc_Quad_GDMT = b(on === 4);
+    out.calc_Max_GDMT = b(on === 4 && pl.every(function (x) { return x.pct == null || x.pct >= 100 || (x.lastChange && x.lastChange.type === 'Decrease' && x.lastChange.reason); }));
+    out.calc_Dead = b(A.vital.dead);
+    out.calc_Death_Date = A.vital.date || '';
+    out.calc_Death_Cause = A.vital.cause || '';
+    out.calc_FU_Status = A.vital.dead ? 'Died' : A.followUp.status;
+    var enrol = CF.iso(p.timestamp) || CF.iso(p.Admission_Date) || '';
+    var lastV = A.visits.length ? CF.iso(A.visits[0].visitDate) : '';
+    var lastC = lastV && (!enrol || lastV > enrol) ? lastV : enrol;
+    out.calc_Enrol_Date = enrol;
+    out.calc_Last_Contact = lastC;
+    var end = A.vital.dead && A.vital.date ? A.vital.date : lastC;
+    out.calc_FU_Days = A.vital.dead && !A.vital.date ? '' : (enrol && end ? Math.max(0, CF.daysBetween(enrol, end)) : '');
+    out.calc_Visits_N = A.visits.length;
+    var adm = admissions(p).filter(function (a) { return a.hf === 'HF related'; });
+    out.calc_HF_Admissions_N = adm.length;
+    var r30 = false, r90 = false, all = admissions(p);
+    for (var i = 1; i < all.length; i++) {
+      if (all[i].hf !== 'HF related' || !all[i - 1].dis) continue;
+      var gap = CF.daysBetween(all[i - 1].dis, all[i].d);
+      if (gap != null && gap >= 0 && gap <= 30) r30 = true;
+      if (gap != null && gap >= 0 && gap <= 90) r90 = true;
+    }
+    all.forEach(function (a) { if (/≤30|<=30/.test(a.band)) r30 = r90 = true; if (/31/.test(a.band)) r90 = true; });
+    out.calc_HF_Readm_30d = b(r30); out.calc_HF_Readm_90d = b(r90);
+    return out;
+  }
+
+  // ---------- form knowledge (for SPSS coding and the codebook) ----------
+  function fieldInfo(id) {
+    var el = document.getElementById(id), info = { type: 'string', options: [], label: '' };
+    if (!el) return info;
+    if (el.tagName === 'SELECT') {
+      info.options = Array.prototype.map.call(el.options, function (o) { return s(o.value || o.text); }).filter(function (x) { return x && !/^select/i.test(x); });
+      var yn = info.options.length && info.options.every(function (x) { return /^(yes|no)$/i.test(x); });
+      info.type = yn ? 'binary' : 'categorical';
+    } else if (el.type === 'number') info.type = 'numeric';
+    else if (el.type === 'date') info.type = 'date';
+    // label: <label for>, the label just before the control, or the only label of a wrapper holding just this control
+    var lab = document.querySelector('label[for="' + id + '"]');
+    if (!lab && el.previousElementSibling && el.previousElementSibling.tagName === 'LABEL') lab = el.previousElementSibling;
+    for (var n = el.parentElement, k = 0; !lab && n && k < 2; n = n.parentElement, k++) {
+      var ctrls = n.querySelectorAll('input:not([type=hidden]),select,textarea'), labs = n.querySelectorAll('label');
+      if (ctrls.length === 1 && labs.length === 1) lab = labs[0];
+    }
+    info.label = lab ? s(lab.textContent).replace(/\s*\*$/, '').replace(/\s+/g, ' ') : '';
+    if (!info.label || /^performed$/i.test(info.label)) info.label = pillLabel(id) || (/_Done$/.test(id) ? id.replace(/_Done$/, '').replace(/_/g, ' ') + ' performed' : info.label);
+    if (!info.label) info.label = id.replace(/^Med_/, 'Medication: ').replace(/^Lab_/, 'Lab: ').replace(/_/g, ' ') + (/^Med_/.test(id) ? ' (legacy grouped field)' : '');
+    return info;
+  }
+  // labels of the pill-style Yes/No fields (comorbidities etc.) come from the page's pill lists
+  var PILL_LABELS = null;
+  function pillLabel(id) {
+    if (!PILL_LABELS) {
+      PILL_LABELS = {};
+      Object.keys(window).forEach(function (k) {
+        if (!/^PILL_/.test(k)) return;
+        try { (window[k] || []).forEach(function (x) { if (x && x.id && x.label) PILL_LABELS[x.id] = x.label; }); } catch (e) {}
+      });
+    }
+    var extra = { DM: 'Diabetes', HTN: 'Hypertension', AF: 'Atrial fibrillation', CKD: 'Chronic kidney disease', CVA: 'Stroke / TIA', PVD: 'Peripheral vascular disease', Obese: 'Obesity', OSA: 'Obstructive sleep apnoea', Smoker: 'Smoking status', IHD: 'Ischaemic heart disease', FH_Cardio: 'Family history of heart disease', Thyroid_Dz: 'Thyroid disease' };
+    return extra[id] || PILL_LABELS[id] || '';
+  }
+  var NUMERIC = { Age: 1, EF_Diagnosis: 1, Admissions: 1, LOS: 1, Height: 1, Weight: 1, BMI: 1, Dry_Weight: 1, Pulse: 1, SpO2: 1, MAGGIC_Score: 1, HF_Dur: 1, KCCQ: 1 };
+  function isNumericField(f, info) { return NUMERIC[f] || /^Lab_/.test(f) && !/Others|Date/.test(f) || info.type === 'numeric'; }
+  function toBin(v) { var t = s(v).toLowerCase(); if (!t) return ''; if (/^(yes|y|1|true)$/.test(t)) return 1; if (/^(no|n|0|false)$/.test(t)) return 0; return ''; }
+  function toNum(v) { if (v == null || v === '') return ''; var n = parseFloat(String(v).replace(/[^\d.\-]/g, '')); return isNaN(n) ? '' : n; }
+  var ID_FIELDS = { Civil_ID: 1, File_No: 1, Mobile: 1 };
+
+  // ---------- SPSS: one row per patient ----------
+  function exportPatientsSPSS() {
+    popWait('Building the SPSS patient file…');
+    loadAll().then(function (recs) {
+      if (!recs.length) { popClose(); showPopup('error', 'No data', 'Registry is empty.'); return; }
+      var fields = ALL_PATIENT_FIELDS.slice();
+      var infos = {}; fields.forEach(function (f) { infos[f] = fieldInfo(f); });
+      // binary also when every recorded value is Yes/No (hidden fields, pills)
+      fields.forEach(function (f) {
+        if (infos[f].type !== 'string' || ID_FIELDS[f]) return;
+        var vals = recs.map(function (r) { return s(r.p[f]); }).filter(Boolean);
+        if (vals.length && vals.every(function (v) { return /^(yes|no)$/i.test(v); })) infos[f].type = 'binary';
+      });
+      var head = ['_PatientID'].concat(fields, CALC.map(function (c) { return c[0]; }));
+      var lines = [head.join(',')];
+      recs.forEach(function (r) {
+        var row = [r.id], calc = derive(r);
+        fields.forEach(function (f) {
+          var v = r.p[f], inf = infos[f];
+          if (ID_FIELDS[f]) row.push(csvEsc(s(v) ? "'" + s(v) : ''));
+          else if (inf.type === 'binary') row.push(toBin(v));
+          else if (isNumericField(f, inf)) row.push(toNum(v));
+          else row.push(csvEsc(v != null ? (typeof v === 'object' ? JSON.stringify(v) : v) : ''));
+        });
+        CALC.forEach(function (c) { row.push(csvEsc(calc[c[0]])); });
+        lines.push(row.join(','));
+      });
+      download('﻿' + lines.join('\r\n'), 'HF_Registry_SPSS_' + today() + '.csv');
+      // codebook
+      var cb = [['Variable', 'Label', 'Type', 'Values / coding']];
+      cb.push(['_PatientID', 'Record ID', 'string', 'Database document ID; merge key with the visit file']);
+      fields.forEach(function (f) {
+        var inf = infos[f], type = ID_FIELDS[f] ? 'string' : inf.type === 'binary' ? 'binary' : isNumericField(f, inf) ? 'numeric' : inf.type;
+        var coding = ID_FIELDS[f] ? 'Text; a leading apostrophe keeps leading zeros'
+          : type === 'binary' ? '1 = Yes, 0 = No, blank = not recorded'
+          : type === 'categorical' ? inf.options.join(' / ')
+          : type === 'date' ? 'YYYY-MM-DD'
+          : f === 'Extra_Admissions' ? 'JSON list of additional admissions (see the visit/admission tables in Excel)' : '';
+        cb.push([f, inf.label, type, coding]);
+      });
+      CALC.forEach(function (c) { cb.push([c[0], 'Computed by the registry engine', c[1], c[2]]); });
+      download('﻿' + cb.map(function (r) { return r.map(csvEsc).join(','); }).join('\r\n'), 'HF_Registry_SPSS_Codebook_' + today() + '.csv');
+      popClose();
+      showPopup('success', 'SPSS export ready', recs.length + ' patient rows and the codebook were downloaded. In SPSS: File → Open → Data → CSV, UTF-8. Yes/No fields are coded 1/0; calc_* variables are computed from the full record.');
+    }).catch(popErr);
+  }
+
+  // ---------- SPSS: one row per visit ----------
+  var V_EXTRA_TEXT = ['V_KCCQ_Date', 'V_Death_Date', 'V_Death_Cause', 'V_Next_Appt_Set'];
+  function visitGDMT(r, v) {
+    // medication state at this visit: history up to and including its date
+    var d = s(v.visitDate), sub = r.visits.filter(function (x) { return s(x.visitDate) <= d; });
+    try {
+      var H = CF.medHistory(r.p, sub), o = {}, n = 0;
+      PK.forEach(function (k) {
+        var h = CF.onPillar(H, k)[0];
+        o[k] = h ? 1 : 0; o[k + '_pct'] = h ? CF.pctTarget(h.current) : null; if (h) n++;
+      });
+      o.n = n; return o;
+    } catch (e) { return null; }
+  }
+  function exportVisitsSPSS() {
+    popWait('Building the long-format visit file…');
+    loadAll().then(function (recs) {
+      if (!recs.length) { popClose(); showPopup('error', 'No data', 'Registry is empty.'); return; }
+      // original column set, read from the page's own definition when present
+      var NUM = ['V_KCCQ', 'V_Pulse', 'V_SpO2', 'V_Weight', 'V_QRS', 'V_Echo_EDVI', 'V_Echo_ESVI', 'V_Echo_EF', 'V_CMR_LVEDVI', 'V_CMR_LVESVI', 'V_CMR_LVEF', 'V_CMR_RVEDI', 'V_CMR_RVEF', 'V_CMR_LGE_Pct',
+        'V_Walk_Meters', 'V_CPET_PeakVO2', 'V_CPET_VEVCO2', 'V_CPET_RER', 'V_CPET_AT', 'V_CPET_VO2HR', 'V_CPET_PetCO2', 'V_RHC_CI', 'V_RHC_RAP', 'V_RHC_RVP', 'V_RHC_PCWP', 'V_RHC_PAP', 'V_RHC_PVR', 'V_RHC_PAPi', 'V_RHC_MVO2',
+        'V_CAG_Stents_Number', 'V_Proc_PCI_Stents_Number', 'V_Proc_Pericardiocentesis_Volume', 'V_Proc_Pleural_Tapping_Volume', 'V_Proc_Ascites_Tapping_Volume',
+        'V_HbA1c', 'V_Gluc', 'V_Urea', 'V_Creat', 'V_eGFR', 'V_Na', 'V_K', 'V_BNP', 'V_NTproBNP', 'V_INR', 'V_Iron', 'V_Transferrin', 'V_Ferritin', 'V_WBC', 'V_Hb', 'V_Plt', 'V_TSH', 'V_FreeT4', 'V_TotalChol', 'V_LDL', 'V_HDL', 'V_TG'];
+      var BIN = ['V_Device_Done', 'V_ECG_Done', 'V_Holter_Done', 'V_Echo_Done', 'V_CMR_Done', 'V_Walk_Completed', 'V_CPET_Done', 'V_RHC_Done', 'V_CAG_Done', 'V_CAG_PCI_Done', 'V_Proc_CA_Done', 'V_Proc_PCI_Done', 'V_Proc_CABG_Done', 'V_Proc_Device_Done', 'V_Proc_Ablation_Done',
+        'V_Proc_Pericardiocentesis_Done', 'V_Proc_Pleural_Tapping_Done', 'V_Proc_Ascites_Tapping_Done', 'V_Proc_Other_Done', 'V_Quad_GDMT', 'V_Max_GDMT', 'V_Recovered_LV', 'V_Strong_HF', 'V_Adv_HF_Therapy', 'V_Med_Refill_Today', 'V_Registered_Visit', 'V_Fasting'];
+      var TXT = ['V_NYHA', 'V_Fatigue', 'V_Edema', 'V_BP', 'V_JVP', 'V_Rales', 'V_S3', 'V_LBBB', 'V_Arrhythmia', 'V_Pacing_ECG', 'V_Pacing_Mode', 'V_Device_Type', 'V_Device_Info', 'V_EF_Change', 'V_CMR_LGE',
+        'V_CAG_Findings', 'V_CAG_PCI_Details', 'V_Procedures', 'V_Compliance', 'V_Mortality', 'V_LostFU', 'V_Advanced_HF_Outcome', 'V_Adv_HF_Therapy_Type', 'V_Referral', 'V_Lab_Others', 'V_Med_Others'].concat(V_EXTRA_TEXT);
+      var CALCV = ['calc_SBP', 'calc_DBP', 'calc_NYHA', 'calc_RAS_On', 'calc_BB_On', 'calc_MRA_On', 'calc_SGLT2_On', 'calc_RAS_PctTarget', 'calc_BB_PctTarget', 'calc_MRA_PctTarget', 'calc_SGLT2_PctTarget', 'calc_GDMT_Pillars', 'calc_Quad_GDMT', 'calc_Days_From_Enrol'];
+      var head = ['_PatientID', 'File_No', 'VisitSeq', 'VisitDate', 'VisitType'].concat(NUM, BIN, TXT).map(function (h) { return h.replace(/^V_/, ''); }).concat(CALCV);
+      var lines = [head.join(',')], n = 0;
+      recs.forEach(function (r) {
+        var asc = r.visits.slice().sort(function (a, b2) { return s(a.visitDate).localeCompare(s(b2.visitDate)); });
+        var enrol = CF.iso(r.p.timestamp) || CF.iso(r.p.Admission_Date);
+        asc.forEach(function (v, i) {
+          var row = [r.id, csvEsc("'" + s(r.p.File_No)), i + 1, csvEsc(s(v.visitDate)), csvEsc(s(v.visitType))];
+          NUM.forEach(function (f) { row.push(toNum(v[f])); });
+          BIN.forEach(function (f) { row.push(toBin(v[f])); });
+          TXT.forEach(function (f) { row.push(csvEsc(v[f] != null ? v[f] : '')); });
+          var bp = s(v.V_BP).match(/(\d{2,3})\s*\/\s*(\d{2,3})/), nyv = { I: 1, II: 2, III: 3, IV: 4 }[s(v.V_NYHA).toUpperCase()];
+          var g = visitGDMT(r, v);
+          row.push(bp ? bp[1] : '', bp ? bp[2] : '', nyv || '');
+          PK.forEach(function (k) { row.push(g ? g[k] : ''); });
+          PK.forEach(function (k) { row.push(g && g[k + '_pct'] != null ? g[k + '_pct'] : ''); });
+          row.push(g ? g.n : '', g ? b(g.n === 4) : '', enrol && v.visitDate ? CF.daysBetween(enrol, CF.iso(v.visitDate)) : '');
+          lines.push(row.join(',')); n++;
+        });
+      });
+      download('﻿' + lines.join('\r\n'), 'HF_Registry_SPSS_Visits_Long_' + today() + '.csv');
+      popClose();
+      showPopup('success', 'Visit export ready', n + ' visit rows downloaded (one row per visit). Merge with the patient file on _PatientID. calc_* columns give the GDMT state at each visit and SBP/DBP as numbers.');
+    }).catch(popErr);
+  }
+
+  // ---------- Excel: full export with computed columns ----------
+  function exportAllExcel() {
+    popWait('Loading all patient records and visits…');
+    loadAll().then(function (recs) {
+      if (!recs.length) { popClose(); showPopup('error', 'No data', 'Registry is empty.'); return; }
+      var wb = XLSX.utils.book_new();
+      var head = ['_PatientID', '_Imported', '_VisitCount'].concat(ALL_PATIENT_FIELDS, CALC.map(function (c) { return c[0]; }));
+      var rows = [head];
+      recs.forEach(function (r) {
+        var c = derive(r), row = [r.id, r.p.imported ? 'Yes' : '', r.visits.length];
+        ALL_PATIENT_FIELDS.forEach(function (f) { var v = r.p[f]; row.push(v != null ? (typeof v === 'object' ? JSON.stringify(v) : v) : ''); });
+        CALC.forEach(function (k) { row.push(c[k[0]]); });
+        rows.push(row);
+      });
+      var ws1 = XLSX.utils.aoa_to_sheet(rows);
+      ws1['!cols'] = head.map(function (h) { return { wch: Math.max(10, Math.min(24, h.length + 2)) }; });
+      XLSX.utils.book_append_sheet(wb, ws1, 'Patients');
+      var keys = {};
+      recs.forEach(function (r) { r.visits.forEach(function (v) { Object.keys(v).forEach(function (k) { if (k !== 'id') keys[k] = 1; }); }); });
+      var vf = Object.keys(keys).sort(function (a, b2) { if (a === 'visitDate') return -1; if (b2 === 'visitDate') return 1; if (a === 'visitType') return -1; if (b2 === 'visitType') return 1; return a.localeCompare(b2); });
+      var vRows = [['_PatientID', 'File_No', 'Patient_Name'].concat(vf, ['calc_GDMT_Pillars', 'calc_Quad_GDMT'])];
+      recs.forEach(function (r) {
+        r.visits.forEach(function (v) {
+          var g = visitGDMT(r, v);
+          vRows.push([r.id, s(r.p.File_No), s(r.p.Patient_Name)].concat(vf.map(function (f) { var x = v[f]; return x != null ? (typeof x === 'object' ? JSON.stringify(x) : x) : ''; }), [g ? g.n : '', g ? b(g.n === 4) : '']));
+        });
+      });
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(vRows), 'Visits');
+      var cb = [['Computed column', 'Type', 'Meaning']].concat(CALC.map(function (c) { return c; }));
+      var total = recs.reduce(function (a, r) { return a + r.visits.length; }, 0);
+      var summary = [['HF REGISTRY — FULL EXPORT'], ['Generated', new Date().toLocaleString()], ['Total patients', recs.length], ['Total visits', total], [],
+        ['NOTES'], ["'Patients' = one row per patient: all recorded fields, then calc_* columns computed by the registry engine."],
+        ["'Visits' = one row per visit; join to Patients on _PatientID or File_No. calc_GDMT_Pillars = pillars on at that visit."],
+        ["'Computed columns' explains every calc_* column."]];
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(summary), 'Summary');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(cb), 'Computed columns');
+      XLSX.writeFile(wb, 'HF_Registry_Full_Export_' + today() + '.xlsx');
+      popClose();
+      showPopup('success', 'Exported', recs.length + ' patients and ' + total + ' visits downloaded.');
+    }).catch(popErr);
+  }
+
+  // ---------- statistics shared by the analytics PDF and Excel ----------
+  function stats(recs) {
+    var n = recs.length, st = { n: n, rows: [] };
+    function cnt(fn) { return recs.filter(function (r) { try { return fn(r); } catch (e) { return false; } }).length; }
+    function pc(k, d) { d = d == null ? n : d; return d ? Math.round(k / d * 100) + '%' : '—'; }
+    function ms(vals) {
+      vals = vals.filter(function (x) { return x != null && !isNaN(x); });
+      if (!vals.length) return '—';
+      var m = vals.reduce(function (a, x) { return a + x; }, 0) / vals.length;
+      var sd = vals.length > 1 ? Math.sqrt(vals.reduce(function (a, x) { return a + (x - m) * (x - m); }, 0) / (vals.length - 1)) : 0;
+      return r1(m) + ' ± ' + r1(sd) + ' (n=' + vals.length + ')';
+    }
+    function sec(title) { st.rows.push({ sec: title }); }
+    function row(label, k, d, note) { st.rows.push({ label: label, value: typeof k === 'number' ? k + ' (' + pc(k, d) + ')' : k, note: note || '' }); }
+    var C = recs.map(function (r) { return { r: r, c: derive(r) }; });
+    sec('Registry');
+    row('Patients', String(n));
+    row('Male', cnt(function (r) { return /^m/i.test(s(r.p.Gender)); }));
+    row('Age, years (mean ± SD)', ms(recs.map(function (r) { return parseFloat(r.p.Age); })));
+    ['HFrEF', 'HFmrEF', 'HFpEF'].forEach(function (t) { row('HF type recorded: ' + t, cnt(function (r) { return s(r.p.HF_Type) === t; })); });
+    row('ESC 2026 group: HFrEF (LVEF <50%)', C.filter(function (x) { return x.c.calc_ESC2026_Group === 'HFrEF'; }).length);
+    row('ESC 2026 group: HFpEF (LVEF ≥50%)', C.filter(function (x) { return x.c.calc_ESC2026_Group === 'HFpEF'; }).length);
+    row('Latest LVEF, % (mean ± SD)', ms(C.map(function (x) { return x.c.calc_LVEF_Latest === '' ? null : x.c.calc_LVEF_Latest; })));
+    sec('Clinical status (latest)');
+    [1, 2, 3, 4].forEach(function (k) { var nyN = C.filter(function (x) { return x.c.calc_NYHA_Latest !== ''; }).length; row('NYHA ' + ['', 'I', 'II', 'III', 'IV'][k], C.filter(function (x) { return x.c.calc_NYHA_Latest === k; }).length, nyN, 'of ' + nyN + ' with NYHA recorded'); });
+    row('KCCQ (mean ± SD)', ms(C.map(function (x) { return x.c.calc_KCCQ_Latest === '' ? null : x.c.calc_KCCQ_Latest; })));
+    row('BMI, kg/m² (mean ± SD)', ms(C.map(function (x) { return x.c.calc_BMI_Latest === '' ? null : x.c.calc_BMI_Latest; })));
+    row('Obesity (BMI ≥30)', C.filter(function (x) { return x.c.calc_BMI_Latest !== '' && x.c.calc_BMI_Latest >= 30; }).length);
+    sec('Comorbidities');
+    [['DM', 'Diabetes'], ['HTN', 'Hypertension'], ['AF', 'Atrial fibrillation'], ['CKD', 'CKD'], ['Dyslipidemia', 'Dyslipidaemia'], ['CVA', 'Stroke / TIA']].forEach(function (x) {
+      row(x[1], cnt(function (r) { return CF.yes(r.p[x[0]]) || r.visits.some(function (v) { return CF.yes(v['V_' + x[0]]); }); }));
+    });
+    row('IHD', cnt(function (r) { return s(r.p.IHD) && !/^no$/i.test(s(r.p.IHD)); }));
+    row('Current smoker', cnt(function (r) { return s(r.p.Smoker) === 'Current'; }));
+    var red = C.filter(function (x) { return x.c.calc_ESC2026_Group === 'HFrEF'; }), rn = red.length;
+    sec('GDMT in reduced EF (LVEF <50%, n=' + rn + ')');
+    [['RAS', 'ARNI / ACEi / ARB'], ['BB', 'Beta-blocker'], ['MRA', 'MRA'], ['SGLT2', 'SGLT2 inhibitor']].forEach(function (k) {
+      var onN = red.filter(function (x) { return x.c['calc_' + k[0] + '_On'] === 1; }).length;
+      var tgt = red.filter(function (x) { return x.c['calc_' + k[0] + '_PctTarget'] !== '' && x.c['calc_' + k[0] + '_PctTarget'] >= 100; }).length;
+      var half = red.filter(function (x) { return x.c['calc_' + k[0] + '_PctTarget'] !== '' && x.c['calc_' + k[0] + '_PctTarget'] >= 50; }).length;
+      row(k[1] + ': on', onN, rn, k[0] === 'SGLT2' ? '' : '≥50% of target: ' + half + ' · at target: ' + tgt);
+    });
+    row('Quadruple therapy (all 4 pillars)', red.filter(function (x) { return x.c.calc_Quad_GDMT === 1; }).length, rn);
+    row('All 4 at target dose (or reduced for a recorded reason)', red.filter(function (x) { return x.c.calc_Max_GDMT === 1; }).length, rn);
+    row('Pillars per patient (mean ± SD)', ms(red.map(function (x) { return x.c.calc_GDMT_Pillars; })));
+    sec('Admissions');
+    row('At least one HF admission', C.filter(function (x) { return x.c.calc_HF_Admissions_N > 0; }).length);
+    row('HF readmission ≤30 days', C.filter(function (x) { return x.c.calc_HF_Readm_30d === 1; }).length);
+    row('HF readmission ≤90 days', C.filter(function (x) { return x.c.calc_HF_Readm_90d === 1; }).length);
+    st.C = C;
+    return st;
+  }
+
+  // ---------- analytics PDF (mortality and lost follow-up excluded by design) ----------
+  function analyticsPDF() {
+    popWait('Building the analytics report…');
+    analyticsRecords().then(function (recs) {
+      popClose();
+      if (!recs.length) { showPopup('error', 'No data', 'No patient data.'); return; }
+      var st = stats(recs);
+      var h = CFUI.pdfCss() + '<div class="top"><div><h1>HF Clinic Registry · analytics report</h1><div class="muted">Mubarak Al-Kabeer Hospital · Sabah Al-Ahmad Cardiac Center</div></div><div class="brand"><b>HF Registry</b><br>by CardioFlow<br>' + CF.fmt(today()) + '</div></div>';
+      var open = false;
+      st.rows.forEach(function (x) {
+        if (x.sec) { if (open) h += '</table>'; h += '<h2>' + CF.esc(x.sec) + '</h2><table>'; open = true; return; }
+        h += '<tr><td class="k">' + CF.esc(x.label) + '</td><td>' + CF.esc(x.value) + (x.note ? ' <span class="muted small">' + CF.esc(x.note) + '</span>' : '') + '</td></tr>';
+      });
+      if (open) h += '</table>';
+      h += '<div class="note">Generated ' + new Date().toLocaleString() + '. GDMT, LVEF, NYHA, KCCQ and BMI are computed from each patient\'s full record (latest values). Mortality and loss to follow-up are excluded from this report by design; see Analytics → Outcomes.</div>';
+      return CFUI.renderPdf(h, 'HF_Analytics_' + today() + '.pdf', 'HF Registry · analytics report');
+    }).catch(popErr);
+  }
+
+  // ---------- analytics Excel ----------
+  function analyticsExcel() {
+    popWait('Building the analytics workbook…');
+    analyticsRecords().then(function (recs) {
+      popClose();
+      if (!recs.length) { showPopup('error', 'No data', 'No patient data.'); return; }
+      var st = stats(recs), wb = XLSX.utils.book_new();
+      var s1 = [['HF CLINIC REGISTRY — ANALYTICS REPORT'], ['MKH · Generated: ' + new Date().toLocaleString()], ['Total patients', recs.length], [], ['METRIC', 'VALUE', 'NOTE']];
+      st.rows.forEach(function (x) { s1.push(x.sec ? [] : [x.label, x.value, x.note]); if (x.sec) s1.push([x.sec.toUpperCase()]); });
+      var ws = XLSX.utils.aoa_to_sheet(s1); ws['!cols'] = [{ wch: 52 }, { wch: 26 }, { wch: 40 }];
+      XLSX.utils.book_append_sheet(wb, ws, 'Summary');
+      var head = ['File No', 'Name', 'Age', 'Gender', 'Nationality', 'HF type (recorded)', 'ESC 2026 group', 'LVEF latest (%)', 'LVEF date', 'NYHA latest', 'KCCQ latest', 'BMI',
+        'ARNI/ACEi/ARB', 'Dose', '% target', 'Beta-blocker', 'Dose', '% target', 'MRA', 'Dose', '% target', 'SGLT2i', 'Dose', 'Pillars (0–4)', 'Quadruple', 'All at target',
+        'Vital status', 'Follow-up status', 'DM', 'HTN', 'AF', 'IHD', 'CKD', 'Visits', 'Last contact', 'Next appt', 'Doctor'];
+      var rows = [head];
+      st.C.forEach(function (x) {
+        var p = x.r.p, c = x.c, pl = x.r.pillars || [];
+        function P(k) { var y = pl.filter(function (z) { return z.key === k; })[0]; return y && y.on ? [y.drug, y.dose, y.pct != null ? y.pct : ''] : ['', '', '']; }
+        var sg = P('SGLT2');
+        rows.push([s(p.File_No), s(p.Patient_Name), toNum(p.Age), s(p.Gender), s(p.Nationality), s(p.HF_Type), c.calc_ESC2026_Group, c.calc_LVEF_Latest, c.calc_LVEF_Latest_Date,
+          c.calc_NYHA_Latest ? ['', 'I', 'II', 'III', 'IV'][c.calc_NYHA_Latest] : '', c.calc_KCCQ_Latest, c.calc_BMI_Latest]
+          .concat(P('RAS'), P('BB'), P('MRA'), [sg[0], sg[1], c.calc_GDMT_Pillars, c.calc_Quad_GDMT ? 'Yes' : 'No', c.calc_Max_GDMT ? 'Yes' : 'No',
+            c.calc_Dead ? 'Died' + (c.calc_Death_Date ? ' ' + c.calc_Death_Date : '') : 'Alive', c.calc_FU_Status, s(p.DM), s(p.HTN), s(p.AF), s(p.IHD), s(p.CKD), c.calc_Visits_N, c.calc_Last_Contact, s(p.Next_Appt), s(p.Doctor_Name)]));
+      });
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), 'All Patients');
+      var gap = [['GDMT GAPS — reduced EF (LVEF <50%), alive patients'], ['File', 'Name', 'LVEF', 'ARNI/ACEi/ARB', 'Beta-blocker', 'MRA', 'SGLT2i', 'Missing', 'Recorded reasons', 'Engine: change first']];
+      st.C.forEach(function (x) {
+        var c = x.c; if (c.calc_ESC2026_Group !== 'HFrEF' || c.calc_Dead) return;
+        var pl = x.r.pillars || [], miss = pl.filter(function (y) { return !y.on; });
+        if (!miss.length) return;
+        function cell(k) { var y = pl.filter(function (z) { return z.key === k; })[0]; return y && y.on ? 'Yes' + (y.pct != null ? ' (' + y.pct + '%)' : '') : 'NO'; }
+        var A = x.r.A, first = A && A.review && A.review.first ? A.review.first.label + ': ' + A.review.first.reason : (A && A.review ? A.review.sequence : '');
+        gap.push([s(x.r.p.File_No), s(x.r.p.Patient_Name), c.calc_LVEF_Latest, cell('RAS'), cell('BB'), cell('MRA'), cell('SGLT2'), miss.length,
+          miss.map(function (y) { return y.label + ': ' + (y.reason || 'no reason recorded'); }).join('; '), first || '']);
+      });
+      var wsg = XLSX.utils.aoa_to_sheet(gap); wsg['!cols'] = [{ wch: 10 }, { wch: 24 }, { wch: 6 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 12 }, { wch: 8 }, { wch: 60 }, { wch: 60 }];
+      XLSX.utils.book_append_sheet(wb, wsg, 'GDMT Gaps');
+      XLSX.writeFile(wb, 'HF_Analytics_MKH_' + today() + '.xlsx');
+      showPopup('success', 'Excel exported', 'Analytics workbook downloaded (Summary, All Patients, GDMT Gaps).');
+    }).catch(popErr);
+  }
+
+  // ---------- clinic day PDF ----------
+  function clinicDayPDF() {
+    popWait('Building the clinic list…');
+    loadAll().then(function (recs) {
+      popClose();
+      var t = today();
+      var list = recs.filter(function (r) { return s(r.p.Next_Appt) === t && !(r.A && r.A.vital.dead); });
+      var title = 'Clinic list · ' + CF.fmt(t);
+      var note = '';
+      if (!list.length) {
+        list = recs.filter(function (r) { return s(r.p.Next_Appt) >= t && !(r.A && r.A.vital.dead); }).sort(function (a, b2) { return s(a.p.Next_Appt).localeCompare(s(b2.p.Next_Appt)); }).slice(0, 30);
+        title = 'Upcoming appointments';
+        note = 'No patients are booked for today (' + CF.fmt(t) + '); the next ' + list.length + ' booked patients are listed.';
+      }
+      var h = CFUI.pdfCss() + '<div class="top"><div><h1>' + CF.esc(title) + '</h1><div class="muted">Heart failure clinic · Mubarak Al-Kabeer Hospital</div></div><div class="brand"><b>HF Registry</b><br>by CardioFlow<br>' + CF.fmt(t) + '</div></div>';
+      if (note) h += '<p class="muted">' + CF.esc(note) + '</p>';
+      h += '<table><tr><th>Appt</th><th>Name</th><th>File</th><th>HF group</th><th>LVEF</th><th>NYHA</th><th>GDMT</th><th>K / eGFR</th><th>To do at this visit</th></tr>';
+      list.forEach(function (r) {
+        var A = r.A, c = derive(r), S = A ? A.S : {};
+        var k = CF.last(S, 'K'), e = CF.last(S, 'eGFR');
+        var todo = [];
+        if (A) {
+          A.labs.filter(function (l) { return l.level !== 'upcoming'; }).slice(0, 3).forEach(function (l) { todo.push(l.labs); });
+          A.meds.filter(function (m) { return m.level === 'danger' || m.level === 'warn'; }).slice(0, 3).forEach(function (m) { todo.push(m.title); });
+        }
+        h += '<tr><td style="white-space:nowrap">' + CF.fmt(r.p.Next_Appt, false) + '</td><td><b>' + CF.esc(r.p.Patient_Name) + '</b></td><td>' + CF.esc(r.p.File_No) + '</td><td>' + CF.esc(c.calc_ESC2026_Group) + '</td>' +
+          '<td>' + (c.calc_LVEF_Latest !== '' ? c.calc_LVEF_Latest + '%' : '') + '</td><td>' + (c.calc_NYHA_Latest ? ['', 'I', 'II', 'III', 'IV'][c.calc_NYHA_Latest] : '') + '</td><td>' + c.calc_GDMT_Pillars + '/4</td>' +
+          '<td>' + (k ? k.value : '–') + ' / ' + (e ? e.value : '–') + '</td><td class="small">' + CF.esc(todo.join(' · ')) + '</td></tr>';
+      });
+      h += '</table><div class="note">Generated ' + new Date().toLocaleString() + ' · ' + list.length + ' patients. "To do" lists labs due and medication alerts from the registry engine.</div>';
+      return CFUI.renderPdf(h, 'HF_Clinic_Day_' + t + '.pdf', 'HF Registry · clinic list');
+    }).catch(popErr);
+  }
+
+  function install() {
+    window.exportAllPatientsSPSS = exportPatientsSPSS;
+    window.exportAllVisitsSPSS = exportVisitsSPSS;
+    window.exportAllPatientsExcel = exportAllExcel;
+    window.exportAnalyticsPDF = analyticsPDF;
+    window.exportAnalyticsExcel = analyticsExcel;
+    window.exportClinicDayPDF = clinicDayPDF;
+  }
+  return { install: install, loadAll: loadAll, derive: derive, stats: stats, CALC: CALC };
+})();
+CFX.install();
 
 </script>
 
