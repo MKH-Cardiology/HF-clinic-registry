@@ -3385,6 +3385,7 @@ details.cf-iron[open]>summary{margin-bottom:6px;}
                 <li class="nav-item"><button class="nav-link" onclick="showMainAlertsTab('refill',this)" style="font-weight:600;"><i class="fa fa-prescription-bottle-medical text-primary"></i> Refill 8 wk <span class="badge bg-primary ms-1" id="mainRefillCount">0</span></button></li>
                 <li class="nav-item"><button class="nav-link" onclick="showMainAlertsTab('registered',this)" style="font-weight:600;"><i class="fa fa-clipboard-check text-info"></i> Registration 6 mo <span class="badge bg-info text-dark ms-1" id="mainRegisteredCount">0</span></button></li>
                 <li class="nav-item"><button class="nav-link" onclick="showMainAlertsTab('kccq',this)" style="font-weight:600;"><i class="fa fa-heart-pulse text-secondary"></i> KCCQ 6 mo <span class="badge bg-secondary ms-1" id="mainKCCQCount">0</span></button></li>
+                <li class="nav-item"><button class="nav-link" onclick="showMainAlertsTab('walk',this)" style="font-weight:600;"><i class="fa fa-person-walking text-success"></i> 6MWT 6 mo <span class="badge bg-success ms-1" id="mainWalkCount">0</span></button></li>
                 <li class="nav-item"><button class="nav-link" onclick="showMainAlertsTab('overdue',this)" style="font-weight:600;"><i class="fa fa-user-clock text-danger"></i> Lost F/U 6 mo <span class="badge bg-danger ms-1" id="mainOverdueCount">0</span></button></li>
                 <li class="nav-item"><button class="nav-link" onclick="showMainAlertsTab('vacc',this)" style="font-weight:600;"><i class="fa fa-syringe text-primary"></i> Vaccinations Due <span class="badge bg-primary ms-1" id="mainVaccCount">0</span></button></li>
             </ul>
@@ -3916,7 +3917,7 @@ var MED_FORMULARY = {
     Med_CCB:        {label:'CCB',                options:['None','Amlodipine','Nifedipine','Diltiazem','Verapamil','Other CCB'], doses:{'Amlodipine':['5 mg OD','10 mg OD'],'Nifedipine':['30 mg OD','60 mg OD','90 mg OD'],'Diltiazem':['120 mg OD','180 mg OD','240 mg OD','300 mg OD','360 mg OD'],'Verapamil':['40 mg TID','80 mg TID','120 mg BID','180 mg OD','240 mg OD'],'Other CCB':['Other (specify dose)']}},
     Med_Diuretic:   {label:'Diuretics',          options:['None','Furosemide','Torsemide','Metolazone','HCTZ','Furosemide + Metolazone','Furosemide + HCTZ','Metolazone + HCTZ'], doses:{'Furosemide':['20 mg PO OD','40 mg PO OD','40 mg PO BID','80 mg PO OD','80 mg PO BID','120 mg PO OD'],'Torsemide':['5 mg PO OD','10 mg PO OD','20 mg PO OD','40 mg PO OD','100 mg PO OD'],'Metolazone':['2.5 mg PO OD','5 mg PO OD','10 mg PO OD'],'HCTZ':['12.5 mg PO OD','25 mg PO OD','50 mg PO OD'],'Furosemide + Metolazone':['Furo 40 + Metolazone 2.5','Furo 40 + Metolazone 5','Furo 80 + Metolazone 2.5','Furo 80 + Metolazone 5','Furo 80 + Metolazone 10','Furo 120 + Metolazone 5','Furo 120 + Metolazone 10'],'Furosemide + HCTZ':['Furo 40 + HCTZ 12.5','Furo 40 + HCTZ 25','Furo 80 + HCTZ 12.5','Furo 80 + HCTZ 25'],'Metolazone + HCTZ':['Metolazone 2.5 + HCTZ 12.5','Metolazone 5 + HCTZ 25']}},
     Med_Statin:     {label:'Statin',             options:['None','Zocor','Lipitor','Crestor'], doses:{'Zocor':['10 mg PO OD','20 mg PO OD','40 mg PO OD'],'Lipitor':['10 mg PO OD','20 mg PO OD','40 mg PO OD','80 mg PO OD'],'Crestor':['5 mg PO OD','10 mg PO OD','20 mg PO OD','40 mg PO OD']}},
-    Med_LipidCombo: {label:'Lipid Combination',  options:['None','Atozet','Zympass','Ezetrol'], doses:{'Atozet':['10/10 mg PO OD','10/20 mg PO OD','10/40 mg PO OD','10/80 mg PO OD'],'Zympass':['5/10 mg PO OD','10/10 mg PO OD','10/20 mg PO OD','20/10 mg PO OD'],'Ezetrol':['10 mg PO OD']}},
+    Med_LipidCombo: {label:'Lipid Combination',  options:['None','Atozet','Zympass','Ezetrol'], doses:{'Atozet':['10/10 mg PO OD','10/20 mg PO OD','10/40 mg PO OD','10/80 mg PO OD'],'Zympass':['20/10 mg PO OD','40/10 mg PO OD'],'Ezetrol':['10 mg PO OD']}},
     Med_Ezetrol:    {label:'Ezetrol (standalone)', options:['None','Ezetrol'], doses:{'Ezetrol':['10 mg PO OD']}},
     Med_PCSK9:      {label:'PCSK9i',              options:['None','Repatha','Praluent'], doses:{'Repatha':['140 mg SC q2wk','420 mg SC q1mo'],'Praluent':['75 mg SC q2wk','150 mg SC q2wk']}},
     Med_Fibrate:    {label:'Fibrate',             options:['None','Fibrates'], doses:{'Fibrates':['145 mg PO OD','160 mg PO OD']}},
@@ -4040,7 +4041,7 @@ var VISIT_MED_GROUPS = [
             {id:'V_Repatha',  label:'Repatha',  doses:['','140 mg SC q2wk','420 mg SC q1mo']},
             {id:'V_Praluent', label:'Praluent', doses:['','75 mg SC q2wk','150 mg SC q2wk']},
             {id:'V_Atozet',   label:'Atozet',   doses:['','10/10 mg PO OD','10/20 mg PO OD','10/40 mg PO OD','10/80 mg PO OD']},
-            {id:'V_Zympass',  label:'Zympass',  doses:['','5/10 mg PO OD','10/10 mg PO OD','10/20 mg PO OD','20/10 mg PO OD']},
+            {id:'V_Zympass',  label:'Zympass',  doses:['','20/10 mg PO OD','40/10 mg PO OD']},
             {id:'V_Fibrates', label:'Fibrates', doses:['','145 mg PO OD','160 mg PO OD']},
             {id:'V_Omacor',   label:'Omacor',   doses:['','1 g PO OD','2 g PO OD']},
             {id:'V_Vascepa',  label:'Vascepa',  doses:['','2 g PO BID','4 g PO OD']}
@@ -4270,7 +4271,7 @@ function doLogout(){if(confirm('Sign out of HF Registry?'))auth.signOut();}
 function goToMain(){['pageAdmin','pageAnalytics','pageClinic','pageEducation'].forEach(function(p){var el=document.getElementById(p);if(el)el.classList.remove('active');});document.getElementById('pageMain').classList.add('active');showStickySave();if(typeof loadMainAlerts==='function')loadMainAlerts();}
 
 // ========== MAIN PAGE ALERTS (Upcoming / Overdue / Vaccinations / Calendar) ==========
-var _mainAlertsData={upcoming:[],refill:[],registered:[],kccq:[],overdue:[],vacc:[],labs:[],apptByDay:{}};
+var _mainAlertsData={upcoming:[],refill:[],registered:[],kccq:[],overdue:[],vacc:[],labs:[],walk:[],apptByDay:{}};
 var _mainAlertsActiveTab='upcoming';
 var _calendarView={year:null,month:null,selectedDate:null}; // month is 0-11
 
@@ -4327,11 +4328,12 @@ function renderMainAlertsBody(){
             if(item.id)html+=' <button class="btn btn-sm btn-outline-light py-0 px-2 ms-2" style="font-size:0.72rem;" onclick="openPatientFromClinic(\''+item.id+'\')"><i class="fa fa-edit"></i> Open</button>';
             html+='</span>';
             html+='</div>';
-        }else if(_mainAlertsActiveTab==='refill' || _mainAlertsActiveTab==='registered' || _mainAlertsActiveTab==='kccq'){
+        }else if(_mainAlertsActiveTab==='refill' || _mainAlertsActiveTab==='registered' || _mainAlertsActiveTab==='kccq' || _mainAlertsActiveTab==='walk'){
             var serviceMeta={
                 refill:{icon:'fa-prescription-bottle-medical',label:'Medication refill',tone:'warning'},
                 registered:{icon:'fa-id-card',label:'Clinic registration',tone:'info'},
-                kccq:{icon:'fa-clipboard-check',label:'KCCQ assessment',tone:'secondary'}
+                kccq:{icon:'fa-clipboard-check',label:'KCCQ assessment',tone:'secondary'},
+                walk:{icon:'fa-person-walking',label:'6-minute walk test',tone:'success'}
             }[_mainAlertsActiveTab];
             html+='<div class="alert alert-'+serviceMeta.tone+' py-1 px-2 mb-1 d-flex justify-content-between align-items-center flex-wrap" style="font-size:0.82rem;">';
             html+='<span><b>'+(item.name||'Unknown')+'</b> <small class="text-muted">(File: '+(item.file||'-')+')</small></span>';
@@ -4407,7 +4409,7 @@ function loadMainAlerts(){
             ? _loadRegistryAllVisits(false).catch(function(){return null;})
             : Promise.resolve(null);
         return bulkVisitsPromise.then(function(bulkVisits){
-        _mainAlertsData={upcoming:[],refill:[],registered:[],kccq:[],overdue:[],vacc:[],labs:[],apptByDay:{}};
+        _mainAlertsData={upcoming:[],refill:[],registered:[],kccq:[],overdue:[],vacc:[],labs:[],walk:[],apptByDay:{}};
         var patientPromises=[];
         var fallbackQueue=[],fallbackActive=0;
         function pumpFallbackVisits(){
@@ -4473,6 +4475,10 @@ function loadMainAlerts(){
                     var kccqVisit=latestVisitWith(all,function(v){return v.V_KCCQ!==undefined&&v.V_KCCQ!==null&&String(v.V_KCCQ).trim()!=='';});
                     var kccqBase=kccqVisit?(isoDate(kccqVisit.V_KCCQ_Date)||isoDate(kccqVisit.visitDate)):contactDate;
                     pushService('kccq',d,id,kccqVisit?kccqBase:'',addMonths(kccqBase,6),!kccqVisit);
+                    // 6-minute walk test: 6 months after the last test; never done = due now
+                    var walkVisit=latestVisitWith(all,function(v){return String(v.V_Walk_Meters||'').trim()!=='';});
+                    var walkBase=walkVisit?(isoDate(walkVisit.V_Walk_Date)||isoDate(walkVisit.visitDate)):(String(d.Walk_Meters||'').trim()?(isoDate(d.Walk_Date)||isoDate(d.Admission_Date)||enrolled):'');
+                    pushService('walk',d,id,walkBase,walkBase?addMonths(walkBase,6):todayStr,!walkBase);
 
                     // Vaccination status — uses the new V_Vacc_<id>_Date fields
                     // aggregated across all visits (legacy *_Year fields as fallback).
@@ -4504,14 +4510,14 @@ function loadMainAlerts(){
         Promise.all(patientPromises).then(function(){
             // Sort each list
             _mainAlertsData.upcoming.sort(function(a,b){return a.daysUntil-b.daysUntil;});
-            ['refill','registered','kccq'].forEach(function(key){_mainAlertsData[key].sort(function(a,b){return b.daysOverdue-a.daysOverdue;});});
+            ['refill','registered','kccq','walk'].forEach(function(key){_mainAlertsData[key].sort(function(a,b){return b.daysOverdue-a.daysOverdue;});});
             _mainAlertsData.overdue.sort(function(a,b){return b.daysSince-a.daysSince;});
             _mainAlertsData.vacc.sort(function(a,b){return (a.name||'').localeCompare(b.name||'');});
             // Update badges
             var uc=document.getElementById('mainUpcomingCount');if(uc)uc.textContent=_mainAlertsData.upcoming.length;
             var rc=document.getElementById('mainRefillCount');if(rc)rc.textContent=_mainAlertsData.refill.length;
             var rgc=document.getElementById('mainRegisteredCount');if(rgc)rgc.textContent=_mainAlertsData.registered.length;
-            var kc=document.getElementById('mainKCCQCount');if(kc)kc.textContent=_mainAlertsData.kccq.length;
+            var kc=document.getElementById('mainKCCQCount');if(kc)kc.textContent=_mainAlertsData.kccq.length;var wkc=document.getElementById('mainWalkCount');if(wkc)wkc.textContent=_mainAlertsData.walk.length;
             var oc=document.getElementById('mainOverdueCount');if(oc)oc.textContent=_mainAlertsData.overdue.length;
             var vc=document.getElementById('mainVaccCount');if(vc)vc.textContent=_mainAlertsData.vacc.length;
             renderMainAlertsBody();
@@ -18063,14 +18069,14 @@ var CFUI = (function () {
     }
     // 6-minute walk test every 6 months
     var wk = CF.walkStatus(A.S);
-    if (!A.vital.dead && wk.state !== 'ok') {
-      items.push({ lvl: wk.state === 'soon' ? 'consider' : 'due', icon: 'fa-person-walking', cat: 'Clinic',
+    if (!A.vital.dead && (wk.state === 'missing' || wk.state === 'overdue')) {
+      items.push({ lvl: 'due', icon: 'fa-person-walking', cat: 'Clinic',
         title: wk.state === 'missing' ? '6-minute walk test not yet recorded' : wk.state === 'overdue' ? '6-minute walk test overdue' : '6-minute walk test due ' + CF.fmt(wk.due),
         detail: wk.last ? 'Last ' + wk.last.value + ' m on ' + CF.fmt(wk.last.date) + ' (' + ago(wk.last.date) + ')' + (wk.state === 'overdue' ? '; due since ' + CF.fmt(wk.due) : '') + '. Repeat every 6 months.' : 'No 6-minute walk test on record. Baseline test, then every 6 months.',
         btn: 'Record 6MWT', act: 'alarm:walk' });
     }
     alarms.forEach(function (a, i) {
-      if (a.key === 'kccq') return; // replaced by the item above
+      if (a.key === 'kccq' || a.key === 'walk') return; // replaced by the items above
       if (a.key === 'appointment' && a.level !== 'danger') return; // shown in the header
       items.push({ lvl: levelOf('alarm', a), icon: a.icon, cat: 'Clinic', title: a.name, detail: a.detail, btn: { refill: 'Start visit · refill', registration: 'Start visit · register', kccq: 'Record KCCQ', vaccines: 'Record vaccines' }[a.key] || 'Start visit', act: 'alarm:' + a.key });
     });
@@ -18605,7 +18611,16 @@ var CFUI = (function () {
     var origAlarms = window.computePatientAlarms;
     if (typeof origAlarms === 'function') window.computePatientAlarms = function (data, visitsArr) {
       try { if (CF.vitalStatus(data || {}, visitsArr || []).dead) return []; } catch (e) {}
-      return origAlarms.apply(this, arguments);
+      var list = origAlarms.apply(this, arguments) || [];
+      try {
+        var w = CF.walkStatus(CF.series(data || {}, visitsArr || []));
+        if (w.state === 'missing' || w.state === 'overdue') {
+          var late = w.state === 'overdue' ? w.overdueDays : 0;
+          list.push({ key: 'walk', name: '6-minute walk test', short: '6MWT' + (late ? ' +' + late + 'd' : ''), level: 'secondary', icon: 'fa-person-walking',
+            detail: w.last ? 'Due ' + w.due + ' · last ' + w.last.value + ' m on ' + w.last.date : 'No 6-minute walk test recorded', dueDate: w.due, daysOverdue: late });
+        }
+      } catch (e) {}
+      return list;
     };
     ['goToMain', 'goToAdmin', 'goToAnalytics', 'goToClinic', 'goToEducation'].forEach(function (n) {
       wrap(n, null, function () { var o = $('pageOverview'); if (o) o.classList.remove('active'); });
