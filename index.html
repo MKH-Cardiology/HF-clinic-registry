@@ -1813,6 +1813,33 @@ details.cf-tl-y[open]>summary.cf-tl-yh:before{content:'\25BE';}
 .cf-rtag.hi{background:#FEF3F2;color:#B42318;}
 .cf-rnone{font-size:.72rem;color:var(--cf-ink-3);}
 .cf-ov-h .cf-fast-toggle{margin-left:auto;font-size:.74rem;font-weight:600;}
+/* Latest ECG card (overview) */
+.cf-ecg{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;margin-top:10px;padding:10px;border:1px solid var(--cf-line);border-radius:12px;background:#fbfcfe;}
+.cf-ecg-h{flex-basis:100%;font-size:.7rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--cf-ink-3);}
+.cf-ecg-h .fa{color:var(--cf-danger);}
+.cf-ecg-img{display:block;flex:0 0 auto;border:1px solid var(--cf-line);border-radius:8px;overflow:hidden;background:#fff;}
+.cf-ecg-img img{display:block;height:110px;max-width:260px;object-fit:cover;}
+.cf-ecg-meta{flex:1;min-width:160px;font-size:.78rem;color:var(--cf-ink-2);}
+.cf-ecg-meta b{color:var(--cf-ink);}.cf-ecg-meta span{color:#98a2b3;}
+.cf-ecg-more{margin-top:4px;font-size:.72rem;}
+.cf-rtag.smk{background:#EEF4FB;color:#0B2D5B;}.cf-rtag.none{background:#F9FAFB;color:#98a2b3;}
+/* IV iron calculator (visit) */
+.cf-iron{margin-top:10px;border:1px solid #d9e6f5;border-radius:12px;padding:10px 12px;background:#f7fbff;}
+.cf-iron-h{font-weight:700;color:var(--cf-navy);font-size:.85rem;margin-bottom:6px;}
+.cf-iron-h small{font-weight:400;color:var(--cf-ink-3);margin-left:6px;}
+.cf-iron-h .fa{color:#B42318;}
+.cf-iron-in{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:6px;}
+.cf-iron-in label{font-size:.72rem;color:var(--cf-ink-3);font-weight:600;}
+.cf-iron-in small{display:block;font-weight:400;font-size:.64rem;color:#98a2b3;}
+.cf-iron-ind{font-size:.75rem;border-radius:8px;padding:3px 8px;margin-bottom:5px;display:inline-block;}
+.cf-iron-ind.ok{background:#E7F6EC;color:#1B7F3B;}.cf-iron-ind.warn{background:#FFFAEB;color:#B54708;}
+.cf-iron-total{font-size:.85rem;margin:2px 0 4px;}
+.cf-iron-tab{width:100%;font-size:.76rem;border-collapse:collapse;margin-bottom:4px;}
+.cf-iron-tab th{background:#eef3fa;color:var(--cf-navy);padding:3px 6px;text-align:left;}
+.cf-iron-tab td{padding:3px 6px;border-bottom:1px solid #e8eef6;}
+.cf-iron-notes{font-size:.72rem;color:var(--cf-ink-2);margin:4px 0 8px 16px;padding:0;}
+.cf-iron-warn{font-size:.74rem;color:#B54708;background:#FFFAEB;border-radius:8px;padding:4px 8px;margin-bottom:6px;}
+@media (max-width:640px){.cf-iron-in{grid-template-columns:1fr 1fr;}}
 
 </style>
 
@@ -2200,7 +2227,7 @@ details.cf-tl-y[open]>summary.cf-tl-yh:before{content:'\25BE';}
                     <div class="yes-no-field"><label>Completed</label><select class="form-select" id="Walk_Completed" onchange="toggleWalkMeters()"><option>N</option><option>Y</option></select></div>
                     <div id="walkMetersWrap" style="display:none;">
                         <div class="row g-2 entry-detail-panel">
-                            <div class="col-12"><label>Meters Walked</label><input type="text" class="form-control" id="Walk_Meters" inputmode="text" oninput="toggleWalkMeters()"></div>
+                            <div class="col-6"><label>Meters Walked</label><input type="text" class="form-control" id="Walk_Meters" inputmode="text" oninput="toggleWalkMeters()"></div><div class="col-6"><label>Date of test</label><input type="date" class="form-control" id="Walk_Date"></div>
                         </div>
                     </div>
                     <input type="hidden" id="Walk_Test">
@@ -3050,7 +3077,7 @@ details.cf-tl-y[open]>summary.cf-tl-yh:before{content:'\25BE';}
                         <div class="yes-no-field"><label>Completed</label><select class="form-select" id="V_Walk_Completed" onchange="toggleVisitWalkMeters()"><option>N</option><option>Y</option></select></div>
                         <div id="vWalkMetersWrap" style="display:none;">
                             <div class="row g-2 entry-detail-panel">
-                                <div class="col-12"><label>Meters Walked</label><input type="text" class="form-control" id="V_Walk_Meters" inputmode="text"></div>
+                                <div class="col-6"><label>Meters Walked</label><input type="text" class="form-control" id="V_Walk_Meters" inputmode="text"></div><div class="col-6"><label>Date of test</label><input type="date" class="form-control" id="V_Walk_Date"></div>
                             </div>
                         </div>
                     </div>
@@ -16171,6 +16198,7 @@ var CF = (function () {
     add('EF', adm, p.CMR_LVEF, 'CMR');
     add('NYHA', adm, { I: 1, II: 2, III: 3, IV: 4 }[s(p.NYHA)] || null, 'Admission');
     add('BMI', adm, p.BMI, 'Admission');
+    add('Walk', iso(p.Walk_Date) || adm, p.Walk_Meters, 'Baseline 6MWT');
     parseExtraAdmissions(p).forEach(function (a, i) {
       var d = iso(a.date), dd = iso(a.dischargeDate) || d, src = 'Admission ' + (i + 2);
       add('K', d, a.Lab_K, src); add('K', dd, a.Lab_K_Disch, src);
@@ -16190,6 +16218,7 @@ var CF = (function () {
       add('EF', d, v.V_Echo_EF, src); add('EF', d, v.V_CMR_LVEF, 'CMR'); add('BMI', d, v.V_BMI, src);
       add('NYHA', d, { I: 1, II: 2, III: 3, IV: 4 }[s(v.V_NYHA)] || null, src);
       add('KCCQ', iso(v.V_KCCQ_Date) || d, v.V_KCCQ, src);
+      add('Walk', iso(v.V_Walk_Date) || d, v.V_Walk_Meters, src);
     });
     Object.keys(S).forEach(function (k) { S[k].sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; }); });
     return S;
@@ -16200,6 +16229,52 @@ var CF = (function () {
     if (!l) return null;
     var d = daysBetween(l.date, ref || todayIso());
     return d != null && d <= days ? l : null;
+  }
+
+  // Latest smoking status. "Never" recorded after "Current"/"Former" cannot be true (and is the form's
+  // default), so it is read as "Former" and flagged for checking.
+  function smokingStatus(p, visits) {
+    var recs = (visits || []).map(function (v) { return { v: s(v.V_Smoker), d: iso(v.visitDate) }; })
+      .concat([{ v: s(p.Smoker), d: iso(p.Admission_Date) || iso(p.timestamp) }]).filter(function (r) { return r.v; });
+    if (!recs.length) return { status: '', date: '', note: '' };
+    var latest = recs[0], ever = recs.filter(function (r) { return /current|former/i.test(r.v); });
+    if (/never/i.test(latest.v) && ever.length) {
+      var e = ever[0];
+      return { status: 'Former', date: latest.d, note: 'Latest record says "Never" but ' + fmt(e.d) + ' says "' + e.v + '": please check', check: true };
+    }
+    return { status: latest.v, date: latest.d, note: '' };
+  }
+
+  // IV ferric carboxymaltose: total iron need from Hb and weight (simplified Ferinject SmPC table,
+  // as used in CONFIRM-HF / AFFIRM-AHF / HEART-FID). Max 1000 mg and 20 mg/kg per infusion,
+  // at least 7 days apart. Values for clinical review.
+  var IRON = { hbLow: 10, hbHigh: 14, weightCut: 70, minWeight: 35, maxSingle: 1000, maxPerKg: 20, gapDays: 7, recheckDays: 90, hbStop: 15 };
+  function ironDose(weightKg, hb, ferritin, tsat, startDate) {
+    var out = { total: null, doses: [], warnings: [], indication: '', hb: hb, weight: weightKg };
+    if (hb != null && hb > 25) hb = hb / 10; // entered in g/L
+    out.hb = hb;
+    if (ferritin != null) {
+      var def = ferritin < 100 || (ferritin < 300 && tsat != null && tsat < 20);
+      out.deficient = def;
+      out.indication = (def ? 'Iron deficiency' : 'Not iron deficient by ESC criteria') + ' (ferritin ' + ferritin + (tsat != null ? ', TSAT ' + tsat + '%' : '') + ')';
+      if (!def) out.warnings.push('ESC criteria not met: ferritin <100 µg/L, or 100–299 with TSAT <20%.');
+    } else out.warnings.push('No ferritin recorded: confirm iron deficiency first.');
+    if (weightKg == null || hb == null) { out.warnings.push('Enter weight and Hb to calculate.'); return out; }
+    if (hb >= IRON.hbStop) { out.warnings.push('Hb ≥15 g/dL: IV iron not recommended.'); return out; }
+    var total;
+    if (weightKg < IRON.minWeight) { total = 500; out.warnings.push('Weight <35 kg: 500 mg total; check the SmPC.'); }
+    else if (hb < IRON.hbLow) total = weightKg < IRON.weightCut ? 1500 : 2000;
+    else if (hb < IRON.hbHigh) total = weightKg < IRON.weightCut ? 1000 : 1500;
+    else total = 500;
+    out.total = total;
+    var perDose = Math.min(IRON.maxSingle, Math.floor(weightKg * IRON.maxPerKg / 50) * 50), left = total, d = startDate || todayIso(), i = 0;
+    while (left > 0 && i < 4) {
+      var dose = Math.min(perDose, left);
+      out.doses.push({ date: d, mg: dose, ml: dose / 50 });
+      left -= dose; d = addDays(d, IRON.gapDays); i++;
+    }
+    out.recheck = addDays(out.doses[out.doses.length - 1].date, IRON.recheckDays);
+    return out;
   }
 
   // ---------- 7. Patient profile --------------------------------------
@@ -16226,7 +16301,7 @@ var CF = (function () {
       bmi: bmiVal, height: h || null, weight: w ? w.value : null, age: age, female: /^f/i.test(s(p.Gender)),
       dm: flag('DM'), ckd: flag('CKD'), dialysis: flag('Dialysis'), af: flag('AF'), htn: flag('HTN'),
       ascvd: !!ascvd, obese: flag('Obese') || (bmiVal != null && bmiVal >= 30),
-      smoker: s(p.Smoker) || s(v0.V_Smoker)
+      smoker: smokingStatus(p, visits).status
     };
   }
 
@@ -16928,7 +17003,7 @@ var CF = (function () {
     readDrug: readDrug, doseText: doseText, pctTarget: pctTarget, presetsFor: presetsFor, nextPreset: nextPreset,
     medSnapshots: medSnapshots, medHistory: medHistory, onClass: onClass, onPillar: onPillar,
     series: series, last: last, profile: profile, vitalStatus: vitalStatus, followUpStatus: followUpStatus,
-    labSuggestions: labSuggestions, medSuggestions: medSuggestions, medReview: medReview, fastingAdvice: fastingAdvice, REVIEW: REVIEW, deviceSuggestions: deviceSuggestions, latestECG: latestECG, currentDevice: currentDevice, omtSince: omtSince, DEVICE: DEVICE, glp1Plan: glp1Plan,
+    labSuggestions: labSuggestions, medSuggestions: medSuggestions, medReview: medReview, fastingAdvice: fastingAdvice, smokingStatus: smokingStatus, ironDose: ironDose, IRON: IRON, REVIEW: REVIEW, deviceSuggestions: deviceSuggestions, latestECG: latestECG, currentDevice: currentDevice, omtSince: omtSince, DEVICE: DEVICE, glp1Plan: glp1Plan,
     readmitBand: readmitBand, analyse: analyse, pillarStatus: pillarStatus, parseExtraAdmissions: parseExtraAdmissions, yes: yes
   };
 })();
@@ -17254,10 +17329,11 @@ var CFUI = (function () {
     html += '<div class="cf-assist-sub">GDMT <b>' + quad + ' of 4</b> pillars' + (A.profile.esc2026 ? ' · ' + A.profile.esc2026 + ' (ESC 2026' + (A.profile.ef != null ? ', LVEF ' + A.profile.ef + '%' : '') + ')' : '') + '</div>';
     html += pillarChips(pillars, true);
     html += '<div class="cf-assist-rv"><div class="cf-col-h">Medication review <small>each current drug against today\'s K, kidney function, BP, HR, weight and congestion</small>' +
-      '<label class="cf-fast-toggle"><input type="checkbox" id="cfFastingToggle"' + (val('V_Fasting') === 'Yes' ? ' checked' : '') + '> <i class="fa fa-moon"></i> Fasting (Ramadan) mode</label></div>' + reviewTable(A, true) + fastingBlock(A) + '</div>';
+      '<label class="cf-fast-toggle"><input type="checkbox" id="cfFastingToggle"' + (val('V_Fasting') === 'Yes' ? ' checked' : '') + '> <i class="fa fa-moon"></i> Fasting (Ramadan) mode</label></div>' + reviewTable(A, true) + fastingBlock(A) + ironBlock(A) + '</div>';
     html += '<div class="cf-assist-cols"><div><div class="cf-col-h">Suggestions</div>' + suggestionList(A.meds.filter(function (m) { return !m.review; })) + '</div>' +
       '<div><div class="cf-col-h">Labs due</div>' + labList(A.labs) + '</div></div>';
     box.innerHTML = html;
+    bindIron(box, A);
     var ft = $('cfFastingToggle');
     if (ft) ft.addEventListener('change', function () { setVal('V_Fasting', ft.checked ? 'Yes' : ''); markDirty(); renderAssist(); });
     box.querySelectorAll('.cf-apply').forEach(function (b) {
@@ -17316,6 +17392,85 @@ var CFUI = (function () {
         '<div class="cf-rv-why">' + esc(x.reason || '') + (x.next && x.status !== 'continue' ? ' <b>→ ' + esc(x.next) + '</b>' : '') + '</div>' + btn + '</div>';
     }).join('');
     return (R.sequence ? '<div class="cf-seq"><i class="fa fa-list-ol"></i> ' + esc(R.sequence) + '</div>' : '') + rows;
+  }
+  // ---------- IV ferric carboxymaltose dose calculator (visit) ----------
+  var ironOpen = false, ironOverride = {};
+  function numVal(id) { var x = parseFloat(String(val(id) || '').replace(',', '.')); return isNaN(x) ? null : x; }
+  function ironInputs(A) {
+    var S = A.S, L = function (k) { var o = CF.last(S, k); return o ? o : null; };
+    var w = numVal('V_Weight'), hb = numVal('V_Hb'), fe = numVal('V_Ferritin'), ts = numVal('V_Transferrin');
+    var lw = L('Weight'), lh = L('Hb'), lf = L('Ferritin'), lt = L('TSAT');
+    var o = ironOverride;
+    if (o.weight != null) { w = o.weight; } if (o.hb != null) { hb = o.hb; } if (o.fer != null) { fe = o.fer; } if (o.tsat != null) { ts = o.tsat; }
+    return {
+      weight: w != null ? w : (lw ? lw.value : null), weightSrc: w != null ? 'this visit' : (lw ? CF.fmt(lw.date) : ''),
+      hb: hb != null ? hb : (lh ? lh.value : null), hbSrc: hb != null ? 'this visit' : (lh ? CF.fmt(lh.date) : ''),
+      fer: fe != null ? fe : (lf ? lf.value : null), ferSrc: fe != null ? 'this visit' : (lf ? CF.fmt(lf.date) : ''),
+      tsat: ts != null ? ts : (lt ? lt.value : null)
+    };
+  }
+  function ironWanted(A) {
+    var onRow = val('V_Ferinject_Status') === 'Yes' || /start|increase|continue/i.test(val('V_Ferinject_Action') || '');
+    var suggested = A.meds.some(function (m) { return m.drug === 'Ferinject'; });
+    return ironOpen || onRow || suggested;
+  }
+  function ironResultHtml(r) {
+    var h = '';
+    if (r.indication) h += '<div class="cf-iron-ind ' + (r.deficient ? 'ok' : 'warn') + '">' + esc(r.indication) + '</div>';
+    if (r.total) {
+      h += '<div class="cf-iron-total">Total dose <b>' + r.total + ' mg</b> <small>(Hb ' + r.hb + ' g/dL, ' + r.weight + ' kg)</small></div><table class="cf-iron-tab"><tr><th>Infusion</th><th>Date</th><th>Dose</th><th>Volume</th></tr>' +
+        r.doses.map(function (d, i) { return '<tr><td>' + (i + 1) + '</td><td>' + (i === 0 ? CF.fmt(d.date) : 'on or after ' + CF.fmt(d.date)) + '</td><td><b>' + d.mg + ' mg</b></td><td>' + d.ml + ' mL (50 mg/mL)</td></tr>'; }).join('') + '</table>' +
+        '<ul class="cf-iron-notes"><li>Dilute in 0.9% saline only (1000 mg: ≤250 mL over ≥15 min; 500 mg: ≤100 mL over ≥6 min), per local protocol.</li>' +
+        '<li>Observe for 30 min for hypersensitivity; resuscitation facilities available.</li>' +
+        '<li>Recheck ferritin, TSAT and Hb around <b>' + CF.fmt(r.recheck) + '</b> (not earlier than 4 weeks after the last dose). HF trials repeated 500 mg at 12 and 24 weeks if still iron deficient.</li>' +
+        '<li>Check phosphate if repeated courses or symptoms (hypophosphataemia).</li></ul>';
+    }
+    if (r.warnings.length) h += '<div class="cf-iron-warn">' + r.warnings.map(esc).join('<br>') + '</div>';
+    return h;
+  }
+  function ironBlock(A) {
+    if (!ironWanted(A)) return '<button type="button" class="btn btn-sm btn-link cf-iron-open">IV iron dose calculator</button>';
+    var I = ironInputs(A);
+    var r = CF.ironDose(I.weight, I.hb, I.fer, I.tsat, val('Visit_Date') || CF.todayIso());
+    return '<div class="cf-iron"><div class="cf-iron-h"><i class="fa fa-droplet"></i> IV ferric carboxymaltose · dose calculator <small>simplified SmPC table (Hb and weight) · for the doctor to confirm</small></div>' +
+      '<div class="cf-iron-in"><label>Weight (kg)<input type="number" step="0.1" class="form-control form-control-sm" id="cfIronW" value="' + (I.weight != null ? I.weight : '') + '"><small>' + esc(I.weightSrc) + '</small></label>' +
+      '<label>Hb (g/dL)<input type="number" step="0.1" class="form-control form-control-sm" id="cfIronHb" value="' + (I.hb != null ? I.hb : '') + '"><small>' + esc(I.hbSrc) + '</small></label>' +
+      '<label>Ferritin (µg/L)<input type="number" class="form-control form-control-sm" id="cfIronFe" value="' + (I.fer != null ? I.fer : '') + '"><small>' + esc(I.ferSrc) + '</small></label>' +
+      '<label>TSAT (%)<input type="number" class="form-control form-control-sm" id="cfIronTs" value="' + (I.tsat != null ? I.tsat : '') + '"><small>&nbsp;</small></label></div>' +
+      '<div id="cfIronOut">' + ironResultHtml(r) + '</div>' +
+      '<button type="button" class="btn btn-sm btn-primary cf-iron-apply"' + (r.total ? '' : ' disabled') + '><i class="fa fa-check me-1"></i>Apply to this visit</button> <small class="text-muted">Sets Ferinject (first infusion) in the medication list and writes the schedule into the plan.</small></div>';
+  }
+  function bindIron(box, A) {
+    var open = box.querySelector('.cf-iron-open');
+    if (open) open.addEventListener('click', function () { ironOpen = true; renderAssist(); });
+    var ids = ['cfIronW', 'cfIronHb', 'cfIronFe', 'cfIronTs'];
+    function cur() {
+      var g = function (id) { var x = parseFloat(($(id) || {}).value); return isNaN(x) ? null : x; };
+      return CF.ironDose(g('cfIronW'), g('cfIronHb'), g('cfIronFe'), g('cfIronTs'), val('Visit_Date') || CF.todayIso());
+    }
+    var keyOf = { cfIronW: 'weight', cfIronHb: 'hb', cfIronFe: 'fer', cfIronTs: 'tsat' };
+    ids.forEach(function (id) { var el = $(id); if (el) el.addEventListener('input', function () { var x = parseFloat(el.value); ironOverride[keyOf[id]] = isNaN(x) ? null : x; var r = cur(); $('cfIronOut').innerHTML = ironResultHtml(r); var b = box.querySelector('.cf-iron-apply'); if (b) b.disabled = !r.total; }); });
+    var ap = box.querySelector('.cf-iron-apply');
+    if (ap) ap.addEventListener('click', function () {
+      var r = cur(); if (!r.total) return;
+      var first = r.doses[0], preset = first.mg + ' mg IV once';
+      var row = document.querySelector('.cf-med[data-med="V_Ferinject"]');
+      if (row) {
+        var a = row.querySelector('.cf-act'); a.value = 'Start'; a.dispatchEvent(new Event('change'));
+        var ds = row.querySelector('.cf-dose');
+        if ([].some.call(ds.options, function (o) { return o.value === preset; })) { ds.value = preset; ds.dispatchEvent(new Event('change')); }
+        else if ([].some.call(ds.options, function (o) { return o.value === '__other'; })) {
+          ds.value = '__other'; ds.dispatchEvent(new Event('change'));
+          var c = row.querySelector('.cf-custom'); if (c) { c.value = preset; c.dispatchEvent(new Event('input')); }
+        }
+      }
+      var line = 'Ferric carboxymaltose total ' + r.total + ' mg (Hb ' + r.hb + ' g/dL, ' + r.weight + ' kg): ' +
+        r.doses.map(function (d, i) { return d.mg + ' mg ' + (i === 0 ? CF.fmt(d.date) : 'on/after ' + CF.fmt(d.date)); }).join(', ') + '. Recheck ferritin/TSAT/Hb ~' + CF.fmt(r.recheck) + '.';
+      var pl = $('V_Plan');
+      if (pl) { var lines = s(pl.value).split('\n').filter(function (x) { return x && x.indexOf('Ferric carboxymaltose total') !== 0; }); lines.push(line); pl.value = lines.join('\n'); pl.dispatchEvent(new Event('input', { bubbles: true })); }
+      markDirty();
+      if (typeof showPopup === 'function') showPopup('success', 'IV iron added', 'Ferinject ' + preset + ' set in the medication list and the schedule written in the plan. Review, then save the visit.');
+    });
   }
   function fastingBlock(A) {
     var f = A.review && A.review.fasting;
@@ -17870,35 +18025,61 @@ var CFUI = (function () {
           var pc = prev.value ? Math.round((l.value - prev.value) / Math.abs(prev.value) * 100) : null;
           var main = pc == null ? (delta > 0 ? '+' : '') + delta : pc === 0 ? '0%' : (pc > 0 ? '+' : '') + pc + '%';
           return '<span class="' + (delta > 0 ? 'up' : delta < 0 ? 'down' : '') + '">' + (delta > 0 ? '▲ ' : delta < 0 ? '▼ ' : '= ') + main + '</span>' +
-            '<small class="cf-d-abs">' + (delta > 0 ? '+' : '') + delta + ' vs ' + prev.value + ' · ' + CF.fmt(prev.date, false) + '</small>';
+            '<small class="cf-d-abs">' + (delta > 0 ? '+' : '') + delta + ' vs ' + prev.value + ' · ' + CF.fmt(prev.date) + '</small>';
         })() : '') + '</td>' +
         '<td class="t">' + sparkline(a, flag === 'crit' ? '#B42318' : flag === 'abn' ? '#B54708' : '#1E88E5') + '</td>' +
         '<td class="w">' + (l ? CF.fmt(l.date) + '<small>' + (age === 0 ? 'today' : age + ' d ago') + ' · ' + esc(l.source) + '</small>' : '') + '</td>' +
-        '<td class="n">' + (due ? '<span class="cf-due ' + due.level + '">' + (due.level === 'urgent' ? 'urgent' : 'due ' + CF.fmt(due.due, false)) + '</span>' : '') + '</td></tr>';
+        '<td class="n">' + (due ? '<span class="cf-due ' + due.level + '">' + (due.level === 'urgent' ? 'urgent' : 'due ' + CF.fmt(due.due)) + '</span>' : '') + '</td></tr>';
     }).join('');
-    var vit = [['SBP', 'Systolic BP', 'mmHg'], ['HR', 'Heart rate', 'bpm'], ['Weight', 'Weight', 'kg'], ['KCCQ', 'KCCQ', ''], ['EF', 'LVEF', '%']].map(function (r) {
+    var vit = [['SBP', 'Systolic BP', 'mmHg'], ['HR', 'Heart rate', 'bpm'], ['Weight', 'Weight', 'kg'], ['KCCQ', 'KCCQ', ''], ['EF', 'LVEF', '%'], ['Walk', '6-min walk', 'm']].map(function (r) {
       var a = S[r[0]] || []; if (!a.length) return '';
       var l = a[a.length - 1];
-      return '<div class="cf-trend"><small>' + r[1] + '</small><b>' + l.value + (r[2] ? ' <i>' + r[2] + '</i>' : '') + '</b>' + sparkline(a, '#0B2D5B') + '<em>' + CF.fmt(l.date, false) + (a.length > 1 ? ' · n=' + a.length : '') + '</em></div>';
+      return '<div class="cf-trend"><small>' + r[1] + '</small><b>' + l.value + (r[2] ? ' <i>' + r[2] + '</i>' : '') + '</b>' + sparkline(a, '#0B2D5B') + '<em>' + CF.fmt(l.date) + (a.length > 1 ? ' · n=' + a.length : '') + '</em></div>';
     }).join('');
     // BMI: from each recorded weight and the height; stored BMI values if no height
     var bmiS = pr.height ? (S.Weight || []).map(function (o) { return { date: o.date, value: Math.round(o.value / Math.pow(pr.height / 100, 2) * 10) / 10 }; }) : (S.BMI || []).map(function (o) { return { date: o.date, value: Math.round(o.value * 10) / 10 }; });
     if (bmiS.length) {
       var bl = bmiS[bmiS.length - 1], bv = bl.value;
       var bc = bv < 18.5 ? 'Underweight' : bv < 25 ? 'Normal' : bv < 30 ? 'Overweight' : bv < 35 ? 'Obesity I' : bv < 40 ? 'Obesity II' : 'Obesity III';
-      vit += '<div class="cf-trend' + (bv >= 30 || bv < 18.5 ? ' cf-bmi-flag' : '') + '"><small>BMI</small><b>' + bv + ' <i>kg/m² · ' + bc + '</i></b>' + sparkline(bmiS, '#0B2D5B') + '<em>' + CF.fmt(bl.date, false) + (pr.height ? ' · height ' + pr.height + ' cm' : '') + '</em></div>';
+      vit += '<div class="cf-trend' + (bv >= 30 || bv < 18.5 ? ' cf-bmi-flag' : '') + '"><small>BMI</small><b>' + bv + ' <i>kg/m² · ' + bc + '</i></b>' + sparkline(bmiS, '#0B2D5B') + '<em>' + CF.fmt(bl.date) + (pr.height ? ' · height ' + pr.height + ' cm' : '') + '</em></div>';
     }
     return (rows ? '<div class="table-responsive"><table class="cf-labs"><thead><tr><th>Test</th><th>Latest</th><th>Change</th><th>Trend</th><th>Date</th><th>Next</th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '<div class="cf-empty">No results recorded yet.</div>') +
-      (vit ? '<div class="cf-trends mt-2">' + vit + '</div>' : '');
+      (vit ? '<div class="cf-trends mt-2">' + vit + '</div>' : '') + ecgCard(A);
+  }
+  // every ECG image on record (admissions and visits), newest first
+  function ecgImages(p, visits) {
+    var parse = typeof _parseEcgGalleryEntries === 'function' ? _parseEcgGalleryEntries : function (raw) { try { var a = JSON.parse(raw || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } };
+    var out = [];
+    function addAll(raw, legacy, date, src) { (parse(raw, legacy) || []).forEach(function (e) { if (e && e.url) out.push({ url: e.url, date: CF.iso(e.date) || date, src: src, name: e.name || '' }); }); }
+    addAll(p.ECG_Images, p.ECG_Image, CF.iso(p.Admission_Date) || CF.iso(p.timestamp), 'Admission');
+    CF.parseExtraAdmissions(p).forEach(function (a, i) { addAll(a.ECG_Images, a.ECG_Image, CF.iso(a.date), 'Admission ' + (i + 2)); });
+    (visits || []).forEach(function (v) { addAll(v.V_ECG_Images, v.V_ECG_Image, CF.iso(v.visitDate), (v.visitType || 'Visit') + ' visit'); });
+    return out.filter(function (x) { return x.date; }).sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+  }
+  function ecgCard(A) {
+    var p = ovState.p || {}, imgs = ecgImages(p, A.visits), ecg = CF.latestECG(p, A.visits);
+    if (!imgs.length && !ecg) return '';
+    var facts = ecg ? [ecg.rhythm, ecg.qrs != null ? 'QRS ' + ecg.qrs + ' ms' : '', ecg.lbbb === 'Yes' ? 'LBBB' : '', ecg.paced].filter(Boolean).join(' · ') : '';
+    var h = '<div class="cf-ecg"><div class="cf-ecg-h"><i class="fa fa-heart-pulse"></i> Latest ECG</div>';
+    if (imgs.length) {
+      var l = imgs[0];
+      h += '<a class="cf-ecg-img" href="' + esc(l.url) + '" target="_blank" rel="noopener" title="Open full size"><img src="' + esc(l.url) + '" alt="ECG ' + esc(CF.fmt(l.date)) + '" loading="lazy"></a>' +
+        '<div class="cf-ecg-meta"><b>' + CF.fmt(l.date) + '</b> <span>(' + ago(l.date) + ')</span><br><small>' + esc(l.src) + (ecg && ecg.date === l.date && facts ? ' · ' + esc(facts) : '') + '</small>' +
+        (ecg && ecg.date !== l.date && facts ? '<br><small>Latest ECG findings (' + CF.fmt(ecg.date) + '): ' + esc(facts) + '</small>' : '') +
+        (imgs.length > 1 ? '<div class="cf-ecg-more">Earlier: ' + imgs.slice(1, 6).map(function (x) { return '<a href="' + esc(x.url) + '" target="_blank" rel="noopener">' + CF.fmt(x.date) + '</a>'; }).join(' · ') + (imgs.length > 6 ? ' · +' + (imgs.length - 6) : '') + '</div>' : '') + '</div>';
+    } else {
+      h += '<div class="cf-ecg-meta"><b>' + CF.fmt(ecg.date) + '</b> <span>(' + ago(ecg.date) + ')</span><br><small>' + esc(ecg.src) + (facts ? ' · ' + esc(facts) : '') + '</small><br><small class="text-muted">No ECG image attached.</small></div>';
+    }
+    return h + '</div>';
   }
   // Risk factors and comorbidities from the record (any visit saying Yes counts; smoking takes the worst status)
   function riskFactors(p, A) {
     var vs = A.visits || [], out = [];
     function any(key) { return CF.yes(p[key]) || vs.some(function (v) { return CF.yes(v['V_' + key]); }); }
     function val(key) { var x = s(p[key]); vs.forEach(function (v) { if (!x || /^no$/i.test(x)) x = s(v['V_' + key]) || x; }); return x && !/^no$/i.test(x) ? x : ''; }
-    var smk = [s(p.Smoker)].concat(vs.map(function (v) { return s(v.V_Smoker); }));
-    var sm = smk.indexOf('Current') >= 0 ? (s(vs[0] && vs[0].V_Smoker) === 'Former' ? 'Former' : 'Current') : smk.indexOf('Former') >= 0 ? 'Former' : '';
-    if (sm === 'Current') out.push(['Current smoker', 'hi']); else if (sm === 'Former') out.push(['Ex-smoker', '']);
+    var sm = CF.smokingStatus(p, vs);
+    var smTxt = { Current: 'Current smoker', Former: 'Ex-smoker', Never: 'Never smoked' }[sm.status] || (sm.status ? 'Smoking: ' + sm.status : 'Smoking: not recorded');
+    out.push([smTxt + (sm.date ? ' (' + CF.fmt(sm.date) + ')' : '') + (sm.check ? ' ⚠' : ''), sm.status === 'Current' ? 'hi' : sm.status ? 'smk' : 'none', sm.note]);
     if (any('DM')) out.push(['Diabetes', 'hi']);
     if (any('HTN')) out.push(['Hypertension', 'hi']);
     if (any('Dyslipidemia')) out.push(['Dyslipidaemia', '']);
@@ -17921,7 +18102,7 @@ var CFUI = (function () {
   function riskRow(p, A) {
     var rf = riskFactors(p, A);
     return '<div class="cf-risk"><span class="cf-risk-h"><i class="fa fa-triangle-exclamation"></i> Risk factors</span>' +
-      (rf.length ? rf.map(function (r) { return '<span class="cf-rtag ' + r[1] + '">' + esc(r[0]) + '</span>'; }).join('') : '<span class="cf-rnone">none recorded</span>') + '</div>';
+      (rf.length ? rf.map(function (r) { return '<span class="cf-rtag ' + r[1] + '"' + (r[2] ? ' title="' + esc(r[2]) + '"' : '') + '>' + esc(r[0]) + '</span>'; }).join('') : '<span class="cf-rnone">none recorded</span>') + '</div>';
   }
   function medsBlock(p, A, noPillars) {
     var html = noPillars ? '' : pillarChips(CF.pillarStatus(p, A.visits, A), false);
@@ -17969,6 +18150,7 @@ var CFUI = (function () {
   }
   function renderOverview(id, p, allVisits, latest) {
     var A = CF.analyse(p, allVisits);
+    ovState.p = p;
     var alarms = [];
     try { alarms = computePatientAlarms(p, A.visits); } catch (e) {}
     ovState.A = A; ovState.alarms = alarms;
@@ -18104,7 +18286,7 @@ var CFUI = (function () {
       form.addEventListener('change', markDirty);
       form.addEventListener('change', function (e) {
         var id = e.target && e.target.id || '';
-        if (/^V_(K|Creat|eGFR|BP|Pulse|Weight|Height|Echo_EF|Ferritin|Transferrin|NTproBNP|HbA1c|LDL|INR|NYHA)$/.test(id) || id === 'Visit_Date') scheduleAssist();
+        if (/^V_(K|Creat|eGFR|BP|Pulse|Weight|Height|Echo_EF|Ferritin|Transferrin|Hb|NTproBNP|HbA1c|LDL|INR|NYHA)$/.test(id) || id === 'Visit_Date') scheduleAssist();
       });
     }
     ['Mortality', 'V_Mortality'].forEach(function (id) { var e = $(id); if (e) e.addEventListener('change', function () { toggleDeath(id === 'Mortality' ? '' : 'V_'); }); });
@@ -18144,6 +18326,7 @@ var CFUI = (function () {
     toggleDeath(''); readmitSuggest();
   }
   function afterVisitFormChange(isNew) {
+    ironOpen = false; ironOverride = {};
     refreshEditor('V_', isNew);
     renderAssist(); renderKccqHint(); toggleDeath('V_');
   }
@@ -18236,6 +18419,7 @@ var CFUI = (function () {
       ['NYHA', ny ? ['', 'I', 'II', 'III', 'IV'][ny.value] + ' (' + CF.fmt(ny.date) + ')' : ''],
       ['KCCQ', kq.length ? kq[kq.length - 1].value + ' (' + CF.fmt(kq[kq.length - 1].date) + ')' + (kq.length > 1 ? ' · change ' + (kq[kq.length - 1].value - kq[kq.length - 2].value >= 0 ? '+' : '') + (kq[kq.length - 1].value - kq[kq.length - 2].value) : '') : ''],
       ['Weight / BMI', [pr.weight != null ? pr.weight + ' kg' : '', pr.bmi != null ? 'BMI ' + Math.round(pr.bmi * 10) / 10 : ''].filter(Boolean).join(' · ')],
+      ['6-min walk', (function () { var w = CF.last(S, 'Walk'); return w ? w.value + ' m (' + CF.fmt(w.date) + ')' : ''; })()],
       ['Device', dev ? esc(dev.type) + (dev.date ? ' (' + CF.fmt(dev.date) + ')' : '') : 'None recorded']]) + '</div></div>';
     var rf = riskFactors(p, A);
     h += '<div class="pdf-keep"><b class="muted small">RISK FACTORS AND COMORBIDITIES</b><br>' + (rf.length ? rf.map(function (r) { return '<span class="tag ' + r[1] + '">' + esc(r[0]) + '</span>'; }).join('') : '<span class="muted">none recorded</span>') + '</div>';
@@ -18330,6 +18514,11 @@ var CFUI = (function () {
     window.cfToggleDeath = toggleDeath;
     window.cfReadmitSuggest = readmitSuggest;
     window.renderCalendarDayList = renderCalendarDayList;
+    // 6MWT: default the test date to the visit date when marked completed
+    document.addEventListener('change', function (e) {
+      if (!e.target || e.target.id !== 'V_Walk_Completed' || e.target.value !== 'Y') return;
+      var d = $('V_Walk_Date'); if (d && !d.value) d.value = val('Visit_Date') || CF.todayIso();
+    }, true);
     // Patient PDF: the new report replaces the field dump (which shifted and printed blank pages)
     window.pdfFromAdmin = function (id) { return patientReport(id); };
     window.generatePDF = function (data, visitsData, id) { return patientReport(id, data, (visitsData || []).length ? visitsData : null); };
@@ -18355,7 +18544,7 @@ CFUI.install();
 (function () {
   'use strict';
   if (typeof ALL_PATIENT_FIELDS !== 'undefined') {
-    ['HF_Readmission', 'HF_Readmission_Interval', 'Death_Date', 'Death_Cause'].forEach(function (f) { if (ALL_PATIENT_FIELDS.indexOf(f) < 0) ALL_PATIENT_FIELDS.push(f); });
+    ['HF_Readmission', 'HF_Readmission_Interval', 'Death_Date', 'Death_Cause', 'Walk_Date'].forEach(function (f) { if (ALL_PATIENT_FIELDS.indexOf(f) < 0) ALL_PATIENT_FIELDS.push(f); });
   }
 
   // ---- computed helpers used by the patched analytics code ----
@@ -18626,6 +18815,9 @@ var CFX = (function () {
     ['calc_KCCQ_First', 'numeric', 'First KCCQ score (0–100)'],
     ['calc_KCCQ_Latest', 'numeric', 'Latest KCCQ score (0–100)'],
     ['calc_Weight_Latest', 'numeric', 'kg'],
+    ['calc_6MWT_Latest', 'numeric', 'Latest 6-minute walk distance, m'],
+    ['calc_6MWT_Latest_Date', 'date', 'YYYY-MM-DD'],
+    ['calc_Smoking_Latest', 'string', 'Latest smoking status (Never / Current / Former; "Never" after an earlier Current/Former is read as Former)'],
     ['calc_BMI_Latest', 'numeric', 'kg/m² from latest weight and height'],
     ['calc_RAS_On', 'binary', '1 = on ARNI/ACEi/ARB at the latest medication list, 0 = not'],
     ['calc_BB_On', 'binary', '1 = on beta-blocker'],
@@ -18670,6 +18862,9 @@ var CFX = (function () {
     out.calc_KCCQ_First = kq.length ? kq[0].value : '';
     out.calc_KCCQ_Latest = kq.length ? kq[kq.length - 1].value : '';
     out.calc_Weight_Latest = pr.weight != null ? pr.weight : '';
+    var wk = CF.last(S, 'Walk');
+    out.calc_6MWT_Latest = wk ? wk.value : ''; out.calc_6MWT_Latest_Date = wk ? wk.date : '';
+    out.calc_Smoking_Latest = CF.smokingStatus(p, A.visits).status || '';
     out.calc_BMI_Latest = pr.bmi != null ? r1(pr.bmi) : '';
     var pl = r.pillars || [], on = 0;
     PK.forEach(function (k) {
@@ -18796,7 +18991,7 @@ var CFX = (function () {
   }
 
   // ---------- SPSS: one row per visit ----------
-  var V_EXTRA_TEXT = ['V_KCCQ_Date', 'V_Death_Date', 'V_Death_Cause', 'V_Next_Appt_Set'];
+  var V_EXTRA_TEXT = ['V_KCCQ_Date', 'V_Walk_Date', 'V_Death_Date', 'V_Death_Cause', 'V_Next_Appt_Set'];
   function visitGDMT(r, v) {
     // medication state at this visit: history up to and including its date
     var d = s(v.visitDate), sub = r.visits.filter(function (x) { return s(x.visitDate) <= d; });
