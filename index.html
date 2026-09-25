@@ -1874,6 +1874,28 @@ details.cf-iron[open]>summary{margin-bottom:6px;}
 .cf-why select{width:auto;font-size:.72rem;padding:0 22px 0 8px;height:24px;border-radius:999px;}
 .cf-glp1-wrap{margin-top:4px;}
 .cf-glp1-steps{font-size:.76rem;margin:4px 0 6px 18px;padding:0;}
+/* ---- medication section on phones ---- */
+#visitMedDoses .cf-st-badge .cf-note-why{min-width:0;flex:1 1 180px;overflow-wrap:anywhere;}
+#visitMedDoses .cf-med select,#visitMedDoses .cf-med input{max-width:100%;text-overflow:ellipsis;}
+@media (max-width:640px){
+  #hfForm #visitMedDoses .row.g-2>.cf-cell-wide,#hfForm #medSection7 .row.g-2>.cf-cell-wide{flex:0 0 100%!important;max-width:100%!important;width:100%;}
+  #visitMedDoses .cf-med.cf-on,#visitMedDoses .cf-med.cf-stopping{padding:6px;}
+  #visitMedDoses .cf-st-badge{font-size:.78rem;padding:6px 8px;}
+  #visitMedDoses .cf-st-badge .cf-note-why{flex-basis:100%;}
+  #visitMedDoses .cf-st-badge .cf-apply{padding:2px 12px;font-size:.78rem;}
+  details.cf-iron{padding:8px;}
+  details.cf-iron>summary{font-size:.82rem;line-height:1.35;}
+  details.cf-iron>summary small{display:none;}
+  .cf-iron-in{grid-template-columns:1fr 1fr;gap:6px;}
+  .cf-iron-in input{font-size:16px;}
+  .cf-iron-tab{font-size:.74rem;}
+  .cf-iron-tab th,.cf-iron-tab td{padding:4px 5px;vertical-align:top;}
+  .cf-iron-tab td:nth-child(4),.cf-iron-tab th:nth-child(4){white-space:nowrap;}
+  .cf-iron-notes{margin-left:14px;}
+  .cf-why{border-radius:12px;width:100%;}
+  .cf-why select{flex:1;min-width:140px;}
+  .cf-mt-slim{justify-content:flex-start;}
+}
 
 </style>
 
@@ -16308,6 +16330,8 @@ var CF = (function () {
       out.indication = (def ? 'Iron deficiency' : 'Not iron deficient by ESC criteria') + ' (ferritin ' + ferritin + (tsat != null ? ', TSAT ' + tsat + '%' : '') + ')';
       if (!def) out.warnings.push('ESC criteria not met: ferritin <100 µg/L, or 100–299 with TSAT <20%.');
     } else out.warnings.push('No ferritin recorded: confirm iron deficiency first.');
+    if (ferritin != null && ferritin < 5) out.warnings.push('Ferritin ' + ferritin + ' µg/L is unusually low: check the value and units before dosing.');
+    if (tsat != null && (tsat <= 0 || tsat > 100)) out.warnings.push('TSAT ' + tsat + '% is not plausible: check the value.');
     if (weightKg == null || hb == null) { out.warnings.push('Enter weight and Hb to calculate.'); return out; }
     if (hb >= IRON.hbStop) { out.warnings.push('Hb ≥15 g/dL: IV iron not recommended.'); return out; }
     var total;
@@ -17437,6 +17461,9 @@ var CFUI = (function () {
     // a recommendation note under each drug, and the IV iron calculator under Ferinject once started
     document.querySelectorAll('#visitMedDoses .cf-med').forEach(function (row) {
       var key = CF.baseKey(row.getAttribute('data-med')), x = reviewFor(A, key);
+      // phones: a drug the patient takes gets the full width (not-taking rows stay two per line)
+      var cell = row.closest('[class*="col-"]');
+      if (cell) cell.classList.toggle('cf-cell-wide', row.classList.contains('cf-on') || row.classList.contains('cf-stopping'));
       var b = row.querySelector('.cf-st-badge');
       if (!b) { b = document.createElement('div'); b.className = 'cf-st-badge'; row.insertBefore(b, row.querySelector('.cf-med-detail')); }
       b.className = 'cf-st-badge' + (x ? ' ' + x.status : '');
@@ -17527,8 +17554,8 @@ var CFUI = (function () {
     var h = '';
     if (r.indication) h += '<div class="cf-iron-ind ' + (r.deficient ? 'ok' : 'warn') + '">' + esc(r.indication) + '</div>';
     if (r.total) {
-      h += '<div class="cf-iron-total">Total dose <b>' + r.total + ' mg</b> <small>(Hb ' + r.hb + ' g/dL, ' + r.weight + ' kg)</small></div><table class="cf-iron-tab"><tr><th>Infusion</th><th>Date</th><th>Dose</th><th>Volume</th></tr>' +
-        r.doses.map(function (d, i) { return '<tr><td>' + (i + 1) + '</td><td>' + (i === 0 ? CF.fmt(d.date) : 'on or after ' + CF.fmt(d.date)) + '</td><td><b>' + d.mg + ' mg</b></td><td>' + d.ml + ' mL (50 mg/mL)</td></tr>'; }).join('') + '</table>' +
+      h += '<div class="cf-iron-total">Total dose <b>' + r.total + ' mg</b> <small>(Hb ' + r.hb + ' g/dL, ' + r.weight + ' kg)</small></div><table class="cf-iron-tab"><tr><th>Infusion</th><th>Date</th><th>Dose</th><th>Volume (50 mg/mL)</th></tr>' +
+        r.doses.map(function (d, i) { return '<tr><td>' + (i + 1) + '</td><td>' + (i === 0 ? CF.fmt(d.date) : '≥ ' + CF.fmt(d.date)) + '</td><td><b>' + d.mg + ' mg</b></td><td>' + d.ml + ' mL</td></tr>'; }).join('') + '</table>' +
         '<ul class="cf-iron-notes"><li>Dilute in 0.9% saline only (1000 mg: ≤250 mL over ≥15 min; 500 mg: ≤100 mL over ≥6 min), per local protocol.</li>' +
         '<li>Observe for 30 min for hypersensitivity; resuscitation facilities available.</li>' +
         '<li>Recheck ferritin, TSAT and Hb around <b>' + CF.fmt(r.recheck) + '</b> (not earlier than 4 weeks after the last dose). HF trials repeated 500 mg at 12 and 24 weeks if still iron deficient.</li>' +
@@ -17540,7 +17567,7 @@ var CFUI = (function () {
   function ironBlock(A) {
     var I = ironInputs(A);
     var r = CF.ironDose(I.weight, I.hb, I.fer, I.tsat, val('Visit_Date') || CF.todayIso());
-    return '<details class="cf-iron"' + (ironOpen ? ' open' : '') + '><summary class="cf-iron-h"><i class="fa fa-droplet"></i> IV iron dose calculator' + (r.total ? ' · total <b>' + r.total + ' mg</b> in ' + r.doses.length + ' infusion' + (r.doses.length > 1 ? 's' : '') : ' · enter Hb and weight') + ' <small>simplified SmPC table · for the doctor to confirm</small></summary>' +
+    return '<details class="cf-iron"' + (ironOpen ? ' open' : '') + '><summary class="cf-iron-h"><i class="fa fa-droplet"></i> IV iron dose calculator<span class="cf-iron-sum">' + (r.total ? ' · total <b>' + r.total + ' mg</b> in ' + r.doses.length + ' infusion' + (r.doses.length > 1 ? 's' : '') : ' · enter Hb and weight') + '</span> <small>simplified SmPC table · for the doctor to confirm</small></summary>' +
       '<div class="cf-iron-in"><label>Weight (kg)<input type="number" step="0.1" class="form-control form-control-sm" id="cfIronW" value="' + (I.weight != null ? I.weight : '') + '"><small>' + esc(I.weightSrc) + '</small></label>' +
       '<label>Hb (g/dL)<input type="number" step="0.1" class="form-control form-control-sm" id="cfIronHb" value="' + (I.hb != null ? I.hb : '') + '"><small>' + esc(I.hbSrc) + '</small></label>' +
       '<label>Ferritin (µg/L)<input type="number" class="form-control form-control-sm" id="cfIronFe" value="' + (I.fer != null ? I.fer : '') + '"><small>' + esc(I.ferSrc) + '</small></label>' +
@@ -17557,7 +17584,7 @@ var CFUI = (function () {
       return CF.ironDose(g('cfIronW'), g('cfIronHb'), g('cfIronFe'), g('cfIronTs'), val('Visit_Date') || CF.todayIso());
     }
     var keyOf = { cfIronW: 'weight', cfIronHb: 'hb', cfIronFe: 'fer', cfIronTs: 'tsat' };
-    ids.forEach(function (id) { var el = $(id); if (el) el.addEventListener('input', function () { var x = parseFloat(el.value); ironOverride[keyOf[id]] = isNaN(x) ? null : x; var r = cur(); $('cfIronOut').innerHTML = ironResultHtml(r); var b = box.querySelector('.cf-iron-apply'); if (b) b.disabled = !r.total; }); });
+    ids.forEach(function (id) { var el = $(id); if (el) el.addEventListener('input', function () { var x = parseFloat(el.value); ironOverride[keyOf[id]] = isNaN(x) ? null : x; var r = cur(); $('cfIronOut').innerHTML = ironResultHtml(r); var sm = box.querySelector('.cf-iron-sum'); if (sm) sm.innerHTML = r.total ? ' · total <b>' + r.total + ' mg</b> in ' + r.doses.length + ' infusion' + (r.doses.length > 1 ? 's' : '') : ' · enter Hb and weight'; var b = box.querySelector('.cf-iron-apply'); if (b) b.disabled = !r.total; }); });
     var ap = box.querySelector('.cf-iron-apply');
     if (ap) ap.addEventListener('click', function () {
       var r = cur(); if (!r.total) return;
