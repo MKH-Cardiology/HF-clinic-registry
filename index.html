@@ -1868,6 +1868,12 @@ details.cf-iron>summary::-webkit-details-marker{display:none;}
 details.cf-iron>summary:before{content:'\25B8  ';color:var(--cf-ink-3);}
 details.cf-iron[open]>summary:before{content:'\25BE  ';}
 details.cf-iron[open]>summary{margin-bottom:6px;}
+/* medication section: slim fasting line, "why not on" under a missing group, GLP-1 plan */
+.cf-mt-slim{display:flex;justify-content:flex-end;margin:2px 0 4px;}
+.cf-why{display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-size:.74rem;color:#B42318;background:#fff8f7;border:1px solid #f6d0cc;border-radius:999px;padding:2px 4px 2px 10px;margin:2px 0 6px;width:fit-content;}
+.cf-why select{width:auto;font-size:.72rem;padding:0 22px 0 8px;height:24px;border-radius:999px;}
+.cf-glp1-wrap{margin-top:4px;}
+.cf-glp1-steps{font-size:.76rem;margin:4px 0 6px 18px;padding:0;}
 
 </style>
 
@@ -17405,22 +17411,28 @@ var CFUI = (function () {
     var A = CF.analyse(cp.data, vlist);
     var pillars = CF.pillarStatus(cp.data, vlist, A);
     var quad = pillars.filter(function (p) { return p.on; }).length;
-    var sugg = A.meds.filter(function (m) { return !m.review; });
-    var html = '<div class="cf-mt"><div class="cf-mt-h"><span><i class="fa fa-wand-magic-sparkles"></i> Recommendations</span>' +
-      '<small>GDMT ' + quad + '/4' + (A.profile.esc2026 ? ' · ' + A.profile.esc2026 + (A.profile.ef != null ? ' (LVEF ' + A.profile.ef + '%)' : '') : '') + ' · suggestions only; notes appear under each drug</small>' +
-      '<label class="cf-fast-toggle" title="Ramadan guidance is shown on the patient overview"><input type="checkbox" id="cfFastingToggle"' + (val('V_Fasting') === 'Yes' ? ' checked' : '') + '> <i class="fa fa-moon"></i> Fasting</label></div>' +
-      pillarLine(pillars) +
-      (A.review && A.review.sequence ? '<div class="cf-seq"><i class="fa fa-list-ol"></i> ' + esc(A.review.sequence) + '</div>' : '') +
-      (sugg.length ? '<div class="cf-mt-sugg">' + suggestionRows(sugg) + '</div>' : '') + '</div>';
-    top.innerHTML = html;
-    bindApply(top);
+    // no recommendations box (the overview has the full list): only the visit's fasting flag
+    top.innerHTML = '<div class="cf-mt-slim"><label class="cf-fast-toggle" title="Ramadan guidance is shown on the patient overview"><input type="checkbox" id="cfFastingToggle"' + (val('V_Fasting') === 'Yes' ? ' checked' : '') + '> <i class="fa fa-moon"></i> Fasting (Ramadan) this visit</label></div>';
     var ft = $('cfFastingToggle');
     if (ft) ft.addEventListener('change', function () { setVal('V_Fasting', ft.checked ? 'Yes' : ''); markDirty(); });
-    top.querySelectorAll('.cf-gdmt-reason').forEach(function (sel) {
-      sel.addEventListener('change', function () { setVal('V_GDMT_Reason_' + sel.getAttribute('data-pillar'), sel.value); scheduleAssist(); markDirty(); });
-    });
-    top.querySelectorAll('[data-glp1-plan]').forEach(function (b) {
-      b.addEventListener('click', function () { addGlp1PlanToNotes(b.getAttribute('data-glp1-plan')); });
+    // missing GDMT pillar: "why not on?" under that medication group's header
+    document.querySelectorAll('#visitMedDoses .cf-why').forEach(function (e) { e.remove(); });
+    pillars.forEach(function (pl) {
+      if (pl.on) return;
+      if (A.profile.esc2026 !== 'HFrEF' && pl.key !== 'SGLT2') return; // pillars are a reduced-EF concept; SGLT2i for all HF
+      var grp = null;
+      document.querySelectorAll('#visitMedDoses .cf-med').forEach(function (row) {
+        if (grp) return;
+        var d = CF.DRUGS[CF.baseKey(row.getAttribute('data-med'))];
+        if (d && d.pillar === pl.key) grp = row.closest('.visit-med-group');
+      });
+      if (!grp) return;
+      var w = document.createElement('div'); w.className = 'cf-why';
+      w.innerHTML = '<i class="fa fa-circle-exclamation"></i> Not on ' + esc(pl.label) + ' <select class="form-select form-select-sm cf-gdmt-reason" data-pillar="' + pl.key + '"><option value="">why not on?</option>' +
+        GDMT_RATIONALE_OPTIONS.filter(Boolean).map(function (o) { return '<option' + (o === pl.reason ? ' selected' : '') + '>' + o + '</option>'; }).join('') + '</select>';
+      var lab = grp.querySelector('.visit-med-group-label');
+      if (lab && lab.nextSibling) grp.insertBefore(w, lab.nextSibling); else grp.appendChild(w);
+      w.querySelector('select').addEventListener('change', function (e) { setVal('V_GDMT_Reason_' + pl.key, e.target.value); scheduleAssist(); markDirty(); });
     });
     // a recommendation note under each drug, and the IV iron calculator under Ferinject once started
     document.querySelectorAll('#visitMedDoses .cf-med').forEach(function (row) {
@@ -17430,6 +17442,19 @@ var CFUI = (function () {
       b.className = 'cf-st-badge' + (x ? ' ' + x.status : '');
       b.innerHTML = rowNote(x);
       bindApply(b);
+      if ((CF.DRUGS[key] || {}).cls === 'glp1') {
+        var gw = row.querySelector('.cf-glp1-wrap'), started = val('V_' + key + '_Status') === 'Yes' || /start|restart/i.test(val('V_' + key + '_Action') || '');
+        if (started) {
+          if (!gw) { gw = document.createElement('div'); gw.className = 'cf-glp1-wrap'; row.appendChild(gw); }
+          var which = key === 'Mounjaro' ? 'tirzepatide' : 'semaglutide', pl = CF.glp1Plan(which, val('Visit_Date') || CF.todayIso());
+          gw.innerHTML = '<details class="cf-iron"><summary class="cf-iron-h"><i class="fa fa-weight-scale"></i> Titration plan · ' + esc(pl.drug) + ' <small>dates from this visit</small></summary>' +
+            '<ol class="cf-glp1-steps">' + pl.schedule.map(function (st) { return '<li><b>' + CF.fmt(st.from) + '</b> · ' + esc(st.dose) + '</li>'; }).join('') + '</ol>' +
+            '<div class="cf-plan-cols"><div><div class="cf-plan-h">Before starting</div><ul>' + pl.checklist.map(function (c) { return '<li>' + esc(c) + '</li>'; }).join('') + '</ul></div>' +
+            '<div><div class="cf-plan-h">Monitoring</div><ul>' + pl.monitoring.map(function (c) { return '<li>' + esc(c) + '</li>'; }).join('') + '</ul></div></div>' +
+            '<button type="button" class="btn btn-sm btn-primary cf-glp1-add"><i class="fa fa-check me-1"></i>Add plan to visit notes</button></details>';
+          gw.querySelector('.cf-glp1-add').addEventListener('click', function () { addGlp1PlanToNotes(which); });
+        } else if (gw) gw.remove();
+      }
       if (key === 'Ferinject') {
         var wrap = row.querySelector('.cf-iron-wrap');
         if (ironStarted()) {
@@ -18347,7 +18372,7 @@ var CFUI = (function () {
       renderAssist();
       if (opts.drug) applyToRow(opts.drug, opts.act || 'Continue', opts.next, opts.reason); else if (opts.field) focusEl($(opts.field));
       else if (opts.plan) { var pl = $('V_Plan'); if (pl) { pl.value = s(pl.value) ? pl.value + '\n' + opts.plan : opts.plan; focusEl(pl); } }
-      else if (opts.glp1) { focusEl($('cfMedTop')); setTimeout(function () { var d = document.querySelector('#cfMedTop .cf-sug.glp1 details'); if (d) d.open = true; }, 300); }
+      else if (opts.glp1) { focusEl(document.querySelector('.cf-med[data-med="V_Ozempic"]') || $('visitMedDoses')); }
       else scrollToForm('.visit-section');
     }, 80);
   }
