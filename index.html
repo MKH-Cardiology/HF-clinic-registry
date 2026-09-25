@@ -1841,6 +1841,33 @@ details.cf-tl-y[open]>summary.cf-tl-yh:before{content:'\25BE';}
 .cf-iron-warn{font-size:.74rem;color:#B54708;background:#FFFAEB;border-radius:8px;padding:4px 8px;margin-bottom:6px;}
 @media (max-width:640px){.cf-iron-in{grid-template-columns:1fr 1fr;}}
 .cf-chip.warn{background:#FFFAEB;color:#B54708;border-color:#FEDF89;}
+/* Recommendations inside the medication section */
+.cf-mt{border:1px solid #d9e6f5;background:#f7fbff;border-radius:12px;padding:8px 10px;margin:4px 0 8px;}
+.cf-mt-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 10px;font-weight:700;color:var(--cf-navy);font-size:.85rem;}
+.cf-mt-h small{font-weight:400;color:var(--cf-ink-3);font-size:.7rem;}
+.cf-mt-h .cf-fast-toggle{margin-left:auto;}
+.cf-mt-pillars{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 4px;}
+.cf-mt-p{display:inline-flex;align-items:center;gap:5px;font-size:.74rem;border-radius:999px;padding:2px 8px;border:1px solid var(--cf-line);background:#fff;}
+.cf-mt-p.on{color:#1B7F3B;border-color:#bfe5cc;background:#f3fbf6;}
+.cf-mt-p.on em{font-style:normal;color:var(--cf-ink-3);}
+.cf-mt-p.off{color:#B42318;border-color:#f6d0cc;background:#fff8f7;}
+.cf-mt-p select{width:auto;font-size:.7rem;padding:0 22px 0 6px;height:22px;border-radius:999px;}
+.cf-mt-sugg .cf-sug{display:flex;align-items:flex-start;gap:8px;}
+.cf-mt-sugg .cf-sug>div{flex:1;}
+.cf-mt-sugg .cf-sug .cf-apply{flex:0 0 auto;align-self:center;}
+#visitMedDoses .cf-st-badge{display:flex;align-items:flex-start;gap:6px;flex-wrap:wrap;font-size:.72rem;margin:3px 0 2px;padding:4px 8px;border-radius:8px;background:#f8fafc;color:var(--cf-ink-2);}
+#visitMedDoses .cf-st-badge:empty{display:none;}
+#visitMedDoses .cf-st-badge.hold,#visitMedDoses .cf-st-badge.avoid{background:#fff6f5;}
+#visitMedDoses .cf-st-badge.reduce{background:#fffbf0;}
+#visitMedDoses .cf-st-badge.up{background:#f3fbf6;}
+#visitMedDoses .cf-st-badge .cf-note-why{flex:1;min-width:160px;line-height:1.35;}
+#visitMedDoses .cf-st-badge .cf-apply{padding:0 8px;font-size:.7rem;}
+.cf-iron-wrap{margin-top:4px;}
+details.cf-iron>summary{cursor:pointer;list-style:none;}
+details.cf-iron>summary::-webkit-details-marker{display:none;}
+details.cf-iron>summary:before{content:'\25B8  ';color:var(--cf-ink-3);}
+details.cf-iron[open]>summary:before{content:'\25BE  ';}
+details.cf-iron[open]>summary{margin-bottom:6px;}
 
 </style>
 
@@ -16233,8 +16260,10 @@ var CF = (function () {
   }
 
   // KCCQ reassessment: never recorded = due now; otherwise 6 months after the last score.
-  function kccqStatus(S) {
-    var k = S.KCCQ || [], l = k.length ? k[k.length - 1] : null, today = todayIso();
+  function kccqStatus(S) { return repeatStatus(S, 'KCCQ'); }
+  function walkStatus(S) { return repeatStatus(S, 'Walk'); }
+  function repeatStatus(S, key) {
+    var k = S[key] || [], l = k.length ? k[k.length - 1] : null, today = todayIso();
     if (!l) return { state: 'missing', due: today, last: null };
     var due = addDays(l.date, Math.round(6 * 30.4)), days = daysBetween(today, due);
     return { state: days < 0 ? 'overdue' : days <= 30 ? 'soon' : 'ok', due: due, last: l, overdueDays: days < 0 ? -days : 0 };
@@ -17011,7 +17040,7 @@ var CF = (function () {
     readDrug: readDrug, doseText: doseText, pctTarget: pctTarget, presetsFor: presetsFor, nextPreset: nextPreset,
     medSnapshots: medSnapshots, medHistory: medHistory, onClass: onClass, onPillar: onPillar,
     series: series, last: last, profile: profile, vitalStatus: vitalStatus, followUpStatus: followUpStatus,
-    labSuggestions: labSuggestions, medSuggestions: medSuggestions, medReview: medReview, fastingAdvice: fastingAdvice, smokingStatus: smokingStatus, kccqStatus: kccqStatus, ironDose: ironDose, IRON: IRON, REVIEW: REVIEW, deviceSuggestions: deviceSuggestions, latestECG: latestECG, currentDevice: currentDevice, omtSince: omtSince, DEVICE: DEVICE, glp1Plan: glp1Plan,
+    labSuggestions: labSuggestions, medSuggestions: medSuggestions, medReview: medReview, fastingAdvice: fastingAdvice, smokingStatus: smokingStatus, kccqStatus: kccqStatus, walkStatus: walkStatus, ironDose: ironDose, IRON: IRON, REVIEW: REVIEW, deviceSuggestions: deviceSuggestions, latestECG: latestECG, currentDevice: currentDevice, omtSince: omtSince, DEVICE: DEVICE, glp1Plan: glp1Plan,
     readmitBand: readmitBand, analyse: analyse, pillarStatus: pillarStatus, parseExtraAdmissions: parseExtraAdmissions, yes: yes
   };
 })();
@@ -17322,45 +17351,88 @@ var CFUI = (function () {
         '<b>' + esc(l.labs) + '</b><span>' + esc(l.because) + '</span></div>';
     }).join('');
   }
-  function renderAssist() {
-    var box = $('cfVisitAssist');
-    if (!box) return;
-    var cp = currentPatient();
-    if (!cp.data) { box.innerHTML = '<div class="cf-assist-empty">Open or save a patient to see medication and lab suggestions.</div>'; return; }
-    var vlist = contextVisits(true);
-    var A = CF.analyse(cp.data, vlist);
-    // The fasting switch applies to this visit even before a visit date is entered.
-    if (A.review) A.review.fasting = val('V_Fasting') === 'Yes' ? CF.fastingAdvice(A.hist, [{ V_Fasting: 'Yes' }]) : null;
-    var pillars = CF.pillarStatus(cp.data, vlist, A);
-    var quad = pillars.filter(function (p) { return p.on; }).length;
-    var html = '<div class="cf-assist-head"><span><i class="fa fa-wand-magic-sparkles"></i> Treatment assistant</span><small>Suggestions only · based on this visit\'s entries and the full record</small></div>';
-    html += '<div class="cf-assist-sub">GDMT <b>' + quad + ' of 4</b> pillars' + (A.profile.esc2026 ? ' · ' + A.profile.esc2026 + ' (ESC 2026' + (A.profile.ef != null ? ', LVEF ' + A.profile.ef + '%' : '') + ')' : '') + '</div>';
-    html += pillarChips(pillars, true);
-    html += '<div class="cf-assist-rv"><div class="cf-col-h">Medication review <small>each current drug against today\'s K, kidney function, BP, HR, weight and congestion</small>' +
-      '<label class="cf-fast-toggle"><input type="checkbox" id="cfFastingToggle"' + (val('V_Fasting') === 'Yes' ? ' checked' : '') + '> <i class="fa fa-moon"></i> Fasting (Ramadan) mode</label></div>' + reviewTable(A, true) + fastingBlock(A) + ironBlock(A) + '</div>';
-    html += '<div class="cf-assist-cols"><div><div class="cf-col-h">Suggestions</div>' + suggestionList(A.meds.filter(function (m) { return !m.review; })) + '</div>' +
-      '<div><div class="cf-col-h">Labs due</div>' + labList(A.labs) + '</div></div>';
-    box.innerHTML = html;
-    bindIron(box, A);
-    var ft = $('cfFastingToggle');
-    if (ft) ft.addEventListener('change', function () { setVal('V_Fasting', ft.checked ? 'Yes' : ''); markDirty(); renderAssist(); });
-    box.querySelectorAll('.cf-apply').forEach(function (b) {
+  // Recommendations live inside the medication section: a short header above the list
+  // (GDMT pillars with "why not", what to change first, drugs to start) and a note under each drug.
+  function medTop() {
+    var t = $('cfMedTop');
+    if (!t) {
+      var md = $('visitMedDoses'); if (!md) return null;
+      t = document.createElement('div'); t.id = 'cfMedTop'; t.className = 'col-12';
+      md.parentNode.insertBefore(t, md);
+    }
+    return t;
+  }
+  function pillarLine(pillars) {
+    return '<div class="cf-mt-pillars">' + pillars.map(function (p) {
+      if (p.on) return '<span class="cf-mt-p on" title="' + esc(p.drug + ' ' + p.dose) + '"><i class="fa fa-check"></i> ' + esc(p.label) + (p.pct != null ? ' <em>' + p.pct + '%</em>' : '') + '</span>';
+      return '<span class="cf-mt-p off"><i class="fa fa-xmark"></i> ' + esc(p.label) + ' <select class="form-select form-select-sm cf-gdmt-reason" data-pillar="' + p.key + '"><option value="">why not on?</option>' +
+        GDMT_RATIONALE_OPTIONS.filter(Boolean).map(function (o) { return '<option' + (o === p.reason ? ' selected' : '') + '>' + o + '</option>'; }).join('') + '</select></span>';
+    }).join('') + '</div>';
+  }
+  function suggestionRows(items) {
+    return items.map(function (it) {
+      if (it.level === 'glp1') return glp1Card(it);
+      var icon = it.level === 'danger' ? 'fa-triangle-exclamation' : it.level === 'warn' ? 'fa-circle-exclamation' : 'fa-circle-info';
+      var btn = it.drug && it.act ? '<button type="button" class="btn btn-sm btn-outline-primary cf-apply" data-drug="' + esc(it.drug) + '" data-act="' + esc(it.act) + '" data-next="' + esc(it.next || '') + '" data-reason="' + esc(it.reasonCode || '') + '">' + ({ Start: 'Add', Increase: 'Increase', Decrease: 'Reduce', Hold: 'Hold', Stop: 'Stop' }[it.act] || 'Apply') + '</button>' : '';
+      return '<div class="cf-sug ' + it.level + '"><i class="fa ' + icon + '"></i><div><b>' + esc(it.title) + '</b><span>' + esc(it.detail) + '</span></div>' + btn + '</div>';
+    }).join('');
+  }
+  function rowNote(x) {
+    if (!x || (x.status === 'continue' && !x.reason)) return '';
+    var actionable = x.status !== 'continue' && x.act;
+    return statusPill(x) + '<span class="cf-note-why">' + esc(x.reason || '') + (x.next && x.status !== 'continue' ? ' <b>→ ' + esc(x.next) + '</b>' : '') + '</span>' +
+      (actionable ? '<button type="button" class="btn btn-sm btn-outline-primary cf-apply" data-drug="' + esc(x.key) + '" data-act="' + esc(x.act) + '" data-next="' + esc(x.next || '') + '" data-reason="' + esc(x.why ? REASON_CODE[x.why] : '') + '">Apply</button>' : '');
+  }
+  function bindApply(root) {
+    root.querySelectorAll('.cf-apply').forEach(function (b) {
+      if (b._cf) return; b._cf = 1;
       b.addEventListener('click', function () { applyToRow(b.getAttribute('data-drug'), b.getAttribute('data-act'), b.getAttribute('data-next'), b.getAttribute('data-reason')); });
     });
-    // status badge on each medication row
+  }
+  function renderAssist() {
+    var old = $('cfVisitAssist'); if (old) { old.innerHTML = ''; old.style.display = 'none'; }
+    var top = medTop();
+    if (!top) return;
+    var cp = currentPatient();
+    if (!cp.data) { top.innerHTML = ''; document.querySelectorAll('#visitMedDoses .cf-st-badge, #visitMedDoses .cf-iron-wrap').forEach(function (e) { e.remove(); }); return; }
+    var vlist = contextVisits(true);
+    var A = CF.analyse(cp.data, vlist);
+    var pillars = CF.pillarStatus(cp.data, vlist, A);
+    var quad = pillars.filter(function (p) { return p.on; }).length;
+    var sugg = A.meds.filter(function (m) { return !m.review; });
+    var html = '<div class="cf-mt"><div class="cf-mt-h"><span><i class="fa fa-wand-magic-sparkles"></i> Recommendations</span>' +
+      '<small>GDMT ' + quad + '/4' + (A.profile.esc2026 ? ' · ' + A.profile.esc2026 + (A.profile.ef != null ? ' (LVEF ' + A.profile.ef + '%)' : '') : '') + ' · suggestions only; notes appear under each drug</small>' +
+      '<label class="cf-fast-toggle" title="Ramadan guidance is shown on the patient overview"><input type="checkbox" id="cfFastingToggle"' + (val('V_Fasting') === 'Yes' ? ' checked' : '') + '> <i class="fa fa-moon"></i> Fasting</label></div>' +
+      pillarLine(pillars) +
+      (A.review && A.review.sequence ? '<div class="cf-seq"><i class="fa fa-list-ol"></i> ' + esc(A.review.sequence) + '</div>' : '') +
+      (sugg.length ? '<div class="cf-mt-sugg">' + suggestionRows(sugg) + '</div>' : '') + '</div>';
+    top.innerHTML = html;
+    bindApply(top);
+    var ft = $('cfFastingToggle');
+    if (ft) ft.addEventListener('change', function () { setVal('V_Fasting', ft.checked ? 'Yes' : ''); markDirty(); });
+    top.querySelectorAll('.cf-gdmt-reason').forEach(function (sel) {
+      sel.addEventListener('change', function () { setVal('V_GDMT_Reason_' + sel.getAttribute('data-pillar'), sel.value); scheduleAssist(); markDirty(); });
+    });
+    top.querySelectorAll('[data-glp1-plan]').forEach(function (b) {
+      b.addEventListener('click', function () { addGlp1PlanToNotes(b.getAttribute('data-glp1-plan')); });
+    });
+    // a recommendation note under each drug, and the IV iron calculator under Ferinject once started
     document.querySelectorAll('#visitMedDoses .cf-med').forEach(function (row) {
       var key = CF.baseKey(row.getAttribute('data-med')), x = reviewFor(A, key);
       var b = row.querySelector('.cf-st-badge');
       if (!b) { b = document.createElement('div'); b.className = 'cf-st-badge'; row.insertBefore(b, row.querySelector('.cf-med-detail')); }
-      b.innerHTML = x && x.status !== 'continue' ? statusPill(x) + '<span>' + esc(x.reason) + '</span>' : '';
+      b.className = 'cf-st-badge' + (x ? ' ' + x.status : '');
+      b.innerHTML = rowNote(x);
+      bindApply(b);
+      if (key === 'Ferinject') {
+        var wrap = row.querySelector('.cf-iron-wrap');
+        if (ironStarted()) {
+          if (!wrap) { wrap = document.createElement('div'); wrap.className = 'cf-iron-wrap'; row.appendChild(wrap); }
+          wrap.innerHTML = ironBlock(A);
+          bindIron(wrap, A);
+        } else if (wrap) wrap.remove();
+      }
     });
-    box.querySelectorAll('.cf-gdmt-reason').forEach(function (sel) {
-      sel.addEventListener('change', function () { setVal('V_GDMT_Reason_' + sel.getAttribute('data-pillar'), sel.value); scheduleAssist(); markDirty(); });
-    });
-    box.querySelectorAll('[data-glp1-plan]').forEach(function (b) {
-      b.addEventListener('click', function () { addGlp1PlanToNotes(b.getAttribute('data-glp1-plan')); });
-    });
-    // sync computed Quad GDMT hint
     var q = $('cfQuadHint');
     if (q) q.textContent = 'Computed from medications: ' + quad + '/4 pillars' + (quad === 4 ? ' (quadruple therapy)' : '');
   }
@@ -17417,10 +17489,8 @@ var CFUI = (function () {
       tsat: ts != null ? ts : (lt ? lt.value : null)
     };
   }
-  function ironWanted(A) {
-    var onRow = val('V_Ferinject_Status') === 'Yes' || /start|increase|continue/i.test(val('V_Ferinject_Action') || '');
-    var suggested = A.meds.some(function (m) { return m.drug === 'Ferinject'; });
-    return ironOpen || onRow || suggested;
+  function ironStarted() {
+    return val('V_Ferinject_Status') === 'Yes' || /start|increase|continue|restart/i.test(val('V_Ferinject_Action') || '');
   }
   function ironResultHtml(r) {
     var h = '';
@@ -17437,20 +17507,19 @@ var CFUI = (function () {
     return h;
   }
   function ironBlock(A) {
-    if (!ironWanted(A)) return '<button type="button" class="btn btn-sm btn-link cf-iron-open">IV iron dose calculator</button>';
     var I = ironInputs(A);
     var r = CF.ironDose(I.weight, I.hb, I.fer, I.tsat, val('Visit_Date') || CF.todayIso());
-    return '<div class="cf-iron"><div class="cf-iron-h"><i class="fa fa-droplet"></i> IV ferric carboxymaltose · dose calculator <small>simplified SmPC table (Hb and weight) · for the doctor to confirm</small></div>' +
+    return '<details class="cf-iron"' + (ironOpen ? ' open' : '') + '><summary class="cf-iron-h"><i class="fa fa-droplet"></i> IV iron dose calculator' + (r.total ? ' · total <b>' + r.total + ' mg</b> in ' + r.doses.length + ' infusion' + (r.doses.length > 1 ? 's' : '') : ' · enter Hb and weight') + ' <small>simplified SmPC table · for the doctor to confirm</small></summary>' +
       '<div class="cf-iron-in"><label>Weight (kg)<input type="number" step="0.1" class="form-control form-control-sm" id="cfIronW" value="' + (I.weight != null ? I.weight : '') + '"><small>' + esc(I.weightSrc) + '</small></label>' +
       '<label>Hb (g/dL)<input type="number" step="0.1" class="form-control form-control-sm" id="cfIronHb" value="' + (I.hb != null ? I.hb : '') + '"><small>' + esc(I.hbSrc) + '</small></label>' +
       '<label>Ferritin (µg/L)<input type="number" class="form-control form-control-sm" id="cfIronFe" value="' + (I.fer != null ? I.fer : '') + '"><small>' + esc(I.ferSrc) + '</small></label>' +
       '<label>TSAT (%)<input type="number" class="form-control form-control-sm" id="cfIronTs" value="' + (I.tsat != null ? I.tsat : '') + '"><small>&nbsp;</small></label></div>' +
       '<div id="cfIronOut">' + ironResultHtml(r) + '</div>' +
-      '<button type="button" class="btn btn-sm btn-primary cf-iron-apply"' + (r.total ? '' : ' disabled') + '><i class="fa fa-check me-1"></i>Apply to this visit</button> <small class="text-muted">Sets Ferinject (first infusion) in the medication list and writes the schedule into the plan.</small></div>';
+      '<button type="button" class="btn btn-sm btn-primary cf-iron-apply"' + (r.total ? '' : ' disabled') + '><i class="fa fa-check me-1"></i>Apply to this visit</button> <small class="text-muted">Sets the first infusion dose and writes the schedule into the plan.</small></details>';
   }
   function bindIron(box, A) {
-    var open = box.querySelector('.cf-iron-open');
-    if (open) open.addEventListener('click', function () { ironOpen = true; renderAssist(); });
+    var det = box.querySelector('details.cf-iron');
+    if (det) det.addEventListener('toggle', function () { ironOpen = det.open; });
     var ids = ['cfIronW', 'cfIronHb', 'cfIronFe', 'cfIronTs'];
     function cur() {
       var g = function (id) { var x = parseFloat(($(id) || {}).value); return isNaN(x) ? null : x; };
@@ -17462,6 +17531,7 @@ var CFUI = (function () {
     if (ap) ap.addEventListener('click', function () {
       var r = cur(); if (!r.total) return;
       var first = r.doses[0], preset = first.mg + ' mg IV once';
+      ironOpen = true;
       var row = document.querySelector('.cf-med[data-med="V_Ferinject"]');
       if (row) {
         var a = row.querySelector('.cf-act'); a.value = 'Start'; a.dispatchEvent(new Event('change'));
@@ -17991,6 +18061,14 @@ var CFUI = (function () {
         detail: kq.last ? 'Last score ' + kq.last.value + ' on ' + CF.fmt(kq.last.date) + ' (' + ago(kq.last.date) + ')' + (kq.state === 'overdue' ? '; due since ' + CF.fmt(kq.due) : '') + '. Repeat every 6 months.' : 'No KCCQ on record. Baseline score, then every 6 months.',
         btn: 'Record KCCQ', act: 'alarm:kccq' });
     }
+    // 6-minute walk test every 6 months
+    var wk = CF.walkStatus(A.S);
+    if (!A.vital.dead && wk.state !== 'ok') {
+      items.push({ lvl: wk.state === 'soon' ? 'consider' : 'due', icon: 'fa-person-walking', cat: 'Clinic',
+        title: wk.state === 'missing' ? '6-minute walk test not yet recorded' : wk.state === 'overdue' ? '6-minute walk test overdue' : '6-minute walk test due ' + CF.fmt(wk.due),
+        detail: wk.last ? 'Last ' + wk.last.value + ' m on ' + CF.fmt(wk.last.date) + ' (' + ago(wk.last.date) + ')' + (wk.state === 'overdue' ? '; due since ' + CF.fmt(wk.due) : '') + '. Repeat every 6 months.' : 'No 6-minute walk test on record. Baseline test, then every 6 months.',
+        btn: 'Record 6MWT', act: 'alarm:walk' });
+    }
     alarms.forEach(function (a, i) {
       if (a.key === 'kccq') return; // replaced by the item above
       if (a.key === 'appointment' && a.level !== 'danger') return; // shown in the header
@@ -18180,7 +18258,10 @@ var CFUI = (function () {
       (pr.ef != null ? '<span class="cf-chip">LVEF ' + pr.ef + '%</span>' : '') + (ny ? '<span class="cf-chip">NYHA ' + ['', 'I', 'II', 'III', 'IV'][ny.value] + '</span>' : '') +
       (function () { var st = CF.kccqStatus(A.S); if (A.vital.dead) return kq ? '<span class="cf-chip">KCCQ ' + kq.value + '</span>' : '';
         if (st.state === 'missing') return '<span class="cf-chip warn" title="No KCCQ on record">KCCQ not recorded</span>';
-        return '<span class="cf-chip' + (st.state === 'overdue' ? ' warn' : '') + '" title="Next due ' + CF.fmt(st.due) + '">KCCQ ' + kq.value + ' · ' + CF.fmt(kq.date) + (st.state === 'overdue' ? ' · overdue' : '') + '</span>'; })() + (pr.bmi != null ? '<span class="cf-chip">BMI ' + Math.round(pr.bmi * 10) / 10 + '</span>' : '') + status +
+        return '<span class="cf-chip' + (st.state === 'overdue' ? ' warn' : '') + '" title="Next due ' + CF.fmt(st.due) + '">KCCQ ' + kq.value + ' · ' + CF.fmt(kq.date) + (st.state === 'overdue' ? ' · overdue' : '') + '</span>'; })() +
+      (function () { if (A.vital.dead) return ''; var w = CF.walkStatus(A.S);
+        if (w.state === 'missing') return '<span class="cf-chip warn" title="No 6-minute walk test on record">6MWT not recorded</span>';
+        return '<span class="cf-chip' + (w.state === 'overdue' ? ' warn' : '') + '" title="Next due ' + CF.fmt(w.due) + '">6MWT ' + w.last.value + ' m · ' + CF.fmt(w.last.date) + (w.state === 'overdue' ? ' · overdue' : '') + '</span>'; })() + (pr.bmi != null ? '<span class="cf-chip">BMI ' + Math.round(pr.bmi * 10) / 10 + '</span>' : '') + status +
       (appt && !A.vital.dead ? '<span class="cf-chip appt"><i class="fa fa-calendar"></i> Next ' + CF.fmt(appt) + '</span>' : '') + '</div>' + riskRow(p, A) + '</div>' +
       '<div class="cf-ov-btns"><button class="btn btn-primary" data-ov="visit"><i class="fa fa-stethoscope me-1"></i>Start visit</button>' +
       '<button class="btn btn-outline-primary" data-ov="edit"><i class="fa fa-pen me-1"></i>Edit record</button>' +
@@ -18255,11 +18336,12 @@ var CFUI = (function () {
       if (!val('Visit_Date')) { setVal('Visit_Date', CF.todayIso()); var vd = $('Visit_Date'); if (vd) vd.dispatchEvent(new Event('change', { bubbles: true })); }
       if (opts.refill) { var r = $('visitMedRefillCheck'); if (r && !r.checked) { r.checked = true; r.dispatchEvent(new Event('change', { bubbles: true })); } }
       if (opts.fasting) setVal('V_Fasting', 'Yes');
+      if (opts.walk) { var wc = $('V_Walk_Completed'); if (wc) { wc.value = 'Y'; wc.dispatchEvent(new Event('change', { bubbles: true })); if (typeof toggleVisitWalkMeters === 'function') toggleVisitWalkMeters(); } opts.field = 'V_Walk_Meters'; }
       if (opts.registered) { var g = $('visitRegisteredCheck'); if (g && !g.checked) { g.checked = true; g.dispatchEvent(new Event('change', { bubbles: true })); } }
       renderAssist();
       if (opts.drug) applyToRow(opts.drug, opts.act || 'Continue', opts.next, opts.reason); else if (opts.field) focusEl($(opts.field));
       else if (opts.plan) { var pl = $('V_Plan'); if (pl) { pl.value = s(pl.value) ? pl.value + '\n' + opts.plan : opts.plan; focusEl(pl); } }
-      else if (opts.glp1) { focusEl($('cfVisitAssist')); setTimeout(function () { var d = document.querySelector('#cfVisitAssist .cf-sug.glp1 details'); if (d) d.open = true; }, 300); }
+      else if (opts.glp1) { focusEl($('cfMedTop')); setTimeout(function () { var d = document.querySelector('#cfMedTop .cf-sug.glp1 details'); if (d) d.open = true; }, 300); }
       else scrollToForm('.visit-section');
     }, 80);
   }
@@ -18271,6 +18353,7 @@ var CFUI = (function () {
       if (k === 'refill') return startVisit(id, { refill: true });
       if (k === 'registration') return startVisit(id, { registered: true });
       if (k === 'kccq') return startVisit(id, { field: 'V_KCCQ' });
+      if (k === 'walk') return startVisit(id, { walk: true });
       if (k === 'vaccines') return startVisit(id, { field: 'vaccBlock' });
       return startVisit(id, {});
     }
