@@ -1840,6 +1840,7 @@ details.cf-tl-y[open]>summary.cf-tl-yh:before{content:'\25BE';}
 .cf-iron-notes{font-size:.72rem;color:var(--cf-ink-2);margin:4px 0 8px 16px;padding:0;}
 .cf-iron-warn{font-size:.74rem;color:#B54708;background:#FFFAEB;border-radius:8px;padding:4px 8px;margin-bottom:6px;}
 @media (max-width:640px){.cf-iron-in{grid-template-columns:1fr 1fr;}}
+.cf-chip.warn{background:#FFFAEB;color:#B54708;border-color:#FEDF89;}
 
 </style>
 
@@ -16231,6 +16232,13 @@ var CF = (function () {
     return d != null && d <= days ? l : null;
   }
 
+  // KCCQ reassessment: never recorded = due now; otherwise 6 months after the last score.
+  function kccqStatus(S) {
+    var k = S.KCCQ || [], l = k.length ? k[k.length - 1] : null, today = todayIso();
+    if (!l) return { state: 'missing', due: today, last: null };
+    var due = addDays(l.date, Math.round(6 * 30.4)), days = daysBetween(today, due);
+    return { state: days < 0 ? 'overdue' : days <= 30 ? 'soon' : 'ok', due: due, last: l, overdueDays: days < 0 ? -days : 0 };
+  }
   // Latest smoking status. "Never" recorded after "Current"/"Former" cannot be true (and is the form's
   // default), so it is read as "Former" and flagged for checking.
   function smokingStatus(p, visits) {
@@ -17003,7 +17011,7 @@ var CF = (function () {
     readDrug: readDrug, doseText: doseText, pctTarget: pctTarget, presetsFor: presetsFor, nextPreset: nextPreset,
     medSnapshots: medSnapshots, medHistory: medHistory, onClass: onClass, onPillar: onPillar,
     series: series, last: last, profile: profile, vitalStatus: vitalStatus, followUpStatus: followUpStatus,
-    labSuggestions: labSuggestions, medSuggestions: medSuggestions, medReview: medReview, fastingAdvice: fastingAdvice, smokingStatus: smokingStatus, ironDose: ironDose, IRON: IRON, REVIEW: REVIEW, deviceSuggestions: deviceSuggestions, latestECG: latestECG, currentDevice: currentDevice, omtSince: omtSince, DEVICE: DEVICE, glp1Plan: glp1Plan,
+    labSuggestions: labSuggestions, medSuggestions: medSuggestions, medReview: medReview, fastingAdvice: fastingAdvice, smokingStatus: smokingStatus, kccqStatus: kccqStatus, ironDose: ironDose, IRON: IRON, REVIEW: REVIEW, deviceSuggestions: deviceSuggestions, latestECG: latestECG, currentDevice: currentDevice, omtSince: omtSince, DEVICE: DEVICE, glp1Plan: glp1Plan,
     readmitBand: readmitBand, analyse: analyse, pillarStatus: pillarStatus, parseExtraAdmissions: parseExtraAdmissions, yes: yes
   };
 })();
@@ -17975,7 +17983,16 @@ var CFUI = (function () {
   }
   function actionItems(A, alarms) {
     var items = [];
+    // KCCQ from the full record (the clinic reminder misses patients never assessed)
+    var kq = CF.kccqStatus(A.S);
+    if (!A.vital.dead && kq.state !== 'ok') {
+      items.push({ lvl: kq.state === 'soon' ? 'consider' : 'due', icon: 'fa-clipboard-list', cat: 'Clinic',
+        title: kq.state === 'missing' ? 'KCCQ not yet recorded' : kq.state === 'overdue' ? 'KCCQ overdue' : 'KCCQ due ' + CF.fmt(kq.due),
+        detail: kq.last ? 'Last score ' + kq.last.value + ' on ' + CF.fmt(kq.last.date) + ' (' + ago(kq.last.date) + ')' + (kq.state === 'overdue' ? '; due since ' + CF.fmt(kq.due) : '') + '. Repeat every 6 months.' : 'No KCCQ on record. Baseline score, then every 6 months.',
+        btn: 'Record KCCQ', act: 'alarm:kccq' });
+    }
     alarms.forEach(function (a, i) {
+      if (a.key === 'kccq') return; // replaced by the item above
       if (a.key === 'appointment' && a.level !== 'danger') return; // shown in the header
       items.push({ lvl: levelOf('alarm', a), icon: a.icon, cat: 'Clinic', title: a.name, detail: a.detail, btn: { refill: 'Start visit · refill', registration: 'Start visit · register', kccq: 'Record KCCQ', vaccines: 'Record vaccines' }[a.key] || 'Start visit', act: 'alarm:' + a.key });
     });
@@ -18161,7 +18178,9 @@ var CFUI = (function () {
       '<div class="cf-ov-meta">' + esc(ageSex(p)) + ' · File ' + esc(p.File_No || '—') + ' · Civil ' + esc(p.Civil_ID || '—') + (s(p.Doctor_Name) ? ' · ' + esc(p.Doctor_Name) : '') + '</div>' +
       '<div class="cf-chips">' + (pr.hfType ? '<span class="cf-chip type">' + esc(pr.hfType) + (pr.esc2026 && pr.esc2026 !== pr.hfType ? ' <small>→ ' + pr.esc2026 + '</small>' : '') + '</span>' : '') +
       (pr.ef != null ? '<span class="cf-chip">LVEF ' + pr.ef + '%</span>' : '') + (ny ? '<span class="cf-chip">NYHA ' + ['', 'I', 'II', 'III', 'IV'][ny.value] + '</span>' : '') +
-      (kq ? '<span class="cf-chip">KCCQ ' + kq.value + '</span>' : '') + (pr.bmi != null ? '<span class="cf-chip">BMI ' + Math.round(pr.bmi * 10) / 10 + '</span>' : '') + status +
+      (function () { var st = CF.kccqStatus(A.S); if (A.vital.dead) return kq ? '<span class="cf-chip">KCCQ ' + kq.value + '</span>' : '';
+        if (st.state === 'missing') return '<span class="cf-chip warn" title="No KCCQ on record">KCCQ not recorded</span>';
+        return '<span class="cf-chip' + (st.state === 'overdue' ? ' warn' : '') + '" title="Next due ' + CF.fmt(st.due) + '">KCCQ ' + kq.value + ' · ' + CF.fmt(kq.date) + (st.state === 'overdue' ? ' · overdue' : '') + '</span>'; })() + (pr.bmi != null ? '<span class="cf-chip">BMI ' + Math.round(pr.bmi * 10) / 10 + '</span>' : '') + status +
       (appt && !A.vital.dead ? '<span class="cf-chip appt"><i class="fa fa-calendar"></i> Next ' + CF.fmt(appt) + '</span>' : '') + '</div>' + riskRow(p, A) + '</div>' +
       '<div class="cf-ov-btns"><button class="btn btn-primary" data-ov="visit"><i class="fa fa-stethoscope me-1"></i>Start visit</button>' +
       '<button class="btn btn-outline-primary" data-ov="edit"><i class="fa fa-pen me-1"></i>Edit record</button>' +
