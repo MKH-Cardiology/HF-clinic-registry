@@ -1901,7 +1901,9 @@ details.cf-iron[open]>summary{margin-bottom:6px;}
 /* ---- Fill from report (CFAI) ---- */
 .cf-ai-btn{background:#f3ecff;color:#5b2bb5;border:1px solid #d6c4fb;font-weight:600;margin:4px 0 8px;}
 .cf-ai-btn:hover{background:#e7dcff;color:#4a1f9c;}
-#visitFormTitle + .cf-ai-btn{margin:-6px 0 10px;}
+#visitFormTitle + .cf-ai-btnbar{margin:-6px 0 10px;}
+.cf-ai-btnbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;}
+.cf-ai-btnbar .cf-ai-btn{margin:0;}
 .cf-ai-ov{position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:3000;display:flex;align-items:center;justify-content:center;padding:12px;}
 .cf-ai-box{background:#fff;border-radius:14px;width:min(860px,100%);max-height:94vh;display:flex;flex-direction:column;box-shadow:0 20px 50px rgba(0,0,0,.3);}
 .cf-ai-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #eee;}
@@ -18067,7 +18069,7 @@ var CFUI = (function () {
       html += '<div class="alert alert-light border py-1 px-2 mb-1 d-flex justify-content-between align-items-center" style="font-size:0.82rem;">' +
         '<span>' + tag + ' <b>' + esc(a.name || 'Unknown') + '</b> <small class="text-muted">(File: ' + esc(a.file || '-') + ')</small>' +
         (a.doctor ? ' <small class="text-muted ms-1"><i class="fa fa-user-md"></i> ' + esc(a.doctor) + '</small>' : '') + '</span>' +
-        (a.id ? '<span class="d-flex gap-1">' + (!(dateStr > today) && window.CFAI ? '<button class="btn btn-sm cf-ai-btn py-0 px-2 m-0" style="font-size:0.72rem;" title="Photograph this patient\'s lab slip" onclick="CFAI.labSlip(\'' + a.id + '\')"><i class="fa fa-vial"></i> Lab slip</button>' : '') +
+        (a.id ? '<span class="d-flex gap-1">' + (!(dateStr > today) && window.CFAI ? '<button class="btn btn-sm cf-ai-btn py-0 px-2 m-0" style="font-size:0.72rem;" title="Photograph this patient\'s lab slip" onclick="CFAI.labSlip(\'' + a.id + '\')"><i class="fa fa-flask"></i> Lab slip</button>' : '') +
           '<button class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size:0.72rem;" onclick="openPatientFromClinic(\'' + a.id + '\')"><i class="fa fa-edit"></i> Open</button></span>' : '') + '</div>';
     });
     return html;
@@ -18385,7 +18387,7 @@ var CFUI = (function () {
         if (w.state === 'missing') return '<span class="cf-chip warn" title="No 6-minute walk test on record">6MWT not recorded</span>';
         return '<span class="cf-chip' + (w.state === 'overdue' ? ' warn' : '') + '" title="Next due ' + CF.fmt(w.due) + '">6MWT ' + w.last.value + ' m · ' + CF.fmt(w.last.date) + (w.state === 'overdue' ? ' · overdue' : '') + '</span>'; })() + (pr.bmi != null ? '<span class="cf-chip">BMI ' + Math.round(pr.bmi * 10) / 10 + '</span>' : '') + status +
       (appt && !A.vital.dead ? '<span class="cf-chip appt"><i class="fa fa-calendar"></i> Next ' + CF.fmt(appt) + '</span>' : '') + '</div>' + riskRow(p, A) + '</div>' +
-      '<div class="cf-ov-btns"><button class="btn btn-primary" data-ov="visit"><i class="fa fa-stethoscope me-1"></i>Start visit</button>' + (window.CFAI ? '<button class="btn cf-ai-btn" data-ov="labs"><i class="fa fa-vial me-1"></i>Lab slip</button>' : '') +
+      '<div class="cf-ov-btns"><button class="btn btn-primary" data-ov="visit"><i class="fa fa-stethoscope me-1"></i>Start visit</button>' + (window.CFAI ? '<button class="btn cf-ai-btn" data-ov="labs"><i class="fa fa-flask me-1"></i>Lab slip</button>' : '') +
       '<button class="btn btn-outline-primary" data-ov="edit"><i class="fa fa-pen me-1"></i>Edit record</button>' +
       '<button class="btn btn-outline-primary" data-ov="trends"><i class="fa fa-chart-line me-1"></i>Trends</button>' +
       '<button class="btn btn-outline-primary" data-ov="pdf"><i class="fa fa-file-pdf me-1"></i>PDF</button></div></div>';
@@ -19530,17 +19532,19 @@ CFX.install();
     }
     var vt = $('visitFormTitle');
     if (vt && !$('cfAiVisBtn')) {
+      var bar = document.createElement('div');
+      bar.className = 'cf-ai-btnbar';
       var v = document.createElement('button');
       v.type = 'button'; v.id = 'cfAiVisBtn'; v.className = 'btn btn-sm cf-ai-btn';
       v.innerHTML = '<i class="fa fa-wand-magic-sparkles me-1"></i>Fill visit from report';
       v.onclick = function () { open('visit'); };
-      vt.insertAdjacentElement('afterend', v);
       var l = document.createElement('button');
-      l.type = 'button'; l.id = 'cfAiLabBtn'; l.className = 'btn btn-sm cf-ai-btn ms-2';
-      l.innerHTML = '<i class="fa fa-vial me-1"></i>Lab slip';
+      l.type = 'button'; l.id = 'cfAiLabBtn'; l.className = 'btn btn-sm cf-ai-btn';
+      l.innerHTML = '<i class="fa fa-flask me-1"></i>Lab slip';
       l.title = 'Photograph a lab result slip and fill this visit\'s labs';
       l.onclick = function () { open('labs'); };
-      v.insertAdjacentElement('afterend', l);
+      bar.appendChild(v); bar.appendChild(l);
+      vt.insertAdjacentElement('afterend', bar);
     }
   }
 
