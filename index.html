@@ -20096,10 +20096,21 @@ CFX.install();
     done(n);
   }
 
+  // The record-level "Fill from report" strip is for steps 1-3; the Visits step has its own buttons.
+  function syncAdmBtn() {
+    var b = $('cfAiAdmBtn'); if (!b) return;
+    var act = document.querySelector('#hfForm .form-step.active');
+    b.style.display = act && act.getAttribute('data-step') === '4' ? 'none' : '';
+  }
   function clearMarks() { document.querySelectorAll('.cf-ai-filled').forEach(function (e) { e.classList.remove('cf-ai-filled'); }); }
   function init() {
     addButtons();
     extraButtons();
+    syncAdmBtn();
+    if (window.MutationObserver) {
+      var mo = new MutationObserver(syncAdmBtn);
+      document.querySelectorAll('#hfForm .form-step').forEach(function (f) { mo.observe(f, { attributes: true, attributeFilter: ['class'] }); });
+    }
     // highlights belong to the record that was filled: clear them when another record is opened or the form is cleared
     ['resetForm', 'editPt'].forEach(function (fn) {
       if (typeof window[fn] !== 'function' || window[fn].cfAiClear) return;
