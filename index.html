@@ -1945,6 +1945,15 @@ details.cf-iron[open]>summary{margin-bottom:6px;}
 .cf-ai-zoom{position:fixed;inset:0;z-index:3100;background:rgba(0,0,0,.85);overflow:auto;display:flex;flex-direction:column;align-items:center;padding:10px;gap:8px;cursor:zoom-out;}
 .cf-ai-zoom img{max-width:min(1400px,100%);height:auto;background:#fff;}
 .cf-ai-zoom button{position:sticky;bottom:10px;}
+.cf-ai-multi{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:.82rem;}
+.cf-ai-multi label{display:inline-flex;align-items:center;gap:4px;cursor:pointer;}
+.cf-ai-ea{margin:0;padding:2px 8px;}
+label.cf-ai-filled{background:#fffbe6;border-radius:4px;box-shadow:0 0 0 2px #facc15;}
+.cf-ai-slip{border-radius:8px;padding:7px 10px;font-size:.85rem;margin-bottom:6px;}
+.cf-ai-slip.ok{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;}
+.cf-ai-slip.warn{background:#fff8e1;border:1px solid #ffe08a;color:#7c5a00;}
+.cf-ai-slip.bad{background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;}
+.cf-ov-btns .cf-ai-btn{margin:0;}
 
 </style>
 
@@ -4165,6 +4174,7 @@ var ADMISSION_MED_GROUPS = VISIT_MED_GROUPS.map(function(group){
 });
 var ADMISSION_MED_LIST=[];
 ADMISSION_MED_GROUPS.forEach(function(g){g.meds.forEach(function(m){ADMISSION_MED_LIST.push(m);});});
+ADMISSION_MED_LIST.forEach(function(m){if(m.id==='A_Furosemide'){["20 mg IV BID", "40 mg IV BID", "40 mg IV TID", "80 mg IV BID", "80 mg IV TID", "120 mg IV BID", "Infusion 5 mg/h", "Infusion 10 mg/h", "Infusion 20 mg/h"].forEach(function(d){if(m.doses.indexOf(d)<0)m.doses.push(d);});}});
 
 // Maps the new per-drug hospital editor back to the registry's legacy grouped
 // Med_* fields so old analytics, cards and exports continue to work.
@@ -16034,6 +16044,7 @@ var CF = (function () {
     for (var i = 0; i < FREQ.length; i++) if (FREQ[i][0].test(t)) return { label: FREQ[i][1], mult: FREQ[i][2] };
     return null;
   }
+  function isIVDose(t) { return /\bIV\b|infusion|i\.v\./i.test(String(t || '')); }
   function parseDose(text, freqText) {
     var t = s(text);
     if (!t) return null;
@@ -16233,6 +16244,7 @@ var CF = (function () {
         if (state === 'on') {
           if (!last || last.state === 'none' || last.state === 'unlisted') ev = (last && last.state !== 'none') ? 'Restart' : 'Start';
           else if (last.state === 'stopped' || last.state === 'held') ev = 'Restart';
+          else if (lastEntry && isIVDose(doseText(lastEntry)) !== isIVDose(doseText(e))) ev = 'Change'; // IV <-> oral: mg are not comparable
           else if (mg != null && lastMg != null && mg > lastMg) ev = 'Increase';
           else if (mg != null && lastMg != null && mg < lastMg) ev = 'Decrease';
           else if (mg != null && lastMg != null) ev = null;
@@ -17121,7 +17133,7 @@ var CF = (function () {
   return {
     DRUGS: DRUGS, CLASS_LABEL: CLASS_LABEL, PILLARS: PILLARS, REASONS: REASONS, ACTIONS: ACTIONS, RULES: RULES, READMIT_BANDS: READMIT_BANDS,
     s: s, num: num, iso: iso, todayIso: todayIso, addDays: addDays, daysBetween: daysBetween, fmt: fmt, esc: esc,
-    baseKey: baseKey, drugLabel: drugLabel, parseDose: parseDose, freqFromPreset: freqFromPreset, plausibility: plausibility,
+    baseKey: baseKey, drugLabel: drugLabel, parseDose: parseDose, isIVDose: isIVDose, freqFromPreset: freqFromPreset, plausibility: plausibility,
     readDrug: readDrug, doseText: doseText, pctTarget: pctTarget, presetsFor: presetsFor, nextPreset: nextPreset,
     medSnapshots: medSnapshots, medHistory: medHistory, onClass: onClass, onPillar: onPillar,
     series: series, last: last, profile: profile, vitalStatus: vitalStatus, followUpStatus: followUpStatus,
@@ -17351,10 +17363,12 @@ var CFUI = (function () {
     var p = (pid && typeof PC !== 'undefined' && PC[pid]) || {};
     var snaps = CF.medSnapshots(p, typeof visits !== 'undefined' ? visits : []);
     var latest = snaps.length ? snaps[snaps.length - 1] : null;
+    var ivSkipped = [];
     VISIT_MED_LIST.forEach(function (m) {
       ['_Status', '', '_Custom', '_Freq', '_Change', '_Action', '_Reason'].forEach(function (suf) { setVal(m.id + suf, suf === '_Status' ? 'No' : ''); });
       var e = latest && latest.meds[CF.baseKey(m.id)];
       if (!e || e.status !== 'on') return; // stopped / held drugs are not carried into the new visit
+      if (CF.isIVDose(e.dose)) { ivSkipped.push(CF.drugLabel ? CF.drugLabel(CF.baseKey(m.id)) : m.label); return; } // an in-hospital IV dose is not a clinic dose
       var preset = m.doses.filter(Boolean).indexOf(e.dose) >= 0;
       setVal(m.id + '_Status', 'Yes');
       setVal(m.id, preset ? e.dose : '');
@@ -17368,7 +17382,7 @@ var CFUI = (function () {
     refreshEditor('V_', true);
     if (latest) {
       var info = $('cfCarryInfo');
-      if (info) info.innerHTML = '<i class="fa fa-rotate me-1"></i>Medications carried forward from the <b>' + esc(latest.kind === 'visit' ? latest.label.toLowerCase() + ' visit' : latest.label.toLowerCase()) + '</b> of ' + CF.fmt(latest.date) + '. Change only what changed today.';
+      if (info) info.innerHTML = '<i class="fa fa-rotate me-1"></i>Medications carried forward from the <b>' + esc(latest.kind === 'visit' ? latest.label.toLowerCase() + ' visit' : latest.label.toLowerCase()) + '</b> of ' + CF.fmt(latest.date) + '. Change only what changed today.' + (ivSkipped.length ? ' <b>' + esc(ivSkipped.join(', ')) + '</b> was IV in hospital: enter the oral dose.' : '');
     }
   }
 
@@ -18053,7 +18067,8 @@ var CFUI = (function () {
       html += '<div class="alert alert-light border py-1 px-2 mb-1 d-flex justify-content-between align-items-center" style="font-size:0.82rem;">' +
         '<span>' + tag + ' <b>' + esc(a.name || 'Unknown') + '</b> <small class="text-muted">(File: ' + esc(a.file || '-') + ')</small>' +
         (a.doctor ? ' <small class="text-muted ms-1"><i class="fa fa-user-md"></i> ' + esc(a.doctor) + '</small>' : '') + '</span>' +
-        (a.id ? '<button class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size:0.72rem;" onclick="openPatientFromClinic(\'' + a.id + '\')"><i class="fa fa-edit"></i> Open</button>' : '') + '</div>';
+        (a.id ? '<span class="d-flex gap-1">' + (!(dateStr > today) && window.CFAI ? '<button class="btn btn-sm cf-ai-btn py-0 px-2 m-0" style="font-size:0.72rem;" title="Photograph this patient\'s lab slip" onclick="CFAI.labSlip(\'' + a.id + '\')"><i class="fa fa-vial"></i> Lab slip</button>' : '') +
+          '<button class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size:0.72rem;" onclick="openPatientFromClinic(\'' + a.id + '\')"><i class="fa fa-edit"></i> Open</button></span>' : '') + '</div>';
     });
     return html;
   }
@@ -18370,7 +18385,7 @@ var CFUI = (function () {
         if (w.state === 'missing') return '<span class="cf-chip warn" title="No 6-minute walk test on record">6MWT not recorded</span>';
         return '<span class="cf-chip' + (w.state === 'overdue' ? ' warn' : '') + '" title="Next due ' + CF.fmt(w.due) + '">6MWT ' + w.last.value + ' m · ' + CF.fmt(w.last.date) + (w.state === 'overdue' ? ' · overdue' : '') + '</span>'; })() + (pr.bmi != null ? '<span class="cf-chip">BMI ' + Math.round(pr.bmi * 10) / 10 + '</span>' : '') + status +
       (appt && !A.vital.dead ? '<span class="cf-chip appt"><i class="fa fa-calendar"></i> Next ' + CF.fmt(appt) + '</span>' : '') + '</div>' + riskRow(p, A) + '</div>' +
-      '<div class="cf-ov-btns"><button class="btn btn-primary" data-ov="visit"><i class="fa fa-stethoscope me-1"></i>Start visit</button>' +
+      '<div class="cf-ov-btns"><button class="btn btn-primary" data-ov="visit"><i class="fa fa-stethoscope me-1"></i>Start visit</button>' + (window.CFAI ? '<button class="btn cf-ai-btn" data-ov="labs"><i class="fa fa-vial me-1"></i>Lab slip</button>' : '') +
       '<button class="btn btn-outline-primary" data-ov="edit"><i class="fa fa-pen me-1"></i>Edit record</button>' +
       '<button class="btn btn-outline-primary" data-ov="trends"><i class="fa fa-chart-line me-1"></i>Trends</button>' +
       '<button class="btn btn-outline-primary" data-ov="pdf"><i class="fa fa-file-pdf me-1"></i>PDF</button></div></div>';
@@ -18397,6 +18412,7 @@ var CFUI = (function () {
       b.addEventListener('click', function () {
         var k = b.getAttribute('data-ov');
         if (k === 'visit') startVisit(id, {});
+        else if (k === 'labs') startVisit(id, { labs: true });
         else if (k === 'edit') { editPt(id); goToMain(); if (typeof goToWizardStep === 'function') goToWizardStep(1); scrollToForm(); }
         else if (k === 'trends') showTrends(id);
         else if (k === 'pdf') pdfFromAdmin(id);
@@ -18446,6 +18462,7 @@ var CFUI = (function () {
       if (opts.walk) { var wc = $('V_Walk_Completed'); if (wc) { wc.value = 'Y'; wc.dispatchEvent(new Event('change', { bubbles: true })); if (typeof toggleVisitWalkMeters === 'function') toggleVisitWalkMeters(); } opts.field = 'V_Walk_Meters'; }
       if (opts.registered) { var g = $('visitRegisteredCheck'); if (g && !g.checked) { g.checked = true; g.dispatchEvent(new Event('change', { bubbles: true })); } }
       renderAssist();
+      if (opts.labs && window.CFAI) { focusEl(document.getElementById('V_Creat') || null); CFAI.open('labs'); return; }
       if (opts.drug) applyToRow(opts.drug, opts.act || 'Continue', opts.next, opts.reason); else if (opts.field) focusEl($(opts.field));
       else if (opts.plan) { var pl = $('V_Plan'); if (pl) { pl.value = s(pl.value) ? pl.value + '\n' + opts.plan : opts.plan; focusEl(pl); } }
       else if (opts.glp1) { focusEl(document.querySelector('.cf-med[data-med="V_Ozempic"]') || $('visitMedDoses')); }
@@ -19472,11 +19489,25 @@ CFX.install();
   'use strict';
   var AI_REGION = 'europe-west1';          // must match REGION in ai-function/functions/index.js
   var MAX_PAGES = 6, MAX_EDGE = 1800, JPEG_Q = 0.85;
-  var DEMO = {"admission":{"document_type":"Discharge summary","document_date":"2026-09-10","fields":[{"id":"Patient_Name","label":"Name","sec":"Demographics","value":"SAMPLE PATIENT (TEST)","source":"Patient: SAMPLE PATIENT (TEST)","confidence":"high","note":""},{"id":"File_No","label":"File No  (6 digits)","sec":"Demographics","value":"900123","source":"File No: 900123","confidence":"high","note":""},{"id":"Civil_ID","label":"Civil ID  (12 digits)","sec":"Demographics","value":"270011299999","source":"Civil ID: 270011299999","confidence":"high","note":""},{"id":"Age","label":"Age","sec":"Demographics","value":"58","source":"Age/Sex: 58 Y / Male","confidence":"high","note":""},{"id":"Gender","label":"Gender","sec":"Demographics","value":"Male","source":"Age/Sex: 58 Y / Male","confidence":"high","note":""},{"id":"Nationality","label":"Nationality","sec":"Demographics","value":"Kuwaiti","source":"Nationality: Kuwaiti","confidence":"high","note":""},{"id":"HF_Type","label":"Type of HF","sec":"HF diagnosis","value":"HFrEF","source":"Acute decompensated heart failure (de novo), HFrEF, LVEF 28%","confidence":"high","note":""},{"id":"EF_Diagnosis","label":"EF at Diagnosis (%)","sec":"HF diagnosis","value":"28","source":"LVEF 28% (Simpson's)","confidence":"high","note":""},{"id":"HF_Cause","label":"Cause of HF","sec":"HF diagnosis","value":"ICM","source":"Ischaemic cardiomyopathy — old anterior STEMI (2019)","confidence":"high","note":""},{"id":"DeNovo_HF","label":"De Novo HF","sec":"HF diagnosis","value":"Yes","source":"(de novo)","confidence":"high","note":""},{"id":"NYHA","label":"NYHA Visit","sec":"Symptoms, Signs & Vitals","value":"IV","source":"dyspnoea NYHA class III–IV","confidence":"low","note":"Written as \"III–IV\"; the worse class was chosen."},{"id":"Admission_Date","label":"Admission Date","sec":"Symptoms, Signs & Vitals","value":"2026-09-03","source":"Date of admission: 03/09/2026","confidence":"high","note":""},{"id":"Admission_Discharge_Date","label":"Discharge Date","sec":"Symptoms, Signs & Vitals","value":"2026-09-10","source":"Date of discharge: 10/09/2026","confidence":"high","note":""},{"id":"Admission_HF_Related","label":"Cause of Admission","sec":"Symptoms, Signs & Vitals","value":"HF related","source":"Acute decompensated heart failure","confidence":"high","note":""},{"id":"Admission_Reason","label":"Reason / Notes","sec":"Symptoms, Signs & Vitals","value":"Acute decompensated HF (de novo)","source":"Diagnosis 1","confidence":"high","note":""},{"id":"BP","label":"BP","sec":"Symptoms, Signs & Vitals","value":"104/68","source":"BP 104/68 mmHg","confidence":"high","note":""},{"id":"Pulse","label":"Pulse","sec":"Symptoms, Signs & Vitals","value":"108","source":"HR 108 bpm irregular","confidence":"high","note":""},{"id":"SpO2","label":"SpO2 (%)","sec":"Symptoms, Signs & Vitals","value":"91","source":"SpO2 91% on room air","confidence":"high","note":""},{"id":"Weight","label":"Weight (kg)","sec":"Symptoms, Signs & Vitals","value":"88","source":"Weight 88 kg","confidence":"high","note":""},{"id":"Height","label":"Height (cm)","sec":"Symptoms, Signs & Vitals","value":"172","source":"height 172 cm","confidence":"high","note":""},{"id":"JVP","label":"JVP","sec":"Symptoms, Signs & Vitals","value":"Raised","source":"raised JVP","confidence":"high","note":""},{"id":"Rales","label":"Rales","sec":"Symptoms, Signs & Vitals","value":"Yes","source":"bibasal crackles","confidence":"high","note":""},{"id":"Edema","label":"Oedema","sec":"Symptoms, Signs & Vitals","value":"Moderate","source":"moderate pitting oedema to the knees","confidence":"high","note":""},{"id":"Smoker","label":"Smoker","sec":"Risk Factors & Comorbidities","value":"Current","source":"Current smoker (20 pack-years)","confidence":"high","note":""},{"id":"DM","label":"DM","sec":"Risk Factors & Comorbidities","value":"Yes","source":"Type 2 DM","confidence":"high","note":""},{"id":"HTN","label":"HTN","sec":"Risk Factors & Comorbidities","value":"Yes","source":"HTN","confidence":"high","note":""},{"id":"Dyslipidemia","label":"Dyslipidemia","sec":"Risk Factors & Comorbidities","value":"Yes","source":"dyslipidaemia","confidence":"high","note":""},{"id":"AF","label":"AF","sec":"Risk Factors & Comorbidities","value":"Yes","source":"Paroxysmal atrial fibrillation","confidence":"high","note":""},{"id":"CKD","label":"CKD","sec":"Risk Factors & Comorbidities","value":"Yes","source":"CKD stage 3a","confidence":"high","note":""},{"id":"IHD","label":"IHD","sec":"Risk Factors & Comorbidities","value":"STEMI","source":"old anterior STEMI (2019), s/p PCI to LAD","confidence":"high","note":""},{"id":"ECG_Arrhythmia","label":"Arrhythmia","sec":"Investigations & Procedures","value":"Atrial fibrillation","source":"ECG: Atrial fibrillation, ventricular rate 110/min","confidence":"high","note":""},{"id":"ECG_QRS","label":"QRS Duration (ms)","sec":"Investigations & Procedures","value":"152","source":"QRS 152 ms","confidence":"high","note":""},{"id":"ECG_LBBB","label":"LBBB","sec":"Investigations & Procedures","value":"Yes","source":"LBBB morphology","confidence":"high","note":""},{"id":"Echo_Done","label":"Performed","sec":"Investigations & Procedures","value":"Yes","source":"Echo (04/09/2026)","confidence":"high","note":""},{"id":"Echo_EF","label":"EF %","sec":"Investigations & Procedures","value":"28","source":"LVEF 28% (Simpson's)","confidence":"high","note":""},{"id":"Valvular_Disease","label":"Valvular Disease","sec":"HF diagnosis","value":"Yes","source":"moderate functional MR","confidence":"high","note":""},{"id":"Valvular_Type","label":"Valvular disease type","sec":"History","value":"MR","source":"moderate functional MR","confidence":"medium","note":""},{"id":"Lab_Na","label":"Na Adm (mmol/L)","sec":"In-Hospital Labs","value":"132","source":"Sodium 132 (admission)","confidence":"high","note":""},{"id":"Lab_K","label":"K Adm (mmol/L)","sec":"In-Hospital Labs","value":"4.9","source":"Potassium 4.9 (admission)","confidence":"high","note":""},{"id":"Lab_K_Disch","label":"K Disch (mmol/L)","sec":"In-Hospital Labs","value":"4.4","source":"Potassium 4.4 (discharge)","confidence":"high","note":""},{"id":"Lab_Urea","label":"Urea Adm (mmol/L)","sec":"In-Hospital Labs","value":"11.2","source":"Urea 11.2 (admission)","confidence":"high","note":""},{"id":"Lab_Creat","label":"Creatinine Adm (µmol/L)","sec":"In-Hospital Labs","value":"142","source":"Creatinine 142 µmol/L (admission)","confidence":"high","note":""},{"id":"Lab_Creat_Disch","label":"Creatinine Disch (µmol/L)","sec":"In-Hospital Labs","value":"128","source":"Creatinine 128 (discharge)","confidence":"high","note":""},{"id":"Lab_eGFR","label":"eGFR Adm Auto","sec":"In-Hospital Labs","value":"46","source":"eGFR 46 (admission)","confidence":"high","note":""},{"id":"Lab_eGFR_Disch","label":"eGFR Disch Auto","sec":"In-Hospital Labs","value":"52","source":"eGFR 52 (discharge)","confidence":"high","note":""},{"id":"Lab_Hb","label":"Hb Adm (g/dL)","sec":"In-Hospital Labs","value":"11.8","source":"Haemoglobin 118 g/L","confidence":"medium","note":"Reported as 118 g/L, converted to g/dL."},{"id":"Lab_BNP","label":"NT-proBNP Adm (pg/mL)","sec":"In-Hospital Labs","value":"6850","source":"NT-proBNP 6850 pg/mL (admission)","confidence":"high","note":""},{"id":"Lab_BNP_Disch","label":"NT-proBNP Disch (pg/mL)","sec":"In-Hospital Labs","value":"2940","source":"NT-proBNP 2940 (discharge)","confidence":"high","note":""},{"id":"Lab_HbA1c","label":"HbA1c (%)","sec":"In-Hospital Labs","value":"8.3","source":"HbA1c 8.3 %","confidence":"high","note":""},{"id":"Lab_LDL","label":"LDL","sec":"In-Hospital Labs","value":"2.9","source":"LDL-C 2.9 mmol/L","confidence":"high","note":""},{"id":"Lab_Ferritin","label":"Ferritin (µg/L)","sec":"In-Hospital Labs","value":"64","source":"Ferritin 64 µg/L","confidence":"high","note":""},{"id":"Lab_TrSats","label":"Transferrin Sat. / TSAT (%)","sec":"In-Hospital Labs","value":"14","source":"TSAT 14 %","confidence":"high","note":""},{"id":"Discharge_Status","label":"Status on Discharge","sec":"Outcomes & Management","value":"Walking","source":"Discharged walking","confidence":"high","note":""},{"id":"Discharge_OPD_Appt","label":"OPD Appointment on Discharge","sec":"Outcomes & Management","value":"2026-09-24","source":"HF clinic follow-up on 24/09/2026","confidence":"high","note":""}],"medications":[{"key":"Entresto","label":"Entresto","generic":"Sacubitril/valsartan","dose":"24/26 mg PO BID","preset":true,"frequency":"","context":"discharge","source":"Sacubitril/valsartan (Entresto) 24/26 mg BID","confidence":"high","note":""},{"key":"Concor","label":"Concor","generic":"Bisoprolol","dose":"2.5 mg PO OD","preset":true,"frequency":"","context":"discharge","source":"Bisoprolol (Concor) 2.5 mg OD","confidence":"high","note":""},{"key":"Aldactone","label":"Aldactone","generic":"Spironolactone","dose":"25 mg PO OD","preset":true,"frequency":"","context":"discharge","source":"Spironolactone (Aldactone) 25 mg OD","confidence":"high","note":""},{"key":"Forxiga","label":"Forxiga","generic":"Dapagliflozin","dose":"10 mg PO OD","preset":true,"frequency":"","context":"discharge","source":"Dapagliflozin (Forxiga) 10 mg OD","confidence":"high","note":""},{"key":"Furosemide","label":"Furosemide","generic":"Furosemide","dose":"40 mg PO BID","preset":true,"frequency":"","context":"discharge","source":"Furosemide 40 mg BID","confidence":"high","note":""},{"key":"Eliquis","label":"Eliquis","generic":"Apixaban","dose":"5 mg PO BID","preset":true,"frequency":"","context":"discharge","source":"Apixaban (Eliquis) 5 mg BID","confidence":"high","note":""},{"key":"Crestor","label":"Crestor","generic":"Rosuvastatin","dose":"20 mg PO OD","preset":true,"frequency":"","context":"discharge","source":"Rosuvastatin (Crestor) 20 mg OD (night)","confidence":"high","note":""},{"key":"Ferinject","label":"Ferinject (ferric carboxymaltose)","generic":"Ferric carboxymaltose","dose":"1000 mg IV once","preset":true,"frequency":"","context":"in_hospital","source":"Ferric carboxymaltose 1000 mg IV given on 08/09/2026 (in-hospital dose)","confidence":"medium","note":"Given once in hospital on 08/09/2026; not a discharge medicine."}],"other_medications":["Metformin 500 mg BID"],"later_labs":[{"test":"Urea","value":"9.8","when":"discharge","field_hint":"","source":"Urea ... 9.8"},{"test":"Sodium","value":"136","when":"discharge","field_hint":"","source":"Sodium ... 136"}],"notes":{"labs":"","echo":"Echo 04/09/2026: dilated LV, LVEDD 64 mm, global hypokinesia, moderate functional MR, RVSP 48 mmHg.","plan":"HF clinic follow-up 24/09/2026 with renal profile. Up-titrate GDMT. Smoking cessation advice given. Consider CRT-D if LVEF ≤35% after 3 months of optimised therapy.","other":"Hospital course: IV furosemide 80 mg BID, diuresis −5 kg. Ferric carboxymaltose 1000 mg IV on 08/09/2026."},"flags":["NYHA written as \"III–IV\" — IV chosen, please confirm.","Mobile number is not in the report — enter it by hand (required).","Ferinject was an in-hospital dose — it is not ticked as a discharge medicine."]},"visit":{"document_type":"HF clinic follow-up note","document_date":"2026-09-24","fields":[{"id":"Visit_Date","label":"Visit Date","sec":"Visit","value":"2026-09-24","source":"Clinic date: 24/09/2026","confidence":"high","note":""},{"id":"Visit_Type","label":"Visit Type","sec":"Visit","value":"Post-Discharge","source":"Visit: Post-discharge","confidence":"high","note":""},{"id":"V_NYHA","label":"NYHA Class","sec":"Symptoms","value":"II","source":"Breathless on moderate exertion (NYHA II)","confidence":"high","note":""},{"id":"V_BP","label":"BP","sec":"Signs / Vitals","value":"112/70","source":"BP 112/70 mmHg","confidence":"high","note":""},{"id":"V_Pulse","label":"Pulse","sec":"Signs / Vitals","value":"78","source":"HR 78 bpm regular","confidence":"high","note":""},{"id":"V_SpO2","label":"SpO2 %","sec":"Signs / Vitals","value":"97","source":"SpO2 97%","confidence":"high","note":""},{"id":"V_Weight","label":"Weight (kg)","sec":"Signs / Vitals","value":"84","source":"weight 84 kg","confidence":"high","note":""},{"id":"V_JVP","label":"JVP","sec":"Signs / Vitals","value":"N","source":"JVP not raised","confidence":"high","note":""},{"id":"V_Rales","label":"Pulm. Rales","sec":"Signs / Vitals","value":"N","source":"chest clear","confidence":"high","note":""},{"id":"V_Edema","label":"Oedema","sec":"Signs / Vitals","value":"Mild feet","source":"mild pedal oedema","confidence":"high","note":""},{"id":"V_Smoker","label":"Smoking Status","sec":"Risk Factors and Comorbidities","value":"Current","source":"Still smoking ~5 cigarettes/day","confidence":"high","note":""},{"id":"V_ECG_Done","label":"Performed","sec":"Investigations and Procedures","value":"Yes","source":"ECG","confidence":"high","note":""},{"id":"V_Arrhythmia","label":"Arrhythmia","sec":"Investigations and Procedures","value":"Sinus rhythm","source":"Sinus rhythm 76/min","confidence":"medium","note":"Free-text field"},{"id":"V_QRS","label":"QRS Width (ms)","sec":"Investigations and Procedures","value":"150","source":"QRS 150 ms","confidence":"high","note":""},{"id":"V_LBBB","label":"LBBB","sec":"Investigations and Procedures","value":"Yes","source":"LBBB","confidence":"high","note":""},{"id":"V_Na","label":"Sodium / Na (mmol/L)","sec":"Visit Labs — Kuwait SI units","value":"137","source":"Na 137","confidence":"high","note":""},{"id":"V_K","label":"Potassium / K (mmol/L)","sec":"Visit Labs — Kuwait SI units","value":"5.1","source":"K 5.1","confidence":"high","note":""},{"id":"V_Urea","label":"Urea (mmol/L)","sec":"Visit Labs — Kuwait SI units","value":"9.1","source":"Urea 9.1","confidence":"high","note":""},{"id":"V_Creat","label":"Creatinine (µmol/L)","sec":"Visit Labs — Kuwait SI units","value":"131","source":"Creatinine 131","confidence":"high","note":""},{"id":"V_eGFR","label":"eGFR (ml/min/1.73m²) Auto","sec":"Visit Labs — Kuwait SI units","value":"50","source":"eGFR 50","confidence":"high","note":""},{"id":"V_Hb","label":"Hb (g/dL)","sec":"Visit Labs — Kuwait SI units","value":"12.2","source":"Hb 12.2 g/dL","confidence":"high","note":""},{"id":"V_NTproBNP","label":"NT-proBNP (pg/mL)","sec":"Visit Labs — Kuwait SI units","value":"1480","source":"NT-proBNP 1480","confidence":"high","note":""},{"id":"V_Plan","label":"Plan / Recommendations","sec":"Assessment & Plan","value":"Up-titrate Entresto & bisoprolol. Reduce furosemide. Repeat U&E + K in 2 weeks. Smoking cessation clinic referral. Review in 6 weeks with echo.","source":"Plan: Up-titrate Entresto & bisoprolol as above…","confidence":"medium","note":"Handwritten"}],"medications":[{"key":"Entresto","label":"Entresto","generic":"Sacubitril/valsartan","dose":"49/51 mg PO BID","preset":true,"frequency":"","context":"current","source":"24/26 mg BID → ↑ 49/51 mg BID","confidence":"medium","note":"Handwritten change: increased from 24/26 mg BID"},{"key":"Concor","label":"Concor","generic":"Bisoprolol","dose":"5 mg PO OD","preset":true,"frequency":"","context":"current","source":"2.5 mg OD → ↑ 5 mg OD","confidence":"medium","note":"Handwritten change: increased from 2.5 mg OD"},{"key":"Aldactone","label":"Aldactone","generic":"Spironolactone","dose":"25 mg PO OD","preset":true,"frequency":"","context":"current","source":"25 mg OD continue","confidence":"high","note":""},{"key":"Forxiga","label":"Forxiga","generic":"Dapagliflozin","dose":"10 mg PO OD","preset":true,"frequency":"","context":"current","source":"10 mg OD continue","confidence":"high","note":""},{"key":"Furosemide","label":"Furosemide","generic":"Furosemide","dose":"40 mg PO OD","preset":true,"frequency":"","context":"current","source":"40 mg BID → ↓ 40 mg OD","confidence":"medium","note":"Handwritten change: decreased from 40 mg BID"},{"key":"Eliquis","label":"Eliquis","generic":"Apixaban","dose":"5 mg PO BID","preset":true,"frequency":"","context":"current","source":"5 mg BID continue","confidence":"high","note":""},{"key":"Crestor","label":"Crestor","generic":"Rosuvastatin","dose":"20 mg PO OD","preset":true,"frequency":"","context":"current","source":"20 mg OD continue","confidence":"high","note":""}],"other_medications":[],"later_labs":[],"notes":{"labs":"Labs dated 22/09/2026 (2 days before the visit).","echo":"","plan":"","other":"Feels better since discharge. No orthopnoea. Mild ankle swelling in the evenings."},"flags":["Labs are dated 22/09/2026, two days before the visit.","Medication changes are handwritten — please confirm the new doses."]}};
+  var DEMO = {"labs":{"document_type":"Laboratory result slip (cumulative)","document_date":"2026-09-22","fields":[{"id":"Slip_File_No","label":"File number printed on the slip","sec":"Slip","value":"900123","source":"MRN: 900123","confidence":"high","note":""},{"id":"Slip_Date","label":"Sample / report date on the slip","sec":"Slip","value":"2026-09-22","source":"Collected: 22/09/2026 08:14","confidence":"high","note":""},{"id":"V_Na","label":"Sodium / Na (mmol/L)","sec":"Labs","value":"137","source":"Na 137","confidence":"high","note":""},{"id":"V_K","label":"Potassium / K (mmol/L)","sec":"Labs","value":"5.1","source":"K 5.1","confidence":"high","note":""},{"id":"V_Urea","label":"Urea (mmol/L)","sec":"Labs","value":"9.1","source":"Urea 9.1","confidence":"high","note":""},{"id":"V_Creat","label":"Creatinine (µmol/L)","sec":"Labs","value":"131","source":"Creatinine 131","confidence":"high","note":""},{"id":"V_eGFR","label":"eGFR (ml/min/1.73m²) Auto","sec":"Labs","value":"50","source":"eGFR 50","confidence":"high","note":""},{"id":"V_Hb","label":"Hb (g/dL)","sec":"Labs","value":"12.2","source":"Hb 12.2 g/dL","confidence":"high","note":""},{"id":"V_NTproBNP","label":"NT-proBNP (pg/mL)","sec":"Labs","value":"1480","source":"NT-proBNP 1480","confidence":"high","note":""},{"id":"V_Ferritin","label":"Ferritin (µg/L)","sec":"Labs","value":"71","source":"Ferritin 71 ug/L","confidence":"high","note":""},{"id":"V_Transferrin","label":"Transferrin Sat. / TSAT (%)","sec":"Labs","value":"16","source":"TSAT 16 %","confidence":"high","note":""},{"id":"V_HbA1c","label":"HbA1c (%)","sec":"Labs","value":"7.9","source":"HbA1c 7.9 %","confidence":"high","note":""},{"id":"V_LDL","label":"LDL","sec":"Labs","value":"1.9","source":"LDL-C 1.9 mmol/L","confidence":"high","note":""}],"medications":[],"other_medications":[],"later_labs":[{"test":"Potassium","value":"4.4","when":"2026-09-10","field_hint":"","source":"previous column 10/09: K 4.4"},{"test":"Creatinine","value":"128","when":"2026-09-10","field_hint":"","source":"previous column 10/09: Creat 128"}],"notes":{"labs":"Magnesium 0.78 mmol/L; Albumin 38 g/L; CRP 4 mg/L","echo":"","plan":"","other":""},"flags":["Potassium 5.1 is flagged H on the slip."]},"admission":{"document_type":"Discharge summary","document_date":"2026-09-10","fields":[{"id":"Fatigue","label":"Symptoms on admission","sec":"Symptoms, Signs & Vitals","value":"Dyspnea","source":"Presented with progressive dyspnoea NYHA class III–IV","confidence":"high","note":""},{"id":"Sym_Other_Text","label":"Sym Other Text","sec":"Symptoms, Signs & Vitals","value":"Orthopnoea, bilateral lower limb oedema","source":"orthopnoea and bilateral lower limb oedema","confidence":"high","note":""},{"id":"Patient_Name","label":"Name","sec":"Demographics","value":"SAMPLE PATIENT (TEST)","source":"Patient: SAMPLE PATIENT (TEST)","confidence":"high","note":""},{"id":"File_No","label":"File No  (6 digits)","sec":"Demographics","value":"900123","source":"File No: 900123","confidence":"high","note":""},{"id":"Civil_ID","label":"Civil ID  (12 digits)","sec":"Demographics","value":"270011299999","source":"Civil ID: 270011299999","confidence":"high","note":""},{"id":"Age","label":"Age","sec":"Demographics","value":"58","source":"Age/Sex: 58 Y / Male","confidence":"high","note":""},{"id":"Gender","label":"Gender","sec":"Demographics","value":"Male","source":"Age/Sex: 58 Y / Male","confidence":"high","note":""},{"id":"Nationality","label":"Nationality","sec":"Demographics","value":"Kuwaiti","source":"Nationality: Kuwaiti","confidence":"high","note":""},{"id":"HF_Type","label":"Type of HF","sec":"HF diagnosis","value":"HFrEF","source":"Acute decompensated heart failure (de novo), HFrEF, LVEF 28%","confidence":"high","note":""},{"id":"EF_Diagnosis","label":"EF at Diagnosis (%)","sec":"HF diagnosis","value":"28","source":"LVEF 28% (Simpson's)","confidence":"high","note":""},{"id":"HF_Cause","label":"Cause of HF","sec":"HF diagnosis","value":"ICM","source":"Ischaemic cardiomyopathy — old anterior STEMI (2019)","confidence":"high","note":""},{"id":"DeNovo_HF","label":"De Novo HF","sec":"HF diagnosis","value":"Yes","source":"(de novo)","confidence":"high","note":""},{"id":"NYHA","label":"NYHA Visit","sec":"Symptoms, Signs & Vitals","value":"IV","source":"dyspnoea NYHA class III–IV","confidence":"low","note":"Written as \"III–IV\"; the worse class was chosen."},{"id":"Admission_Date","label":"Admission Date","sec":"Symptoms, Signs & Vitals","value":"2026-09-03","source":"Date of admission: 03/09/2026","confidence":"high","note":""},{"id":"Admission_Discharge_Date","label":"Discharge Date","sec":"Symptoms, Signs & Vitals","value":"2026-09-10","source":"Date of discharge: 10/09/2026","confidence":"high","note":""},{"id":"Admission_HF_Related","label":"Cause of Admission","sec":"Symptoms, Signs & Vitals","value":"HF related","source":"Acute decompensated heart failure","confidence":"high","note":""},{"id":"Admission_Reason","label":"Reason / Notes","sec":"Symptoms, Signs & Vitals","value":"Acute decompensated HF (de novo)","source":"Diagnosis 1","confidence":"high","note":""},{"id":"BP","label":"BP","sec":"Symptoms, Signs & Vitals","value":"104/68","source":"BP 104/68 mmHg","confidence":"high","note":""},{"id":"Pulse","label":"Pulse","sec":"Symptoms, Signs & Vitals","value":"108","source":"HR 108 bpm irregular","confidence":"high","note":""},{"id":"SpO2","label":"SpO2 (%)","sec":"Symptoms, Signs & Vitals","value":"91","source":"SpO2 91% on room air","confidence":"high","note":""},{"id":"Weight","label":"Weight (kg)","sec":"Symptoms, Signs & Vitals","value":"88","source":"Weight 88 kg","confidence":"high","note":""},{"id":"Height","label":"Height (cm)","sec":"Symptoms, Signs & Vitals","value":"172","source":"height 172 cm","confidence":"high","note":""},{"id":"JVP","label":"JVP","sec":"Symptoms, Signs & Vitals","value":"Raised","source":"raised JVP","confidence":"high","note":""},{"id":"Rales","label":"Rales","sec":"Symptoms, Signs & Vitals","value":"Yes","source":"bibasal crackles","confidence":"high","note":""},{"id":"Edema","label":"Oedema","sec":"Symptoms, Signs & Vitals","value":"Moderate","source":"moderate pitting oedema to the knees","confidence":"high","note":""},{"id":"Smoker","label":"Smoker","sec":"Risk Factors & Comorbidities","value":"Current","source":"Current smoker (20 pack-years)","confidence":"high","note":""},{"id":"DM","label":"DM","sec":"Risk Factors & Comorbidities","value":"Yes","source":"Type 2 DM","confidence":"high","note":""},{"id":"HTN","label":"HTN","sec":"Risk Factors & Comorbidities","value":"Yes","source":"HTN","confidence":"high","note":""},{"id":"Dyslipidemia","label":"Dyslipidemia","sec":"Risk Factors & Comorbidities","value":"Yes","source":"dyslipidaemia","confidence":"high","note":""},{"id":"AF","label":"AF","sec":"Risk Factors & Comorbidities","value":"Yes","source":"Paroxysmal atrial fibrillation","confidence":"high","note":""},{"id":"CKD","label":"CKD","sec":"Risk Factors & Comorbidities","value":"Yes","source":"CKD stage 3a","confidence":"high","note":""},{"id":"IHD","label":"IHD","sec":"Risk Factors & Comorbidities","value":"STEMI","source":"old anterior STEMI (2019), s/p PCI to LAD","confidence":"high","note":""},{"id":"ECG_Arrhythmia","label":"Arrhythmia","sec":"Investigations & Procedures","value":"Atrial fibrillation","source":"ECG: Atrial fibrillation, ventricular rate 110/min","confidence":"high","note":""},{"id":"ECG_QRS","label":"QRS Duration (ms)","sec":"Investigations & Procedures","value":"152","source":"QRS 152 ms","confidence":"high","note":""},{"id":"ECG_LBBB","label":"LBBB","sec":"Investigations & Procedures","value":"Yes","source":"LBBB morphology","confidence":"high","note":""},{"id":"Echo_Done","label":"Performed","sec":"Investigations & Procedures","value":"Yes","source":"Echo (04/09/2026)","confidence":"high","note":""},{"id":"Echo_EF","label":"EF %","sec":"Investigations & Procedures","value":"28","source":"LVEF 28% (Simpson's)","confidence":"high","note":""},{"id":"Valvular_Disease","label":"Valvular Disease","sec":"HF diagnosis","value":"Yes","source":"moderate functional MR","confidence":"high","note":""},{"id":"Valvular_Type","label":"Valvular disease type","sec":"History","value":"MR","source":"moderate functional MR","confidence":"medium","note":""},{"id":"Lab_Na","label":"Na Adm (mmol/L)","sec":"In-Hospital Labs","value":"132","source":"Sodium 132 (admission)","confidence":"high","note":""},{"id":"Lab_K","label":"K Adm (mmol/L)","sec":"In-Hospital Labs","value":"4.9","source":"Potassium 4.9 (admission)","confidence":"high","note":""},{"id":"Lab_K_Disch","label":"K Disch (mmol/L)","sec":"In-Hospital Labs","value":"4.4","source":"Potassium 4.4 (discharge)","confidence":"high","note":""},{"id":"Lab_Urea","label":"Urea Adm (mmol/L)","sec":"In-Hospital Labs","value":"11.2","source":"Urea 11.2 (admission)","confidence":"high","note":""},{"id":"Lab_Creat","label":"Creatinine Adm (µmol/L)","sec":"In-Hospital Labs","value":"142","source":"Creatinine 142 µmol/L (admission)","confidence":"high","note":""},{"id":"Lab_Creat_Disch","label":"Creatinine Disch (µmol/L)","sec":"In-Hospital Labs","value":"128","source":"Creatinine 128 (discharge)","confidence":"high","note":""},{"id":"Lab_eGFR","label":"eGFR Adm Auto","sec":"In-Hospital Labs","value":"46","source":"eGFR 46 (admission)","confidence":"high","note":""},{"id":"Lab_eGFR_Disch","label":"eGFR Disch Auto","sec":"In-Hospital Labs","value":"52","source":"eGFR 52 (discharge)","confidence":"high","note":""},{"id":"Lab_Hb","label":"Hb Adm (g/dL)","sec":"In-Hospital Labs","value":"11.8","source":"Haemoglobin 118 g/L","confidence":"medium","note":"Reported as 118 g/L, converted to g/dL."},{"id":"Lab_BNP","label":"NT-proBNP Adm (pg/mL)","sec":"In-Hospital Labs","value":"6850","source":"NT-proBNP 6850 pg/mL (admission)","confidence":"high","note":""},{"id":"Lab_BNP_Disch","label":"NT-proBNP Disch (pg/mL)","sec":"In-Hospital Labs","value":"2940","source":"NT-proBNP 2940 (discharge)","confidence":"high","note":""},{"id":"Lab_HbA1c","label":"HbA1c (%)","sec":"In-Hospital Labs","value":"8.3","source":"HbA1c 8.3 %","confidence":"high","note":""},{"id":"Lab_LDL","label":"LDL","sec":"In-Hospital Labs","value":"2.9","source":"LDL-C 2.9 mmol/L","confidence":"high","note":""},{"id":"Lab_Ferritin","label":"Ferritin (µg/L)","sec":"In-Hospital Labs","value":"64","source":"Ferritin 64 µg/L","confidence":"high","note":""},{"id":"Lab_TrSats","label":"Transferrin Sat. / TSAT (%)","sec":"In-Hospital Labs","value":"14","source":"TSAT 14 %","confidence":"high","note":""},{"id":"Discharge_Status","label":"Status on Discharge","sec":"Outcomes & Management","value":"Walking","source":"Discharged walking","confidence":"high","note":""},{"id":"Discharge_OPD_Appt","label":"OPD Appointment on Discharge","sec":"Outcomes & Management","value":"2026-09-24","source":"HF clinic follow-up on 24/09/2026","confidence":"high","note":""}],"medications":[{"key":"Furosemide","label":"Furosemide","generic":"Furosemide","dose":"80 mg IV BID","preset":true,"frequency":"","context":"in_hospital","source":"Treated with IV furosemide 80 mg BID","confidence":"high","note":"In-hospital IV dose; the discharge dose is 40 mg PO BID."},{"key":"Entresto","label":"Entresto","generic":"Sacubitril/valsartan","dose":"24/26 mg PO BID","preset":true,"frequency":"","context":"discharge","source":"Sacubitril/valsartan (Entresto) 24/26 mg BID","confidence":"high","note":""},{"key":"Concor","label":"Concor","generic":"Bisoprolol","dose":"2.5 mg PO OD","preset":true,"frequency":"","context":"discharge","source":"Bisoprolol (Concor) 2.5 mg OD","confidence":"high","note":""},{"key":"Aldactone","label":"Aldactone","generic":"Spironolactone","dose":"25 mg PO OD","preset":true,"frequency":"","context":"discharge","source":"Spironolactone (Aldactone) 25 mg OD","confidence":"high","note":""},{"key":"Forxiga","label":"Forxiga","generic":"Dapagliflozin","dose":"10 mg PO OD","preset":true,"frequency":"","context":"discharge","source":"Dapagliflozin (Forxiga) 10 mg OD","confidence":"high","note":""},{"key":"Furosemide","label":"Furosemide","generic":"Furosemide","dose":"40 mg PO BID","preset":true,"frequency":"","context":"discharge","source":"Furosemide 40 mg BID","confidence":"high","note":""},{"key":"Eliquis","label":"Eliquis","generic":"Apixaban","dose":"5 mg PO BID","preset":true,"frequency":"","context":"discharge","source":"Apixaban (Eliquis) 5 mg BID","confidence":"high","note":""},{"key":"Crestor","label":"Crestor","generic":"Rosuvastatin","dose":"20 mg PO OD","preset":true,"frequency":"","context":"discharge","source":"Rosuvastatin (Crestor) 20 mg OD (night)","confidence":"high","note":""},{"key":"Ferinject","label":"Ferinject (ferric carboxymaltose)","generic":"Ferric carboxymaltose","dose":"1000 mg IV once","preset":true,"frequency":"","context":"in_hospital","source":"Ferric carboxymaltose 1000 mg IV given on 08/09/2026 (in-hospital dose)","confidence":"medium","note":"Given once in hospital on 08/09/2026; not a discharge medicine."}],"other_medications":["Metformin 500 mg BID"],"later_labs":[{"test":"Urea","value":"9.8","when":"discharge","field_hint":"","source":"Urea ... 9.8"},{"test":"Sodium","value":"136","when":"discharge","field_hint":"","source":"Sodium ... 136"}],"notes":{"labs":"","echo":"Echo 04/09/2026: dilated LV, LVEDD 64 mm, global hypokinesia, moderate functional MR, RVSP 48 mmHg.","plan":"HF clinic follow-up 24/09/2026 with renal profile. Up-titrate GDMT. Smoking cessation advice given. Consider CRT-D if LVEF ≤35% after 3 months of optimised therapy.","other":"Hospital course: IV furosemide 80 mg BID, diuresis −5 kg. Ferric carboxymaltose 1000 mg IV on 08/09/2026."},"flags":["NYHA written as \"III–IV\" — IV chosen, please confirm.","Mobile number is not in the report — enter it by hand (required).","Ferinject was an in-hospital dose — it is not ticked as a discharge medicine."]},"visit":{"document_type":"HF clinic follow-up note","document_date":"2026-09-24","fields":[{"id":"Visit_Date","label":"Visit Date","sec":"Visit","value":"2026-09-24","source":"Clinic date: 24/09/2026","confidence":"high","note":""},{"id":"Visit_Type","label":"Visit Type","sec":"Visit","value":"Post-Discharge","source":"Visit: Post-discharge","confidence":"high","note":""},{"id":"V_NYHA","label":"NYHA Class","sec":"Symptoms","value":"II","source":"Breathless on moderate exertion (NYHA II)","confidence":"high","note":""},{"id":"V_BP","label":"BP","sec":"Signs / Vitals","value":"112/70","source":"BP 112/70 mmHg","confidence":"high","note":""},{"id":"V_Pulse","label":"Pulse","sec":"Signs / Vitals","value":"78","source":"HR 78 bpm regular","confidence":"high","note":""},{"id":"V_SpO2","label":"SpO2 %","sec":"Signs / Vitals","value":"97","source":"SpO2 97%","confidence":"high","note":""},{"id":"V_Weight","label":"Weight (kg)","sec":"Signs / Vitals","value":"84","source":"weight 84 kg","confidence":"high","note":""},{"id":"V_JVP","label":"JVP","sec":"Signs / Vitals","value":"N","source":"JVP not raised","confidence":"high","note":""},{"id":"V_Rales","label":"Pulm. Rales","sec":"Signs / Vitals","value":"N","source":"chest clear","confidence":"high","note":""},{"id":"V_Edema","label":"Oedema","sec":"Signs / Vitals","value":"Mild feet","source":"mild pedal oedema","confidence":"high","note":""},{"id":"V_Smoker","label":"Smoking Status","sec":"Risk Factors and Comorbidities","value":"Current","source":"Still smoking ~5 cigarettes/day","confidence":"high","note":""},{"id":"V_ECG_Done","label":"Performed","sec":"Investigations and Procedures","value":"Yes","source":"ECG","confidence":"high","note":""},{"id":"V_Arrhythmia","label":"Arrhythmia","sec":"Investigations and Procedures","value":"Sinus rhythm","source":"Sinus rhythm 76/min","confidence":"medium","note":"Free-text field"},{"id":"V_QRS","label":"QRS Width (ms)","sec":"Investigations and Procedures","value":"150","source":"QRS 150 ms","confidence":"high","note":""},{"id":"V_LBBB","label":"LBBB","sec":"Investigations and Procedures","value":"Yes","source":"LBBB","confidence":"high","note":""},{"id":"V_Na","label":"Sodium / Na (mmol/L)","sec":"Visit Labs — Kuwait SI units","value":"137","source":"Na 137","confidence":"high","note":""},{"id":"V_K","label":"Potassium / K (mmol/L)","sec":"Visit Labs — Kuwait SI units","value":"5.1","source":"K 5.1","confidence":"high","note":""},{"id":"V_Urea","label":"Urea (mmol/L)","sec":"Visit Labs — Kuwait SI units","value":"9.1","source":"Urea 9.1","confidence":"high","note":""},{"id":"V_Creat","label":"Creatinine (µmol/L)","sec":"Visit Labs — Kuwait SI units","value":"131","source":"Creatinine 131","confidence":"high","note":""},{"id":"V_eGFR","label":"eGFR (ml/min/1.73m²) Auto","sec":"Visit Labs — Kuwait SI units","value":"50","source":"eGFR 50","confidence":"high","note":""},{"id":"V_Hb","label":"Hb (g/dL)","sec":"Visit Labs — Kuwait SI units","value":"12.2","source":"Hb 12.2 g/dL","confidence":"high","note":""},{"id":"V_NTproBNP","label":"NT-proBNP (pg/mL)","sec":"Visit Labs — Kuwait SI units","value":"1480","source":"NT-proBNP 1480","confidence":"high","note":""},{"id":"V_Plan","label":"Plan / Recommendations","sec":"Assessment & Plan","value":"Up-titrate Entresto & bisoprolol. Reduce furosemide. Repeat U&E + K in 2 weeks. Smoking cessation clinic referral. Review in 6 weeks with echo.","source":"Plan: Up-titrate Entresto & bisoprolol as above…","confidence":"medium","note":"Handwritten"}],"medications":[{"key":"Entresto","label":"Entresto","generic":"Sacubitril/valsartan","dose":"49/51 mg PO BID","preset":true,"frequency":"","context":"current","source":"24/26 mg BID → ↑ 49/51 mg BID","confidence":"medium","note":"Handwritten change: increased from 24/26 mg BID"},{"key":"Concor","label":"Concor","generic":"Bisoprolol","dose":"5 mg PO OD","preset":true,"frequency":"","context":"current","source":"2.5 mg OD → ↑ 5 mg OD","confidence":"medium","note":"Handwritten change: increased from 2.5 mg OD"},{"key":"Aldactone","label":"Aldactone","generic":"Spironolactone","dose":"25 mg PO OD","preset":true,"frequency":"","context":"current","source":"25 mg OD continue","confidence":"high","note":""},{"key":"Forxiga","label":"Forxiga","generic":"Dapagliflozin","dose":"10 mg PO OD","preset":true,"frequency":"","context":"current","source":"10 mg OD continue","confidence":"high","note":""},{"key":"Furosemide","label":"Furosemide","generic":"Furosemide","dose":"40 mg PO OD","preset":true,"frequency":"","context":"current","source":"40 mg BID → ↓ 40 mg OD","confidence":"medium","note":"Handwritten change: decreased from 40 mg BID"},{"key":"Eliquis","label":"Eliquis","generic":"Apixaban","dose":"5 mg PO BID","preset":true,"frequency":"","context":"current","source":"5 mg BID continue","confidence":"high","note":""},{"key":"Crestor","label":"Crestor","generic":"Rosuvastatin","dose":"20 mg PO OD","preset":true,"frequency":"","context":"current","source":"20 mg OD continue","confidence":"high","note":""}],"other_medications":[],"later_labs":[],"notes":{"labs":"Labs dated 22/09/2026 (2 days before the visit).","echo":"","plan":"","other":"Feels better since discharge. No orthopnoea. Mild ankle swelling in the evenings."},"flags":["Labs are dated 22/09/2026, two days before the visit.","Medication changes are handwritten — please confirm the new doses."]},"extra":{"document_type":"Discharge summary","document_date":"2026-09-10","fields":[{"id":"Symptoms","label":"Symptoms on admission","sec":"Symptoms, Signs & Vitals","value":"Dyspnea","source":"Presented with progressive dyspnoea NYHA class III–IV","confidence":"high","note":""},{"id":"Sym_Other_Text","label":"Other Symptoms","sec":"Symptoms, Signs & Vitals","value":"Orthopnoea, bilateral lower limb oedema","source":"orthopnoea and bilateral lower limb oedema","confidence":"high","note":""},{"id":"NYHA","label":"NYHA","sec":"Symptoms, Signs & Vitals","value":"IV","source":"dyspnoea NYHA class III–IV","confidence":"low","note":"Written as \"III–IV\"; the worse class was chosen."},{"id":"date","label":"Admission Date","sec":"Admission Details","value":"2026-09-03","source":"Date of admission: 03/09/2026","confidence":"high","note":""},{"id":"dischargeDate","label":"Discharge Date","sec":"Admission Details","value":"2026-09-10","source":"Date of discharge: 10/09/2026","confidence":"high","note":""},{"id":"Admission_HF_Related","label":"Cause of Admission","sec":"Admission Details","value":"HF related","source":"Acute decompensated heart failure","confidence":"high","note":""},{"id":"reason","label":"Reason for admission / diagnosis","sec":"Admission Details","value":"Acute decompensated HF (de novo)","source":"Diagnosis 1","confidence":"high","note":""},{"id":"BP","label":"BP","sec":"Symptoms, Signs & Vitals","value":"104/68","source":"BP 104/68 mmHg","confidence":"high","note":""},{"id":"Pulse","label":"Pulse","sec":"Symptoms, Signs & Vitals","value":"108","source":"HR 108 bpm irregular","confidence":"high","note":""},{"id":"SpO2","label":"SpO2 (%)","sec":"Symptoms, Signs & Vitals","value":"91","source":"SpO2 91% on room air","confidence":"high","note":""},{"id":"Weight","label":"Weight (kg)","sec":"Symptoms, Signs & Vitals","value":"88","source":"Weight 88 kg","confidence":"high","note":""},{"id":"Height","label":"Height (cm)","sec":"Symptoms, Signs & Vitals","value":"172","source":"height 172 cm","confidence":"high","note":""},{"id":"JVP","label":"JVP","sec":"Symptoms, Signs & Vitals","value":"Raised","source":"raised JVP","confidence":"high","note":""},{"id":"Rales","label":"Rales","sec":"Symptoms, Signs & Vitals","value":"Yes","source":"bibasal crackles","confidence":"high","note":""},{"id":"Edema","label":"Oedema","sec":"Symptoms, Signs & Vitals","value":"Moderate","source":"moderate pitting oedema to the knees","confidence":"high","note":""},{"id":"ECG_Arrhythmia","label":"Arrhythmia","sec":"Investigations & Procedures","value":"Atrial fibrillation","source":"ECG: Atrial fibrillation, ventricular rate 110/min","confidence":"high","note":""},{"id":"ECG_QRS","label":"QRS Duration (ms)","sec":"Investigations & Procedures","value":"152","source":"QRS 152 ms","confidence":"high","note":""},{"id":"ECG_LBBB","label":"LBBB","sec":"Investigations & Procedures","value":"Yes","source":"LBBB morphology","confidence":"high","note":""},{"id":"Echo_EF","label":"EF %","sec":"Investigations & Procedures","value":"28","source":"LVEF 28% (Simpson's)","confidence":"high","note":""},{"id":"Lab_Na","label":"Na Adm (mmol/L)","sec":"In-Hospital Labs","value":"132","source":"Sodium 132 (admission)","confidence":"high","note":""},{"id":"Lab_K","label":"K Adm (mmol/L)","sec":"In-Hospital Labs","value":"4.9","source":"Potassium 4.9 (admission)","confidence":"high","note":""},{"id":"Lab_K_Disch","label":"K Disch (mmol/L)","sec":"In-Hospital Labs","value":"4.4","source":"Potassium 4.4 (discharge)","confidence":"high","note":""},{"id":"Lab_Urea","label":"Urea Adm (mmol/L)","sec":"In-Hospital Labs","value":"11.2","source":"Urea 11.2 (admission)","confidence":"high","note":""},{"id":"Lab_Creat","label":"Creatinine Adm (µmol/L)","sec":"In-Hospital Labs","value":"142","source":"Creatinine 142 µmol/L (admission)","confidence":"high","note":""},{"id":"Lab_Creat_Disch","label":"Creatinine Disch (µmol/L)","sec":"In-Hospital Labs","value":"128","source":"Creatinine 128 (discharge)","confidence":"high","note":""},{"id":"Lab_Hb","label":"Hb Adm (g/dL)","sec":"In-Hospital Labs","value":"11.8","source":"Haemoglobin 118 g/L","confidence":"medium","note":"Reported as 118 g/L, converted to g/dL."},{"id":"Lab_BNP","label":"NT-proBNP Adm (pg/mL)","sec":"In-Hospital Labs","value":"6850","source":"NT-proBNP 6850 pg/mL (admission)","confidence":"high","note":""},{"id":"Lab_BNP_Disch","label":"NT-proBNP Disch (pg/mL)","sec":"In-Hospital Labs","value":"2940","source":"NT-proBNP 2940 (discharge)","confidence":"high","note":""},{"id":"Lab_HbA1c","label":"HbA1c (%)","sec":"In-Hospital Labs","value":"8.3","source":"HbA1c 8.3 %","confidence":"high","note":""},{"id":"Lab_LDL","label":"LDL (mmol/L)","sec":"In-Hospital Labs","value":"2.9","source":"LDL-C 2.9 mmol/L","confidence":"high","note":""},{"id":"Lab_Ferritin","label":"Ferritin (µg/L)","sec":"In-Hospital Labs","value":"64","source":"Ferritin 64 µg/L","confidence":"high","note":""},{"id":"Lab_TrSats","label":"Transferrin Sat / TSAT (%)","sec":"In-Hospital Labs","value":"14","source":"TSAT 14 %","confidence":"high","note":""},{"id":"Discharge_Status","label":"Status on Discharge","sec":"Outcomes & Management","value":"Walking","source":"Discharged walking","confidence":"high","note":""},{"id":"Discharge_OPD_Appt","label":"OPD Appointment on Discharge","sec":"Outcomes & Management","value":"2026-09-24","source":"HF clinic follow-up on 24/09/2026","confidence":"high","note":""}],"medications":[{"key":"Furosemide","label":"Furosemide","generic":"Furosemide","dose":"80 mg IV BID","preset":true,"frequency":"","context":"in_hospital","source":"Treated with IV furosemide 80 mg BID","confidence":"high","note":"In-hospital IV dose; the discharge dose is 40 mg PO BID."},{"key":"Entresto","label":"Entresto","generic":"Sacubitril/valsartan","dose":"24/26 mg PO BID","preset":true,"frequency":"","context":"discharge","source":"Sacubitril/valsartan (Entresto) 24/26 mg BID","confidence":"high","note":""},{"key":"Concor","label":"Concor","generic":"Bisoprolol","dose":"2.5 mg PO OD","preset":true,"frequency":"","context":"discharge","source":"Bisoprolol (Concor) 2.5 mg OD","confidence":"high","note":""},{"key":"Aldactone","label":"Aldactone","generic":"Spironolactone","dose":"25 mg PO OD","preset":true,"frequency":"","context":"discharge","source":"Spironolactone (Aldactone) 25 mg OD","confidence":"high","note":""},{"key":"Forxiga","label":"Forxiga","generic":"Dapagliflozin","dose":"10 mg PO OD","preset":true,"frequency":"","context":"discharge","source":"Dapagliflozin (Forxiga) 10 mg OD","confidence":"high","note":""},{"key":"Furosemide","label":"Furosemide","generic":"Furosemide","dose":"40 mg PO BID","preset":true,"frequency":"","context":"discharge","source":"Furosemide 40 mg BID","confidence":"high","note":""},{"key":"Eliquis","label":"Eliquis","generic":"Apixaban","dose":"5 mg PO BID","preset":true,"frequency":"","context":"discharge","source":"Apixaban (Eliquis) 5 mg BID","confidence":"high","note":""},{"key":"Crestor","label":"Crestor","generic":"Rosuvastatin","dose":"20 mg PO OD","preset":true,"frequency":"","context":"discharge","source":"Rosuvastatin (Crestor) 20 mg OD (night)","confidence":"high","note":""},{"key":"Ferinject","label":"Ferinject (ferric carboxymaltose)","generic":"Ferric carboxymaltose","dose":"1000 mg IV once","preset":true,"frequency":"","context":"in_hospital","source":"Ferric carboxymaltose 1000 mg IV given on 08/09/2026 (in-hospital dose)","confidence":"medium","note":"Given once in hospital on 08/09/2026; not a discharge medicine."}],"other_medications":["Metformin 500 mg BID"],"later_labs":[{"test":"Urea","value":"9.8","when":"discharge","field_hint":"","source":"Urea ... 9.8"},{"test":"Sodium","value":"136","when":"discharge","field_hint":"","source":"Sodium ... 136"}],"notes":{"labs":"","echo":"Echo 04/09/2026: dilated LV, LVEDD 64 mm, global hypokinesia, moderate functional MR, RVSP 48 mmHg.","plan":"HF clinic follow-up 24/09/2026 with renal profile. Up-titrate GDMT. Smoking cessation advice given. Consider CRT-D if LVEF ≤35% after 3 months of optimised therapy.","other":"Hospital course: IV furosemide 80 mg BID, diuresis −5 kg. Ferric carboxymaltose 1000 mg IV on 08/09/2026."},"flags":["NYHA written as \"III–IV\" — IV chosen, please confirm.","Ferinject was an in-hospital dose — it is not ticked as a discharge medicine."]}};
   var NOTE_FIELD = {
     admission: { labs: 'Lab_Others', echo: 'Investigations_Other', plan: 'Notes', other: 'Notes', meds: 'Med_Others' },
-    visit: { labs: 'V_Lab_Others', echo: 'V_Echo_Other', plan: 'V_Plan', other: 'V_Others', meds: 'V_Med_Others' }
+    visit: { labs: 'V_Lab_Others', echo: 'V_Echo_Other', plan: 'V_Plan', other: 'V_Others', meds: 'V_Med_Others' },
+    extra: { labs: 'Lab_Others', echo: 'ECHO', plan: 'Notes', other: 'Notes', meds: 'Med_Others' },
+    labs: { labs: 'V_Lab_Others', echo: 'V_Lab_Others', plan: 'V_Lab_Others', other: 'V_Lab_Others', meds: 'V_Med_Others' }
   };
+  var SYM = ['Dyspnea', 'Palpitations', 'Fatigue', 'Chest Pain', 'Syncope'];
+  // multi-select fields of the main form that are stored in a hidden input
+  var MULTI_DOM = {
+    Fatigue: SYM, V_Fatigue: SYM,
+    Valvular_Type: ['MR', 'MS', 'AR', 'AS', 'TR', 'TS', 'PR', 'PS'], PCI_CABG: ['PCI', 'CABG'],
+    Inotropes_Selected: ['Dobutamine', 'Dopamine', 'Milrinone', 'Simdax', 'Levophed', 'Adrenaline', 'Vasopressin'],
+    Hemo_Support_Type: ['IABP', 'Impella', 'VA-ECMO'],
+    Complications: ['AKI', 'Arrhythmia', 'Infection', 'Cardiogenic Shock', 'Stroke', 'Bleeding', 'Cardiac Arrest', 'Death', 'Other'],
+    InHospital_Procedures: ['CAG/PCI', 'Devices', 'Ablations', 'Pericardiocentesis', 'Pleural tapping', 'Ascites tapping', 'Others']
+  };
+  var SYM_BOX = { Dyspnea: 'Dyspnea', Palpitations: 'Palpitations', Fatigue: 'Fatigue', 'Chest Pain': 'ChestPain', Syncope: 'Syncope' };
+  var TITLES = { admission: 'Fill the patient record from a report', visit: 'Fill this visit from a report', extra: 'Fill an additional admission from a report', labs: 'Lab slip → this visit\'s labs' };
   var CTX = { current: 'current', discharge: 'discharge', home: 'home (before admission)', in_hospital: 'in hospital only', stopped: 'stopped', planned: 'planned' };
   var st = null; // modal state
 
@@ -19504,17 +19535,46 @@ CFX.install();
       v.innerHTML = '<i class="fa fa-wand-magic-sparkles me-1"></i>Fill visit from report';
       v.onclick = function () { open('visit'); };
       vt.insertAdjacentElement('afterend', v);
+      var l = document.createElement('button');
+      l.type = 'button'; l.id = 'cfAiLabBtn'; l.className = 'btn btn-sm cf-ai-btn ms-2';
+      l.innerHTML = '<i class="fa fa-vial me-1"></i>Lab slip';
+      l.title = 'Photograph a lab result slip and fill this visit\'s labs';
+      l.onclick = function () { open('labs'); };
+      v.insertAdjacentElement('afterend', l);
     }
   }
 
+  function extraButtons() {
+    var add = $('addAdmissionBtn');
+    if (add && !$('cfAiExtraNewBtn')) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.id = 'cfAiExtraNewBtn'; b.className = 'btn btn-sm cf-ai-btn ms-2';
+      b.innerHTML = '<i class="fa fa-wand-magic-sparkles me-1"></i>Add admission from report';
+      b.onclick = function () { open('extra', { idx: null }); };
+      add.insertAdjacentElement('afterend', b);
+    }
+    document.querySelectorAll('.extra-adm-card').forEach(function (card) {
+      if (card.querySelector('.cf-ai-ea')) return;
+      var idx = +card.getAttribute('data-extra-idx');
+      var rm = card.querySelector('.ea-remove-btn');
+      if (!rm) return;
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'btn btn-sm cf-ai-btn cf-ai-ea me-2';
+      b.title = 'Fill this admission from a report';
+      b.innerHTML = '<i class="fa fa-wand-magic-sparkles"></i><span class="d-none d-md-inline ms-1">Fill from report</span>';
+      b.onclick = function (e) { e.stopPropagation(); open('extra', { idx: idx }); };
+      rm.insertAdjacentElement('beforebegin', b);
+    });
+  }
+
   // ---------- modal ----------
-  function open(mode) {
+  function open(mode, opt) {
     close();
-    st = { mode: mode, pages: [], res: null, demo: false };
+    st = { mode: mode, pages: [], res: null, demo: false, extraIdx: opt && opt.idx != null ? opt.idx : null };
     var ov = document.createElement('div');
     ov.id = 'cfAiModal'; ov.className = 'cf-ai-ov';
     ov.innerHTML = '<div class="cf-ai-box" role="dialog" aria-modal="true" aria-labelledby="cfAiTitle">' +
-      '<div class="cf-ai-head"><h5 id="cfAiTitle"><i class="fa fa-wand-magic-sparkles me-2"></i>' + (mode === 'visit' ? 'Fill this visit from a report' : 'Fill the patient record from a report') + '</h5>' +
+      '<div class="cf-ai-head"><h5 id="cfAiTitle"><i class="fa fa-wand-magic-sparkles me-2"></i>' + esc(TITLES[mode] + (mode === 'extra' ? (st.extraIdx == null ? ' (new)' : ' (#' + (st.extraIdx + 2) + ')') : '')) + '</h5>' +
       '<button type="button" class="btn-close" aria-label="Close" id="cfAiClose"></button></div>' +
       '<div class="cf-ai-body" id="cfAiBody"></div></div>';
     document.body.appendChild(ov);
@@ -19526,7 +19586,7 @@ CFX.install();
 
   function renderPick(err) {
     var body = $('cfAiBody');
-    var visitBlocked = st.mode === 'visit' && !hasPatientOpen();
+    var visitBlocked = (st.mode === 'visit' || st.mode === 'labs') && !hasPatientOpen();
     body.innerHTML =
       (err ? '<div class="alert alert-danger py-2 small">' + esc(err) + '</div>' : '') +
       '<p class="small text-muted mb-2">Take a clear photo of each page (flat, good light, whole page in frame) or choose images / a PDF. Up to ' + MAX_PAGES + ' pages of <b>one</b> report. Nothing is saved until you review and press Save.</p>' +
@@ -19554,7 +19614,7 @@ CFX.install();
         '<button type="button" class="cf-ai-x" data-i="' + i + '" aria-label="Remove page ' + (i + 1) + '">×</button><span class="cf-ai-n">' + (i + 1) + '</span></div>';
     }).join('');
     t.querySelectorAll('.cf-ai-x').forEach(function (b) { b.onclick = function () { st.pages.splice(+b.getAttribute('data-i'), 1); drawThumbs(); }; });
-    var r = $('cfAiRead'); if (r) r.disabled = !st.pages.length || (st.mode === 'visit' && !hasPatientOpen());
+    var r = $('cfAiRead'); if (r) r.disabled = !st.pages.length || ((st.mode === 'visit' || st.mode === 'labs') && !hasPatientOpen());
   }
   function addFiles(files) {
     var room = MAX_PAGES - st.pages.length;
@@ -19623,12 +19683,14 @@ CFX.install();
   }
   function demo() {
     if (!DEMO) { renderPick('Demo data is missing from this build.'); return; }
+    if (!DEMO[st.mode]) { renderPick('No demo for this section.'); return; }
     if (st.mode === 'admission' && hasPatientOpen() && !confirm('The demo puts a synthetic test patient\'s data into the record that is open now. Continue? (Nothing is saved unless you press Save.)')) return;
     busy('Demo: reading the built-in sample report…');
     setTimeout(function () {
       if (!st) return;
       st.busy = false; st.demo = true;
       st.res = { mode: st.mode, model: 'demo', pages: 1, usage: { est_cost_usd: 0 }, result: JSON.parse(JSON.stringify(DEMO[st.mode])) };
+      if (st.mode === 'labs') st.res.result.fields.forEach(function (f) { if (f.id === 'Slip_File_No') f.value = ($('File_No') || {}).value || f.value; });
       renderReview();
     }, 700);
   }
@@ -19651,6 +19713,44 @@ CFX.install();
     return 'Continue';
   }
 
+  // ---- where a field lives: the main form (DOM) or an additional admission (JSON array) ----
+  var EXTRA_DEF = null;
+  function extraDefs() {
+    if (EXTRA_DEF) return EXTRA_DEF;
+    EXTRA_DEF = {};
+    (typeof EXTRA_ADM_SCHEMA !== 'undefined' ? EXTRA_ADM_SCHEMA : []).forEach(function (sec) {
+      sec.fields.forEach(function (f) {
+        if (f.t === 'pills') f.items.forEach(function (i) { EXTRA_DEF[i.k] = { t: 'sel', o: ['No', 'Yes'], pill: true }; });
+        else if (f.k) EXTRA_DEF[f.k] = f;
+      });
+    });
+    return EXTRA_DEF;
+  }
+  function extraArr() { return typeof _readExtraAdmissions === 'function' ? _readExtraAdmissions() : []; }
+  function target(id) {
+    if (st.mode === 'extra') {
+      var d = extraDefs()[id];
+      if (!d || d.t === 'subhead' || d.t === 'fullmeds' || d.t === 'ecgimages') return null;
+      var rec = st.extraIdx != null ? (extraArr()[st.extraIdx] || {}) : {};
+      var kind = d.t === 'sel' ? 'select' : (d.t === 'multi' || d.t === 'btnmulti') ? 'multi' : d.t === 'date' ? 'date' : d.t === 'area' ? 'textarea' : 'text';
+      var opts = kind === 'select' || kind === 'multi' ? d.o.filter(function (x) { return x !== ''; }) : null;
+      var cur = String(rec[id] == null ? '' : rec[id]).trim();
+      if (kind === 'select' && (cur === opts[0] && (d.pill || /^(No|N|Never|Alive)$/.test(cur)))) cur = '';
+      return { kind: kind, opts: opts, cur: cur, derived: !!d._derived };
+    }
+    var el = $(id);
+    if (!el) return null;
+    if (MULTI_DOM[id]) return { kind: 'multi', opts: MULTI_DOM[id], cur: String(el.value || '').trim(), el: el };
+    var k = el.tagName === 'SELECT' ? 'select' : el.type === 'date' ? 'date' : el.tagName === 'TEXTAREA' ? 'textarea' : 'text';
+    return { kind: k, opts: k === 'select' ? optionValues(el).filter(Boolean) : null, cur: isEmptyish(el) ? '' : String(el.value).trim(), el: el };
+  }
+  function splitMulti(v) { return String(v || '').split(',').map(function (x) { return x.trim(); }).filter(Boolean); }
+  function unionMulti(a, b) { var out = splitMulti(a); splitMulti(b).forEach(function (x) { if (out.indexOf(x) < 0) out.push(x); }); return out.join(', '); }
+  function hasMed(prefix, key) {
+    if (st.mode === 'extra') return (typeof ADMISSION_MED_LIST !== 'undefined' ? ADMISSION_MED_LIST : []).some(function (m) { return m.id === 'A_' + key; });
+    return !!medRow(prefix, key);
+  }
+
   function renderReview() {
     var R = st.res.result, mode = st.mode, prefix = mode === 'visit' ? 'V_' : 'A_';
     st.items = [];
@@ -19664,18 +19764,36 @@ CFX.install();
     h.push('<p class="small text-muted mb-2">Ticked items will be filled in. <b>Check every value against the report.</b> Items with low confidence, or that would overwrite something already in the form, start unticked.</p>');
     if (R.flags && R.flags.length) h.push('<div class="cf-ai-flags"><b><i class="fa fa-triangle-exclamation me-1"></i>Please check</b><ul>' + R.flags.map(function (f) { return '<li>' + esc(f) + '</li>'; }).join('') + '</ul></div>');
 
+    // lab slip: identity and date checks (these two values are never written to the form)
+    var slipBad = false, slipDateNote = '';
+    if (mode === 'labs') {
+      var sf = (R.fields || []).filter(function (f) { return f.id === 'Slip_File_No'; })[0];
+      var sd = (R.fields || []).filter(function (f) { return f.id === 'Slip_Date'; })[0];
+      var openFile = String(($('File_No') || {}).value || '').replace(/\D/g, ''), slipFile = sf ? String(sf.value).replace(/\D/g, '') : '';
+      var vis = String(($('Visit_Date') || {}).value || '');
+      var who = esc((($('Patient_Name') || {}).value || 'the open patient'));
+      if (!slipFile) h.push('<div class="cf-ai-slip warn"><i class="fa fa-id-card me-1"></i>No file number was read on the slip. Make sure it belongs to <b>' + who + '</b>.</div>');
+      else if (openFile && slipFile !== openFile && slipFile.indexOf(openFile) < 0 && openFile.indexOf(slipFile) < 0) {
+        slipBad = true;
+        h.push('<div class="cf-ai-slip bad"><i class="fa fa-triangle-exclamation me-1"></i><b>Different patient?</b> The slip shows file <b>' + esc(sf.value) + '</b> but the open patient is file <b>' + esc(openFile) + '</b> (' + who + '). Nothing is ticked; tick only if you are sure.</div>');
+      } else h.push('<div class="cf-ai-slip ok"><i class="fa fa-circle-check me-1"></i>File ' + esc(sf.value) + ' matches ' + who + '.</div>');
+      if (sd && vis && sd.value !== vis) slipDateNote = 'Labs dated ' + fmtDate(sd.value);
+      if (sd) h.push('<div class="small text-muted mb-2">Sample date: <b>' + fmtDate(sd.value) + '</b>' + (slipDateNote ? ' · the visit date is ' + fmtDate(vis) + ' (a note with the lab date will be added to Other labs)' : '') + '</div>');
+    }
     // fields grouped by section
     var groups = {}, order = [], missing = [];
     (R.fields || []).forEach(function (f) {
-      var el = $(f.id);
-      if (!el) { missing.push(f); return; }
-      var cur = isEmptyish(el) ? '' : String(el.value).trim();
+      if (f.id === 'Slip_File_No' || f.id === 'Slip_Date') return;
+      var T = target(f.id);
+      if (!T) { missing.push(f); return; }
+      var cur = T.cur;
       // a new visit's date is pre-set to today: the report's own date should replace it
       var preset = f.id === 'Visit_Date' && cur === todayIso() && !(typeof editingVisitId !== 'undefined' && editingVisitId);
-      var conflict = cur && cur !== f.value && !preset;
-      var same = cur && cur === f.value;
-      var auto = /\bauto\b/i.test(f.label || '');
-      var it = { kind: 'field', f: f, el: el, cur: cur, same: same, on: !same && !conflict && !auto && f.confidence !== 'low' };
+      var same = cur && (cur === f.value || (T.kind === 'multi' && unionMulti(cur, f.value) === unionMulti(cur, '')));
+      var conflict = cur && !same && !preset && T.kind !== 'multi';
+      var auto = /\bauto\b/i.test(f.label || '') || T.derived;
+      var it = { kind: 'field', f: f, T: T, el: T.el, cur: cur, same: same, on: !same && !conflict && !auto && f.confidence !== 'low' };
+      if (slipBad) it.on = false;
       it.idx = st.items.push(it) - 1;
       if (!groups[f.sec]) { groups[f.sec] = []; order.push(f.sec); }
       groups[f.sec].push(it);
@@ -19694,7 +19812,7 @@ CFX.install();
       var taken = {};
       h.push('<div class="cf-ai-sec"><div class="cf-ai-sech">Medications</div>');
       meds.forEach(function (m) {
-        var row = medRow(prefix, m.key);
+        var row = mode === 'extra' ? hasMed(prefix, m.key) : medRow(prefix, m.key);
         var it = { kind: 'med', m: m, row: row };
         var good = prefer.indexOf(m.context) >= 0 && m.confidence !== 'low' && row && !taken[m.key];
         if (good) taken[m.key] = 1;
@@ -19714,14 +19832,15 @@ CFX.install();
       var it1 = { kind: 'append', target: nf.meds, text: R.other_medications.join('; '), on: true, title: 'Other medications' };
       it1.idx = st.items.push(it1) - 1; h.push(appendHtml(it1));
     }
+    if (slipDateNote) { var itd = { kind: 'append', target: nf.labs, text: slipDateNote, on: !slipBad, title: 'Lab date' }; itd.idx = st.items.push(itd) - 1; h.push(appendHtml(itd)); }
     (R.later_labs || []).forEach(function (l) {
-      var it = { kind: 'lab', l: l, on: true };
+      var it = { kind: 'lab', l: l, on: !slipBad };
       it.idx = st.items.push(it) - 1; h.push(labHtml(it, mode));
     });
-    [['labs', 'Lab notes'], ['echo', 'Echo details'], ['plan', 'Plan'], ['other', 'Other notes']].forEach(function (p) {
+    [['labs', mode === 'labs' ? 'Other tests' : 'Lab notes'], ['echo', 'Echo details'], ['plan', 'Plan'], ['other', 'Other notes']].forEach(function (p) {
       var t = R.notes && R.notes[p[0]];
       if (!t) return;
-      var it = { kind: 'append', target: nf[p[0]], text: t, on: true, title: p[1] };
+      var it = { kind: 'append', target: nf[p[0]], text: t, on: !slipBad, title: p[1] };
       it.idx = st.items.push(it) - 1; h.push(appendHtml(it));
     });
     if (missing.length) h.push('<details class="small text-muted mt-2"><summary>' + missing.length + ' item(s) have no matching box on this form</summary>' + missing.map(function (f) { return esc(f.label || f.id) + ': ' + esc(f.value); }).join('<br>') + '</details>');
@@ -19755,20 +19874,26 @@ CFX.install();
     return (s ? '<div class="cf-ai-src">“' + esc(s) + '”</div>' : '') + (note ? '<div class="cf-ai-note">' + esc(note) + '</div>' : '');
   }
   function fieldHtml(it) {
-    var f = it.f, el = it.el, input;
-    if (el.tagName === 'SELECT') {
-      var opts = optionValues(el).filter(Boolean);
+    var f = it.f, T = it.T, input;
+    if (T.kind === 'multi') {
+      var pick = splitMulti(f.value);
+      input = '<div class="cf-ai-multi" data-v="' + it.idx + '">' + T.opts.map(function (o) {
+        return '<label><input type="checkbox" value="' + esc(o) + '"' + (pick.indexOf(o) >= 0 ? ' checked' : '') + '> ' + esc(o) + '</label>';
+      }).join('') + '</div>';
+    } else if (T.kind === 'select') {
+      var opts = T.opts.slice();
       if (opts.indexOf(f.value) < 0) opts.unshift(f.value);
       input = '<select class="form-select form-select-sm cf-ai-val" data-v="' + it.idx + '">' + opts.map(function (o) { return '<option' + (o === f.value ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select>';
-    } else if (el.tagName === 'TEXTAREA' || f.value.length > 40) {
+    } else if (T.kind === 'textarea' || f.value.length > 40) {
       input = '<textarea class="form-control form-control-sm cf-ai-val" rows="2" data-v="' + it.idx + '">' + esc(f.value) + '</textarea>';
     } else {
-      input = '<input class="form-control form-control-sm cf-ai-val" data-v="' + it.idx + '" value="' + esc(f.value) + '"' + (el.type === 'date' ? ' type="date"' : '') + '>';
+      input = '<input class="form-control form-control-sm cf-ai-val" data-v="' + it.idx + '" value="' + esc(f.value) + '"' + (T.kind === 'date' ? ' type="date"' : '') + '>';
     }
     var tags = [];
     if (it.same) tags.push('<span class="cf-ai-tag same">already in form</span>');
+    else if (it.cur && T.kind === 'multi') tags.push('<span class="cf-ai-tag">adds to: ' + esc(it.cur) + '</span>');
     else if (it.cur && !it.conflict) tags.push('<span class="cf-ai-tag">replaces today\'s date</span>');
-    else if (it.conflict) tags.push('<span class="cf-ai-tag conflict">form now: ' + esc(el.type === 'date' ? fmtDate(it.cur) : it.cur) + '</span>');
+    else if (it.conflict) tags.push('<span class="cf-ai-tag conflict">form now: ' + esc(T.kind === 'date' ? fmtDate(it.cur) : it.cur) + '</span>');
     if (it.auto) tags.push('<span class="cf-ai-tag">the app calculates this</span>');
     return '<div class="cf-ai-row' + (f.confidence === 'low' ? ' low' : '') + '"><label class="cf-ai-chk"><input type="checkbox" data-k="' + it.idx + '"' + (it.on ? ' checked' : '') + '></label>' +
       '<div class="cf-ai-lab">' + esc(f.label) + ' ' + confChip(f.confidence) + tags.join('') + src(f.source, f.note) + '</div>' +
@@ -19791,13 +19916,14 @@ CFX.install();
   }
   function labHtml(it, mode) {
     var l = it.l, labsField = NOTE_FIELD[mode].labs;
-    var opts = [].slice.call(document.querySelectorAll('#hfForm input[id$="_Disch"]')).map(function (e) { return e.id; });
-    if (mode === 'visit') opts = [];
+    var opts = mode === 'extra' ? Object.keys(extraDefs()).filter(function (k) { return /_Disch$/.test(k); }) :
+      [].slice.call(document.querySelectorAll('#hfForm input[id$="_Disch"]')).map(function (e) { return e.id; });
+    if (mode === 'visit' || mode === 'labs') opts = [];
     var sel = '<select class="form-select form-select-sm cf-ai-tgt" data-t="' + it.idx + '"><option value="' + labsField + '">Add to lab notes</option>' +
       opts.map(function (id) { return '<option value="' + id + '"' + (id === l.field_hint ? ' selected' : '') + '>' + esc(id.replace(/_/g, ' ')) + '</option>'; }).join('') + '</select>';
     it.target = l.field_hint && opts.indexOf(l.field_hint) >= 0 ? l.field_hint : labsField;
     return '<div class="cf-ai-row"><label class="cf-ai-chk"><input type="checkbox" data-k="' + it.idx + '"' + (it.on ? ' checked' : '') + '></label>' +
-      '<div class="cf-ai-lab">' + esc(l.test) + ' <b>' + esc(l.value) + '</b>' + (l.when ? ' <span class="text-muted small">(' + esc(l.when) + ')</span>' : '') + src(l.source) + '</div>' +
+      '<div class="cf-ai-lab">' + esc(l.test) + ' <b>' + esc(l.value) + '</b>' + (l.when ? ' <span class="text-muted small">(' + esc(fmtDate(l.when)) + ')</span>' : '') + src(l.source) + '</div>' +
       '<div class="cf-ai-in">' + sel + '</div></div>';
   }
 
@@ -19818,7 +19944,36 @@ CFX.install();
     fire(el); mark(el);
     return true;
   }
-  function valueOf(idx) { var e = $('cfAiBody').querySelector('[data-v="' + idx + '"]'); return e ? String(e.value).trim() : null; }
+  function valueOf(idx) {
+    var e = $('cfAiBody').querySelector('[data-v="' + idx + '"]');
+    if (!e) return null;
+    if (e.classList.contains('cf-ai-multi')) return [].slice.call(e.querySelectorAll('input:checked')).map(function (c) { return c.value; }).join(', ');
+    return String(e.value).trim();
+  }
+  // main-form multi-selects: merge with what is there, then let the page redraw its own buttons
+  function setMultiDom(id, v) {
+    var el = $(id), all = unionMulti(el ? el.value : '', v);
+    if (id === 'Fatigue' || id === 'V_Fatigue') {
+      var pre = id === 'V_Fatigue' ? 'V_Sym_' : 'Sym_';
+      splitMulti(v).forEach(function (o) { var cb = $(pre + SYM_BOX[o]); if (cb) { cb.checked = true; mark(cb.parentNode); } });
+      if (id === 'Fatigue' && typeof syncOtherSymptoms === 'function') syncOtherSymptoms();
+      if (id === 'V_Fatigue' && typeof syncVisitOtherSymptoms === 'function') syncVisitOtherSymptoms();
+      return;
+    }
+    if (el) el.value = all;
+    if (id === 'Valvular_Type' && typeof restoreValvularType === 'function') restoreValvularType(all);
+    else if (id === 'PCI_CABG' && typeof restorePCICABG === 'function') restorePCICABG(all);
+    else if (id === 'Complications' && typeof restoreComplications === 'function') restoreComplications(all);
+    else if (id === 'InHospital_Procedures' && typeof restoreInHospitalProcedures === 'function') restoreInHospitalProcedures(all);
+    else if (id === 'Inotropes_Selected' && typeof restoreInotropesFromData === 'function') restoreInotropesFromData({ Inotropes_Used: 'Yes', Inotropes_Selected: all });
+    else if (id === 'Hemo_Support_Type' && typeof restoreHemoSupportFromData === 'function') restoreHemoSupportFromData({ Hemo_Support: 'Yes', Hemo_Support_Type: all });
+  }
+  function freqOf(t) {
+    var fm = String(t).match(/\b(OD|BID|BD|TID|TDS|QID|once daily|twice daily|nocte|weekly|every \d+ weeks?|monthly|once|\d+ mg\/h)\b/i);
+    if (!fm) return '';
+    var u = fm[1].toUpperCase();
+    return u === 'BD' ? 'BID' : u === 'TDS' ? 'TID' : fm[1];
+  }
   function setMed(row, action, doseText) {
     var act = row.querySelector('.cf-act');
     act.value = action; act.dispatchEvent(new Event('change'));
@@ -19829,13 +19984,14 @@ CFX.install();
     if (hit) { sel.value = hit; sel.dispatchEvent(new Event('change')); }
     else {
       sel.value = '__other'; sel.dispatchEvent(new Event('change'));
-      var fm = doseText.match(/\b(OD|BID|BD|TID|TDS|QID|once daily|twice daily|nocte|weekly|every \d+ weeks?|monthly|once)\b/i);
       custom.value = doseText; custom.dispatchEvent(new Event('input'));
-      if (fm && !freq.value) { freq.value = fm[1].toUpperCase() === 'BD' ? 'BID' : fm[1].toUpperCase() === 'TDS' ? 'TID' : fm[1]; freq.dispatchEvent(new Event('input')); }
+      var fq = freqOf(doseText);
+      if (fq && !freq.value) { freq.value = fq; freq.dispatchEvent(new Event('input')); }
     }
     mark(sel);
   }
   function apply() {
+    if (st.mode === 'extra') return applyExtra();
     var mode = st.mode, prefix = mode === 'visit' ? 'V_' : 'A_', nf = NOTE_FIELD[mode];
     var n = { fields: 0, meds: 0, notes: 0 }, extraMeds = [];
     // the lab target selects
@@ -19845,13 +20001,12 @@ CFX.install();
       var v = valueOf(it.idx);
       if (it.kind === 'field') {
         if (v == null || v === '') return;
+        if (it.T.kind === 'multi') { setMultiDom(it.f.id, v); mark(it.el); n.fields++; return; }
         it.el.value = v;
         if (it.el.tagName === 'SELECT' && it.el.value !== v) { // value not in the list: add it once so it is not lost
           var o = document.createElement('option'); o.value = o.textContent = v; it.el.appendChild(o); it.el.value = v;
         }
         fire(it.el); mark(it.el);
-        if (it.f.id === 'Valvular_Type' && typeof restoreValvularType === 'function') restoreValvularType(v);
-        if (it.f.id === 'PCI_CABG' && typeof restorePCICABG === 'function') restorePCICABG(v);
         n.fields++;
       } else if (it.kind === 'med') {
         var m = it.m, dose = v == null ? m.dose : v;
@@ -19864,11 +20019,14 @@ CFX.install();
       } else if (it.kind === 'lab') {
         var el = $(it.target);
         if (it.target !== nf.labs && el && !String(el.value || '').trim()) { el.value = it.l.value; fire(el); mark(el); n.fields++; }
-        else if (appendTo(nf.labs, it.l.test + ' ' + it.l.value + (it.l.when ? ' (' + it.l.when + ')' : ''))) n.notes++;
+        else if (appendTo(nf.labs, it.l.test + ' ' + it.l.value + (it.l.when ? ' (' + fmtDate(it.l.when) + ')' : ''))) n.notes++;
       }
     });
     if (extraMeds.length) appendTo(nf.meds, extraMeds.join('; '));
     try { if (typeof syncPillsFromData === 'function') syncPillsFromData(); } catch (e) { /* older pages */ }
+    done(n);
+  }
+  function done(n) {
     var demo = st.demo;
     close();
     var msg = n.fields + ' field' + (n.fields === 1 ? '' : 's') + ', ' + n.meds + ' medicine' + (n.meds === 1 ? '' : 's') + (n.notes ? ' and ' + n.notes + ' note' + (n.notes === 1 ? '' : 's') : '') +
@@ -19876,14 +20034,86 @@ CFX.install();
     if (typeof showPopup === 'function') showPopup('success', 'Filled from report', msg); else alert(msg);
   }
 
+  // Additional admission: values go into that admission's record through the page's own
+  // updateExtraAdmission(), so derived values, gates and outcome mirrors behave as if typed.
+  function applyExtra() {
+    var nf = NOTE_FIELD.extra, n = { fields: 0, meds: 0, notes: 0 }, extraMeds = [], filled = [];
+    $('cfAiBody').querySelectorAll('.cf-ai-tgt').forEach(function (s) { st.items[+s.getAttribute('data-t')].target = s.value; });
+    var idx = st.extraIdx;
+    if (idx == null || !(idx < extraArr().length)) {
+      if (typeof addExtraAdmission !== 'function') { alert('This page cannot add admissions.'); return; }
+      addExtraAdmission();
+      idx = extraArr().length - 1;
+    }
+    var tag = st.demo ? '[Demo] ' : '[From report' + (st.res.result.document_date ? ' ' + fmtDate(st.res.result.document_date) : '') + '] ';
+    function put(k, v) { updateExtraAdmission(idx, k, v); filled.push(k); }
+    function append(k, text) {
+      if (!text) return false;
+      var cur = String((extraArr()[idx] || {})[k] || '').trim();
+      if (cur.indexOf(text) >= 0) return false;
+      var multiLine = (extraDefs()[k] || {}).t === 'area';
+      put(k, (cur ? cur + (multiLine ? '\n' : '; ') : '') + tag + text);
+      return true;
+    }
+    st.items.forEach(function (it) {
+      if (!it.on) return;
+      var v = valueOf(it.idx);
+      if (it.kind === 'field') {
+        if (v == null || v === '') return;
+        if (it.T.kind === 'multi') v = unionMulti((extraArr()[idx] || {})[it.f.id], v);
+        put(it.f.id, v); n.fields++;
+      } else if (it.kind === 'med') {
+        var m = it.m, dose = v == null ? m.dose : v, id = 'A_' + m.key;
+        if (!it.row) { extraMeds.push(m.label + (m.context !== 'stopped' ? ' ' + dose : ' (stopped)')); return; }
+        if (m.context === 'stopped') { onExtraAdmissionMedStatusChange(idx, id, 'Stopped'); n.meds++; return; }
+        var def = (ADMISSION_MED_LIST.filter(function (x) { return x.id === id; })[0] || { doses: [] });
+        var preset = def.doses.filter(function (d) { return d && d.toLowerCase() === dose.toLowerCase(); })[0];
+        onExtraAdmissionMedStatusChange(idx, id, 'Yes');
+        if (preset) put(id, preset); else { put(id + '_Custom', dose); var fq = freqOf(dose); if (fq) put(id + '_Freq', fq); }
+        n.meds++;
+      } else if (it.kind === 'append') {
+        if (append(it.target, v)) n.notes++;
+      } else if (it.kind === 'lab') {
+        var rec = extraArr()[idx] || {};
+        if (it.target !== nf.labs && !String(rec[it.target] || '').trim()) { put(it.target, it.l.value); n.fields++; }
+        else if (append(nf.labs, it.l.test + ' ' + it.l.value + (it.l.when ? ' (' + fmtDate(it.l.when) + ')' : ''))) n.notes++;
+      }
+    });
+    if (extraMeds.length) append(nf.meds, extraMeds.join('; '));
+    if (typeof _renderExtraAdmissions === 'function') _renderExtraAdmissions();
+    var card = document.querySelector('.extra-adm-card[data-extra-idx="' + idx + '"]');
+    var step = card && card.closest('.form-step');
+    if (step && !step.classList.contains('active') && typeof goToWizardStep === 'function') goToWizardStep(+step.getAttribute('data-step'));
+    if (card) {
+      card.classList.add('expanded');
+      filled.forEach(function (k) { var el = $('ea_' + idx + '_' + k); if (el) mark(el); });
+      setTimeout(function () { card.scrollIntoView({ block: 'start', behavior: 'smooth' }); }, 50);
+    }
+    done(n);
+  }
+
+  function clearMarks() { document.querySelectorAll('.cf-ai-filled').forEach(function (e) { e.classList.remove('cf-ai-filled'); }); }
   function init() {
     addButtons();
+    extraButtons();
+    // highlights belong to the record that was filled: clear them when another record is opened or the form is cleared
+    ['resetForm', 'editPt'].forEach(function (fn) {
+      if (typeof window[fn] !== 'function' || window[fn].cfAiClear) return;
+      var o = window[fn];
+      window[fn] = function () { clearMarks(); return o.apply(this, arguments); };
+      window[fn].cfAiClear = true;
+    });
+    if (typeof window._renderExtraAdmissions === 'function' && !window._renderExtraAdmissions.cfAi) {
+      var orig = window._renderExtraAdmissions;
+      window._renderExtraAdmissions = function () { var r = orig.apply(this, arguments); try { extraButtons(); } catch (e) { /* keep the page working */ } return r; };
+      window._renderExtraAdmissions.cfAi = true;
+    }
     // the visit title can be re-rendered; keep the button there
     var vt = $('visitFormTitle');
     if (vt && window.MutationObserver) new MutationObserver(function () { if (!$('cfAiVisBtn')) addButtons(); }).observe(vt.parentNode, { childList: true });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
-  window.CFAI = { open: open, close: close, _state: function () { return st; }, _visitAction: visitAction, region: AI_REGION };
+  window.CFAI = { labSlip: function (id) { if (window.CFUI && CFUI.startVisit) CFUI.startVisit(id, { labs: true }); }, open: open, close: close, _state: function () { return st; }, _visitAction: visitAction, region: AI_REGION };
 })();
 
 </script>
