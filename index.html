@@ -19616,7 +19616,8 @@ CFX.install();
       st.busy = false;
       var code = String(e && e.code || ''), msg = String(e && e.message || e);
       if (/not-found/.test(code) || /not found/i.test(msg)) msg = 'The AI reader is not deployed on the server yet (see the setup guide). You can still press "Try the demo".';
-      else if (/internal/.test(code) && /^internal$/i.test(msg)) msg = 'The AI reader did not answer. Check the internet connection and try again.';
+      else if (/internal/.test(code) && /^internal$/i.test(msg)) msg = 'The AI reader failed on the server (no details). If this repeats, run "firebase functions:log --only extractReport" and check the last error.';
+      else if (/unavailable|deadline/.test(code) && !/busy/i.test(msg)) msg = 'No answer from the AI reader (' + code.replace('functions/', '') + '). Check the internet connection and try again.';
       renderPick(msg);
     });
   }
