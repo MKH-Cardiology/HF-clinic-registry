@@ -21,6 +21,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-functions-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root{--primary:#0B2D5B;--primary-dark:#071F40;--secondary:#6c757d;--accent:#1E88E5;--success:#1d6f42;--info:#17a2b8;--warning-soft:#fff3cd;--danger-soft:#f8d7da;}
@@ -1896,6 +1897,54 @@ details.cf-iron[open]>summary{margin-bottom:6px;}
   .cf-why select{flex:1;min-width:140px;}
   .cf-mt-slim{justify-content:flex-start;}
 }
+
+/* ---- Fill from report (CFAI) ---- */
+.cf-ai-btn{background:#f3ecff;color:#5b2bb5;border:1px solid #d6c4fb;font-weight:600;margin:4px 0 8px;}
+.cf-ai-btn:hover{background:#e7dcff;color:#4a1f9c;}
+#visitFormTitle + .cf-ai-btn{margin:-6px 0 10px;}
+.cf-ai-ov{position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:3000;display:flex;align-items:center;justify-content:center;padding:12px;}
+.cf-ai-box{background:#fff;border-radius:14px;width:min(860px,100%);max-height:94vh;display:flex;flex-direction:column;box-shadow:0 20px 50px rgba(0,0,0,.3);}
+.cf-ai-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #eee;}
+.cf-ai-head h5{margin:0;font-size:1.02rem;font-weight:700;color:#4a1f9c;}
+.cf-ai-body{padding:12px 16px;overflow:auto;}
+.cf-ai-pick{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.cf-ai-thumbs{display:flex;gap:8px;flex-wrap:wrap;min-height:10px;}
+.cf-ai-thumb{position:relative;width:96px;height:124px;border:1px solid #ddd;border-radius:8px;overflow:hidden;background:#f8f8f8;}
+.cf-ai-thumb img{width:100%;height:100%;object-fit:cover;}
+.cf-ai-pdf{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;font-size:.7rem;text-align:center;padding:4px;color:#b91c1c;word-break:break-all;}
+.cf-ai-pdf i{font-size:2rem;margin-bottom:4px;}
+.cf-ai-x{position:absolute;top:2px;right:2px;border:0;background:rgba(0,0,0,.6);color:#fff;border-radius:50%;width:22px;height:22px;line-height:20px;padding:0;}
+.cf-ai-n{position:absolute;left:4px;bottom:3px;background:rgba(255,255,255,.85);border-radius:4px;font-size:.7rem;padding:0 4px;}
+.cf-ai-foot{display:flex;align-items:center;gap:8px;margin-top:12px;}
+.cf-ai-foot.sticky{position:sticky;bottom:-12px;background:#fff;padding:10px 0;border-top:1px solid #eee;}
+.cf-ai-legal{font-size:.72rem;color:#888;margin-top:8px;}
+.cf-ai-busy{display:flex;flex-direction:column;align-items:center;gap:10px;padding:40px 10px;text-align:center;}
+.cf-ai-meta{margin-bottom:6px;}
+.cf-ai-flags{background:#fff8e1;border:1px solid #ffe08a;border-radius:8px;padding:8px 10px;font-size:.84rem;margin-bottom:10px;}
+.cf-ai-flags ul{margin:4px 0 0;padding-left:18px;}
+.cf-ai-sec{border:1px solid #eee;border-radius:10px;margin-bottom:10px;overflow:hidden;}
+.cf-ai-sech{background:#f6f3fd;font-weight:700;font-size:.82rem;padding:5px 10px;color:#4a1f9c;}
+.cf-ai-row{display:grid;grid-template-columns:28px 1fr minmax(150px,38%);gap:6px 8px;align-items:start;padding:6px 10px;border-top:1px solid #f1f1f1;font-size:.85rem;}
+.cf-ai-row:first-child{border-top:0;}
+.cf-ai-row.low{background:#F3F7FC;}
+.cf-ai-chk input{width:18px;height:18px;margin-top:2px;}
+.cf-ai-src{font-size:.74rem;color:#666;font-style:italic;margin-top:2px;}
+.cf-ai-note{font-size:.74rem;color:#9a3412;margin-top:1px;}
+.cf-ai-conf{font-size:.66rem;border-radius:8px;padding:0 6px;margin-left:2px;text-transform:uppercase;letter-spacing:.02em;}
+.cf-ai-conf.high{background:#dcfce7;color:#166534;}.cf-ai-conf.medium{background:#fef9c3;color:#854d0e;}.cf-ai-conf.low{background:#fee2e2;color:#991b1b;}
+.cf-ai-tag{display:inline-block;font-size:.68rem;border-radius:8px;padding:0 6px;margin-left:4px;background:#eef2ff;color:#3730a3;}
+.cf-ai-tag.conflict{background:#ffedd5;color:#9a3412;}.cf-ai-tag.same{background:#f1f5f9;color:#475569;}.cf-ai-tag.act{background:#e0f2fe;color:#075985;font-weight:600;}.cf-ai-tag.ctx{background:#f5f5f4;color:#57534e;}
+#hfForm .cf-ai-filled{background:#fffbe6!important;box-shadow:0 0 0 2px #facc15 inset;}
+@media (max-width:640px){
+  .cf-ai-ov{padding:0;align-items:stretch;}
+  .cf-ai-box{border-radius:0;max-height:100vh;height:100%;}
+  .cf-ai-row{grid-template-columns:26px 1fr;}
+  .cf-ai-in{grid-column:2;}
+}
+.cf-ai-thumb.sm{width:56px;height:72px;cursor:zoom-in;}
+.cf-ai-zoom{position:fixed;inset:0;z-index:3100;background:rgba(0,0,0,.85);overflow:auto;display:flex;flex-direction:column;align-items:center;padding:10px;gap:8px;cursor:zoom-out;}
+.cf-ai-zoom img{max-width:min(1400px,100%);height:auto;background:#fff;}
+.cf-ai-zoom button{position:sticky;bottom:10px;}
 
 </style>
 
@@ -19413,6 +19462,428 @@ var CFX = (function () {
   return { install: install, loadAll: loadAll, derive: derive, stats: stats, CALC: CALC };
 })();
 CFX.install();
+
+</script>
+<script id="cf-ai">
+/* CFAI - "Fill from report": read a photographed/scanned report with Claude (via the
+   extractReport Cloud Function) and fill the registry form after the doctor reviews it.
+   Nothing is saved automatically; the images are sent only to the function and not stored. */
+(function () {
+  'use strict';
+  var AI_REGION = 'europe-west1';          // must match REGION in ai-function/functions/index.js
+  var MAX_PAGES = 6, MAX_EDGE = 1800, JPEG_Q = 0.85;
+  var DEMO = {"admission":{"document_type":"Discharge summary","document_date":"2026-09-10","fields":[{"id":"Patient_Name","label":"Name","sec":"Demographics","value":"SAMPLE PATIENT (TEST)","source":"Patient: SAMPLE PATIENT (TEST)","confidence":"high","note":""},{"id":"File_No","label":"File No  (6 digits)","sec":"Demographics","value":"900123","source":"File No: 900123","confidence":"high","note":""},{"id":"Civil_ID","label":"Civil ID  (12 digits)","sec":"Demographics","value":"270011299999","source":"Civil ID: 270011299999","confidence":"high","note":""},{"id":"Age","label":"Age","sec":"Demographics","value":"58","source":"Age/Sex: 58 Y / Male","confidence":"high","note":""},{"id":"Gender","label":"Gender","sec":"Demographics","value":"Male","source":"Age/Sex: 58 Y / Male","confidence":"high","note":""},{"id":"Nationality","label":"Nationality","sec":"Demographics","value":"Kuwaiti","source":"Nationality: Kuwaiti","confidence":"high","note":""},{"id":"HF_Type","label":"Type of HF","sec":"HF diagnosis","value":"HFrEF","source":"Acute decompensated heart failure (de novo), HFrEF, LVEF 28%","confidence":"high","note":""},{"id":"EF_Diagnosis","label":"EF at Diagnosis (%)","sec":"HF diagnosis","value":"28","source":"LVEF 28% (Simpson's)","confidence":"high","note":""},{"id":"HF_Cause","label":"Cause of HF","sec":"HF diagnosis","value":"ICM","source":"Ischaemic cardiomyopathy — old anterior STEMI (2019)","confidence":"high","note":""},{"id":"DeNovo_HF","label":"De Novo HF","sec":"HF diagnosis","value":"Yes","source":"(de novo)","confidence":"high","note":""},{"id":"NYHA","label":"NYHA Visit","sec":"Symptoms, Signs & Vitals","value":"IV","source":"dyspnoea NYHA class III–IV","confidence":"low","note":"Written as \"III–IV\"; the worse class was chosen."},{"id":"Admission_Date","label":"Admission Date","sec":"Symptoms, Signs & Vitals","value":"2026-09-03","source":"Date of admission: 03/09/2026","confidence":"high","note":""},{"id":"Admission_Discharge_Date","label":"Discharge Date","sec":"Symptoms, Signs & Vitals","value":"2026-09-10","source":"Date of discharge: 10/09/2026","confidence":"high","note":""},{"id":"Admission_HF_Related","label":"Cause of Admission","sec":"Symptoms, Signs & Vitals","value":"HF related","source":"Acute decompensated heart failure","confidence":"high","note":""},{"id":"Admission_Reason","label":"Reason / Notes","sec":"Symptoms, Signs & Vitals","value":"Acute decompensated HF (de novo)","source":"Diagnosis 1","confidence":"high","note":""},{"id":"BP","label":"BP","sec":"Symptoms, Signs & Vitals","value":"104/68","source":"BP 104/68 mmHg","confidence":"high","note":""},{"id":"Pulse","label":"Pulse","sec":"Symptoms, Signs & Vitals","value":"108","source":"HR 108 bpm irregular","confidence":"high","note":""},{"id":"SpO2","label":"SpO2 (%)","sec":"Symptoms, Signs & Vitals","value":"91","source":"SpO2 91% on room air","confidence":"high","note":""},{"id":"Weight","label":"Weight (kg)","sec":"Symptoms, Signs & Vitals","value":"88","source":"Weight 88 kg","confidence":"high","note":""},{"id":"Height","label":"Height (cm)","sec":"Symptoms, Signs & Vitals","value":"172","source":"height 172 cm","confidence":"high","note":""},{"id":"JVP","label":"JVP","sec":"Symptoms, Signs & Vitals","value":"Raised","source":"raised JVP","confidence":"high","note":""},{"id":"Rales","label":"Rales","sec":"Symptoms, Signs & Vitals","value":"Yes","source":"bibasal crackles","confidence":"high","note":""},{"id":"Edema","label":"Oedema","sec":"Symptoms, Signs & Vitals","value":"Moderate","source":"moderate pitting oedema to the knees","confidence":"high","note":""},{"id":"Smoker","label":"Smoker","sec":"Risk Factors & Comorbidities","value":"Current","source":"Current smoker (20 pack-years)","confidence":"high","note":""},{"id":"DM","label":"DM","sec":"Risk Factors & Comorbidities","value":"Yes","source":"Type 2 DM","confidence":"high","note":""},{"id":"HTN","label":"HTN","sec":"Risk Factors & Comorbidities","value":"Yes","source":"HTN","confidence":"high","note":""},{"id":"Dyslipidemia","label":"Dyslipidemia","sec":"Risk Factors & Comorbidities","value":"Yes","source":"dyslipidaemia","confidence":"high","note":""},{"id":"AF","label":"AF","sec":"Risk Factors & Comorbidities","value":"Yes","source":"Paroxysmal atrial fibrillation","confidence":"high","note":""},{"id":"CKD","label":"CKD","sec":"Risk Factors & Comorbidities","value":"Yes","source":"CKD stage 3a","confidence":"high","note":""},{"id":"IHD","label":"IHD","sec":"Risk Factors & Comorbidities","value":"STEMI","source":"old anterior STEMI (2019), s/p PCI to LAD","confidence":"high","note":""},{"id":"ECG_Arrhythmia","label":"Arrhythmia","sec":"Investigations & Procedures","value":"Atrial fibrillation","source":"ECG: Atrial fibrillation, ventricular rate 110/min","confidence":"high","note":""},{"id":"ECG_QRS","label":"QRS Duration (ms)","sec":"Investigations & Procedures","value":"152","source":"QRS 152 ms","confidence":"high","note":""},{"id":"ECG_LBBB","label":"LBBB","sec":"Investigations & Procedures","value":"Yes","source":"LBBB morphology","confidence":"high","note":""},{"id":"Echo_Done","label":"Performed","sec":"Investigations & Procedures","value":"Yes","source":"Echo (04/09/2026)","confidence":"high","note":""},{"id":"Echo_EF","label":"EF %","sec":"Investigations & Procedures","value":"28","source":"LVEF 28% (Simpson's)","confidence":"high","note":""},{"id":"Valvular_Disease","label":"Valvular Disease","sec":"HF diagnosis","value":"Yes","source":"moderate functional MR","confidence":"high","note":""},{"id":"Valvular_Type","label":"Valvular disease type","sec":"History","value":"MR","source":"moderate functional MR","confidence":"medium","note":""},{"id":"Lab_Na","label":"Na Adm (mmol/L)","sec":"In-Hospital Labs","value":"132","source":"Sodium 132 (admission)","confidence":"high","note":""},{"id":"Lab_K","label":"K Adm (mmol/L)","sec":"In-Hospital Labs","value":"4.9","source":"Potassium 4.9 (admission)","confidence":"high","note":""},{"id":"Lab_K_Disch","label":"K Disch (mmol/L)","sec":"In-Hospital Labs","value":"4.4","source":"Potassium 4.4 (discharge)","confidence":"high","note":""},{"id":"Lab_Urea","label":"Urea Adm (mmol/L)","sec":"In-Hospital Labs","value":"11.2","source":"Urea 11.2 (admission)","confidence":"high","note":""},{"id":"Lab_Creat","label":"Creatinine Adm (µmol/L)","sec":"In-Hospital Labs","value":"142","source":"Creatinine 142 µmol/L (admission)","confidence":"high","note":""},{"id":"Lab_Creat_Disch","label":"Creatinine Disch (µmol/L)","sec":"In-Hospital Labs","value":"128","source":"Creatinine 128 (discharge)","confidence":"high","note":""},{"id":"Lab_eGFR","label":"eGFR Adm Auto","sec":"In-Hospital Labs","value":"46","source":"eGFR 46 (admission)","confidence":"high","note":""},{"id":"Lab_eGFR_Disch","label":"eGFR Disch Auto","sec":"In-Hospital Labs","value":"52","source":"eGFR 52 (discharge)","confidence":"high","note":""},{"id":"Lab_Hb","label":"Hb Adm (g/dL)","sec":"In-Hospital Labs","value":"11.8","source":"Haemoglobin 118 g/L","confidence":"medium","note":"Reported as 118 g/L, converted to g/dL."},{"id":"Lab_BNP","label":"NT-proBNP Adm (pg/mL)","sec":"In-Hospital Labs","value":"6850","source":"NT-proBNP 6850 pg/mL (admission)","confidence":"high","note":""},{"id":"Lab_BNP_Disch","label":"NT-proBNP Disch (pg/mL)","sec":"In-Hospital Labs","value":"2940","source":"NT-proBNP 2940 (discharge)","confidence":"high","note":""},{"id":"Lab_HbA1c","label":"HbA1c (%)","sec":"In-Hospital Labs","value":"8.3","source":"HbA1c 8.3 %","confidence":"high","note":""},{"id":"Lab_LDL","label":"LDL","sec":"In-Hospital Labs","value":"2.9","source":"LDL-C 2.9 mmol/L","confidence":"high","note":""},{"id":"Lab_Ferritin","label":"Ferritin (µg/L)","sec":"In-Hospital Labs","value":"64","source":"Ferritin 64 µg/L","confidence":"high","note":""},{"id":"Lab_TrSats","label":"Transferrin Sat. / TSAT (%)","sec":"In-Hospital Labs","value":"14","source":"TSAT 14 %","confidence":"high","note":""},{"id":"Discharge_Status","label":"Status on Discharge","sec":"Outcomes & Management","value":"Walking","source":"Discharged walking","confidence":"high","note":""},{"id":"Discharge_OPD_Appt","label":"OPD Appointment on Discharge","sec":"Outcomes & Management","value":"2026-09-24","source":"HF clinic follow-up on 24/09/2026","confidence":"high","note":""}],"medications":[{"key":"Entresto","label":"Entresto","generic":"Sacubitril/valsartan","dose":"24/26 mg PO BID","preset":true,"frequency":"","context":"discharge","source":"Sacubitril/valsartan (Entresto) 24/26 mg BID","confidence":"high","note":""},{"key":"Concor","label":"Concor","generic":"Bisoprolol","dose":"2.5 mg PO OD","preset":true,"frequency":"","context":"discharge","source":"Bisoprolol (Concor) 2.5 mg OD","confidence":"high","note":""},{"key":"Aldactone","label":"Aldactone","generic":"Spironolactone","dose":"25 mg PO OD","preset":true,"frequency":"","context":"discharge","source":"Spironolactone (Aldactone) 25 mg OD","confidence":"high","note":""},{"key":"Forxiga","label":"Forxiga","generic":"Dapagliflozin","dose":"10 mg PO OD","preset":true,"frequency":"","context":"discharge","source":"Dapagliflozin (Forxiga) 10 mg OD","confidence":"high","note":""},{"key":"Furosemide","label":"Furosemide","generic":"Furosemide","dose":"40 mg PO BID","preset":true,"frequency":"","context":"discharge","source":"Furosemide 40 mg BID","confidence":"high","note":""},{"key":"Eliquis","label":"Eliquis","generic":"Apixaban","dose":"5 mg PO BID","preset":true,"frequency":"","context":"discharge","source":"Apixaban (Eliquis) 5 mg BID","confidence":"high","note":""},{"key":"Crestor","label":"Crestor","generic":"Rosuvastatin","dose":"20 mg PO OD","preset":true,"frequency":"","context":"discharge","source":"Rosuvastatin (Crestor) 20 mg OD (night)","confidence":"high","note":""},{"key":"Ferinject","label":"Ferinject (ferric carboxymaltose)","generic":"Ferric carboxymaltose","dose":"1000 mg IV once","preset":true,"frequency":"","context":"in_hospital","source":"Ferric carboxymaltose 1000 mg IV given on 08/09/2026 (in-hospital dose)","confidence":"medium","note":"Given once in hospital on 08/09/2026; not a discharge medicine."}],"other_medications":["Metformin 500 mg BID"],"later_labs":[{"test":"Urea","value":"9.8","when":"discharge","field_hint":"","source":"Urea ... 9.8"},{"test":"Sodium","value":"136","when":"discharge","field_hint":"","source":"Sodium ... 136"}],"notes":{"labs":"","echo":"Echo 04/09/2026: dilated LV, LVEDD 64 mm, global hypokinesia, moderate functional MR, RVSP 48 mmHg.","plan":"HF clinic follow-up 24/09/2026 with renal profile. Up-titrate GDMT. Smoking cessation advice given. Consider CRT-D if LVEF ≤35% after 3 months of optimised therapy.","other":"Hospital course: IV furosemide 80 mg BID, diuresis −5 kg. Ferric carboxymaltose 1000 mg IV on 08/09/2026."},"flags":["NYHA written as \"III–IV\" — IV chosen, please confirm.","Mobile number is not in the report — enter it by hand (required).","Ferinject was an in-hospital dose — it is not ticked as a discharge medicine."]},"visit":{"document_type":"HF clinic follow-up note","document_date":"2026-09-24","fields":[{"id":"Visit_Date","label":"Visit Date","sec":"Visit","value":"2026-09-24","source":"Clinic date: 24/09/2026","confidence":"high","note":""},{"id":"Visit_Type","label":"Visit Type","sec":"Visit","value":"Post-Discharge","source":"Visit: Post-discharge","confidence":"high","note":""},{"id":"V_NYHA","label":"NYHA Class","sec":"Symptoms","value":"II","source":"Breathless on moderate exertion (NYHA II)","confidence":"high","note":""},{"id":"V_BP","label":"BP","sec":"Signs / Vitals","value":"112/70","source":"BP 112/70 mmHg","confidence":"high","note":""},{"id":"V_Pulse","label":"Pulse","sec":"Signs / Vitals","value":"78","source":"HR 78 bpm regular","confidence":"high","note":""},{"id":"V_SpO2","label":"SpO2 %","sec":"Signs / Vitals","value":"97","source":"SpO2 97%","confidence":"high","note":""},{"id":"V_Weight","label":"Weight (kg)","sec":"Signs / Vitals","value":"84","source":"weight 84 kg","confidence":"high","note":""},{"id":"V_JVP","label":"JVP","sec":"Signs / Vitals","value":"N","source":"JVP not raised","confidence":"high","note":""},{"id":"V_Rales","label":"Pulm. Rales","sec":"Signs / Vitals","value":"N","source":"chest clear","confidence":"high","note":""},{"id":"V_Edema","label":"Oedema","sec":"Signs / Vitals","value":"Mild feet","source":"mild pedal oedema","confidence":"high","note":""},{"id":"V_Smoker","label":"Smoking Status","sec":"Risk Factors and Comorbidities","value":"Current","source":"Still smoking ~5 cigarettes/day","confidence":"high","note":""},{"id":"V_ECG_Done","label":"Performed","sec":"Investigations and Procedures","value":"Yes","source":"ECG","confidence":"high","note":""},{"id":"V_Arrhythmia","label":"Arrhythmia","sec":"Investigations and Procedures","value":"Sinus rhythm","source":"Sinus rhythm 76/min","confidence":"medium","note":"Free-text field"},{"id":"V_QRS","label":"QRS Width (ms)","sec":"Investigations and Procedures","value":"150","source":"QRS 150 ms","confidence":"high","note":""},{"id":"V_LBBB","label":"LBBB","sec":"Investigations and Procedures","value":"Yes","source":"LBBB","confidence":"high","note":""},{"id":"V_Na","label":"Sodium / Na (mmol/L)","sec":"Visit Labs — Kuwait SI units","value":"137","source":"Na 137","confidence":"high","note":""},{"id":"V_K","label":"Potassium / K (mmol/L)","sec":"Visit Labs — Kuwait SI units","value":"5.1","source":"K 5.1","confidence":"high","note":""},{"id":"V_Urea","label":"Urea (mmol/L)","sec":"Visit Labs — Kuwait SI units","value":"9.1","source":"Urea 9.1","confidence":"high","note":""},{"id":"V_Creat","label":"Creatinine (µmol/L)","sec":"Visit Labs — Kuwait SI units","value":"131","source":"Creatinine 131","confidence":"high","note":""},{"id":"V_eGFR","label":"eGFR (ml/min/1.73m²) Auto","sec":"Visit Labs — Kuwait SI units","value":"50","source":"eGFR 50","confidence":"high","note":""},{"id":"V_Hb","label":"Hb (g/dL)","sec":"Visit Labs — Kuwait SI units","value":"12.2","source":"Hb 12.2 g/dL","confidence":"high","note":""},{"id":"V_NTproBNP","label":"NT-proBNP (pg/mL)","sec":"Visit Labs — Kuwait SI units","value":"1480","source":"NT-proBNP 1480","confidence":"high","note":""},{"id":"V_Plan","label":"Plan / Recommendations","sec":"Assessment & Plan","value":"Up-titrate Entresto & bisoprolol. Reduce furosemide. Repeat U&E + K in 2 weeks. Smoking cessation clinic referral. Review in 6 weeks with echo.","source":"Plan: Up-titrate Entresto & bisoprolol as above…","confidence":"medium","note":"Handwritten"}],"medications":[{"key":"Entresto","label":"Entresto","generic":"Sacubitril/valsartan","dose":"49/51 mg PO BID","preset":true,"frequency":"","context":"current","source":"24/26 mg BID → ↑ 49/51 mg BID","confidence":"medium","note":"Handwritten change: increased from 24/26 mg BID"},{"key":"Concor","label":"Concor","generic":"Bisoprolol","dose":"5 mg PO OD","preset":true,"frequency":"","context":"current","source":"2.5 mg OD → ↑ 5 mg OD","confidence":"medium","note":"Handwritten change: increased from 2.5 mg OD"},{"key":"Aldactone","label":"Aldactone","generic":"Spironolactone","dose":"25 mg PO OD","preset":true,"frequency":"","context":"current","source":"25 mg OD continue","confidence":"high","note":""},{"key":"Forxiga","label":"Forxiga","generic":"Dapagliflozin","dose":"10 mg PO OD","preset":true,"frequency":"","context":"current","source":"10 mg OD continue","confidence":"high","note":""},{"key":"Furosemide","label":"Furosemide","generic":"Furosemide","dose":"40 mg PO OD","preset":true,"frequency":"","context":"current","source":"40 mg BID → ↓ 40 mg OD","confidence":"medium","note":"Handwritten change: decreased from 40 mg BID"},{"key":"Eliquis","label":"Eliquis","generic":"Apixaban","dose":"5 mg PO BID","preset":true,"frequency":"","context":"current","source":"5 mg BID continue","confidence":"high","note":""},{"key":"Crestor","label":"Crestor","generic":"Rosuvastatin","dose":"20 mg PO OD","preset":true,"frequency":"","context":"current","source":"20 mg OD continue","confidence":"high","note":""}],"other_medications":[],"later_labs":[],"notes":{"labs":"Labs dated 22/09/2026 (2 days before the visit).","echo":"","plan":"","other":"Feels better since discharge. No orthopnoea. Mild ankle swelling in the evenings."},"flags":["Labs are dated 22/09/2026, two days before the visit.","Medication changes are handwritten — please confirm the new doses."]}};
+  var NOTE_FIELD = {
+    admission: { labs: 'Lab_Others', echo: 'Investigations_Other', plan: 'Notes', other: 'Notes', meds: 'Med_Others' },
+    visit: { labs: 'V_Lab_Others', echo: 'V_Echo_Other', plan: 'V_Plan', other: 'V_Others', meds: 'V_Med_Others' }
+  };
+  var CTX = { current: 'current', discharge: 'discharge', home: 'home (before admission)', in_hospital: 'in hospital only', stopped: 'stopped', planned: 'planned' };
+  var st = null; // modal state
+
+  function $(id) { return document.getElementById(id); }
+  function esc(x) { return String(x == null ? '' : x).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function fmtDate(iso) { var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || ''); return m ? m[3] + '/' + m[2] + '/' + m[1] : iso || ''; }
+  function todayIso() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  function hasPatientOpen() { return (typeof editingDocId !== 'undefined' && !!editingDocId) || (typeof currentPatientId !== 'undefined' && !!currentPatientId); }
+
+  // ---------- buttons ----------
+  function addButtons() {
+    var ft = $('formTitle');
+    if (ft && !$('cfAiAdmBtn')) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.id = 'cfAiAdmBtn'; b.className = 'btn btn-sm cf-ai-btn';
+      b.innerHTML = '<i class="fa fa-wand-magic-sparkles me-1"></i>Fill from report';
+      b.title = 'Photograph or upload a discharge summary / report and let the AI fill the form for you to review';
+      b.onclick = function () { open('admission'); };
+      ft.insertAdjacentElement('afterend', b);
+    }
+    var vt = $('visitFormTitle');
+    if (vt && !$('cfAiVisBtn')) {
+      var v = document.createElement('button');
+      v.type = 'button'; v.id = 'cfAiVisBtn'; v.className = 'btn btn-sm cf-ai-btn';
+      v.innerHTML = '<i class="fa fa-wand-magic-sparkles me-1"></i>Fill visit from report';
+      v.onclick = function () { open('visit'); };
+      vt.insertAdjacentElement('afterend', v);
+    }
+  }
+
+  // ---------- modal ----------
+  function open(mode) {
+    close();
+    st = { mode: mode, pages: [], res: null, demo: false };
+    var ov = document.createElement('div');
+    ov.id = 'cfAiModal'; ov.className = 'cf-ai-ov';
+    ov.innerHTML = '<div class="cf-ai-box" role="dialog" aria-modal="true" aria-labelledby="cfAiTitle">' +
+      '<div class="cf-ai-head"><h5 id="cfAiTitle"><i class="fa fa-wand-magic-sparkles me-2"></i>' + (mode === 'visit' ? 'Fill this visit from a report' : 'Fill the patient record from a report') + '</h5>' +
+      '<button type="button" class="btn-close" aria-label="Close" id="cfAiClose"></button></div>' +
+      '<div class="cf-ai-body" id="cfAiBody"></div></div>';
+    document.body.appendChild(ov);
+    $('cfAiClose').onclick = close;
+    ov.addEventListener('click', function (e) { if (e.target === ov && !st.busy) close(); });
+    renderPick();
+  }
+  function close() { var m = $('cfAiModal'); if (m) m.remove(); st = null; }
+
+  function renderPick(err) {
+    var body = $('cfAiBody');
+    var visitBlocked = st.mode === 'visit' && !hasPatientOpen();
+    body.innerHTML =
+      (err ? '<div class="alert alert-danger py-2 small">' + esc(err) + '</div>' : '') +
+      '<p class="small text-muted mb-2">Take a clear photo of each page (flat, good light, whole page in frame) or choose images / a PDF. Up to ' + MAX_PAGES + ' pages of <b>one</b> report. Nothing is saved until you review and press Save.</p>' +
+      (visitBlocked ? '<div class="alert alert-warning py-2 small">Open the patient first, then use this from the visit section.</div>' : '') +
+      '<div class="cf-ai-pick">' +
+      '<label class="btn btn-primary btn-sm"><i class="fa fa-camera me-1"></i>Take photo<input type="file" accept="image/*" capture="environment" id="cfAiCam" hidden></label>' +
+      '<label class="btn btn-outline-primary btn-sm"><i class="fa fa-images me-1"></i>Choose images / PDF<input type="file" accept="image/*,application/pdf" multiple id="cfAiFiles" hidden></label>' +
+      '</div><div class="cf-ai-thumbs" id="cfAiThumbs"></div>' +
+      '<div class="cf-ai-foot">' +
+      '<button type="button" class="btn btn-link btn-sm" id="cfAiDemo" title="Uses a built-in synthetic test patient; no AI call and no cost">Try the demo</button>' +
+      '<span class="flex-grow-1"></span>' +
+      '<button type="button" class="btn btn-success" id="cfAiRead" disabled><i class="fa fa-eye me-1"></i>Read report</button></div>' +
+      '<div class="cf-ai-legal">Images go to the AI service only to read them and are not stored by the app. Use only as approved by your hospital.</div>';
+    function onFiles(e) { addFiles([].slice.call(e.target.files || [])); e.target.value = ''; }
+    $('cfAiCam').onchange = onFiles; $('cfAiFiles').onchange = onFiles;
+    $('cfAiRead').onclick = read;
+    $('cfAiDemo').onclick = demo;
+    if (visitBlocked) { $('cfAiDemo').disabled = true; }
+    drawThumbs();
+  }
+  function drawThumbs() {
+    var t = $('cfAiThumbs'); if (!t) return;
+    t.innerHTML = st.pages.map(function (p, i) {
+      return '<div class="cf-ai-thumb">' + (p.type === 'application/pdf' ? '<div class="cf-ai-pdf"><i class="fa fa-file-pdf"></i><span>' + esc(p.name) + '</span></div>' : '<img src="data:' + p.type + ';base64,' + p.data + '" alt="Page ' + (i + 1) + '">') +
+        '<button type="button" class="cf-ai-x" data-i="' + i + '" aria-label="Remove page ' + (i + 1) + '">×</button><span class="cf-ai-n">' + (i + 1) + '</span></div>';
+    }).join('');
+    t.querySelectorAll('.cf-ai-x').forEach(function (b) { b.onclick = function () { st.pages.splice(+b.getAttribute('data-i'), 1); drawThumbs(); }; });
+    var r = $('cfAiRead'); if (r) r.disabled = !st.pages.length || (st.mode === 'visit' && !hasPatientOpen());
+  }
+  function addFiles(files) {
+    var room = MAX_PAGES - st.pages.length;
+    if (files.length > room) alert('Only ' + MAX_PAGES + ' pages per report; the extra files were left out.');
+    files.slice(0, Math.max(0, room)).reduce(function (pr, f) {
+      return pr.then(function () {
+        if (f.type === 'application/pdf') {
+          if (f.size > 8 * 1024 * 1024) { alert(f.name + ' is larger than 8 MB. Please photograph the pages instead.'); return; }
+          return readB64(f).then(function (d) { st.pages.push({ type: 'application/pdf', data: d, name: f.name }); });
+        }
+        return shrink(f).then(function (d) { st.pages.push({ type: 'image/jpeg', data: d, name: f.name }); })
+          .catch(function () { alert('Could not open ' + f.name + '. Please use a JPEG/PNG photo.'); });
+      });
+    }, Promise.resolve()).then(drawThumbs);
+  }
+  function readB64(f) {
+    return new Promise(function (res, rej) { var r = new FileReader(); r.onload = function () { res(String(r.result).split(',')[1]); }; r.onerror = rej; r.readAsDataURL(f); });
+  }
+  function shrink(f) {
+    return new Promise(function (res, rej) {
+      var url = URL.createObjectURL(f), img = new Image();
+      img.onload = function () {
+        var k = Math.min(1, MAX_EDGE / Math.max(img.naturalWidth, img.naturalHeight));
+        var c = document.createElement('canvas');
+        c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+        var g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        res(c.toDataURL('image/jpeg', JPEG_Q).split(',')[1]);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); rej(new Error('image')); };
+      img.src = url;
+    });
+  }
+
+  function callable() {
+    try {
+      if (typeof firebase === 'undefined' || typeof firebase.app !== 'function') return null;
+      var app = firebase.app();
+      if (typeof app.functions !== 'function') return null;
+      return app.functions(AI_REGION).httpsCallable('extractReport', { timeout: 180000 });
+    } catch (e) { return null; }
+  }
+  function busy(msg) {
+    st.busy = true;
+    $('cfAiBody').innerHTML = '<div class="cf-ai-busy"><div class="spinner-border text-primary" role="status"></div><div>' + msg + '</div><div class="small text-muted">This usually takes 15–60 seconds. Keep this screen open.</div></div>';
+  }
+  function read() {
+    var fn = callable();
+    if (!fn) { renderPick('The AI reader is not set up on the server yet (the extractReport function is not deployed). You can still press "Try the demo".'); return; }
+    var n = st.pages.length;
+    busy('Reading ' + n + ' page' + (n > 1 ? 's' : '') + '…');
+    var pages = st.pages;
+    fn({ mode: st.mode, today: todayIso(), images: pages.map(function (p) { return { type: p.type, data: p.data }; }) }).then(function (r) {
+      if (!st) return;
+      st.busy = false; st.res = r.data; st.demo = false;
+      renderReview();
+    }).catch(function (e) {
+      if (!st) return;
+      st.busy = false;
+      var code = String(e && e.code || ''), msg = String(e && e.message || e);
+      if (/not-found/.test(code) || /not found/i.test(msg)) msg = 'The AI reader is not deployed on the server yet (see the setup guide). You can still press "Try the demo".';
+      else if (/internal/.test(code) && /^internal$/i.test(msg)) msg = 'The AI reader did not answer. Check the internet connection and try again.';
+      renderPick(msg);
+    });
+  }
+  function demo() {
+    if (!DEMO) { renderPick('Demo data is missing from this build.'); return; }
+    if (st.mode === 'admission' && hasPatientOpen() && !confirm('The demo puts a synthetic test patient\'s data into the record that is open now. Continue? (Nothing is saved unless you press Save.)')) return;
+    busy('Demo: reading the built-in sample report…');
+    setTimeout(function () {
+      if (!st) return;
+      st.busy = false; st.demo = true;
+      st.res = { mode: st.mode, model: 'demo', pages: 1, usage: { est_cost_usd: 0 }, result: JSON.parse(JSON.stringify(DEMO[st.mode])) };
+      renderReview();
+    }, 700);
+  }
+
+  // ---------- review ----------
+  function isEmptyish(el) {
+    var v = String(el.value || '').trim();
+    if (!v) return true;
+    if (el.tagName === 'SELECT' && el.selectedIndex <= 0) return true;
+    return false;
+  }
+  function optionValues(el) { return [].slice.call(el.options || []).map(function (o) { return o.value || o.text; }); }
+  function medRow(prefix, key) { return document.querySelector('.cf-med[data-med="' + prefix + key + '"]'); }
+  function doseMg(t, f) { var p = CF.parseDose(t, f); return p ? (p.perDay != null ? p.perDay : p.mg) : null; }
+  function visitAction(prev, dose) {
+    if (!prev) return 'Start';
+    if (prev.toLowerCase() === dose.toLowerCase()) return 'Continue';
+    var a = doseMg(prev), b = doseMg(dose);
+    if (a != null && b != null) return b > a + 1e-9 ? 'Increase' : b < a - 1e-9 ? 'Decrease' : 'Continue';
+    return 'Continue';
+  }
+
+  function renderReview() {
+    var R = st.res.result, mode = st.mode, prefix = mode === 'visit' ? 'V_' : 'A_';
+    st.items = [];
+    var h = [];
+    var u = st.res.usage || {};
+    h.push('<div class="cf-ai-meta">' + (st.demo ? '<span class="badge bg-warning text-dark me-1">DEMO · synthetic patient</span>' : '') +
+      '<b>' + esc(R.document_type || 'Report') + '</b>' + (R.document_date ? ' · ' + fmtDate(R.document_date) : '') +
+      (u.est_cost_usd != null && !st.demo ? ' <span class="text-muted small">· about $' + Number(u.est_cost_usd).toFixed(3) + '</span>' : '') + '</div>');
+    var imgs = st.demo ? [] : st.pages.filter(function (p) { return p.type !== 'application/pdf'; });
+    if (imgs.length) h.push('<div class="cf-ai-thumbs mb-2">' + imgs.map(function (p, i) { return '<div class="cf-ai-thumb sm" data-z="' + i + '" title="Tap to enlarge"><img src="data:' + p.type + ';base64,' + p.data + '" alt="Page ' + (i + 1) + '"></div>'; }).join('') + '<span class="small text-muted align-self-center">Tap a page to compare</span></div>');
+    h.push('<p class="small text-muted mb-2">Ticked items will be filled in. <b>Check every value against the report.</b> Items with low confidence, or that would overwrite something already in the form, start unticked.</p>');
+    if (R.flags && R.flags.length) h.push('<div class="cf-ai-flags"><b><i class="fa fa-triangle-exclamation me-1"></i>Please check</b><ul>' + R.flags.map(function (f) { return '<li>' + esc(f) + '</li>'; }).join('') + '</ul></div>');
+
+    // fields grouped by section
+    var groups = {}, order = [], missing = [];
+    (R.fields || []).forEach(function (f) {
+      var el = $(f.id);
+      if (!el) { missing.push(f); return; }
+      var cur = isEmptyish(el) ? '' : String(el.value).trim();
+      // a new visit's date is pre-set to today: the report's own date should replace it
+      var preset = f.id === 'Visit_Date' && cur === todayIso() && !(typeof editingVisitId !== 'undefined' && editingVisitId);
+      var conflict = cur && cur !== f.value && !preset;
+      var same = cur && cur === f.value;
+      var auto = /\bauto\b/i.test(f.label || '');
+      var it = { kind: 'field', f: f, el: el, cur: cur, same: same, on: !same && !conflict && !auto && f.confidence !== 'low' };
+      it.idx = st.items.push(it) - 1;
+      if (!groups[f.sec]) { groups[f.sec] = []; order.push(f.sec); }
+      groups[f.sec].push(it);
+      it.auto = auto; it.conflict = conflict;
+    });
+    order.forEach(function (sec) {
+      h.push('<div class="cf-ai-sec"><div class="cf-ai-sech">' + esc(sec || 'Other') + '</div>');
+      groups[sec].forEach(function (it) { h.push(fieldHtml(it)); });
+      h.push('</div>');
+    });
+
+    // medications
+    var meds = R.medications || [];
+    if (meds.length) {
+      var prefer = mode === 'visit' ? ['current', 'stopped'] : ['discharge', 'current', 'stopped'];
+      var taken = {};
+      h.push('<div class="cf-ai-sec"><div class="cf-ai-sech">Medications</div>');
+      meds.forEach(function (m) {
+        var row = medRow(prefix, m.key);
+        var it = { kind: 'med', m: m, row: row };
+        var good = prefer.indexOf(m.context) >= 0 && m.confidence !== 'low' && row && !taken[m.key];
+        if (good) taken[m.key] = 1;
+        it.on = !!good;
+        if (row && mode === 'visit') {
+          it.prev = row.getAttribute('data-prev') || '';
+          it.action = m.context === 'stopped' ? 'Stop' : visitAction(it.prev, m.dose);
+        } else it.action = m.context === 'stopped' ? 'Stop' : 'Continue';
+        it.idx = st.items.push(it) - 1;
+        h.push(medHtml(it));
+      });
+      h.push('</div>');
+    }
+    // other medications / later labs / notes
+    var nf = NOTE_FIELD[mode];
+    if (R.other_medications && R.other_medications.length) {
+      var it1 = { kind: 'append', target: nf.meds, text: R.other_medications.join('; '), on: true, title: 'Other medications' };
+      it1.idx = st.items.push(it1) - 1; h.push(appendHtml(it1));
+    }
+    (R.later_labs || []).forEach(function (l) {
+      var it = { kind: 'lab', l: l, on: true };
+      it.idx = st.items.push(it) - 1; h.push(labHtml(it, mode));
+    });
+    [['labs', 'Lab notes'], ['echo', 'Echo details'], ['plan', 'Plan'], ['other', 'Other notes']].forEach(function (p) {
+      var t = R.notes && R.notes[p[0]];
+      if (!t) return;
+      var it = { kind: 'append', target: nf[p[0]], text: t, on: true, title: p[1] };
+      it.idx = st.items.push(it) - 1; h.push(appendHtml(it));
+    });
+    if (missing.length) h.push('<details class="small text-muted mt-2"><summary>' + missing.length + ' item(s) have no matching box on this form</summary>' + missing.map(function (f) { return esc(f.label || f.id) + ': ' + esc(f.value); }).join('<br>') + '</details>');
+
+    h.push('<div class="cf-ai-foot sticky"><button type="button" class="btn btn-outline-secondary btn-sm" id="cfAiBack">Back</button><span class="flex-grow-1 small text-muted" id="cfAiCount"></span>' +
+      '<button type="button" class="btn btn-success" id="cfAiApply"><i class="fa fa-check me-1"></i>Fill the form</button></div>');
+    $('cfAiBody').innerHTML = h.join('');
+    $('cfAiBody').scrollTop = 0;
+    $('cfAiBody').querySelectorAll('[data-k]').forEach(function (cb) {
+      cb.addEventListener('change', function () { st.items[+cb.getAttribute('data-k')].on = cb.checked; count(); });
+    });
+    $('cfAiBody').querySelectorAll('[data-z]').forEach(function (t) {
+      t.onclick = function () {
+        var p = imgs[+t.getAttribute('data-z')], z = document.createElement('div');
+        z.className = 'cf-ai-zoom'; z.innerHTML = '<img src="data:' + p.type + ';base64,' + p.data + '" alt="Report page"><button type="button" class="btn btn-light btn-sm">Close</button>';
+        z.onclick = function () { z.remove(); };
+        $('cfAiModal').appendChild(z);
+      };
+    });
+    $('cfAiBack').onclick = function () { st.res = null; renderPick(); };
+    $('cfAiApply').onclick = apply;
+    count();
+  }
+  function count() {
+    var n = st.items.filter(function (i) { return i.on; }).length;
+    var c = $('cfAiCount'); if (c) c.textContent = n + ' of ' + st.items.length + ' ticked';
+    var b = $('cfAiApply'); if (b) b.disabled = !n;
+  }
+  function confChip(c) { return '<span class="cf-ai-conf ' + esc(c) + '">' + esc(c) + '</span>'; }
+  function src(s, note) {
+    return (s ? '<div class="cf-ai-src">“' + esc(s) + '”</div>' : '') + (note ? '<div class="cf-ai-note">' + esc(note) + '</div>' : '');
+  }
+  function fieldHtml(it) {
+    var f = it.f, el = it.el, input;
+    if (el.tagName === 'SELECT') {
+      var opts = optionValues(el).filter(Boolean);
+      if (opts.indexOf(f.value) < 0) opts.unshift(f.value);
+      input = '<select class="form-select form-select-sm cf-ai-val" data-v="' + it.idx + '">' + opts.map(function (o) { return '<option' + (o === f.value ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select>';
+    } else if (el.tagName === 'TEXTAREA' || f.value.length > 40) {
+      input = '<textarea class="form-control form-control-sm cf-ai-val" rows="2" data-v="' + it.idx + '">' + esc(f.value) + '</textarea>';
+    } else {
+      input = '<input class="form-control form-control-sm cf-ai-val" data-v="' + it.idx + '" value="' + esc(f.value) + '"' + (el.type === 'date' ? ' type="date"' : '') + '>';
+    }
+    var tags = [];
+    if (it.same) tags.push('<span class="cf-ai-tag same">already in form</span>');
+    else if (it.cur && !it.conflict) tags.push('<span class="cf-ai-tag">replaces today\'s date</span>');
+    else if (it.conflict) tags.push('<span class="cf-ai-tag conflict">form now: ' + esc(el.type === 'date' ? fmtDate(it.cur) : it.cur) + '</span>');
+    if (it.auto) tags.push('<span class="cf-ai-tag">the app calculates this</span>');
+    return '<div class="cf-ai-row' + (f.confidence === 'low' ? ' low' : '') + '"><label class="cf-ai-chk"><input type="checkbox" data-k="' + it.idx + '"' + (it.on ? ' checked' : '') + '></label>' +
+      '<div class="cf-ai-lab">' + esc(f.label) + ' ' + confChip(f.confidence) + tags.join('') + src(f.source, f.note) + '</div>' +
+      '<div class="cf-ai-in">' + input + '</div></div>';
+  }
+  function medHtml(it) {
+    var m = it.m, tags = ['<span class="cf-ai-tag ctx">' + esc(CTX[m.context] || m.context) + '</span>'];
+    if (!it.row) tags.push('<span class="cf-ai-tag conflict">not on this form: goes to Other medications</span>');
+    if (it.row && st.mode === 'visit') tags.push('<span class="cf-ai-tag act">' + esc(it.action) + (it.prev && it.action !== 'Start' ? ' (was ' + esc(it.prev) + ')' : '') + '</span>');
+    else if (m.context === 'stopped') tags.push('<span class="cf-ai-tag act">Stop</span>');
+    return '<div class="cf-ai-row' + (m.confidence === 'low' ? ' low' : '') + '"><label class="cf-ai-chk"><input type="checkbox" data-k="' + it.idx + '"' + (it.on ? ' checked' : '') + '></label>' +
+      '<div class="cf-ai-lab"><b>' + esc(m.label) + '</b>' + (m.generic ? ' <span class="text-muted small">' + esc(m.generic) + '</span>' : '') + ' ' + confChip(m.confidence) + tags.join('') + src(m.source, m.note) + '</div>' +
+      '<div class="cf-ai-in">' + (m.context === 'stopped' ? '<span class="small text-muted">—</span>' :
+        '<input class="form-control form-control-sm cf-ai-val" data-v="' + it.idx + '" value="' + esc(m.dose + (m.frequency ? ' ' + m.frequency : '')) + '">') + '</div></div>';
+  }
+  function appendHtml(it) {
+    return '<div class="cf-ai-row"><label class="cf-ai-chk"><input type="checkbox" data-k="' + it.idx + '"' + (it.on ? ' checked' : '') + '></label>' +
+      '<div class="cf-ai-lab">' + esc(it.title) + ' <span class="cf-ai-tag">added to the end of the box</span></div>' +
+      '<div class="cf-ai-in"><textarea class="form-control form-control-sm cf-ai-val" rows="2" data-v="' + it.idx + '">' + esc(it.text) + '</textarea></div></div>';
+  }
+  function labHtml(it, mode) {
+    var l = it.l, labsField = NOTE_FIELD[mode].labs;
+    var opts = [].slice.call(document.querySelectorAll('#hfForm input[id$="_Disch"]')).map(function (e) { return e.id; });
+    if (mode === 'visit') opts = [];
+    var sel = '<select class="form-select form-select-sm cf-ai-tgt" data-t="' + it.idx + '"><option value="' + labsField + '">Add to lab notes</option>' +
+      opts.map(function (id) { return '<option value="' + id + '"' + (id === l.field_hint ? ' selected' : '') + '>' + esc(id.replace(/_/g, ' ')) + '</option>'; }).join('') + '</select>';
+    it.target = l.field_hint && opts.indexOf(l.field_hint) >= 0 ? l.field_hint : labsField;
+    return '<div class="cf-ai-row"><label class="cf-ai-chk"><input type="checkbox" data-k="' + it.idx + '"' + (it.on ? ' checked' : '') + '></label>' +
+      '<div class="cf-ai-lab">' + esc(l.test) + ' <b>' + esc(l.value) + '</b>' + (l.when ? ' <span class="text-muted small">(' + esc(l.when) + ')</span>' : '') + src(l.source) + '</div>' +
+      '<div class="cf-ai-in">' + sel + '</div></div>';
+  }
+
+  // ---------- apply ----------
+  function fire(el) { el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); }
+  function mark(el) {
+    if (!el || el.type === 'hidden') return;
+    el.classList.add('cf-ai-filled');
+    var off = function () { el.classList.remove('cf-ai-filled'); el.removeEventListener('input', off); };
+    setTimeout(function () { el.addEventListener('input', off); }, 0);
+  }
+  function appendTo(id, text) {
+    var el = $(id); if (!el || !text) return false;
+    var tag = st.demo ? '[Demo] ' : '[From report' + (st.res.result.document_date ? ' ' + fmtDate(st.res.result.document_date) : '') + '] ';
+    var cur = String(el.value || '').trim();
+    if (cur.indexOf(text) >= 0) return false;
+    el.value = (cur ? cur + (el.tagName === 'TEXTAREA' ? '\n' : '; ') : '') + tag + text;
+    fire(el); mark(el);
+    return true;
+  }
+  function valueOf(idx) { var e = $('cfAiBody').querySelector('[data-v="' + idx + '"]'); return e ? String(e.value).trim() : null; }
+  function setMed(row, action, doseText) {
+    var act = row.querySelector('.cf-act');
+    act.value = action; act.dispatchEvent(new Event('change'));
+    if (action === 'Stop' || action === 'Hold') return;
+    var sel = row.querySelector('.cf-dose'), custom = row.querySelector('.cf-custom'), freq = row.querySelector('.cf-freq');
+    var opts = optionValues(sel);
+    var hit = opts.filter(function (o) { return o && o !== '__other' && o.toLowerCase() === doseText.toLowerCase(); })[0];
+    if (hit) { sel.value = hit; sel.dispatchEvent(new Event('change')); }
+    else {
+      sel.value = '__other'; sel.dispatchEvent(new Event('change'));
+      var fm = doseText.match(/\b(OD|BID|BD|TID|TDS|QID|once daily|twice daily|nocte|weekly|every \d+ weeks?|monthly|once)\b/i);
+      custom.value = doseText; custom.dispatchEvent(new Event('input'));
+      if (fm && !freq.value) { freq.value = fm[1].toUpperCase() === 'BD' ? 'BID' : fm[1].toUpperCase() === 'TDS' ? 'TID' : fm[1]; freq.dispatchEvent(new Event('input')); }
+    }
+    mark(sel);
+  }
+  function apply() {
+    var mode = st.mode, prefix = mode === 'visit' ? 'V_' : 'A_', nf = NOTE_FIELD[mode];
+    var n = { fields: 0, meds: 0, notes: 0 }, extraMeds = [];
+    // the lab target selects
+    $('cfAiBody').querySelectorAll('.cf-ai-tgt').forEach(function (s) { st.items[+s.getAttribute('data-t')].target = s.value; });
+    st.items.forEach(function (it) {
+      if (!it.on) return;
+      var v = valueOf(it.idx);
+      if (it.kind === 'field') {
+        if (v == null || v === '') return;
+        it.el.value = v;
+        if (it.el.tagName === 'SELECT' && it.el.value !== v) { // value not in the list: add it once so it is not lost
+          var o = document.createElement('option'); o.value = o.textContent = v; it.el.appendChild(o); it.el.value = v;
+        }
+        fire(it.el); mark(it.el);
+        if (it.f.id === 'Valvular_Type' && typeof restoreValvularType === 'function') restoreValvularType(v);
+        if (it.f.id === 'PCI_CABG' && typeof restorePCICABG === 'function') restorePCICABG(v);
+        n.fields++;
+      } else if (it.kind === 'med') {
+        var m = it.m, dose = v == null ? m.dose : v;
+        if (!it.row) { extraMeds.push(m.label + (m.context !== 'stopped' ? ' ' + dose : ' (stopped)')); return; }
+        var action = m.context === 'stopped' ? 'Stop' : mode === 'visit' ? visitAction(it.prev, dose) : 'Continue';
+        setMed(it.row, action, dose);
+        n.meds++;
+      } else if (it.kind === 'append') {
+        if (appendTo(it.target, v)) n.notes++;
+      } else if (it.kind === 'lab') {
+        var el = $(it.target);
+        if (it.target !== nf.labs && el && !String(el.value || '').trim()) { el.value = it.l.value; fire(el); mark(el); n.fields++; }
+        else if (appendTo(nf.labs, it.l.test + ' ' + it.l.value + (it.l.when ? ' (' + it.l.when + ')' : ''))) n.notes++;
+      }
+    });
+    if (extraMeds.length) appendTo(nf.meds, extraMeds.join('; '));
+    try { if (typeof syncPillsFromData === 'function') syncPillsFromData(); } catch (e) { /* older pages */ }
+    var demo = st.demo;
+    close();
+    var msg = n.fields + ' field' + (n.fields === 1 ? '' : 's') + ', ' + n.meds + ' medicine' + (n.meds === 1 ? '' : 's') + (n.notes ? ' and ' + n.notes + ' note' + (n.notes === 1 ? '' : 's') : '') +
+      ' filled. Filled boxes are highlighted in yellow: check them against the report, complete anything missing, then Save.' + (demo ? ' (Demo data: synthetic patient.)' : '');
+    if (typeof showPopup === 'function') showPopup('success', 'Filled from report', msg); else alert(msg);
+  }
+
+  function init() {
+    addButtons();
+    // the visit title can be re-rendered; keep the button there
+    var vt = $('visitFormTitle');
+    if (vt && window.MutationObserver) new MutationObserver(function () { if (!$('cfAiVisBtn')) addButtons(); }).observe(vt.parentNode, { childList: true });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+  window.CFAI = { open: open, close: close, _state: function () { return st; }, _visitAction: visitAction, region: AI_REGION };
+})();
 
 </script>
 
