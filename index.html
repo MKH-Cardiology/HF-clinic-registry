@@ -11888,6 +11888,7 @@ function _ironDeficient(p){
     if(isNaN(ferritin) && isNaN(tsat)) return null; // not screened
     if(!isNaN(ferritin) && ferritin < 100) return true;
     if(!isNaN(ferritin) && ferritin <= 300 && !isNaN(tsat) && tsat < 20) return true;
+    if(!isNaN(tsat) && tsat < 20) return true; // TSAT <20% alone (registry rule)
     return false;
 }
 function _ironScreened(p){ return !isNaN(parseFloat(p.Lab_Ferritin)) || !isNaN(parseFloat(p.Lab_TrSats)); }
@@ -12515,7 +12516,7 @@ function buildSpecial(){
     ih+='<tr><td>Iron-deficient among screened (ESC criteria)</td><td><b>'+(screened.length?_fmtPct(idef.length,screened.length):'—')+'</b></td></tr>';
     ih+='<tr><td>On iron therapy among deficient</td><td><b>'+(idef.length?_fmtPct(treated.length,idef.length):'—')+'</b></td></tr>';
     ih+='</table>';
-    ih+='<div class="small text-muted">ESC criteria: ferritin &lt;100 µg/L OR (100-300 + TSAT &lt;20%). Treated = IV iron (Ferinject) recorded in any admission or visit medication list.</div>';
+    ih+='<div class="small text-muted">Criteria: ferritin &lt;100 µg/L OR (100-300 + TSAT &lt;20%) OR TSAT &lt;20% alone. Treated = IV iron (Ferinject) recorded in any admission or visit medication list.</div>';
     document.getElementById('ironBody').innerHTML = ih;
 
     // Echo by phenotype
@@ -16388,11 +16389,13 @@ var CF = (function () {
     if (hb != null && hb > 25) hb = hb / 10; // entered in g/L
     out.hb = hb;
     if (ferritin != null) {
-      var def = ferritin < 100 || (ferritin < 300 && tsat != null && tsat < 20);
+      var def = ferritin < 100 || (ferritin < 300 && tsat != null && tsat < 20) || (tsat != null && tsat < 20);
       out.deficient = def;
-      out.indication = (def ? 'Iron deficiency' : 'Not iron deficient by ESC criteria') + ' (ferritin ' + ferritin + (tsat != null ? ', TSAT ' + tsat + '%' : '') + ')';
-      if (!def) out.warnings.push('ESC criteria not met: ferritin <100 µg/L, or 100–299 with TSAT <20%.');
-    } else out.warnings.push('No ferritin recorded: confirm iron deficiency first.');
+      out.indication = (def ? 'Iron deficiency' + (ferritin >= 300 ? ' (TSAT <20% rule)' : '') : 'Not iron deficient by the registry criteria') + ' (ferritin ' + ferritin + (tsat != null ? ', TSAT ' + tsat + '%' : '') + ')';
+      if (!def) out.warnings.push('Criteria not met: ferritin <100 µg/L, or 100–299 with TSAT <20%, or TSAT <20% alone.');
+      if (def && ferritin >= 300) out.warnings.push('Ferritin ≥300 µg/L: TSAT <20% alone qualifies here, but exclude inflammation/infection before giving IV iron.');
+    } else if (tsat != null && tsat < 20) out.indication = 'Iron deficiency by TSAT <20% (TSAT ' + tsat + '%, no ferritin recorded)';
+    else out.warnings.push('No ferritin recorded: confirm iron deficiency first.');
     if (ferritin != null && ferritin < 5) out.warnings.push('Ferritin ' + ferritin + ' µg/L is unusually low: check the value and units before dosing.');
     if (tsat != null && (tsat <= 0 || tsat > 100)) out.warnings.push('TSAT ' + tsat + '% is not plausible: check the value.');
     if (weightKg == null || hb == null) { out.warnings.push('Enter weight and Hb to calculate.'); return out; }
@@ -16644,15 +16647,16 @@ var CF = (function () {
       }
     });
     if (egV != null && !onPillar(hist, 'SGLT2').length && egV < 20 && reducedEF) add('info', 'SGLT2 inhibitor start', 'Not started at eGFR <20 (continue if already on treatment).');
-    // Iron deficiency (ESC): ferritin <100, or 100–299 with TSAT <20%, and no IV iron since
+    // Iron deficiency: ferritin <100, or 100–299 with TSAT <20% (ESC), or TSAT <20% alone (added rule), and no IV iron since
     var fer = last(S, 'Ferritin'), ts = last(S, 'TSAT');
+    if (!fer && ts && ts.value < 20) fer = { value: null, date: ts.date }; // TSAT recorded without ferritin
     if (fer) {
       var tsat = ts && Math.abs(daysBetween(ts.date, fer.date)) <= 30 ? ts.value : null;
-      var deficient = fer.value < 100 || (fer.value < 300 && tsat != null && tsat < 20);
+      var deficient = (fer.value != null && (fer.value < 100 || (fer.value < 300 && tsat != null && tsat < 20))) || (tsat != null && tsat < 20);
       var iv = hist.drugs.Ferinject;
       var treatedSince = iv && iv.events.some(function (e) { return e.date >= fer.date; });
-      if (deficient && !treatedSince) add('warn', 'Iron deficiency not yet treated', 'Ferritin ' + fer.value + (tsat != null ? ', TSAT ' + tsat + '%' : '') + ' on ' + fmt(fer.date) +
-        '. IV ferric carboxymaltose improves symptoms and reduces HF hospitalisation (ESC class IIa); oral iron is ineffective.', { drug: 'Ferinject', act: 'Start' });
+      if (deficient && !treatedSince) add('warn', 'Iron deficiency not yet treated', (fer.value != null ? 'Ferritin ' + fer.value + (tsat != null ? ', TSAT ' + tsat + '%' : '') : 'TSAT ' + tsat + '% (no ferritin)') + ' on ' + fmt(fer.date) +
+        (fer.value != null && fer.value >= 300 ? ' (TSAT <20% rule; ferritin ≥300: exclude inflammation first)' : '') + '. IV ferric carboxymaltose improves symptoms and reduces HF hospitalisation (ESC class IIa); oral iron is ineffective.', { drug: 'Ferinject', act: 'Start' });
     }
     // Per-drug review (hold / reduce / avoid / room to increase), sequenced
     var R = ctx.review || medReview(p, visits, { hist: hist, S: S, profile: pr });
