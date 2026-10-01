@@ -16048,9 +16048,20 @@ var CF = (function () {
     return null;
   }
   function isIVDose(t) { return /\bIV\b|infusion|i\.v\./i.test(String(t || '')); }
-  function parseDose(text, freqText) {
+  // Combination tablets are written "24/26", "20/10"; for single-ingredient drugs a slash means
+  // a split dose (e.g. furosemide "125/80" = 125 mg + 80 mg = 205 mg/day).
+  function isComboKey(key) {
+    if (!key || typeof VISIT_MED_LIST === 'undefined') return true;
+    if (/^(Entresto|Zympass|Atozet|Xigduo|Synjardy)$/.test(key)) return true;
+    return presetsFor(key).some(function (d) { return /\d\s*\/\s*\d/.test(d); });
+  }
+  function parseDose(text, freqText, key) {
     var t = s(text);
     if (!t) return null;
+    if (key && !isComboKey(key)) {
+      var sl = t.match(/^\s*(\d+(?:[.,]\d+)?)\s*(mg|g)?\s*\/\s*(\d+(?:[.,]\d+)?)(?:\s*\/\s*(\d+(?:[.,]\d+)?))?\s*(mg|g)?\b/i);
+      if (sl) t = t.replace(sl[0], sl[1] + (sl[2] || '') + ' + ' + sl[3] + (sl[4] ? ' + ' + sl[4] : '') + (sl[5] || ''));
+    }
     // split doses written as "125+80 mg" (e.g. morning + afternoon): the daily total
     var sp = t.match(/(\d+(?:[.,]\d+)?)\s*(mg|g)?\s*\+\s*(\d+(?:[.,]\d+)?)(?:\s*\+\s*(\d+(?:[.,]\d+)?))?\s*(mg|g)?/i);
     if (sp) {
@@ -16118,7 +16129,7 @@ var CF = (function () {
     }
     var rawFreq = freq;
     if (!freq) freq = freqFromPreset(dose);
-    var parsed = parseDose(dose, freq);
+    var parsed = parseDose(dose, freq, baseKey(id));
     var check = doseNeedsCheck(dose, rawFreq, parsed);
     if (check) parsed = null;
     return {
@@ -17179,7 +17190,7 @@ var CFUI = (function () {
     parent.appendChild(h);
     return h;
   }
-  function presetMg(t) { var p = CF.parseDose(t); return p ? (p.perDay != null ? p.perDay : p.mg) : null; }
+  function presetMg(t, key) { var p = CF.parseDose(t, null, key); return p ? (p.perDay != null ? p.perDay : p.mg) : null; }
 
   function enhanceEditor(prefix) {
     var list = listFor(prefix);
@@ -17230,11 +17241,11 @@ var CFUI = (function () {
   }
   function fillDoseOptions(row, action) {
     var m = medOf(row), prev = row.getAttribute('data-prev') || '';
-    var prevMg = presetMg(prev);
+    var prevMg = presetMg(prev, CF.baseKey(row.getAttribute('data-med')));
     var sel = row.querySelector('.cf-dose');
     var keep = sel.value;
     var opts = m.doses.filter(Boolean).filter(function (d) {
-      var v = presetMg(d);
+      var v = presetMg(d, CF.baseKey(row.getAttribute('data-med')));
       if (prevMg == null || v == null) return true;
       if (action === 'Increase') return v > prevMg + 1e-9;
       if (action === 'Decrease') return v < prevMg - 1e-9;
@@ -19712,11 +19723,11 @@ CFX.install();
   }
   function optionValues(el) { return [].slice.call(el.options || []).map(function (o) { return o.value || o.text; }); }
   function medRow(prefix, key) { return document.querySelector('.cf-med[data-med="' + prefix + key + '"]'); }
-  function doseMg(t, f) { var p = CF.parseDose(t, f); return p ? (p.perDay != null ? p.perDay : p.mg) : null; }
-  function visitAction(prev, dose) {
+  function doseMg(t, f, k) { var p = CF.parseDose(t, f, k); return p ? (p.perDay != null ? p.perDay : p.mg) : null; }
+  function visitAction(prev, dose, key) {
     if (!prev) return 'Start';
     if (prev.toLowerCase() === dose.toLowerCase()) return 'Continue';
-    var a = doseMg(prev), b = doseMg(dose);
+    var a = doseMg(prev, null, key), b = doseMg(dose, null, key);
     if (a != null && b != null) return b > a + 1e-9 ? 'Increase' : b < a - 1e-9 ? 'Decrease' : 'Continue';
     return 'Continue';
   }
@@ -19827,7 +19838,7 @@ CFX.install();
         it.on = !!good;
         if (row && mode === 'visit') {
           it.prev = row.getAttribute('data-prev') || '';
-          it.action = m.context === 'stopped' ? 'Stop' : visitAction(it.prev, m.dose);
+          it.action = m.context === 'stopped' ? 'Stop' : visitAction(it.prev, m.dose, m.key);
         } else it.action = m.context === 'stopped' ? 'Stop' : 'Continue';
         it.idx = st.items.push(it) - 1;
         h.push(medHtml(it));
@@ -20019,7 +20030,7 @@ CFX.install();
       } else if (it.kind === 'med') {
         var m = it.m, dose = v == null ? m.dose : v;
         if (!it.row) { extraMeds.push(m.label + (m.context !== 'stopped' ? ' ' + dose : ' (stopped)')); return; }
-        var action = m.context === 'stopped' ? 'Stop' : mode === 'visit' ? visitAction(it.prev, dose) : 'Continue';
+        var action = m.context === 'stopped' ? 'Stop' : mode === 'visit' ? visitAction(it.prev, dose, m.key) : 'Continue';
         setMed(it.row, action, dose);
         n.meds++;
       } else if (it.kind === 'append') {
