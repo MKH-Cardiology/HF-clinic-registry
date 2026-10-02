@@ -19582,6 +19582,16 @@ CFX.install();
       b.innerHTML = '<i class="fa fa-wand-magic-sparkles me-1"></i>Add admission from report';
       b.onclick = function () { open('extra', { idx: null }); };
       add.insertAdjacentElement('afterend', b);
+      // discharge lab slip for the latest additional admission (or a new one when there is none)
+      var ds = document.createElement('button');
+      ds.type = 'button'; ds.id = 'cfAiExtraSlipBtn'; ds.className = 'btn btn-sm cf-ai-btn ms-2';
+      ds.innerHTML = '<i class="fa fa-flask me-1"></i>Discharge lab slip';
+      ds.title = 'Fill the discharge labs of the latest additional admission (creates one if there is none)';
+      ds.onclick = function () {
+        var n = extraArr().length;
+        open('labs', n ? { slot: 'disch', idx: n - 1 } : { slot: 'disch', extra: true });
+      };
+      b.insertAdjacentElement('afterend', ds);
     }
     document.querySelectorAll('.extra-adm-card').forEach(function (card) {
       if (card.querySelector('.cf-ai-ea')) return;
@@ -19607,8 +19617,8 @@ CFX.install();
   function open(mode, opt) {
     close();
     st = { mode: mode, callMode: mode, baseMode: mode, pages: [], res: null, demo: false, extraIdx: opt && opt.idx != null ? opt.idx : null,
-      slot: opt && opt.slot || null };
-    if (st.slot) st.title = (st.slot === 'disch' ? 'Discharge' : 'Admission') + ' lab slip → ' + (st.extraIdx != null ? 'admission #' + (st.extraIdx + 2) : 'index admission');
+      slot: opt && opt.slot || null, slotExtra: !!(opt && (opt.extra || opt.idx != null)) };
+    if (st.slot) st.title = (st.slot === 'disch' ? 'Discharge' : 'Admission') + ' lab slip → ' + (st.extraIdx != null ? 'admission #' + (st.extraIdx + 2) : st.slotExtra ? 'new admission' : 'index admission');
     var ov = document.createElement('div');
     ov.id = 'cfAiModal'; ov.className = 'cf-ai-ov';
     ov.innerHTML = '<div class="cf-ai-box" role="dialog" aria-modal="true" aria-labelledby="cfAiTitle">' +
@@ -19798,7 +19808,7 @@ CFX.install();
     V_NTproBNP: 'Lab_BNP_Disch', V_BNP: 'Lab_BNP_only_Disch', V_Hb: 'Lab_Hb_Disch' };
   function adaptSlip() {
     if (!st.slot || !st.res || !st.res.result) return;
-    var R = st.res.result, disch = st.slot === 'disch', extra = st.extraIdx != null;
+    var R = st.res.result, disch = st.slot === 'disch', extra = st.slotExtra;
     st.mode = extra ? 'extra' : 'admission'; st.isSlip = true;
     var exists = function (id) { return extra ? !!extraDefs()[id] : !!$(id); };
     var notes = [], out = [];
