@@ -1956,6 +1956,8 @@ label.cf-ai-filled{background:#fffbe6;border-radius:4px;box-shadow:0 0 0 2px #fa
 .cf-ai-slip.warn{background:#fff8e1;border:1px solid #ffe08a;color:#7c5a00;}
 .cf-ai-slip.bad{background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;}
 .cf-ov-btns .cf-ai-btn{margin:0;}
+.cf-ai-topbar{display:flex;gap:8px;margin:4px 0 8px;}
+.cf-ai-topbar .cf-ai-btn{flex:1;margin:0;}
 
 </style>
 
@@ -19543,7 +19545,16 @@ CFX.install();
       b.innerHTML = '<i class="fa fa-wand-magic-sparkles me-1"></i>Fill from report';
       b.title = 'Photograph or upload a discharge summary / report and let the AI fill the form for you to review';
       b.onclick = function () { open('admission'); };
-      ft.insertAdjacentElement('afterend', b);
+      // top bar: Fill from report (+ Discharge lab slip on step 3, the admission step)
+      var top = document.createElement('div');
+      top.id = 'cfAiTopBar'; top.className = 'cf-ai-topbar';
+      var d = document.createElement('button');
+      d.type = 'button'; d.id = 'cfAiDischBtn'; d.className = 'btn btn-sm cf-ai-btn';
+      d.innerHTML = '<i class="fa fa-flask me-1"></i>Discharge lab slip';
+      d.title = 'Photograph the discharge lab results and fill the discharge lab boxes';
+      d.onclick = function () { open('labs', { slot: 'disch' }); };
+      top.appendChild(b); top.appendChild(d);
+      ft.insertAdjacentElement('afterend', top);
     }
     var vt = $('visitFormTitle');
     if (vt && !$('cfAiVisBtn')) {
@@ -19583,17 +19594,25 @@ CFX.install();
       b.innerHTML = '<i class="fa fa-wand-magic-sparkles"></i><span class="d-none d-md-inline ms-1">Fill from report</span>';
       b.onclick = function (e) { e.stopPropagation(); open('extra', { idx: idx }); };
       rm.insertAdjacentElement('beforebegin', b);
+      var d = document.createElement('button');
+      d.type = 'button'; d.className = 'btn btn-sm cf-ai-btn cf-ai-ea cf-ai-ea-slip me-2';
+      d.title = 'Discharge lab slip for this admission';
+      d.innerHTML = '<i class="fa fa-flask"></i><span class="d-none d-md-inline ms-1">Discharge lab slip</span>';
+      d.onclick = function (e) { e.stopPropagation(); open('labs', { slot: 'disch', idx: idx }); };
+      rm.insertAdjacentElement('beforebegin', d);
     });
   }
 
   // ---------- modal ----------
   function open(mode, opt) {
     close();
-    st = { mode: mode, pages: [], res: null, demo: false, extraIdx: opt && opt.idx != null ? opt.idx : null };
+    st = { mode: mode, callMode: mode, baseMode: mode, pages: [], res: null, demo: false, extraIdx: opt && opt.idx != null ? opt.idx : null,
+      slot: opt && opt.slot || null };
+    if (st.slot) st.title = (st.slot === 'disch' ? 'Discharge' : 'Admission') + ' lab slip → ' + (st.extraIdx != null ? 'admission #' + (st.extraIdx + 2) : 'index admission');
     var ov = document.createElement('div');
     ov.id = 'cfAiModal'; ov.className = 'cf-ai-ov';
     ov.innerHTML = '<div class="cf-ai-box" role="dialog" aria-modal="true" aria-labelledby="cfAiTitle">' +
-      '<div class="cf-ai-head"><h5 id="cfAiTitle"><i class="fa fa-wand-magic-sparkles me-2"></i>' + esc(TITLES[mode] + (mode === 'extra' ? (st.extraIdx == null ? ' (new)' : ' (#' + (st.extraIdx + 2) + ')') : '')) + '</h5>' +
+      '<div class="cf-ai-head"><h5 id="cfAiTitle"><i class="fa fa-wand-magic-sparkles me-2"></i>' + esc(st.title || (TITLES[mode] + (mode === 'extra' ? (st.extraIdx == null ? ' (new)' : ' (#' + (st.extraIdx + 2) + ')') : ''))) + '</h5>' +
       '<button type="button" class="btn-close" aria-label="Close" id="cfAiClose"></button></div>' +
       '<div class="cf-ai-body" id="cfAiBody"></div></div>';
     document.body.appendChild(ov);
@@ -19605,7 +19624,7 @@ CFX.install();
 
   function renderPick(err) {
     var body = $('cfAiBody');
-    var visitBlocked = (st.mode === 'visit' || st.mode === 'labs') && !hasPatientOpen();
+    var visitBlocked = (st.mode === 'visit' || st.mode === 'labs') && !st.slot && !hasPatientOpen();
     body.innerHTML =
       (err ? '<div class="alert alert-danger py-2 small">' + esc(err) + '</div>' : '') +
       '<p class="small text-muted mb-2">Take a clear photo of each page (flat, good light, whole page in frame) or choose images / a PDF. Up to ' + MAX_PAGES + ' pages of <b>one</b> report. Nothing is saved until you review and press Save.</p>' +
@@ -19633,7 +19652,7 @@ CFX.install();
         '<button type="button" class="cf-ai-x" data-i="' + i + '" aria-label="Remove page ' + (i + 1) + '">×</button><span class="cf-ai-n">' + (i + 1) + '</span></div>';
     }).join('');
     t.querySelectorAll('.cf-ai-x').forEach(function (b) { b.onclick = function () { st.pages.splice(+b.getAttribute('data-i'), 1); drawThumbs(); }; });
-    var r = $('cfAiRead'); if (r) r.disabled = !st.pages.length || ((st.mode === 'visit' || st.mode === 'labs') && !hasPatientOpen());
+    var r = $('cfAiRead'); if (r) r.disabled = !st.pages.length || ((st.mode === 'visit' || st.mode === 'labs') && !st.slot && !hasPatientOpen());
   }
   function addFiles(files) {
     var room = MAX_PAGES - st.pages.length;
@@ -19686,10 +19705,10 @@ CFX.install();
     var n = st.pages.length;
     busy('Reading ' + n + ' page' + (n > 1 ? 's' : '') + '…');
     var pages = st.pages;
-    fn({ mode: st.mode, today: todayIso(), images: pages.map(function (p) { return { type: p.type, data: p.data }; }) }).then(function (r) {
+    fn({ mode: st.callMode, today: todayIso(), images: pages.map(function (p) { return { type: p.type, data: p.data }; }) }).then(function (r) {
       if (!st) return;
       st.busy = false; st.res = r.data; st.demo = false;
-      renderReview();
+      adaptSlip(); renderReview();
     }).catch(function (e) {
       if (!st) return;
       st.busy = false;
@@ -19702,15 +19721,15 @@ CFX.install();
   }
   function demo() {
     if (!DEMO) { renderPick('Demo data is missing from this build.'); return; }
-    if (!DEMO[st.mode]) { renderPick('No demo for this section.'); return; }
+    if (!DEMO[st.callMode]) { renderPick('No demo for this section.'); return; }
     if (st.mode === 'admission' && hasPatientOpen() && !confirm('The demo puts a synthetic test patient\'s data into the record that is open now. Continue? (Nothing is saved unless you press Save.)')) return;
     busy('Demo: reading the built-in sample report…');
     setTimeout(function () {
       if (!st) return;
       st.busy = false; st.demo = true;
-      st.res = { mode: st.mode, model: 'demo', pages: 1, usage: { est_cost_usd: 0 }, result: JSON.parse(JSON.stringify(DEMO[st.mode])) };
-      if (st.mode === 'labs') st.res.result.fields.forEach(function (f) { if (f.id === 'Slip_File_No') f.value = ($('File_No') || {}).value || f.value; });
-      renderReview();
+      st.res = { mode: st.mode, model: 'demo', pages: 1, usage: { est_cost_usd: 0 }, result: JSON.parse(JSON.stringify(DEMO[st.callMode])) };
+      if (st.callMode === 'labs') st.res.result.fields.forEach(function (f) { if (f.id === 'Slip_File_No') f.value = ($('File_No') || {}).value || f.value; });
+      adaptSlip(); renderReview();
     }, 700);
   }
 
@@ -19770,6 +19789,39 @@ CFX.install();
     return !!medRow(prefix, key);
   }
 
+  // Admission / discharge lab slips: the server reads a slip as generic lab values (the visit's lab ids);
+  // here they are placed on the admission or discharge fields of the index admission or an additional admission.
+  var SLIP_ADM = { V_HbA1c: 'Lab_HbA1c', V_Gluc: 'Lab_Gluc', V_Urea: 'Lab_Urea', V_Creat: 'Lab_Creat', V_eGFR: 'Lab_eGFR', V_Na: 'Lab_Na', V_K: 'Lab_K',
+    V_BNP: 'Lab_BNP_only', V_NTproBNP: 'Lab_BNP', V_Iron: 'Lab_Iron', V_Ferritin: 'Lab_Ferritin', V_Transferrin: 'Lab_TrSats', V_Hb: 'Lab_Hb', V_WBC: 'Lab_WBC',
+    V_Plt: 'Lab_Plt', V_TSH: 'Lab_TSH', V_FreeT4: 'Lab_FreeT4', V_TotalChol: 'Lab_TotalChol', V_LDL: 'Lab_LDL', V_HDL: 'Lab_HDL', V_TG: 'Lab_TG' };
+  var SLIP_DISCH = { V_Urea: 'Lab_Urea_Disch', V_Creat: 'Lab_Creat_Disch', V_eGFR: 'Lab_eGFR_Disch', V_Na: 'Lab_Na_Disch', V_K: 'Lab_K_Disch',
+    V_NTproBNP: 'Lab_BNP_Disch', V_BNP: 'Lab_BNP_only_Disch', V_Hb: 'Lab_Hb_Disch' };
+  function adaptSlip() {
+    if (!st.slot || !st.res || !st.res.result) return;
+    var R = st.res.result, disch = st.slot === 'disch', extra = st.extraIdx != null;
+    st.mode = extra ? 'extra' : 'admission'; st.isSlip = true;
+    var exists = function (id) { return extra ? !!extraDefs()[id] : !!$(id); };
+    var notes = [], out = [];
+    (R.fields || []).forEach(function (f) {
+      if (f.id === 'Slip_File_No' || f.id === 'Slip_Date') { out.push(f); return; }
+      var to = (disch && SLIP_DISCH[f.id]) || SLIP_ADM[f.id];
+      var lab = String(f.label || f.id).replace(/^V_/, '');
+      if (!to || !exists(to)) { notes.push(lab.replace(/\s*\(.*\)\s*/, '') + ' ' + f.value); return; }
+      var g = Object.assign({}, f, { id: to, sec: disch ? 'Discharge labs' : 'Admission labs' });
+      g.label = (disch && SLIP_DISCH[f.id] ? 'Discharge ' : '') + lab;
+      if (disch && !SLIP_DISCH[f.id]) g.note = (g.note ? g.note + ' · ' : '') + 'No separate discharge box: fills the in-hospital field.';
+      if (/eGFR/.test(to) && !/auto/i.test(g.label)) g.label += ' Auto';
+      out.push(g);
+    });
+    R.fields = out;
+    R.notes = R.notes || {};
+    var head = disch ? 'Discharge labs' : 'Admission labs', sd = out.filter(function (f) { return f.id === 'Slip_Date'; })[0];
+    var extraTxt = [notes.join('; '), R.notes.labs].filter(Boolean).join('; ');
+    R.notes.labs = extraTxt ? head + (sd ? ' (' + fmtDate(sd.value) + ')' : '') + ': ' + extraTxt : '';
+    ['echo', 'plan', 'other'].forEach(function (k) { R.notes[k] = ''; });
+    R.medications = []; R.other_medications = [];
+  }
+
   function renderReview() {
     var R = st.res.result, mode = st.mode, prefix = mode === 'visit' ? 'V_' : 'A_';
     st.items = [];
@@ -19785,11 +19837,11 @@ CFX.install();
 
     // lab slip: identity and date checks (these two values are never written to the form)
     var slipBad = false, slipDateNote = '';
-    if (mode === 'labs') {
+    if (mode === 'labs' || st.isSlip) {
       var sf = (R.fields || []).filter(function (f) { return f.id === 'Slip_File_No'; })[0];
       var sd = (R.fields || []).filter(function (f) { return f.id === 'Slip_Date'; })[0];
       var openFile = String(($('File_No') || {}).value || '').replace(/\D/g, ''), slipFile = sf ? String(sf.value).replace(/\D/g, '') : '';
-      var vis = String(($('Visit_Date') || {}).value || '');
+      var vis = st.isSlip ? '' : String(($('Visit_Date') || {}).value || '');
       var who = esc((($('Patient_Name') || {}).value || 'the open patient'));
       if (!slipFile) h.push('<div class="cf-ai-slip warn"><i class="fa fa-id-card me-1"></i>No file number was read on the slip. Make sure it belongs to <b>' + who + '</b>.</div>');
       else if (openFile && slipFile !== openFile && slipFile.indexOf(openFile) < 0 && openFile.indexOf(slipFile) < 0) {
@@ -19879,7 +19931,7 @@ CFX.install();
         $('cfAiModal').appendChild(z);
       };
     });
-    $('cfAiBack').onclick = function () { st.res = null; renderPick(); };
+    $('cfAiBack').onclick = function () { st.res = null; st.mode = st.baseMode; st.isSlip = false; renderPick(); };
     $('cfAiApply').onclick = apply;
     count();
   }
@@ -20113,9 +20165,10 @@ CFX.install();
 
   // The record-level "Fill from report" strip is for steps 1-3; the Visits step has its own buttons.
   function syncAdmBtn() {
-    var b = $('cfAiAdmBtn'); if (!b) return;
-    var act = document.querySelector('#hfForm .form-step.active');
-    b.style.display = act && act.getAttribute('data-step') === '4' ? 'none' : '';
+    var b = $('cfAiTopBar'); if (!b) return;
+    var act = document.querySelector('#hfForm .form-step.active'), step = act && act.getAttribute('data-step');
+    b.style.display = step === '4' ? 'none' : '';
+    var d = $('cfAiDischBtn'); if (d) d.style.display = step === '3' ? '' : 'none';
   }
   function clearMarks() { document.querySelectorAll('.cf-ai-filled').forEach(function (e) { e.classList.remove('cf-ai-filled'); }); }
   function init() {
