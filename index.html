@@ -16119,6 +16119,9 @@ var CF = (function () {
     var reason = s(rec[id + '_Reason']);
     var any = status || preset || custom || freq || change || action;
     if (!any) return null;
+    // The registry saves "No" for every drug that was not ticked, so a plain "No" carries no
+    // information: it is "not recorded at this visit", never "stopped" (stops are explicit).
+    if (status === 'No' && !action) return null;
     var st = 'none';
     if (action === 'Hold') st = 'held';
     else if (action === 'Stop' || status === 'Stopped') st = 'stopped';
@@ -18960,6 +18963,18 @@ CFUI.install();
       pump();
     });
   }
+  // Current-medication flags for the analytics tabs, from the same medication history as the
+  // overview and the GDMT gap table (one source of truth for "on treatment").
+  function cfMedFlags(hist) {
+    var cls = {};
+    (hist && hist.current || []).forEach(function (h) { var d = CF.DRUGS[h.key]; if (d) cls[d.cls] = 1; });
+    var on = function () { for (var i = 0; i < arguments.length; i++) if (cls[arguments[i]]) return true; return false; };
+    return {
+      onARNI: on('arni'), onSGLT2i: on('sglt2'), onBB: on('bb'), onMRA: on('mra'), onACEiARB: on('acei', 'arb', 'arni'),
+      onDiuretic: on('loop', 'thiazide'), onOAC: on('doac', 'vka'), onProcorolan: on('ivab'), onCCB: on('ccb_dhp', 'ccb_nondhp', 'ccb_other'), onStatin: on('statin')
+    };
+  }
+  window.cfMedFlags = cfMedFlags;
   window.loadAnalytics = function () {
     if (typeof _paperTabBuilt !== 'undefined') _paperTabBuilt = {};
     document.getElementById('analyticsSpinner').style.display = 'block';
@@ -18978,7 +18993,7 @@ CFUI.install();
           p._latestVisit = info.latest || null;
           p._latest = typeof _buildLatestSnapshot === 'function' ? _buildLatestSnapshot(p, p._latestVisit) : Object.assign({}, p);
           try { p._cf = CF.analyse(p, p._visits); p._cfPillars = CF.pillarStatus(p, p._visits, p._cf); } catch (e) { p._cf = null; p._cfPillars = null; }
-          p._latestMeds = _computeLatestMedFlags(p, p._latestVisit);
+          p._latestMeds = p._cf ? cfMedFlags(p._cf.hist) : _computeLatestMedFlags(p, p._latestVisit);
           // display-only fill-ins (never saved): admissions count and length of stay from the recorded dates
           var nAdm = (CF.iso(p.Admission_Date) ? 1 : 0) + CF.parseExtraAdmissions(p).filter(function (a) { return CF.iso(a.date); }).length;
           if (!String(p.Admissions || '').trim() && nAdm) p.Admissions = String(nAdm);
