@@ -16020,6 +16020,17 @@ var CF = (function () {
     x.setUTCDate(x.getUTCDate() + n);
     return x.toISOString().slice(0, 10);
   }
+  // Date for an index admission's data when the admission date is missing. The registration timestamp is
+  // only used when it is not after the first visit (visits are often typed in later for earlier dates);
+  // otherwise the admission is placed the day before the first dated record, as the baseline.
+  function visitIso(v) { return iso(v && v.visitDate) || iso(v && v.Visit_Date) || iso(v && v._displayDate); }
+  function baselineDate(p, visits) {
+    var ts = iso(p && p.timestamp), first = '';
+    (visits || []).forEach(function (v) { var d = visitIso(v); if (d && (!first || d < first)) first = d; });
+    if (!first) return ts;
+    return ts && ts <= first ? ts : addDays(first, -1);
+  }
+  function indexAdmDate(p, visits) { return iso(p.Admission_Date) || iso(p.Admission_Discharge_Date) || baselineDate(p, visits); }
   function daysBetween(a, b) {
     var x = new Date(iso(a) + 'T00:00:00Z'), y = new Date(iso(b) + 'T00:00:00Z');
     if (isNaN(x.getTime()) || isNaN(y.getTime())) return null;
@@ -16234,9 +16245,13 @@ var CF = (function () {
   function medSnapshots(p, visits) {
     p = p || {};
     var out = [];
-    var admDate = iso(p.Admission_Discharge_Date) || iso(p.Admission_Date) || iso(p.timestamp);
+    var admDate = iso(p.Admission_Discharge_Date) || iso(p.Admission_Date);
     var idx = snapshotFrom(p, 'A_') || legacySnapshot(p);
-    if (idx) out.push({ date: admDate, label: 'Index admission', kind: 'admission', meds: idx, full: fromEditor(p, 'A_') });
+    var undated = null;
+    if (idx && admDate) out.push({ date: admDate, label: 'Index admission', kind: 'admission', meds: idx, full: fromEditor(p, 'A_') });
+    // No admission/discharge date: the registration day is NOT the admission day (visits are often entered
+    // afterwards for earlier dates), so the list is the baseline and goes before every dated record.
+    else if (idx) undated = { label: 'Index admission (no date)', kind: 'admission', meds: idx, full: fromEditor(p, 'A_'), baseline: true };
     parseExtraAdmissions(p).forEach(function (a, i) {
       var m = snapshotFrom(a, 'A_');
       if (m) out.push({ date: iso(a.dischargeDate) || iso(a.date), label: 'Admission ' + (i + 2), kind: 'admission', meds: m, full: fromEditor(a, 'A_') });
@@ -16247,6 +16262,12 @@ var CF = (function () {
     });
     out = out.filter(function (x) { return x.date; });
     out.sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
+    if (undated) {
+      var b = baselineDate(p, visits) || todayIso();
+      if (out.length && b >= out[0].date) b = addDays(out[0].date, -1);
+      undated.date = b;
+      out.unshift(undated);
+    }
     return out;
   }
   // Per-drug history and derived events (start / increase / decrease / hold / stop / restart).
@@ -16333,9 +16354,9 @@ var CF = (function () {
       if (n == null || !date) return;
       (S[k] = S[k] || []).push({ date: date, value: n, source: src || '' });
     }
-    var adm = iso(p.Admission_Date) || iso(p.timestamp);
+    var adm = indexAdmDate(p, visits);
     var dis = iso(p.Admission_Discharge_Date) || adm;
-    var enrol = iso(p.timestamp) || adm;
+    var enrol = (iso(p.Admission_Date) || iso(p.Admission_Discharge_Date)) ? (iso(p.timestamp) || adm) : adm;
     add('K', adm, s(p.Lab_K) || pairPart(p.Lab_NaK, 1), 'Admission');
     add('K', dis, p.Lab_K_Disch, 'Discharge');
     add('Na', adm, s(p.Lab_Na) || pairPart(p.Lab_NaK, 0), 'Admission');
@@ -16408,7 +16429,7 @@ var CF = (function () {
   // default), so it is read as "Former" and flagged for checking.
   function smokingStatus(p, visits) {
     var recs = (visits || []).map(function (v) { return { v: s(v.V_Smoker), d: iso(v.visitDate) }; })
-      .concat([{ v: s(p.Smoker), d: iso(p.Admission_Date) || iso(p.timestamp) }]).filter(function (r) { return r.v; });
+      .concat([{ v: s(p.Smoker), d: indexAdmDate(p, visits) }]).filter(function (r) { return r.v; });
     if (!recs.length) return { status: '', date: '', note: '' };
     var latest = recs[0], ever = recs.filter(function (r) { return /current|former/i.test(r.v); });
     if (/never/i.test(latest.v) && ever.length) {
@@ -17047,7 +17068,7 @@ var CF = (function () {
   var DEVICE = { efICD: 35, efCRT: 35, qrsStrong: 150, qrsMin: 130, omtDays: 90, postMIdays: 40, ecgMaxAgeDays: 365, echoMaxAgeDays: 365 };
   function latestECG(p, visits) {
     var list = [];
-    var adm = iso(p.Admission_Date) || iso(p.timestamp);
+    var adm = indexAdmDate(p, visits);
     if (num(p.ECG_QRS) != null || s(p.ECG_LBBB)) list.push({ date: adm, qrs: num(p.ECG_QRS), lbbb: s(p.ECG_LBBB), rhythm: s(p.ECG_Arrhythmia), paced: s(p.ECG_Pacing), src: 'Admission ECG' });
     parseExtraAdmissions(p).forEach(function (a, i) {
       if (num(a.ECG_QRS) != null) list.push({ date: iso(a.date), qrs: num(a.ECG_QRS), lbbb: s(a.ECG_LBBB), rhythm: s(a.ECG_Arrhythmia), paced: s(a.ECG_Pacing), src: 'Admission ' + (i + 2) + ' ECG' });
@@ -17587,13 +17608,15 @@ var CFUI = (function () {
     pillars.forEach(function (pl) {
       if (pl.on) return;
       if (A.profile.esc2026 !== 'HFrEF' && pl.key !== 'SGLT2') return; // pillars are a reduced-EF concept; SGLT2i for all HF
-      var grp = null;
+      var grp = null, onScreen = false;
       document.querySelectorAll('#visitMedDoses .cf-med').forEach(function (row) {
-        if (grp) return;
         var d = CF.DRUGS[CF.baseKey(row.getAttribute('data-med'))];
-        if (d && d.pillar === pl.key) grp = row.closest('.visit-med-group');
+        if (!d || d.pillar !== pl.key) return;
+        if (!grp) grp = row.closest('.visit-med-group');
+        if (row.classList.contains('cf-on')) onScreen = true;
       });
-      if (!grp) return;
+      // a drug of this class is ticked in the record that is open: never ask "why not on?"
+      if (!grp || onScreen) return;
       var w = document.createElement('div'); w.className = 'cf-why';
       w.innerHTML = '<i class="fa fa-circle-exclamation"></i> Not on ' + esc(pl.label) + ' <select class="form-select form-select-sm cf-gdmt-reason" data-pillar="' + pl.key + '"><option value="">why not on?</option>' +
         GDMT_RATIONALE_OPTIONS.filter(Boolean).map(function (o) { return '<option' + (o === pl.reason ? ' selected' : '') + '>' + o + '</option>'; }).join('') + '</select>';
@@ -18508,7 +18531,7 @@ var CFUI = (function () {
     A.hist.snapshots.forEach(function (sn) {
       var on = [], off = [];
       Object.keys(sn.meds).forEach(function (k) { var e = sn.meds[k]; (e.status === 'on' ? on : off).push(CF.drugLabel(k).replace(/ \(.*\)/, '') + (e.status === 'on' ? '' : ' (' + e.status + ')')); });
-      rows.push('<tr><td>' + CF.fmt(sn.date) + '</td><td>' + esc(sn.label) + '<br><small>' + tag(sn) + '</small></td><td>' + esc(on.join(', ') || '—') + (off.length ? '<br><small class="text-danger">' + esc(off.join(', ')) + '</small>' : '') + '</td></tr>');
+      rows.push('<tr><td>' + (sn.baseline ? '<i>No date</i><br><small>counted as the starting list, before the visits</small>' : CF.fmt(sn.date)) + '</td><td>' + esc(sn.label) + '<br><small>' + tag(sn) + '</small></td><td>' + esc(on.join(', ') || '—') + (off.length ? '<br><small class="text-danger">' + esc(off.join(', ')) + '</small>' : '') + '</td></tr>');
     });
     var skipped = (A.visits || []).filter(function (v) { return !CF.iso(v.visitDate) && !CF.iso(v.Visit_Date) && !CF.iso(v._displayDate); }).length;
     var pill = CF.pillarStatus(p, A.visits, A).map(function (x) { return x.label + ': ' + (x.on ? x.drug : 'not on' + (x.reason ? ' (' + x.reason + ')' : '')); }).join(' · ');
