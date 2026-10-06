@@ -17491,6 +17491,59 @@ var CFUI = (function () {
     });
     return false;
   }
+  // ---- Admission dates are required (Update 27) ------------------------------------------
+  // An admission without its own dates cannot be placed in time, so medicines, labs and the
+  // timeline would be read wrongly. Saving is refused until both dates are entered.
+  function indexAdmissionRecorded() {
+    var keys = ['Admission_Date', 'Admission_Discharge_Date', 'Admission_Reason', 'Admission_Cause', 'LOS', 'Transfer_Hospital_Name', 'Discharge_OPD_Appt'];
+    if (keys.some(function (k) { return !!val(k); })) return true;
+    if ((typeof ADMISSION_MED_LIST !== 'undefined' ? ADMISSION_MED_LIST : []).some(function (m) { return /^(yes|stopped)$/i.test(val(m.id + '_Status')) || !!val(m.id + '_Action'); })) return true;
+    return [].some.call(document.querySelectorAll('.form-step[data-step="3"] input[id^="Lab_"], .form-step[data-step="3"] select[id^="Lab_"]'), function (e) { return String(e.value || '').trim() !== ''; });
+  }
+  function admissionDateProblems() {
+    var out = [], today = CF.todayIso();
+    var died = val('Mortality') === 'In-hospital';
+    function check(label, a, d, focusA, focusD, opts) {
+      opts = opts || {};
+      if (!a) out.push({ msg: label + ': <b>admission date</b> is missing', el: focusA, extra: opts.extra });
+      if (!d && !(died && opts.index && val('Death_Date'))) out.push({ msg: label + ': <b>discharge date</b> is missing' + (opts.index ? ' (if the patient died in hospital, enter the date of death in Vital status)' : ''), el: focusD, extra: opts.extra });
+      if (a && a > today) out.push({ msg: label + ': admission date ' + CF.fmt(a) + ' is in the future', el: focusA, extra: opts.extra });
+      if (d && d > today) out.push({ msg: label + ': discharge date ' + CF.fmt(d) + ' is in the future', el: focusD, extra: opts.extra });
+      if (a && d && d < a) out.push({ msg: label + ': discharge date ' + CF.fmt(d) + ' is before the admission date ' + CF.fmt(a), el: focusD, extra: opts.extra });
+    }
+    if (indexAdmissionRecorded()) check('Index admission', CF.iso(val('Admission_Date')), CF.iso(val('Admission_Discharge_Date')), 'Admission_Date', 'Admission_Discharge_Date', { index: true });
+    var extra = typeof _readExtraAdmissions === 'function' ? _readExtraAdmissions() : [];
+    extra.forEach(function (a, i) {
+      a = a || {};
+      check('Additional admission ' + (i + 2), CF.iso(a.date || a.Admission_Date), CF.iso(a.dischargeDate || a.Admission_Discharge_Date), 'ea_' + i + '_date', 'ea_' + i + '_dischargeDate', { extra: i });
+    });
+    return out;
+  }
+  function guardAdmissionSave() {
+    var probs = admissionDateProblems();
+    if (!probs.length) return true;
+    var old = $('popOv'); if (old) old.remove();
+    var ov = document.createElement('div'); ov.id = 'popOv'; ov.className = 'modal-overlay';
+    ov.innerHTML = '<div class="modal-box cf-guard"><div class="modal-icon" style="background:#dc3545;width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;"><i class="fa-solid fa-triangle-exclamation" style="color:#fff;font-size:1.2rem;"></i></div>' +
+      '<h4 style="color:#dc3545">Not saved: admission dates needed</h4>' +
+      '<p class="text-muted mb-2">Every admission needs its <b>admission date</b> and <b>discharge date</b>. Without them the app cannot tell whether the admission came before or after the visits, so medicines, labs and alarms would be wrong.</p>' +
+      '<ul class="text-start small mb-3" style="color:#842029">' + probs.map(function (x) { return '<li>' + x.msg + '</li>'; }).join('') + '</ul>' +
+      '<button class="btn btn-danger w-100 mb-2" data-g="go">Go to the first missing date</button>' +
+      '<button class="btn btn-outline-secondary w-100" data-g="close">Close</button>' +
+      (probs.some(function (x) { return x.extra != null; }) ? '<p class="small text-muted mt-2 mb-0">An additional admission added by mistake can be removed with its <i class="fa fa-trash"></i> button.</p>' : '') + '</div>';
+    document.body.appendChild(ov);
+    ov.querySelectorAll('[data-g]').forEach(function (b) {
+      b.onclick = function () {
+        ov.remove();
+        if (b.getAttribute('data-g') !== 'go') return;
+        var pr = probs[0];
+        if (typeof goToWizardStep === 'function') goToWizardStep(3);
+        if (pr.extra != null) { var card = document.querySelector('.extra-adm-card[data-extra-idx="' + pr.extra + '"]'); if (card) card.classList.add('expanded'); }
+        setTimeout(function () { var el = $(pr.el); if (el) { focusEl(el); try { el.focus(); } catch (e) {} } }, 250);
+      };
+    });
+    return false;
+  }
   function showVisitDateNote() {
     var vd = $('Visit_Date'); if (!vd) return;
     var n = $('cfVisitDateNote');
@@ -18863,7 +18916,7 @@ var CFUI = (function () {
     (function () {
       var sp = window.savePatient;
       if (typeof sp === 'function' && !sp.cfGuard) {
-        window.savePatient = function () { if (!guardVisitSave()) return; return sp.apply(this, arguments); };
+        window.savePatient = function () { if (!guardAdmissionSave()) return; if (!guardVisitSave()) return; return sp.apply(this, arguments); };
         window.savePatient.cfGuard = true;
       }
     })();
@@ -18906,7 +18959,7 @@ var CFUI = (function () {
   }
   return {
     install: install, openOverview: openOverview, startVisit: startVisit, headerChips: headerChips, smartBody: smartBody, renderAssist: renderAssist,
-    markVisitTouched: function () { visitTouched = true; }, calHistory: calHistory, renderPdf: renderPdf, pdfCss: pdfCss, patientReport: patientReport, riskFactors: riskFactors, refreshEditor: refreshEditor, clearDraft: clearDraft
+    markVisitTouched: function () { visitTouched = true; }, admissionDateProblems: admissionDateProblems, calHistory: calHistory, renderPdf: renderPdf, pdfCss: pdfCss, patientReport: patientReport, riskFactors: riskFactors, refreshEditor: refreshEditor, clearDraft: clearDraft
   };
 })();
 CFUI.install();
