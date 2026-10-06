@@ -1963,6 +1963,7 @@ label.cf-ai-filled{background:#fffbe6;border-radius:4px;box-shadow:0 0 0 2px #fa
 .cf-recheck h6{font-weight:700;color:#92400e;margin-bottom:4px;}
 .cf-recheck table{background:#fff;font-size:.8rem;margin:0}
 .cf-recheck tr.cf-rc-hi td{background:#fff7ed;}
+.cf-datacheck{margin-top:10px;font-size:.82rem;}.cf-datacheck summary{cursor:pointer;color:#475569;font-weight:600;}.cf-datacheck table{font-size:.78rem;background:#fff;}
 
 </style>
 
@@ -15994,6 +15995,11 @@ var CF = (function () {
     return m ? parseFloat(m[0]) : null;
   }
   function iso(v) {
+    if (v && typeof v === 'object') {
+      if (typeof v.toDate === 'function') v = v.toDate();
+      else if (typeof v.seconds === 'number') v = new Date(v.seconds * 1000);
+      if (v instanceof Date) return isNaN(v.getTime()) ? '' : v.getFullYear() + '-' + String(v.getMonth() + 1).padStart(2, '0') + '-' + String(v.getDate()).padStart(2, '0');
+    }
     var t = s(v);
     if (!t) return '';
     if (/^\d{4}-\d{2}-\d{2}/.test(t)) return t.slice(0, 10);
@@ -16111,6 +16117,9 @@ var CF = (function () {
   function readDrug(rec, id) {
     rec = rec || {};
     var status = s(rec[id + '_Status']);
+    if (/^(yes|y|true|1|on|taking)$/i.test(status)) status = 'Yes';
+    else if (/^(no|n|false|0|none)$/i.test(status)) status = 'No';
+    else if (/^(stopped|stop|discontinued|held|hold)$/i.test(status)) status = 'Stopped';
     var action = s(rec[id + '_Action']);
     var preset = s(rec[id]);
     var custom = s(rec[id + '_Custom']);
@@ -16187,6 +16196,10 @@ var CF = (function () {
     if (typeof VISIT_MED_LIST !== 'undefined') VISIT_MED_LIST.forEach(function (m) { if (baseKey(m.id) === key) out = m.doses.filter(Boolean); });
     return out;
   }
+  function fromEditor(rec, prefix) {
+    for (var k in rec) if (k.indexOf(prefix) === 0 && /_Action$/.test(k)) return true;
+    return false;
+  }
   function snapshotFrom(rec, prefix) {
     var map = {}, any = false;
     allIds().forEach(function (k) {
@@ -16223,14 +16236,14 @@ var CF = (function () {
     var out = [];
     var admDate = iso(p.Admission_Discharge_Date) || iso(p.Admission_Date) || iso(p.timestamp);
     var idx = snapshotFrom(p, 'A_') || legacySnapshot(p);
-    if (idx) out.push({ date: admDate, label: 'Index admission', kind: 'admission', meds: idx });
+    if (idx) out.push({ date: admDate, label: 'Index admission', kind: 'admission', meds: idx, full: fromEditor(p, 'A_') });
     parseExtraAdmissions(p).forEach(function (a, i) {
       var m = snapshotFrom(a, 'A_');
-      if (m) out.push({ date: iso(a.dischargeDate) || iso(a.date), label: 'Admission ' + (i + 2), kind: 'admission', meds: m });
+      if (m) out.push({ date: iso(a.dischargeDate) || iso(a.date), label: 'Admission ' + (i + 2), kind: 'admission', meds: m, full: fromEditor(a, 'A_') });
     });
     (visits || []).forEach(function (v) {
       var m = snapshotFrom(v, 'V_');
-      if (m) out.push({ date: iso(v.visitDate), label: (v.visitType || 'Visit'), kind: 'visit', meds: m, visitId: v.id });
+      if (m) out.push({ date: iso(v.visitDate) || iso(v.Visit_Date) || iso(v._displayDate), label: (v.visitType || 'Visit'), kind: 'visit', meds: m, visitId: v.id, full: fromEditor(v, 'V_') });
     });
     out = out.filter(function (x) { return x.date; });
     out.sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
@@ -16256,6 +16269,10 @@ var CF = (function () {
             h.events = h.events.filter(function (x) { return x !== last.softEvent; });
             last.state = 'on'; last.entry = before.entry; last.inferred = true; delete last.soft; delete last.softEvent;
           }
+        }
+        if (!e && !sn.full && last && last.state === 'on') {
+          h.points.push({ date: sn.date, source: sn.label, state: 'on', entry: last.entry, snap: i, inferred: true });
+          return; // partial list from an older record: not evidence that the drug stopped
         }
         var point = { date: sn.date, source: sn.label, state: state, entry: e || null, snap: i };
         if (!e && (!last || last.state !== 'on')) return; // nothing to say
@@ -17388,12 +17405,15 @@ var CFUI = (function () {
     if (typeof editingVisitId !== 'undefined' && editingVisitId) return;
     var pid = (typeof currentPatientId !== 'undefined' && currentPatientId) || (typeof editingDocId !== 'undefined' && editingDocId);
     var p = (pid && typeof PC !== 'undefined' && PC[pid]) || {};
-    var snaps = CF.medSnapshots(p, typeof visits !== 'undefined' ? visits : []);
+    var vs = typeof visits !== 'undefined' ? visits : [];
+    var snaps = CF.medSnapshots(p, vs);
     var latest = snaps.length ? snaps[snaps.length - 1] : null;
+    var hist = CF.medHistory(p, vs), cur = {};
+    hist.current.forEach(function (h) { cur[h.key] = h.current; });
     var ivSkipped = [];
     VISIT_MED_LIST.forEach(function (m) {
       ['_Status', '', '_Custom', '_Freq', '_Change', '_Action', '_Reason'].forEach(function (suf) { setVal(m.id + suf, suf === '_Status' ? 'No' : ''); });
-      var e = latest && latest.meds[CF.baseKey(m.id)];
+      var e = cur[CF.baseKey(m.id)];
       if (!e || e.status !== 'on') return; // stopped / held drugs are not carried into the new visit
       if (CF.isIVDose(e.dose)) { ivSkipped.push(CF.drugLabel ? CF.drugLabel(CF.baseKey(m.id)) : m.label); return; } // an in-hospital IV dose is not a clinic dose
       var preset = m.doses.filter(Boolean).indexOf(e.dose) >= 0;
@@ -18456,7 +18476,7 @@ var CFUI = (function () {
     h += '<div class="cf-ov-grid"><section class="cf-ov-card"><div class="cf-ov-h"><i class="fa fa-pills"></i> Current medications' +
       '<label class="cf-fast-toggle ms-auto"><input type="checkbox" id="cfOvFasting"' + (ovState.fasting ? ' checked' : '') + '> <i class="fa fa-moon"></i> Ramadan / fasting</label></div>' + medsBlock(p, A) + '</section>' +
       '<section class="cf-ov-card"><div class="cf-ov-h"><i class="fa fa-microchip"></i> Device and advanced therapy</div>' + deviceBlock(p, A) + '</section></div>';
-    h += '<section class="cf-ov-card"><div class="cf-ov-h"><i class="fa fa-chart-gantt"></i> Medication history <small>each drug over time · tap for details</small></div>' + medHistoryChart(A, { p: p }) + '</section>';
+    h += '<section class="cf-ov-card"><div class="cf-ov-h"><i class="fa fa-chart-gantt"></i> Medication history <small>each drug over time · tap for details</small></div>' + medHistoryChart(A, { p: p }) + medDataCheck(p, A) + '</section>';
     h += '<section class="cf-ov-card"><div class="cf-ov-h"><i class="fa fa-timeline"></i> Patient journey <small>by year · medication decisions shown with the visit or admission of that day</small></div>' + timeline(p, A) + '</section>';
     h += '<details class="cf-ov-card cf-ov-legacy"><summary><i class="fa fa-table-list"></i> All recorded fields</summary>' + generateCardHTML(p, id, latest || (A.visits[0] || null), A.visits, '') + '</details>';
     var box = $('cfOverview');
@@ -18480,6 +18500,22 @@ var CFUI = (function () {
     });
     box.querySelectorAll('[data-act]').forEach(function (b) { b.addEventListener('click', function () { runAction(id, b.getAttribute('data-act')); }); });
     var leg = box.querySelector('.cf-ov-legacy details.cf-allfields'); if (leg) leg.open = true;
+  }
+  // What the app reads, record by record: for checking a medication list that looks wrong.
+  function medDataCheck(p, A) {
+    var rows = [];
+    var tag = function (sn) { return sn.kind === 'visit' ? (sn.full ? 'visit · full list' : 'visit · older format') : (sn.full ? 'admission · full list' : 'admission · older format'); };
+    A.hist.snapshots.forEach(function (sn) {
+      var on = [], off = [];
+      Object.keys(sn.meds).forEach(function (k) { var e = sn.meds[k]; (e.status === 'on' ? on : off).push(CF.drugLabel(k).replace(/ \(.*\)/, '') + (e.status === 'on' ? '' : ' (' + e.status + ')')); });
+      rows.push('<tr><td>' + CF.fmt(sn.date) + '</td><td>' + esc(sn.label) + '<br><small>' + tag(sn) + '</small></td><td>' + esc(on.join(', ') || '—') + (off.length ? '<br><small class="text-danger">' + esc(off.join(', ')) + '</small>' : '') + '</td></tr>');
+    });
+    var skipped = (A.visits || []).filter(function (v) { return !CF.iso(v.visitDate) && !CF.iso(v.Visit_Date) && !CF.iso(v._displayDate); }).length;
+    var pill = CF.pillarStatus(p, A.visits, A).map(function (x) { return x.label + ': ' + (x.on ? x.drug : 'not on' + (x.reason ? ' (' + x.reason + ')' : '')); }).join(' · ');
+    return '<details class="cf-datacheck"><summary><i class="fa fa-magnifying-glass me-1"></i>Data check: what the app reads for medications</summary>' +
+      '<div class="small mb-1"><b>Result:</b> ' + esc(pill) + '</div>' +
+      '<div class="small text-muted mb-1">' + (A.visits || []).length + ' visit(s) loaded' + (skipped ? ' · <b class="text-danger">' + skipped + ' with an unreadable date (not used)</b>' : '') + '. Records with no medication entered are not listed.</div>' +
+      '<table class="table table-sm table-bordered mb-0"><thead><tr><th>Date</th><th>Record</th><th>Medicines read</th></tr></thead><tbody>' + (rows.join('') || '<tr><td colspan="3">No medication records found</td></tr>') + '</tbody></table></details>';
   }
   function scrollToForm(sel) {
     setTimeout(function () { var el = document.querySelector(sel || '#hfForm'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 150);
