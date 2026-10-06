@@ -1958,6 +1958,11 @@ label.cf-ai-filled{background:#fffbe6;border-radius:4px;box-shadow:0 0 0 2px #fa
 .cf-ov-btns .cf-ai-btn{margin:0;}
 .cf-ai-topbar{display:flex;gap:8px;margin:4px 0 8px;}
 .cf-ai-topbar .cf-ai-btn{flex:1;margin:0;}
+.cf-vdate-note{font-size:.76rem;color:#075985;background:#e0f2fe;border-radius:6px;padding:4px 8px;margin-top:4px;}
+.cf-recheck{margin-top:14px;border:1px solid #fde68a;background:#fffbeb;border-radius:10px;padding:10px 12px;}
+.cf-recheck h6{font-weight:700;color:#92400e;margin-bottom:4px;}
+.cf-recheck table{background:#fff;font-size:.8rem;margin:0}
+.cf-recheck tr.cf-rc-hi td{background:#fff7ed;}
 
 </style>
 
@@ -17417,6 +17422,39 @@ var CFUI = (function () {
     var pid = (typeof currentPatientId !== 'undefined' && currentPatientId) || (typeof editingDocId !== 'undefined' && editingDocId);
     return { id: pid, data: (pid && typeof PC !== 'undefined' && PC[pid]) || null };
   }
+  // Set when the user enters anything in the visit section; cleared when a record is opened, the
+  // visit form is cleared/loaded, or a save succeeds. Used to refuse a save that would drop the visit.
+  var visitTouched = false;
+  function guardVisitSave() {
+    if (!visitTouched || val('Visit_Date')) return true;
+    var isNew = !currentPatient().id;
+    var old = $('popOv'); if (old) old.remove();
+    var ov = document.createElement('div'); ov.id = 'popOv'; ov.className = 'modal-overlay';
+    ov.innerHTML = '<div class="modal-box cf-guard"><div class="modal-icon" style="background:#dc3545;width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;"><i class="fa-solid fa-triangle-exclamation" style="color:#fff;font-size:1.2rem;"></i></div>' +
+      '<h4 style="color:#dc3545">Not saved: the visit has no date</h4>' +
+      '<p class="text-muted">' + (isNew
+        ? 'You entered visit information (for example medicines) for a <b>new patient</b>. A visit can only be added after the patient is saved. Save the patient first, then complete the visit with its date.'
+        : 'You entered visit information (for example medicines), but <b>Visit Date</b> is empty. Without a date the visit, and its medicines, would not be saved.') + '</p>' +
+      (isNew ? '<button class="btn btn-dark w-100" data-g="close">OK</button>'
+        : '<button class="btn btn-success w-100 mb-2" data-g="today">Use today (' + CF.fmt(CF.todayIso()) + ') and save</button><button class="btn btn-outline-secondary w-100" data-g="date">Enter the visit date myself</button>') + '</div>';
+    document.body.appendChild(ov);
+    ov.querySelectorAll('[data-g]').forEach(function (b) {
+      b.onclick = function () {
+        var g = b.getAttribute('data-g'); ov.remove();
+        if (g === 'today') { setVal('Visit_Date', CF.todayIso()); var vd = $('Visit_Date'); if (vd) vd.dispatchEvent(new Event('change', { bubbles: true })); window.savePatient(); }
+        else if (g === 'date') { if (typeof goToWizardStep === 'function') goToWizardStep(4); focusEl($('Visit_Date')); }
+      };
+    });
+    return false;
+  }
+  function showVisitDateNote() {
+    var vd = $('Visit_Date'); if (!vd) return;
+    var n = $('cfVisitDateNote');
+    if (!n) { n = document.createElement('div'); n.id = 'cfVisitDateNote'; n.className = 'cf-vdate-note'; vd.parentNode.appendChild(n); }
+    n.innerHTML = '<i class="fa fa-calendar-check me-1"></i>Visit date set to today so this visit is saved with the record. Change it if the visit was on another day.';
+    vd.classList.add('cf-flash'); setTimeout(function () { vd.classList.remove('cf-flash'); }, 2200);
+    clearTimeout(showVisitDateNote.t); showVisitDateNote.t = setTimeout(function () { if (n.parentNode) n.remove(); }, 12000);
+  }
   function contextVisits(includeForm) {
     var list = (typeof visits !== 'undefined' ? visits : []).filter(function (v) { return !(typeof editingVisitId !== 'undefined' && editingVisitId && v.id === editingVisitId); });
     if (includeForm && val('Visit_Date')) list = [formVisit()].concat(list);
@@ -18533,6 +18571,23 @@ var CFUI = (function () {
         var id = e.target && e.target.id || '';
         if (/^V_(K|Creat|eGFR|BP|Pulse|Weight|Height|Echo_EF|Ferritin|Transferrin|Hb|NTproBNP|HbA1c|LDL|INR|NYHA)$/.test(id) || id === 'Visit_Date') scheduleAssist();
       });
+      // Entering anything in the visit section of a saved patient needs a visit date: without one the
+      // visit (and its medicines) is not part of the record and is dropped on "Update Patient".
+      var autoDate = function (e) {
+        var t = e.target; if (!t || !(e.isTrusted || window.__cfTestTrusted)) return;
+        var id = t.id || '';
+        if (id === 'Visit_Date' || id === 'Visit_Type') return;
+        if (!(/^V_/.test(id) || (t.closest && t.closest('.visit-section, #visitMedDoses, .cf-med[data-prefix="V_"]')))) return;
+        visitTouched = true;
+        if (val('Visit_Date')) return;
+        if (!currentPatient().id) return;
+        setVal('Visit_Date', CF.todayIso());
+        var vd = $('Visit_Date'); if (vd) vd.dispatchEvent(new Event('change', { bubbles: true }));
+        showVisitDateNote();
+        scheduleAssist();
+      };
+      form.addEventListener('change', autoDate, true);
+      form.addEventListener('input', autoDate, true);
     }
     ['Mortality', 'V_Mortality'].forEach(function (id) { var e = $(id); if (e) e.addEventListener('change', function () { toggleDeath(id === 'Mortality' ? '' : 'V_'); }); });
     ['HF_Readmission', 'HF_Readmission_Interval', 'Admission_Date', 'Last_Admission'].forEach(function (id) { var e = $(id); if (e) e.addEventListener('change', readmitSuggest); });
@@ -18742,7 +18797,15 @@ var CFUI = (function () {
     wrap('renderOpenPatientAlarms', function () { renderAssist(); renderKccqHint(); if (pendingVisit && pendingVisit.id === ((typeof currentPatientId !== 'undefined' && currentPatientId) || '')) applyPendingVisit(); });
     wrap('resetForm', function () { var ob = $('cfOvBar'); if (ob) ob.style.display = 'none'; markClean(); refreshEditor('A_'); refreshEditor('V_'); renderAssist(); toggleDeath(''); toggleDeath('V_'); readmitSuggest(); });
     // clear the local draft after a successful save
-    wrap('showSaveSuccess', function () { clearDraft(); });
+    wrap('showSaveSuccess', function () { clearDraft(); visitTouched = false; });
+    (function () {
+      var sp = window.savePatient;
+      if (typeof sp === 'function' && !sp.cfGuard) {
+        window.savePatient = function () { if (!guardVisitSave()) return; return sp.apply(this, arguments); };
+        window.savePatient.cfGuard = true;
+      }
+    })();
+    ['editPt', 'resetForm', 'clearVisitForm', 'editVisit'].forEach(function (n) { wrap(n, null, function () { visitTouched = false; }); });
     wrap('updateExtraAdmission', function (r, idx, field) { if (field === 'HF_Readmission' || field === 'date') extraReadmitAuto(idx); });
     // Deceased patients get no service reminders (refill, registration, KCCQ, vaccines, lost follow-up).
     var origAlarms = window.computePatientAlarms;
@@ -18781,7 +18844,7 @@ var CFUI = (function () {
   }
   return {
     install: install, openOverview: openOverview, startVisit: startVisit, headerChips: headerChips, smartBody: smartBody, renderAssist: renderAssist,
-    calHistory: calHistory, renderPdf: renderPdf, pdfCss: pdfCss, patientReport: patientReport, riskFactors: riskFactors, refreshEditor: refreshEditor, clearDraft: clearDraft
+    markVisitTouched: function () { visitTouched = true; }, calHistory: calHistory, renderPdf: renderPdf, pdfCss: pdfCss, patientReport: patientReport, riskFactors: riskFactors, refreshEditor: refreshEditor, clearDraft: clearDraft
   };
 })();
 CFUI.install();
@@ -18998,6 +19061,51 @@ CFUI.install();
     chart('cfStatusChart', 'doughnut', Object.keys(st), Object.keys(st).map(function (k) { return st[k]; }), ['#17b26a', '#f79009', '#98a2b3', '#344054']);
     var sn = document.getElementById('cfStatusNote');
     if (sn) sn.innerHTML = 'Death and loss to follow-up are now separate. ' + (st.Died ? withDate + ' of ' + st.Died + ' deaths have a recorded date (used in survival curves).' : '');
+  };
+})();
+
+// ---- Records to re-check: "Update Patient" pressed on a day with no visit saved that day ----
+// Before Update 22 a visit typed with an empty visit date was dropped on Update Patient (with its medicines).
+// That leaves this trace: the patient record was edited on a day on which no visit exists.
+(function () {
+  function day(x) { var t = String(x || ''); if (!t) return ''; var d = new Date(t); if (isNaN(d)) return CF.iso(t) || ''; return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  function tsDay(x) { if (x && typeof x.toDate === 'function') return day(x.toDate().toISOString()); return day(x); }
+  window.cfRecheckList = function (d) {
+    var out = [];
+    d.forEach(function (p) {
+      if (p._cf && p._cf.vital && p._cf.vital.dead) return;
+      var edit = tsDay(p.lastEditAt);
+      if (!edit) return;
+      var created = tsDay(p.timestamp);
+      if (created && edit === created) return; // the day the patient was entered
+      var vdays = {};
+      (p._visits || []).forEach(function (v) { [v.visitDate, v.Visit_Date].forEach(function (x) { var k = CF.iso(x); if (k) vdays[k] = 1; }); [v.lastEditAt, v.timestamp, v.createdAt].forEach(function (x) { var k = tsDay(x); if (k) vdays[k] = 1; }); });
+      if (vdays[edit]) return;
+      var gaps = (p._cf && p._cf.profile && p._cf.profile.esc2026 === 'HFrEF' ? (p._cfPillars || []) : []).filter(function (x) { return !x.on && !x.reason; }).map(function (x) { return x.label; });
+      var latest = (p._visits || []).map(function (v) { return CF.iso(v.visitDate); }).filter(Boolean).sort().pop() || '';
+      out.push({ id: p.id, name: p.Patient_Name || '?', file: p.File_No || '', edit: edit, by: p.lastEditBy || p.lastEditDoctor || '', latest: latest, gaps: gaps });
+    });
+    out.sort(function (a, b) { return (b.gaps.length ? 1 : 0) - (a.gaps.length ? 1 : 0) || (a.edit < b.edit ? 1 : a.edit > b.edit ? -1 : 0); });
+    return out;
+  };
+  var prev = window.buildGDMTGap;
+  window.buildGDMTGap = function (d, n) {
+    prev(d, n);
+    var host = document.getElementById('gdmtGapTableWrap'); if (!host) return;
+    var box = document.getElementById('cfRecheck');
+    if (!box) { box = document.createElement('div'); box.id = 'cfRecheck'; box.className = 'cf-recheck'; host.parentNode.insertBefore(box, host.nextSibling); }
+    var L = window.cfRecheckList(d);
+    var h = '<h6><i class="fa fa-clipboard-check me-1"></i>Records to re-check <span class="badge bg-secondary">' + L.length + '</span></h6>' +
+      '<p class="small text-muted mb-2">The record was last updated on a day with <b>no visit saved</b>. Before the latest update, a visit typed without a visit date was dropped on “Update Patient”, medicines included. Open each one: if a visit (or medicines) from that day is missing, enter it again with its date. Patients with an unexplained GDMT gap are listed first.</p>';
+    if (!L.length) h += '<p class="small text-success mb-0"><i class="fa fa-circle-check me-1"></i>No records match this pattern.</p>';
+    else {
+      h += '<div style="overflow-x:auto"><table class="table table-sm table-bordered"><thead><tr><th>Patient</th><th>File</th><th>Last updated</th><th>Latest saved visit</th><th>GDMT gap, no reason</th><th></th></tr></thead><tbody>' +
+        L.map(function (r) {
+          return '<tr' + (r.gaps.length ? ' class="cf-rc-hi"' : '') + '><td style="text-align:left;font-weight:600">' + CF.esc(r.name) + '</td><td>' + CF.esc(r.file) + '</td><td>' + CF.fmt(r.edit) + (r.by ? '<br><small class="text-muted">' + CF.esc(r.by) + '</small>' : '') + '</td><td>' + (r.latest ? CF.fmt(r.latest) : '<span class="text-muted">none</span>') + '</td><td style="text-align:left">' + (r.gaps.length ? CF.esc(r.gaps.join(', ')) : '<span class="text-muted">—</span>') + '</td>' +
+            '<td><button class="btn btn-sm btn-outline-primary py-0" onclick="goToMain();CFUI.openOverview(\'' + r.id + '\')">Open</button></td></tr>';
+        }).join('') + '</tbody></table></div>';
+    }
+    box.innerHTML = h;
   };
 })();
 
@@ -20073,6 +20181,7 @@ CFX.install();
   }
   function apply() {
     if (st.mode === 'extra') return applyExtra();
+    if ((st.mode === 'visit' || st.mode === 'labs') && window.CFUI && CFUI.markVisitTouched) CFUI.markVisitTouched();
     var mode = st.mode, prefix = mode === 'visit' ? 'V_' : 'A_', nf = NOTE_FIELD[mode];
     var n = { fields: 0, meds: 0, notes: 0 }, extraMeds = [];
     // the lab target selects
