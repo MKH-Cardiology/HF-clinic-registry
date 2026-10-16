@@ -12220,7 +12220,7 @@ function buildCascade(){
         {label:'+ Beta-blocker',   fn:function(p){return on(p,'ACEi/ARB/ARNI') && on(p,'BB');}},
         {label:'+ MRA',            fn:function(p){return on(p,'ACEi/ARB/ARNI') && on(p,'BB') && on(p,'MRA');}},
         {label:'+ SGLT2i (all 4)', fn:function(p){return on(p,'ACEi/ARB/ARNI') && on(p,'BB') && on(p,'MRA') && on(p,'SGLT2i');}},
-        {label:'On target / max tolerated doses',fn:function(p){return _cfMaxDoses(p);}},
+        {label:'Maximum GDMT doses reached',fn:function(p){return _cfMaxDoses(p);}},
         {label:'LV recovered',     fn:function(p){return p.Recovered_LV==='Yes';}}
     ];
     var counts = steps.map(function(s){ return hfref.filter(s.fn).length; });
@@ -17307,8 +17307,9 @@ var CF = (function () {
   // GDMT target status (Update 28). One definition used by the overview, the visit, analytics and exports.
   //   HFrEF (LVEF <50%): the four pillars. 'target' = dose >= target; 'tolerated' = below target after a
   //     documented dose reduction; 'below' = room to titrate; 'unreadable' = dose cannot be read; 'missing'.
-  //   HFpEF (LVEF >=50%): SGLT2i is required; an MRA or GLP-1/GIP agonist counts only when prescribed
-  //     (no BB / RAS / diuretic target in HFpEF).
+  //   HFpEF (LVEF >=50%): SGLT2i is required; an MRA counts when prescribed
+  //     (no BB / RAS / diuretic / GLP-1 target in the HFpEF GDMT set - clinic decision).
+  //   Beta-blocker: being on one at any dose counts as target (clinic decision).
   // reached = every counted item at target; optimised = reached, or every gap is a documented
   //   intolerance / contraindication (recorded "why not on" reason or a reasoned dose reduction).
   function gdmtTarget(p, visits, A, pillars) {
@@ -17324,7 +17325,8 @@ var CF = (function () {
         it.target = tg ? tg.t : '';
         it.pct = pctTarget(h.current, tc);
         var lc = h.lastChange;
-        if (it.pct == null) it.state = tg ? 'unreadable' : 'target';
+        if (key === 'BB') it.state = 'target'; // clinic rule: on a beta-blocker at any tolerated dose counts as target
+        else if (it.pct == null) it.state = tg ? 'unreadable' : 'target';
         else if (it.pct >= 100) it.state = 'target';
         else if (lc && lc.type === 'Decrease' && lc.reason) { it.state = 'tolerated'; it.reason = lc.reason; }
         else it.state = 'below';
@@ -17343,8 +17345,6 @@ var CF = (function () {
       out.items.push(item('SGLT2 inhibitor', 'SGLT2', sg, sg ? '' : gdmtReason(p, A.visits, 'SGLT2')));
       var mra = onPillar(A.hist, 'MRA')[0];
       if (mra) out.items.push(item('MRA', 'MRA', mra));
-      var glp = onClass(A.hist, 'glp1')[0];
-      if (glp && TARGET_PEF[glp.key]) out.items.push(item('GLP-1 / GIP agonist (obesity)', 'GLP1', glp));
     }
     out.reached = out.items.length > 0 && out.items.every(function (x) { return x.state === 'target'; });
     out.optimised = out.reached || out.items.every(function (x) { return x.state === 'target' || x.state === 'tolerated' || (x.state === 'missing' && x.reason); });
@@ -17354,11 +17354,23 @@ var CF = (function () {
     return out;
   }
 
+  // "On Maximum GDMT Doses": Yes once the target set (gdmtTarget.reached) has been met on any record up to
+  // `upto` (YYYY-MM-DD, inclusive; empty = all records), and it stays Yes afterwards.
+  function gdmtEverReached(p, visits, upto) {
+    var vs = (visits || []).filter(function (v) { var d = visitIso(v); return d && (!upto || d <= upto); })
+      .sort(function (a, b) { var x = visitIso(a), y = visitIso(b); return x < y ? -1 : x > y ? 1 : 0; });
+    function ok(sub) { try { var A = analyse(p, sub), g = gdmtTarget(p, sub, A); return !!(g.group && g.reached); } catch (e) { return false; } }
+    var admD = iso(p.Admission_Discharge_Date) || iso(p.Admission_Date) || '';
+    if ((!upto || !admD || admD <= upto) && ok([])) return { reached: true, date: admD, source: 'Index admission' };
+    for (var i = 0; i < vs.length; i++) if (ok(vs.slice(0, i + 1))) return { reached: true, date: visitIso(vs[i]), source: (vs[i].visitType || 'Visit') };
+    return { reached: false, date: '', source: '' };
+  }
+
   return {
     DRUGS: DRUGS, CLASS_LABEL: CLASS_LABEL, PILLARS: PILLARS, REASONS: REASONS, ACTIONS: ACTIONS, RULES: RULES, READMIT_BANDS: READMIT_BANDS,
     s: s, num: num, iso: iso, todayIso: todayIso, addDays: addDays, daysBetween: daysBetween, fmt: fmt, esc: esc,
     baseKey: baseKey, drugLabel: drugLabel, parseDose: parseDose, isIVDose: isIVDose, freqFromPreset: freqFromPreset, plausibility: plausibility,
-    readDrug: readDrug, doseText: doseText, pctTarget: pctTarget, gdmtTarget: gdmtTarget, targetFor: targetFor, targetCtx: targetCtx, TARGET_REF: TARGET_REF, TARGET_PEF: TARGET_PEF, presetsFor: presetsFor, nextPreset: nextPreset,
+    readDrug: readDrug, doseText: doseText, pctTarget: pctTarget, gdmtTarget: gdmtTarget, gdmtEverReached: gdmtEverReached, targetFor: targetFor, targetCtx: targetCtx, TARGET_REF: TARGET_REF, TARGET_PEF: TARGET_PEF, presetsFor: presetsFor, nextPreset: nextPreset,
     medSnapshots: medSnapshots, medHistory: medHistory, onClass: onClass, onPillar: onPillar,
     series: series, last: last, profile: profile, vitalStatus: vitalStatus, followUpStatus: followUpStatus,
     labSuggestions: labSuggestions, medSuggestions: medSuggestions, medReview: medReview, fastingAdvice: fastingAdvice, smokingStatus: smokingStatus, kccqStatus: kccqStatus, walkStatus: walkStatus, ironDose: ironDose, IRON: IRON, REVIEW: REVIEW, deviceSuggestions: deviceSuggestions, latestECG: latestECG, currentDevice: currentDevice, omtSince: omtSince, DEVICE: DEVICE, glp1Plan: glp1Plan,
@@ -17722,6 +17734,67 @@ var CFUI = (function () {
     tcCache = { at: now, id: cp.id, v: v };
     return v;
   }
+  // ---- "On Maximum GDMT Doses?" filled in automatically (Update 29) ----
+  // Yes once the clinic target set has been met on any record up to that point, and Yes from then on.
+  function formPatient() {
+    var cp = currentPatient(), p = Object.assign({}, cp.data || {});
+    var f = $('hfForm');
+    if (f) [].forEach.call(f.querySelectorAll('input[id],select[id],textarea[id]'), function (e) {
+      if (/^(V_|Visit_|ea_|cf)/.test(e.id) || e.type === 'file' || e.type === 'button') return;
+      if (e.type === 'checkbox') return;
+      p[e.id] = e.value;
+    });
+    return p;
+  }
+  function setAuto(id, yes, hint) {
+    var el = $(id);
+    if (!el) return;
+    var v = yes ? 'Yes' : 'No';
+    if (el.value !== v) { el.value = v; try { el.dispatchEvent(new Event('change', { bubbles: true })); } catch (e) {} }
+    var hid = id + '_cfAuto', h = $(hid);
+    if (!h) { h = document.createElement('div'); h.id = hid; h.className = 'cf-hint cf-auto-hint'; el.parentNode.appendChild(h); }
+    h.innerHTML = '<i class="fa fa-wand-magic-sparkles me-1"></i>' + hint;
+  }
+  var autoBusy = false;
+  function autoMaxGdmt() {
+    if (autoBusy) return;
+    autoBusy = true;
+    try {
+      var p = formPatient();
+      var saved = (typeof visits !== 'undefined' ? visits : []).filter(function (v) { return !(typeof editingVisitId !== 'undefined' && editingVisitId && v.id === editingVisitId); });
+      var vd = val('Visit_Date'), fv = vd ? formVisit() : null;
+      var all = fv ? saved.concat([fv]) : saved;
+      function hintFor(r, upto) {
+        if (r.reached) return 'Automatic: target doses reached ' + (r.date ? 'on ' + CF.fmt(r.date) + ' ' : '') + '(' + esc(r.source) + '); stays Yes from then on.';
+        var A = CF.analyse(p, all.filter(function (v) { var d = CF.iso(v.visitDate) || CF.iso(v.Visit_Date); return d && (!upto || d <= upto); }));
+        var g = CF.gdmtTarget(p, A.visits, A);
+        return 'Automatic: not yet at target' + (g.group ? ' — ' + esc(g.summary) : ' (LVEF not recorded)') + '.';
+      }
+      // visit outcome: up to this visit's date
+      if (vd && $('V_Max_GDMT')) { var rv = CF.gdmtEverReached(p, all, CF.iso(vd)); setAuto('V_Max_GDMT', rv.reached, hintFor(rv, CF.iso(vd))); }
+      // patient (admission) outcome: across every record
+      if ($('Max_GDMT') && (p.Admission_Date || p.Admission_Discharge_Date || all.length || hasAdmissionMeds(p))) {
+        var rp = CF.gdmtEverReached(p, all, '');
+        setAuto('Max_GDMT', rp.reached, hintFor(rp, ''));
+      }
+      // additional admissions: up to each admission's discharge (or admission) date
+      if (typeof _readExtraAdmissions === 'function') {
+        var arr = _readExtraAdmissions(), changed = false;
+        arr.forEach(function (a, i) {
+          var d = CF.iso(a.dischargeDate) || CF.iso(a.date);
+          if (!d) return;
+          var r = CF.gdmtEverReached(p, all, d), v = r.reached ? 'Yes' : 'No';
+          if (a.Max_GDMT !== v) { a.Max_GDMT = v; changed = true; }
+          var el = $('ea_' + i + '_Max_GDMT');
+          if (el) { el.value = v; var hid = 'ea_' + i + '_Max_GDMT_cfAuto', h = $(hid); if (!h) { h = document.createElement('div'); h.id = hid; h.className = 'cf-hint cf-auto-hint'; el.parentNode.appendChild(h); } h.innerHTML = '<i class="fa fa-wand-magic-sparkles me-1"></i>' + hintFor(r, d); }
+        });
+        if (changed) _writeExtraAdmissions(arr);
+      }
+    } catch (e) { if (window.console) console.warn('autoMaxGdmt', e); }
+    autoBusy = false;
+  }
+  function hasAdmissionMeds(p) { return Object.keys(p).some(function (k) { return /^A_.+_Status$/.test(k) && /^yes$/i.test(String(p[k])); }); }
+  var scheduleAutoMax = debounce(autoMaxGdmt, 600);
   function contextVisits(includeForm) {
     var list = (typeof visits !== 'undefined' ? visits : []).filter(function (v) { return !(typeof editingVisitId !== 'undefined' && editingVisitId && v.id === editingVisitId); });
     if (includeForm && val('Visit_Date')) list = [formVisit()].concat(list);
@@ -17731,7 +17804,7 @@ var CFUI = (function () {
   function pillarChips(pillars, editable) {
     return '<div class="cf-pillars">' + pillars.map(function (p) {
       var pct = p.pct;
-      var cls = p.on ? (pct != null && pct >= 100 ? 'ok' : 'on') : (p.reason ? 'reason' : 'gap');
+      var cls = p.on ? ((pct != null && pct >= 100) || p.key === 'BB' ? 'ok' : 'on') : (p.reason ? 'reason' : 'gap');
       var body = p.on
         ? '<b>' + esc(p.drug) + '</b><span>' + esc(p.dose) + '</span>' + (pct != null ? '<i class="cf-bar"><i style="width:' + Math.min(100, pct) + '%"></i></i><em>' + pct + '% of target</em>' : '')
         : (p.reason ? '<b>Not on</b><em>' + esc(p.reason) + '</em>' : '<b>Not on</b>');
@@ -17749,7 +17822,7 @@ var CFUI = (function () {
     if (g.group === 'HFpEF') {
       chips = pillarChips(g.items.map(function (x) { return { key: x.key, label: x.label, on: x.on, drug: x.drug, dose: x.dose, pct: x.pct, reason: x.reason, target: x.target }; }), false);
       var other = pl.filter(function (x) { return (x.key === 'RAS' || x.key === 'BB') && x.on; }).map(function (x) { return x.drug + ' ' + x.dose; });
-      chips += '<div class="cf-gt-note">HFpEF (LVEF ≥50%): SGLT2i is the core therapy; MRA and GLP-1/GIP agonists are counted when prescribed. Beta-blockers, ACEi/ARB/ARNI and diuretics have no HFpEF target' + (other.length ? ' (on ' + esc(other.join(', ')) + ' for other indications)' : '') + '.</div>';
+      chips += '<div class="cf-gt-note">HFpEF (LVEF ≥50%): SGLT2i is the core therapy; an MRA is counted when prescribed. Beta-blockers, ACEi/ARB/ARNI, diuretics and GLP-1/GIP agonists are not part of the HFpEF target set' + (other.length ? ' (on ' + esc(other.join(', ')) + ' for other indications)' : '') + '.</div>';
     } else chips = pillarChips(pl, false);
     var ban = '';
     if (g.applies) {
@@ -17907,6 +17980,7 @@ var CFUI = (function () {
     });
     var q = $('cfQuadHint');
     if (q) q.textContent = 'Computed from medications: ' + quad + '/4 pillars' + (quad === 4 ? ' (quadruple therapy)' : '');
+    scheduleAutoMax();
   }
   function addGlp1PlanToNotes(which) {
     var pl = CF.glp1Plan(which, val('Visit_Date') || CF.todayIso());
@@ -19151,6 +19225,14 @@ var CFUI = (function () {
     window.generatePDF = function (data, visitsData, id) { return patientReport(id, data, (visitsData || []).length ? visitsData : null); };
     // Keep the booked date on the visit record (V_Next_Appt_Set) so past bookings show as seen / missed.
     document.addEventListener('change', function (e) { if (e.target && e.target.id === 'Next_Appt') { var h = $('V_Next_Appt_Set'); if (h) h.value = e.target.value || ''; } }, true);
+    // "On Maximum GDMT Doses?" follows the medicines, dates and LVEF as they are entered
+    document.addEventListener('change', function (e) {
+      var id = e.target && e.target.id || '';
+      if (!id || /Max_GDMT/.test(id) || !e.target.closest || !e.target.closest('#hfForm')) return;
+      scheduleAutoMax();
+    }, true);
+    wrap('_renderExtraAdmissions', function () { scheduleAutoMax(); });
+    wrap('editPt', function () { setTimeout(scheduleAutoMax, 400); });
   }
   return {
     install: install, openOverview: openOverview, startVisit: startVisit, headerChips: headerChips, smartBody: smartBody, renderAssist: renderAssist,
@@ -19180,7 +19262,7 @@ CFUI.install();
     return p && p.Quad_GDMT === 'Yes';
   };
   window._cfMaxDoses = function (p) {
-    if (p && p._cfTarget) return p._cfTarget.group ? p._cfTarget.optimised : false;
+    if (p && p._cfEver) return p._cfEver.reached;
     return p && p.Max_GDMT === 'Yes';
   };
   window._cfAtTarget = function (p) { return !!(p && p._cfTarget && p._cfTarget.reached); };
@@ -19300,7 +19382,9 @@ CFUI.install();
           p._visits = info.all || [];
           p._latestVisit = info.latest || null;
           p._latest = typeof _buildLatestSnapshot === 'function' ? _buildLatestSnapshot(p, p._latestVisit) : Object.assign({}, p);
-          try { p._cf = CF.analyse(p, p._visits); p._cfPillars = CF.pillarStatus(p, p._visits, p._cf); p._cfTarget = CF.gdmtTarget(p, p._visits, p._cf, p._cfPillars); } catch (e) { p._cf = null; p._cfPillars = null; p._cfTarget = null; }
+          try { p._cf = CF.analyse(p, p._visits); p._cfPillars = CF.pillarStatus(p, p._visits, p._cf); p._cfTarget = CF.gdmtTarget(p, p._visits, p._cf, p._cfPillars); p._cfEver = CF.gdmtEverReached(p, p._visits, '');
+            // display-only (never saved): "On Maximum GDMT Doses" from the clinic definition, Yes once reached
+            if (p._cfTarget.group) { p._Max_GDMT_entered = p.Max_GDMT; p.Max_GDMT = p._cfEver.reached ? 'Yes' : 'No'; } } catch (e) { p._cf = null; p._cfPillars = null; p._cfTarget = null; }
           p._latestMeds = p._cf ? cfMedFlags(p._cf.hist) : _computeLatestMedFlags(p, p._latestVisit);
           // display-only fill-ins (never saved): admissions count and length of stay from the recorded dates
           var nAdm = (CF.iso(p.Admission_Date) ? 1 : 0) + CF.parseExtraAdmissions(p).filter(function (a) { return CF.iso(a.date); }).length;
@@ -19330,7 +19414,7 @@ CFUI.install();
     var pie = '<div class="cf-gap-chart-row"><div class="cf-gap-canvas"><canvas id="cfGapChart"></canvas></div><div class="cf-gap-legend">' +
       '<div><b>' + rows.length + '</b>living patients with LVEF &lt;50%</div>' +
       gc.labels.map(function (l, i) { return '<div><i class="sw" style="background:' + gc.colors[i] + '"></i><b>' + gc.data[i] + '</b>' + l + ' (' + Math.round(gc.data[i] / rows.length * 100) + '%)</div>'; }).join('') +
-      '<div class="small text-muted mt-1">Same patients and rules as the table below. Target doses: clinic HFrEF sheet (2022 AHA/ACC/HFSA).</div></div></div>';
+      '<div class="small text-muted mt-1">Same patients and rules as the table below. Target doses: clinic HFrEF sheet (2022 AHA/ACC/HFSA); any beta-blocker dose counts.</div></div></div>';
     var html = '<table class="gap-table table table-sm table-bordered"><thead><tr><th>Patient</th><th>File</th><th>LVEF</th><th>ARNI / ACEi / ARB</th><th>Beta-blocker</th><th>MRA</th><th>SGLT2i</th><th>Gaps</th><th>Recorded reason</th><th>Medication list</th></tr></thead><tbody>';
     var shown = 0;
     rows.forEach(function (p) {
@@ -19411,7 +19495,7 @@ CFUI.install();
     ref.concat(pef).forEach(function (p) { var t = p._cfTarget; if (!t) return; m[t.reached ? 0 : t.optimised ? 1 : 2]++; });
     makeChart('chartMaxGDMT', 'doughnut', ['At target dose', 'Max tolerated (gaps explained)', 'Below target or missing'], [{ data: m, backgroundColor: ['#16a085', '#1E88E5', '#e9ecef'], borderWidth: 2 }], {});
     var rt = ref.filter(function (p) { return p._cfTarget && p._cfTarget.reached; }).length, pt = pef.filter(function (p) { return p._cfTarget && p._cfTarget.reached; }).length;
-    cfChartNote('chartMaxGDMT', 'Living patients with known LVEF (n=' + (ref.length + pef.length) + '). LVEF &lt;50%: four pillars at target (' + rt + '/' + ref.length + '). LVEF ≥50%: SGLT2i, plus MRA / GLP-1 if prescribed, at target (' + pt + '/' + pef.length + '). Targets: clinic dose sheets.');
+    cfChartNote('chartMaxGDMT', 'Current status, living patients with known LVEF (n=' + (ref.length + pef.length) + '). Any beta-blocker dose counts. LVEF &lt;50%: four pillars at target (' + rt + '/' + ref.length + '). LVEF ≥50%: SGLT2i, plus MRA if prescribed, at target (' + pt + '/' + pef.length + '). Targets: clinic dose sheets.');
     // the remaining two charts are unchanged from the original page
     var rlv = d.filter(function (p) { return p.Recovered_LV === 'Yes'; }).length;
     if (document.getElementById('chartRecoveredLV')) makeChart('chartRecoveredLV', 'doughnut', ['Recovered LV', 'Not recovered'], [{ data: [rlv, n - rlv], backgroundColor: ['#1d6f42', '#e9ecef'], borderWidth: 2 }], {});
@@ -19593,9 +19677,10 @@ var CFX = (function () {
     ['calc_SGLT2_PctTarget', 'numeric', '% of target dose'],
     ['calc_GDMT_Pillars', 'numeric', 'Number of GDMT pillars on (0–4)'],
     ['calc_Quad_GDMT', 'binary', '1 = all four pillars on'],
-    ['calc_GDMT_Target_Group', 'string', 'Target set used: HFrEF (LVEF <50%, four pillars) or HFpEF (LVEF >=50%, SGLT2i + MRA/GLP-1 if prescribed)'],
+    ['calc_GDMT_Target_Group', 'string', 'Target set used: HFrEF (LVEF <50%, four pillars; any beta-blocker dose counts) or HFpEF (LVEF >=50%, SGLT2i + MRA if prescribed)'],
     ['calc_GDMT_At_Target', 'binary', '1 = every drug in the target set at its target dose (clinic target-dose sheets)'],
-    ['calc_Max_GDMT', 'binary', '1 = at target, or each gap explained (dose reduced for a recorded reason, or a recorded reason for not using the drug)'],
+    ['calc_Max_GDMT', 'binary', '1 = target set reached on any record (stays 1 afterwards): LVEF <50% RAS/MRA/SGLT2i at target + any beta-blocker; LVEF >=50% SGLT2i (+ MRA if prescribed) at target'],
+    ['calc_Max_GDMT_Date', 'date', 'Date the target set was first reached'],
     ['calc_Dead', 'binary', '1 = died (vital status or date of death recorded)'],
     ['calc_Death_Date', 'date', 'YYYY-MM-DD'],
     ['calc_Death_Cause', 'string', 'HF / sudden cardiac death / other CV / non-CV / unknown'],
@@ -19644,7 +19729,9 @@ var CFX = (function () {
     var gt = A ? CF.gdmtTarget(p, A.visits, A, pl) : null;
     out.calc_GDMT_Target_Group = gt ? gt.group : '';
     out.calc_GDMT_At_Target = gt && gt.group ? b(gt.reached) : '';
-    out.calc_Max_GDMT = gt && gt.group ? b(gt.optimised) : '';
+    var ev = A ? CF.gdmtEverReached(p, A.visits, '') : null;
+    out.calc_Max_GDMT = ev ? b(ev.reached) : '';
+    out.calc_Max_GDMT_Date = ev && ev.reached ? ev.date : '';
     out.calc_Dead = b(A.vital.dead);
     out.calc_Death_Date = A.vital.date || '';
     out.calc_Death_Cause = A.vital.cause || '';
@@ -19898,7 +19985,7 @@ var CFX = (function () {
     });
     row('Quadruple therapy (all 4 pillars)', red.filter(function (x) { return x.c.calc_Quad_GDMT === 1; }).length, rn);
     row('All 4 at target dose', red.filter(function (x) { return x.c.calc_GDMT_At_Target === 1; }).length, rn);
-    row('At target or each gap explained (max tolerated)', red.filter(function (x) { return x.c.calc_Max_GDMT === 1; }).length, rn);
+    row('Maximum GDMT doses reached (ever)', red.filter(function (x) { return x.c.calc_Max_GDMT === 1; }).length, rn);
     row('Pillars per patient (mean ± SD)', ms(red.map(function (x) { return x.c.calc_GDMT_Pillars; })));
     sec('Admissions');
     row('At least one HF admission', C.filter(function (x) { return x.c.calc_HF_Admissions_N > 0; }).length);
