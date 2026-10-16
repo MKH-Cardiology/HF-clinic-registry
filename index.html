@@ -19384,7 +19384,11 @@ CFUI.install();
           p._latest = typeof _buildLatestSnapshot === 'function' ? _buildLatestSnapshot(p, p._latestVisit) : Object.assign({}, p);
           try { p._cf = CF.analyse(p, p._visits); p._cfPillars = CF.pillarStatus(p, p._visits, p._cf); p._cfTarget = CF.gdmtTarget(p, p._visits, p._cf, p._cfPillars); p._cfEver = CF.gdmtEverReached(p, p._visits, '');
             // display-only (never saved): "On Maximum GDMT Doses" from the clinic definition, Yes once reached
-            if (p._cfTarget.group) { p._Max_GDMT_entered = p.Max_GDMT; p.Max_GDMT = p._cfEver.reached ? 'Yes' : 'No'; } } catch (e) { p._cf = null; p._cfPillars = null; p._cfTarget = null; }
+            if (p._cfTarget.group) { p._Max_GDMT_entered = p.Max_GDMT; p.Max_GDMT = p._cfEver.reached ? 'Yes' : 'No'; }
+            // display-only: Quadruple GDMT from the medicines (LVEF <50%: all four pillars; LVEF >=50%: not applicable)
+            p._Quad_GDMT_entered = p.Quad_GDMT;
+            if (p._cfTarget.group === 'HFrEF') p.Quad_GDMT = p._cfPillars.every(function (x) { return x.on; }) ? 'Yes' : 'No';
+            else if (p._cfTarget.group === 'HFpEF') p.Quad_GDMT = 'N/A'; } catch (e) { p._cf = null; p._cfPillars = null; p._cfTarget = null; }
           p._latestMeds = p._cf ? cfMedFlags(p._cf.hist) : _computeLatestMedFlags(p, p._latestVisit);
           // display-only fill-ins (never saved): admissions count and length of stay from the recorded dates
           var nAdm = (CF.iso(p.Admission_Date) ? 1 : 0) + CF.parseExtraAdmissions(p).filter(function (a) { return CF.iso(a.date); }).length;
