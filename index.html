@@ -16325,11 +16325,10 @@ var CF = (function () {
     var out = [];
     var admDate = iso(p.Admission_Discharge_Date) || iso(p.Admission_Date);
     var idx = snapshotFrom(p, 'A_') || legacySnapshot(p);
-    var undated = null;
     if (idx && admDate) out.push({ date: admDate, label: 'Index admission', kind: 'admission', meds: idx, full: fromEditor(p, 'A_') });
     // No admission/discharge date: the registration day is NOT the admission day (visits are often entered
     // afterwards for earlier dates), so the list is the baseline and goes before every dated record.
-    else if (idx) undated = { label: 'Index admission (no date)', kind: 'admission', meds: idx, full: fromEditor(p, 'A_'), baseline: true };
+    // Update 30: an index admission without admission/discharge dates is ignored for medicines (clinic decision).
     parseExtraAdmissions(p).forEach(function (a, i) {
       var m = snapshotFrom(a, 'A_');
       if (m) out.push({ date: iso(a.dischargeDate) || iso(a.date), label: 'Admission ' + (i + 2), kind: 'admission', meds: m, full: fromEditor(a, 'A_') });
@@ -16340,12 +16339,6 @@ var CF = (function () {
     });
     out = out.filter(function (x) { return x.date; });
     out.sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
-    if (undated) {
-      var b = baselineDate(p, visits) || todayIso();
-      if (out.length && b >= out[0].date) b = addDays(out[0].date, -1);
-      undated.date = b;
-      out.unshift(undated);
-    }
     return out;
   }
   // Per-drug history and derived events (start / increase / decrease / hold / stop / restart).
@@ -16459,36 +16452,40 @@ var CF = (function () {
     var adm = indexAdmDate(p, visits);
     var dis = iso(p.Admission_Discharge_Date) || adm;
     var enrol = (iso(p.Admission_Date) || iso(p.Admission_Discharge_Date)) ? (iso(p.timestamp) || adm) : adm;
-    add('K', adm, s(p.Lab_K) || pairPart(p.Lab_NaK, 1), 'Admission');
-    add('K', dis, p.Lab_K_Disch, 'Discharge');
-    add('Na', adm, s(p.Lab_Na) || pairPart(p.Lab_NaK, 0), 'Admission');
-    add('Urea', adm, s(p.Lab_Urea) || pairPart(p.Lab_UreaCreat, 0), 'Admission');
-    add('Creat', adm, s(p.Lab_Creat) || pairPart(p.Lab_UreaCreat, 1), 'Admission');
-    add('Creat', dis, p.Lab_Creat_Disch, 'Discharge');
-    add('eGFR', adm, p.Lab_eGFR, 'Admission');
-    add('eGFR', dis, p.Lab_eGFR_Disch, 'Discharge');
-    add('Hb', adm, p.Lab_Hb, 'Admission');
-    add('Hb', dis, p.Lab_Hb_Disch, 'Discharge');
-    add('Ferritin', adm, s(p.Lab_Ferritin) || pairPart(p.Lab_IronFerritin, 1), 'Admission');
-    add('TSAT', adm, p.Lab_TrSats, 'Admission');
-    add('NTproBNP', adm, p.Lab_BNP, 'Admission');
-    add('NTproBNP', dis, p.Lab_BNP_Disch, 'Discharge');
-    add('HbA1c', adm, p.Lab_HbA1c, 'Admission');
-    add('LDL', adm, p.Lab_LDL, 'Admission');
-    add('TSH', adm, p.Lab_TSH, 'Admission');
-    add('ACR', adm, p.Lab_AlbCreat, 'Admission');
-    add('BNP', adm, p.Lab_BNP_only, 'Admission');
-    add('BNP', dis, p.Lab_BNP_only_Disch, 'Discharge');
-    labsFromText(p.Lab_Others).forEach(function (x) { add(x.k, adm, x.v, 'Admission (other labs)'); });
-    add('Weight', adm, p.Weight, 'Admission');
-    add('SBP', adm, pairPart(p.BP, 0), 'Admission');
-    add('HR', adm, p.Pulse, 'Admission');
+    // Update 30: an index admission without its own dates is ignored for labs, vitals and NYHA (and for
+    // medicines, see medSnapshots). LVEF and the ECG are still used for the HF type and device checks.
+    var admL = iso(p.Admission_Date) || iso(p.Admission_Discharge_Date) || '';
+    var disL = iso(p.Admission_Discharge_Date) || admL;
+    add('K', admL, s(p.Lab_K) || pairPart(p.Lab_NaK, 1), 'Admission');
+    add('K', disL, p.Lab_K_Disch, 'Discharge');
+    add('Na', admL, s(p.Lab_Na) || pairPart(p.Lab_NaK, 0), 'Admission');
+    add('Urea', admL, s(p.Lab_Urea) || pairPart(p.Lab_UreaCreat, 0), 'Admission');
+    add('Creat', admL, s(p.Lab_Creat) || pairPart(p.Lab_UreaCreat, 1), 'Admission');
+    add('Creat', disL, p.Lab_Creat_Disch, 'Discharge');
+    add('eGFR', admL, p.Lab_eGFR, 'Admission');
+    add('eGFR', disL, p.Lab_eGFR_Disch, 'Discharge');
+    add('Hb', admL, p.Lab_Hb, 'Admission');
+    add('Hb', disL, p.Lab_Hb_Disch, 'Discharge');
+    add('Ferritin', admL, s(p.Lab_Ferritin) || pairPart(p.Lab_IronFerritin, 1), 'Admission');
+    add('TSAT', admL, p.Lab_TrSats, 'Admission');
+    add('NTproBNP', admL, p.Lab_BNP, 'Admission');
+    add('NTproBNP', disL, p.Lab_BNP_Disch, 'Discharge');
+    add('HbA1c', admL, p.Lab_HbA1c, 'Admission');
+    add('LDL', admL, p.Lab_LDL, 'Admission');
+    add('TSH', admL, p.Lab_TSH, 'Admission');
+    add('ACR', admL, p.Lab_AlbCreat, 'Admission');
+    add('BNP', admL, p.Lab_BNP_only, 'Admission');
+    add('BNP', disL, p.Lab_BNP_only_Disch, 'Discharge');
+    labsFromText(p.Lab_Others).forEach(function (x) { add(x.k, admL, x.v, 'Admission (other labs)'); });
+    add('Weight', admL, p.Weight, 'Admission');
+    add('SBP', admL, pairPart(p.BP, 0), 'Admission');
+    add('HR', admL, p.Pulse, 'Admission');
     add('EF', enrol, p.EF_Diagnosis, 'At diagnosis');
     add('EF', adm, p.Echo_EF, 'Admission echo');
     add('EF', adm, p.CMR_LVEF, 'CMR');
-    add('NYHA', adm, { I: 1, II: 2, III: 3, IV: 4 }[s(p.NYHA)] || null, 'Admission');
-    add('BMI', adm, p.BMI, 'Admission');
-    add('Walk', iso(p.Walk_Date) || adm, p.Walk_Meters, 'Baseline 6MWT');
+    add('NYHA', admL, { I: 1, II: 2, III: 3, IV: 4 }[s(p.NYHA)] || null, 'Admission');
+    add('BMI', admL, p.BMI, 'Admission');
+    add('Walk', iso(p.Walk_Date) || admL, p.Walk_Meters, 'Baseline 6MWT');
     parseExtraAdmissions(p).forEach(function (a, i) {
       var d = iso(a.date), dd = iso(a.dischargeDate) || d, src = 'Admission ' + (i + 2);
       add('K', d, a.Lab_K, src); add('K', dd, a.Lab_K_Disch, src);
@@ -17356,6 +17353,11 @@ var CF = (function () {
 
   // "On Maximum GDMT Doses": Yes once the target set (gdmtTarget.reached) has been met on any record up to
   // `upto` (YYYY-MM-DD, inclusive; empty = all records), and it stays Yes afterwards.
+  function undatedAdmission(p) {
+    p = p || {};
+    var has = !!(snapshotFrom(p, 'A_') || legacySnapshot(p)) || ['Lab_K', 'Lab_Creat', 'Lab_eGFR', 'Lab_BNP', 'Lab_Hb', 'Admission_Reason'].some(function (k) { return s(p[k]); });
+    return has && !iso(p.Admission_Date) && !iso(p.Admission_Discharge_Date);
+  }
   function gdmtEverReached(p, visits, upto) {
     var vs = (visits || []).filter(function (v) { var d = visitIso(v); return d && (!upto || d <= upto); })
       .sort(function (a, b) { var x = visitIso(a), y = visitIso(b); return x < y ? -1 : x > y ? 1 : 0; });
@@ -17370,7 +17372,7 @@ var CF = (function () {
     DRUGS: DRUGS, CLASS_LABEL: CLASS_LABEL, PILLARS: PILLARS, REASONS: REASONS, ACTIONS: ACTIONS, RULES: RULES, READMIT_BANDS: READMIT_BANDS,
     s: s, num: num, iso: iso, todayIso: todayIso, addDays: addDays, daysBetween: daysBetween, fmt: fmt, esc: esc,
     baseKey: baseKey, drugLabel: drugLabel, parseDose: parseDose, isIVDose: isIVDose, freqFromPreset: freqFromPreset, plausibility: plausibility,
-    readDrug: readDrug, doseText: doseText, pctTarget: pctTarget, gdmtTarget: gdmtTarget, gdmtEverReached: gdmtEverReached, targetFor: targetFor, targetCtx: targetCtx, TARGET_REF: TARGET_REF, TARGET_PEF: TARGET_PEF, presetsFor: presetsFor, nextPreset: nextPreset,
+    readDrug: readDrug, doseText: doseText, pctTarget: pctTarget, gdmtTarget: gdmtTarget, gdmtEverReached: gdmtEverReached, undatedAdmission: undatedAdmission, targetFor: targetFor, targetCtx: targetCtx, TARGET_REF: TARGET_REF, TARGET_PEF: TARGET_PEF, presetsFor: presetsFor, nextPreset: nextPreset,
     medSnapshots: medSnapshots, medHistory: medHistory, onClass: onClass, onPillar: onPillar,
     series: series, last: last, profile: profile, vitalStatus: vitalStatus, followUpStatus: followUpStatus,
     labSuggestions: labSuggestions, medSuggestions: medSuggestions, medReview: medReview, fastingAdvice: fastingAdvice, smokingStatus: smokingStatus, kccqStatus: kccqStatus, walkStatus: walkStatus, ironDose: ironDose, IRON: IRON, REVIEW: REVIEW, deviceSuggestions: deviceSuggestions, latestECG: latestECG, currentDevice: currentDevice, omtSince: omtSince, DEVICE: DEVICE, glp1Plan: glp1Plan,
@@ -18856,10 +18858,11 @@ var CFUI = (function () {
       rows.push('<tr><td>' + (sn.baseline ? '<i>No date</i><br><small>counted as the starting list, before the visits</small>' : CF.fmt(sn.date)) + '</td><td>' + esc(sn.label) + '<br><small>' + tag(sn) + '</small></td><td>' + esc(on.join(', ') || '—') + (off.length ? '<br><small class="text-danger">' + esc(off.join(', ')) + '</small>' : '') + '</td></tr>');
     });
     var skipped = (A.visits || []).filter(function (v) { return !CF.iso(v.visitDate) && !CF.iso(v.Visit_Date) && !CF.iso(v._displayDate); }).length;
+    var undAdm = CF.undatedAdmission(p);
     var pill = CF.pillarStatus(p, A.visits, A).map(function (x) { return x.label + ': ' + (x.on ? x.drug : 'not on' + (x.reason ? ' (' + x.reason + ')' : '')); }).join(' · ');
     return '<details class="cf-datacheck"><summary><i class="fa fa-magnifying-glass me-1"></i>Data check: what the app reads for medications</summary>' +
       '<div class="small mb-1"><b>Result:</b> ' + esc(pill) + '</div>' +
-      '<div class="small text-muted mb-1">' + (A.visits || []).length + ' visit(s) loaded' + (skipped ? ' · <b class="text-danger">' + skipped + ' with an unreadable date (not used)</b>' : '') + '. Records with no medication entered are not listed.</div>' +
+      '<div class="small text-muted mb-1">' + (A.visits || []).length + ' visit(s) loaded' + (skipped ? ' · <b class="text-danger">' + skipped + ' with an unreadable date (not used)</b>' : '') + '. Records with no medication entered are not listed.' + (undAdm ? ' <b class="text-danger">The index admission has no admission or discharge date: its medicines and labs are not used.</b> Add the dates to include it.' : '') + '</div>' +
       '<table class="table table-sm table-bordered mb-0"><thead><tr><th>Date</th><th>Record</th><th>Medicines read</th></tr></thead><tbody>' + (rows.join('') || '<tr><td colspan="3">No medication records found</td></tr>') + '</tbody></table></details>';
   }
   function scrollToForm(sel) {
@@ -19185,7 +19188,7 @@ var CFUI = (function () {
     (function () {
       var sp = window.savePatient;
       if (typeof sp === 'function' && !sp.cfGuard) {
-        window.savePatient = function () { if (!guardAdmissionSave()) return; if (!guardVisitSave()) return; return sp.apply(this, arguments); };
+        window.savePatient = function () { if (!guardVisitSave()) return; return sp.apply(this, arguments); }; // Update 30: admission-date alarm removed (clinic decision)
         window.savePatient.cfGuard = true;
       }
     })();
