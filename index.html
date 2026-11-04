@@ -1995,6 +1995,8 @@ label.cf-ai-filled{background:#fffbe6;border-radius:4px;box-shadow:0 0 0 2px #fa
 .cf-readm-kpi b{display:block;font-size:1.3rem;color:#0b2d5b}
 .cf-readm-kpi small{color:#667085;font-size:.72rem}
 
+.cf-readm-h{font-weight:700;font-size:.85rem;color:#0b2d5b;margin:4px 0 6px}
+
 </style>
 
 </head>
@@ -19639,7 +19641,15 @@ CFUI.install();
       var prev = L[i];
       if (a.d && prev && prev.dis) { var g = CF.daysBetween(prev.dis, a.d); if (g != null && g >= 0 && g <= 30) d30++; if (g != null && g >= 0 && g <= 90) d90++; }
     });
-    return { admissions: L.length, all: r.length, hf: r.filter(function (a) { return a.hf; }).length, d30: d30, d90: d90, last: r.length ? (r.filter(function (a) { return a.d; }).map(function (a) { return a.d; }).pop() || '') : '', undated: L.filter(function (a) { return !a.d; }).length };
+    // Update 32: each readmission classified by time since the INDEX hospitalisation (first admission's
+    // discharge date, or its admission date when no discharge date is recorded).
+    var idx = L[0], idxRef = idx ? (idx.dis || idx.d) : '', bands = {}, bandsHF = {}, noBand = 0;
+    CF.READMIT_BANDS.forEach(function (b) { bands[b] = 0; bandsHF[b] = 0; });
+    r.forEach(function (a) {
+      var b = idxRef && a.d ? CF.readmitBand(idxRef, a.d) : '';
+      if (b) { bands[b]++; if (a.hf) bandsHF[b]++; } else noBand++;
+    });
+    return { admissions: L.length, all: r.length, hf: r.filter(function (a) { return a.hf; }).length, d30: d30, d90: d90, idxRef: idxRef, bands: bands, bandsHF: bandsHF, noBand: noBand, last: r.length ? (r.filter(function (a) { return a.d; }).map(function (a) { return a.d; }).pop() || '') : '', undated: L.filter(function (a) { return !a.d; }).length };
   };
   function buildReadmitCounter(d) {
     var host = document.getElementById('cfReadmCounter'); if (!host) return;
@@ -19648,25 +19658,34 @@ CFUI.install();
     var tot = readm.reduce(function (a, x) { return a + x.c.all; }, 0), totHF = readm.reduce(function (a, x) { return a + x.c.hf; }, 0);
     var t30 = readm.reduce(function (a, x) { return a + x.c.d30; }, 0), t90 = readm.reduce(function (a, x) { return a + x.c.d90; }, 0);
     var pct = function (a, b) { return b ? Math.round(a / b * 100) + '%' : '—'; };
+    var B = CF.READMIT_BANDS, bT = {}, bH = {}, nb = 0;
+    B.forEach(function (b) { bT[b] = 0; bH[b] = 0; });
+    readm.forEach(function (x) { B.forEach(function (b) { bT[b] += x.c.bands[b]; bH[b] += x.c.bandsHF[b]; }); nb += x.c.noBand; });
     var dist = [0, 0, 0, 0];
     withAdm.forEach(function (x) { dist[Math.min(3, x.c.all)]++; });
     var h = '<div class="cf-readm-kpis">' +
       '<div class="cf-readm-kpi"><b>' + tot + '</b><small>readmissions (all causes)</small></div>' +
       '<div class="cf-readm-kpi"><b>' + totHF + '</b><small>HF-related readmissions</small></div>' +
       '<div class="cf-readm-kpi"><b>' + readm.length + ' <span style="font-size:.8rem">/ ' + withAdm.length + '</span></b><small>patients readmitted (' + pct(readm.length, withAdm.length) + ' of patients with an admission)</small></div>' +
-      '<div class="cf-readm-kpi"><b>' + t30 + ' · ' + t90 + '</b><small>within 30 · 90 days of the previous discharge</small></div>' +
+      '<div class="cf-readm-kpi"><b>' + bT[B[0]] + ' · ' + (bT[B[0]] + bT[B[1]]) + '</b><small>within 30 · 90 days of the index discharge</small></div>' +
       '<div class="cf-readm-kpi"><b>' + (withAdm.length ? (tot / withAdm.length).toFixed(2) : '—') + '</b><small>readmissions per admitted patient</small></div></div>' +
+      '<div class="cf-readm-h">Readmissions by time after the index hospitalisation</div><div class="row g-2 mb-2"><div class="col-12 col-md-5"><div class="analytics-chart-wrap-sm"><canvas id="cfReadmIdx"></canvas></div></div><div class="col-12 col-md-7">' +
+      '<table class="table table-sm table-bordered mb-1" style="font-size:.82rem"><thead><tr><th>Time after index discharge</th><th>All causes</th><th>HF-related</th><th>% of readmissions</th></tr></thead><tbody>' +
+      B.map(function (b) { return '<tr><td>' + b + '</td><td><b>' + bT[b] + '</b></td><td>' + bH[b] + '</td><td>' + (tot ? Math.round(bT[b] / tot * 100) + '%' : '—') + '</td></tr>'; }).join('') +
+      (nb ? '<tr><td class="text-muted">Date not recorded</td><td>' + nb + '</td><td></td><td>' + Math.round(nb / tot * 100) + '%</td></tr>' : '') +
+      '</tbody></table><div class="small text-muted">Days from the discharge date of the index (first) hospitalisation to each readmission; the admission date is used when the index discharge date is missing.</div></div></div>' +
       '<div class="row g-2"><div class="col-12 col-md-4"><div class="analytics-chart-wrap-sm"><canvas id="cfReadmDist"></canvas></div><div class="small text-muted">Patients by number of readmissions (patients with at least one admission, n=' + withAdm.length + ').</div></div><div class="col-12 col-md-8">';
     if (!readm.length) h += '<p class="text-muted small">No readmissions recorded.</p>';
     else {
       readm.sort(function (a, b) { return b.c.all - a.c.all || b.c.hf - a.c.hf || (a.c.last < b.c.last ? 1 : -1); });
-      h += '<div style="overflow-x:auto;max-height:320px;overflow-y:auto"><table class="table table-sm table-bordered mb-1" style="font-size:.8rem"><thead><tr><th>Patient</th><th>File</th><th>Admissions</th><th>Readmissions</th><th>HF-related</th><th>≤30 d</th><th>Last readmission</th></tr></thead><tbody>' +
+      h += '<div style="overflow-x:auto;max-height:320px;overflow-y:auto"><table class="table table-sm table-bordered mb-1" style="font-size:.8rem"><thead><tr><th>Patient</th><th>File</th><th>Admissions</th><th>Readmissions</th><th>HF-related</th><th>≤30 d</th><th>31–90 d</th><th>91–180 d</th><th>&gt;180 d</th><th>Last readmission</th></tr></thead><tbody>' +
         readm.map(function (x) {
-          return '<tr><td style="text-align:left;font-weight:600">' + CF.esc(x.p.Patient_Name || '?') + (x.p._cf && x.p._cf.vital.dead ? ' <small class="text-muted">(died)</small>' : '') + '</td><td>' + CF.esc(x.p.File_No || '-') + '</td><td>' + x.c.admissions + '</td><td><b>' + x.c.all + '</b></td><td>' + x.c.hf + '</td><td>' + (x.c.d30 || '') + '</td><td>' + (x.c.last ? CF.fmt(x.c.last) : (x.c.undated ? '<i class="text-muted">no date</i>' : '')) + '</td></tr>';
+          return '<tr><td style="text-align:left;font-weight:600">' + CF.esc(x.p.Patient_Name || '?') + (x.p._cf && x.p._cf.vital.dead ? ' <small class="text-muted">(died)</small>' : '') + '</td><td>' + CF.esc(x.p.File_No || '-') + '</td><td>' + x.c.admissions + '</td><td><b>' + x.c.all + '</b></td><td>' + x.c.hf + '</td>' + B.map(function (b) { return '<td>' + (x.c.bands[b] || '') + '</td>'; }).join('') + '<td>' + (x.c.last ? CF.fmt(x.c.last) : (x.c.undated ? '<i class="text-muted">no date</i>' : '')) + '</td></tr>';
         }).join('') + '</tbody></table></div>';
     }
     h += '<div class="small text-muted">All patients, alive or deceased. Every recorded admission counts (index admission and each additional admission); readmissions are the admissions after the first. HF-related unless marked otherwise. Admissions without dates are counted, but not in the 30/90-day figures.</div></div></div>';
     host.innerHTML = h;
+    chart('cfReadmIdx', 'bar', B, B.map(function (b) { return bT[b]; }), ['#E53935', '#f79009', '#1E88E5', '#0B2D5B']);
     chart('cfReadmDist', 'bar', ['0', '1', '2', '3 or more'], dist, ['#17b26a', '#f79009', '#E53935', '#7a1c1c']);
   }
   window.cfBuildReadmitCounter = buildReadmitCounter;
