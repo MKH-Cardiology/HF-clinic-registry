@@ -1981,6 +1981,20 @@ label.cf-ai-filled{background:#fffbe6;border-radius:4px;box-shadow:0 0 0 2px #fa
 .cf-gt-chip{display:inline-flex;align-items:center;gap:5px;font-size:.74rem;padding:3px 9px;border-radius:999px;margin-left:8px;max-width:100%;white-space:normal}
 .cf-gt-chip.ok{background:#e7f6ec;color:#11633a}.cf-gt-chip.tol{background:#eef4fb;color:#0b2d5b}.cf-gt-chip.gap{background:#fff6e5;color:#7a4a00}
 
+/* Update 31 */
+.cf-echo-alert{margin-top:6px;padding:6px 9px;border-radius:8px;background:#fff1f0;border:1px solid #f5c2c0;color:#8a1c1c;font-size:.78rem;line-height:1.35}
+.cf-ndc{border:1px solid var(--cf-line,#e4e7ec);border-radius:10px;padding:8px 10px;background:#fff}
+.cf-ndc-item{display:flex;align-items:flex-start;gap:8px;padding:6px 2px;border-bottom:1px dashed #eef0f3;font-size:.86rem;cursor:pointer;margin:0}
+.cf-ndc-item:last-child{border-bottom:0}
+.cf-ndc-item input{width:18px;height:18px;margin-top:2px;flex:0 0 auto}
+.cf-ndc-item.done span{color:#11633a}
+.cf-ndc-prog{font-size:.78rem;font-weight:600;padding:2px 8px;border-radius:999px;background:#eef4fb;color:#0b2d5b;margin-left:8px}
+.cf-ndc-prog.ok{background:#e7f6ec;color:#11633a}
+.cf-readm-kpis{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px}
+.cf-readm-kpi{flex:1 1 120px;border:1px solid #e4e7ec;border-radius:10px;padding:8px 10px;background:#fff}
+.cf-readm-kpi b{display:block;font-size:1.3rem;color:#0b2d5b}
+.cf-readm-kpi small{color:#667085;font-size:.72rem}
+
 </style>
 
 </head>
@@ -2846,6 +2860,22 @@ label.cf-ai-filled{background:#fffbe6;border-radius:4px;box-shadow:0 0 0 2px #fa
             </div>
                 </div>
               </div>
+              <!-- ===== Update 31: NURSE DISCHARGE CHECKLIST ===== -->
+              <div class="field-tint collapsible tint-plan" id="admPanelNurse">
+                <div class="ft-head" onclick="toggleAdmPanel('admPanelNurse')">
+                  <i class="fa fa-user-nurse"></i><span>Nurse Discharge Education Checklist</span><span class="cf-ndc-prog" id="cfNdcProg">0/10</span>
+                  <i class="fa fa-chevron-right ft-chev ms-auto"></i>
+                </div>
+                <div class="ft-body">
+                  <div class="small text-muted mb-2">Heart failure discharge education (Module 9: Follow-up and discharge planning). Tick each item when completed.</div>
+                  <div class="cf-ndc"><label class="cf-ndc-item"><input type="checkbox" data-ndc="NDC_Diagnosis"><span>Patient understands the heart failure diagnosis</span></label><input type="hidden" id="NDC_Diagnosis"><label class="cf-ndc-item"><input type="checkbox" data-ndc="NDC_Pharmacist"><span>Medication list reviewed and explained by the clinical pharmacist</span></label><input type="hidden" id="NDC_Pharmacist"><label class="cf-ndc-item"><input type="checkbox" data-ndc="NDC_Weight"><span>Daily weight monitoring instructions provided</span></label><input type="hidden" id="NDC_Weight"><label class="cf-ndc-item"><input type="checkbox" data-ndc="NDC_SodiumFluid"><span>Sodium and fluid restriction instructions reviewed</span></label><input type="hidden" id="NDC_SodiumFluid"><label class="cf-ndc-item"><input type="checkbox" data-ndc="NDC_WarningSigns"><span>Heart failure warning signs and action plan ("When to seek medical help") reviewed</span></label><input type="hidden" id="NDC_WarningSigns"><label class="cf-ndc-item"><input type="checkbox" data-ndc="NDC_Handout"><span>Heart failure patient education handout provided (QR code scan)</span></label><input type="hidden" id="NDC_Handout"><label class="cf-ndc-item"><input type="checkbox" data-ndc="NDC_KCCQ"><span>KCCQ-12 questionnaire completed</span></label><input type="hidden" id="NDC_KCCQ"><label class="cf-ndc-item"><input type="checkbox" data-ndc="NDC_FollowUp"><span>Follow-up appointment scheduled and communicated</span></label><input type="hidden" id="NDC_FollowUp"><label class="cf-ndc-item"><input type="checkbox" data-ndc="NDC_Labs"><span>4 sets of lab requests given</span></label><input type="hidden" id="NDC_Labs"><label class="cf-ndc-item"><input type="checkbox" data-ndc="NDC_Caregiver"><span>Family member / caregiver educated (if available)</span> <select class="form-select form-select-sm ms-auto" data-ndc-na="NDC_Caregiver" style="width:auto;max-width:150px"><option value="">Caregiver present</option><option value="N/A">No caregiver available</option></select></label><input type="hidden" id="NDC_Caregiver"></div>
+                  <div class="row g-2 mt-1">
+                    <div class="col-6 col-md-4"><label>Nurse name / signature</label><input type="text" class="form-control" id="NDC_Nurse" placeholder="Nurse name"></div>
+                    <div class="col-6 col-md-3"><label>Date</label><input type="date" class="form-control" id="NDC_Date"></div>
+                  </div>
+                  <div class="small text-muted mt-2">Educational checklist; use according to provider orders, institutional policy and local guidelines.</div>
+                </div>
+              </div>
               <!-- ===== ADDITIONAL ADMISSIONS PANEL ===== -->
               <div class="field-tint collapsible tint-appt" id="admPanelExtra">
                 <div class="ft-head" onclick="toggleAdmPanel('admPanelExtra')">
@@ -3658,6 +3688,7 @@ label.cf-ai-filled{background:#fffbe6;border-radius:4px;box-shadow:0 0 0 2px #fa
                     <div class="col-12 col-md-4"><div class="analytics-card"><div class="analytics-card-title"><i class="fa fa-calendar-check"></i> Avg Length of Stay</div><div id="losStats" style="padding:10px 0;"></div></div></div>
                     <div class="col-12 col-md-6"><div class="analytics-card"><div class="analytics-card-title"><i class="fa fa-rotate-left"></i> HF readmissions by interval</div><div class="analytics-chart-wrap-sm"><canvas id="cfReadmitChart"></canvas></div><div class="small text-muted mt-1" id="cfReadmitNote"></div></div></div>
                     <div class="col-12 col-md-6"><div class="analytics-card"><div class="analytics-card-title"><i class="fa fa-user-check"></i> Vital and follow-up status</div><div class="analytics-chart-wrap-sm"><canvas id="cfStatusChart"></canvas></div><div class="small text-muted mt-1" id="cfStatusNote"></div></div></div>
+                    <div class="col-12"><div class="analytics-card"><div class="analytics-card-title"><i class="fa fa-arrows-rotate"></i> Readmission counter · all patients</div><div id="cfReadmCounter"></div></div></div>
                 </div>
             </div>
             <div class="analytics-panel" id="tab-gdmtgap">
@@ -17353,6 +17384,20 @@ var CF = (function () {
 
   // "On Maximum GDMT Doses": Yes once the target set (gdmtTarget.reached) has been met on any record up to
   // `upto` (YYYY-MM-DD, inclusive; empty = all records), and it stays Yes afterwards.
+  // Update 31: one-time echo alert once the GDMT target set is first reached. It stays until an echo
+  // (LVEF from echo or CMR, or a visit marked "Echo performed") is recorded after that date, then never returns.
+  function echoAfterTarget(p, visits, A) {
+    A = A || analyse(p, visits);
+    if (A.vital && A.vital.dead) return null;
+    var r = gdmtEverReached(p, A.visits, '');
+    if (!r.reached) return null;
+    var since = r.date || '';
+    var done = (A.S.EF || []).some(function (o) { return since && o.date > since && !/diagnosis/i.test(o.source); }) ||
+      (A.visits || []).some(function (v) { var d = visitIso(v); return d && d > since && (s(v.V_Echo_Done) === 'Yes' || num(v.V_Echo_EF) != null || num(v.V_CMR_LVEF) != null); });
+    if (done) return null;
+    return { reached: since, source: r.source, due: since ? addDays(since, 90) : todayIso(),
+      text: 'Target GDMT doses reached' + (since ? ' on ' + fmt(since) : '') + ' (' + r.source + '). Request an echo to reassess LVEF and remodelling, ideally about 3 months on optimised therapy (' + (since ? fmt(addDays(since, 90)) : 'now') + '). The result guides ICD/CRT decisions and HFimpEF classification.' };
+  }
   function undatedAdmission(p) {
     p = p || {};
     var has = !!(snapshotFrom(p, 'A_') || legacySnapshot(p)) || ['Lab_K', 'Lab_Creat', 'Lab_eGFR', 'Lab_BNP', 'Lab_Hb', 'Admission_Reason'].some(function (k) { return s(p[k]); });
@@ -17372,7 +17417,7 @@ var CF = (function () {
     DRUGS: DRUGS, CLASS_LABEL: CLASS_LABEL, PILLARS: PILLARS, REASONS: REASONS, ACTIONS: ACTIONS, RULES: RULES, READMIT_BANDS: READMIT_BANDS,
     s: s, num: num, iso: iso, todayIso: todayIso, addDays: addDays, daysBetween: daysBetween, fmt: fmt, esc: esc,
     baseKey: baseKey, drugLabel: drugLabel, parseDose: parseDose, isIVDose: isIVDose, freqFromPreset: freqFromPreset, plausibility: plausibility,
-    readDrug: readDrug, doseText: doseText, pctTarget: pctTarget, gdmtTarget: gdmtTarget, gdmtEverReached: gdmtEverReached, undatedAdmission: undatedAdmission, targetFor: targetFor, targetCtx: targetCtx, TARGET_REF: TARGET_REF, TARGET_PEF: TARGET_PEF, presetsFor: presetsFor, nextPreset: nextPreset,
+    readDrug: readDrug, doseText: doseText, pctTarget: pctTarget, gdmtTarget: gdmtTarget, gdmtEverReached: gdmtEverReached, undatedAdmission: undatedAdmission, echoAfterTarget: echoAfterTarget, targetFor: targetFor, targetCtx: targetCtx, TARGET_REF: TARGET_REF, TARGET_PEF: TARGET_PEF, presetsFor: presetsFor, nextPreset: nextPreset,
     medSnapshots: medSnapshots, medHistory: medHistory, onClass: onClass, onPillar: onPillar,
     series: series, last: last, profile: profile, vitalStatus: vitalStatus, followUpStatus: followUpStatus,
     labSuggestions: labSuggestions, medSuggestions: medSuggestions, medReview: medReview, fastingAdvice: fastingAdvice, smokingStatus: smokingStatus, kccqStatus: kccqStatus, walkStatus: walkStatus, ironDose: ironDose, IRON: IRON, REVIEW: REVIEW, deviceSuggestions: deviceSuggestions, latestECG: latestECG, currentDevice: currentDevice, omtSince: omtSince, DEVICE: DEVICE, glp1Plan: glp1Plan,
@@ -17773,7 +17818,11 @@ var CFUI = (function () {
         return 'Automatic: not yet at target' + (g.group ? ' — ' + esc(g.summary) : ' (LVEF not recorded)') + '.';
       }
       // visit outcome: up to this visit's date
-      if (vd && $('V_Max_GDMT')) { var rv = CF.gdmtEverReached(p, all, CF.iso(vd)); setAuto('V_Max_GDMT', rv.reached, hintFor(rv, CF.iso(vd))); }
+      if (vd && $('V_Max_GDMT')) {
+        var rv = CF.gdmtEverReached(p, all, CF.iso(vd));
+        var firstHere = rv.reached && rv.date === CF.iso(vd) && !CF.gdmtEverReached(p, saved, '').reached;
+        setAuto('V_Max_GDMT', rv.reached, hintFor(rv, CF.iso(vd)) + (firstHere ? '<div class="cf-echo-alert"><i class="fa fa-heart-pulse me-1"></i><b>Echo alert:</b> target GDMT reached at this visit for the first time. Request an echo to reassess LVEF (ideally about 3 months on optimised therapy, ' + CF.fmt(CF.addDays(CF.iso(vd), 90)) + '). The patient overview keeps this reminder until the echo is recorded.</div>' : ''));
+      }
       // patient (admission) outcome: across every record
       if ($('Max_GDMT') && (p.Admission_Date || p.Admission_Discharge_Date || all.length || hasAdmissionMeds(p))) {
         var rp = CF.gdmtEverReached(p, all, '');
@@ -17797,6 +17846,39 @@ var CFUI = (function () {
   }
   function hasAdmissionMeds(p) { return Object.keys(p).some(function (k) { return /^A_.+_Status$/.test(k) && /^yes$/i.test(String(p[k])); }); }
   var scheduleAutoMax = debounce(autoMaxGdmt, 600);
+  // ---- Update 31: nurse discharge education checklist (hidden NDC_* fields hold Yes / N/A) ----
+  function ndcSync() {
+    var boxes = document.querySelectorAll('[data-ndc]'), done = 0, total = boxes.length;
+    boxes.forEach(function (b) {
+      var k = b.getAttribute('data-ndc'), h = $(k), v = h ? h.value : '';
+      var na = document.querySelector('[data-ndc-na="' + k + '"]');
+      if (na) na.value = v === 'N/A' ? 'N/A' : '';
+      b.checked = v === 'Yes';
+      b.disabled = v === 'N/A';
+      var row = b.closest('.cf-ndc-item'); if (row) row.classList.toggle('done', v === 'Yes' || v === 'N/A');
+      if (v === 'Yes' || v === 'N/A') done++;
+    });
+    var pg = $('cfNdcProg');
+    if (pg) { pg.textContent = done + '/' + total; pg.classList.toggle('ok', total && done === total); }
+  }
+  function ndcBind() {
+    document.querySelectorAll('[data-ndc]').forEach(function (b) {
+      if (b.cfBound) return; b.cfBound = true;
+      b.addEventListener('change', function () {
+        var h = $(b.getAttribute('data-ndc')); if (h) h.value = b.checked ? 'Yes' : '';
+        if (b.checked && !val('NDC_Date')) setVal('NDC_Date', CF.todayIso());
+        ndcSync(); markDirty();
+      });
+    });
+    document.querySelectorAll('[data-ndc-na]').forEach(function (sel) {
+      if (sel.cfBound) return; sel.cfBound = true;
+      sel.addEventListener('change', function () {
+        var h = $(sel.getAttribute('data-ndc-na')); if (h) h.value = sel.value === 'N/A' ? 'N/A' : '';
+        ndcSync(); markDirty();
+      });
+    });
+    ndcSync();
+  }
   function contextVisits(includeForm) {
     var list = (typeof visits !== 'undefined' ? visits : []).filter(function (v) { return !(typeof editingVisitId !== 'undefined' && editingVisitId && v.id === editingVisitId); });
     if (includeForm && val('Visit_Date')) list = [formVisit()].concat(list);
@@ -18632,6 +18714,10 @@ var CFUI = (function () {
     A.labs.forEach(function (l) {
       items.push({ lvl: levelOf('lab', l), icon: 'fa-vials', cat: 'Labs', title: l.labs + (l.level === 'upcoming' ? ' · due ' + CF.fmt(l.due) : l.level === 'urgent' ? ' · urgent' : ' · due ' + CF.fmt(l.due)), detail: l.because, btn: 'Enter result', act: 'lab:' + (LAB_FIELD[l.key] || 'V_Lab_Others') });
     });
+    try {
+      var ea = A.vital.dead ? null : CF.echoAfterTarget(ovState.p || {}, A.visits, A);
+      if (ea) items.push({ lvl: 'due', icon: 'fa-heart-pulse', cat: 'Device', title: 'Echo: target GDMT reached', detail: ea.text + ' This alert appears once and clears when the echo is recorded.', btn: 'Add to visit plan', act: 'plan:Echo to reassess LVEF after reaching target GDMT doses (' + CF.fmt(ea.reached) + ').' });
+    } catch (e) {}
     A.devices.forEach(function (d) {
       items.push({ lvl: levelOf('dev', d), icon: 'fa-microchip', cat: 'Device', title: d.title, detail: d.detail + (d.missing.length ? ' Missing: ' + d.missing.join(', ') + '.' : ''), btn: 'Add to visit plan', act: 'plan:' + d.title + '. ' + d.detail.split('. ')[0] + '.' });
     });
@@ -19235,7 +19321,9 @@ var CFUI = (function () {
       scheduleAutoMax();
     }, true);
     wrap('_renderExtraAdmissions', function () { scheduleAutoMax(); });
-    wrap('editPt', function () { setTimeout(scheduleAutoMax, 400); });
+    ndcBind();
+    wrap('resetForm', function () { ndcSync(); });
+    wrap('editPt', function () { setTimeout(scheduleAutoMax, 400); ndcSync(); });
   }
   return {
     install: install, openOverview: openOverview, startVisit: startVisit, headerChips: headerChips, smartBody: smartBody, renderAssist: renderAssist,
@@ -19256,7 +19344,8 @@ CFUI.install();
 (function () {
   'use strict';
   if (typeof ALL_PATIENT_FIELDS !== 'undefined') {
-    ['HF_Readmission', 'HF_Readmission_Interval', 'Death_Date', 'Death_Cause', 'Walk_Date'].forEach(function (f) { if (ALL_PATIENT_FIELDS.indexOf(f) < 0) ALL_PATIENT_FIELDS.push(f); });
+    ['HF_Readmission', 'HF_Readmission_Interval', 'Death_Date', 'Death_Cause', 'Walk_Date',
+      'NDC_Diagnosis', 'NDC_Pharmacist', 'NDC_Weight', 'NDC_SodiumFluid', 'NDC_WarningSigns', 'NDC_Handout', 'NDC_KCCQ', 'NDC_FollowUp', 'NDC_Labs', 'NDC_Caregiver', 'NDC_Nurse', 'NDC_Date'].forEach(function (f) { if (ALL_PATIENT_FIELDS.indexOf(f) < 0) ALL_PATIENT_FIELDS.push(f); });
   }
 
   // ---- computed helpers used by the patched analytics code ----
@@ -19533,9 +19622,59 @@ CFUI.install();
     var t = document.getElementById('cfEsc2026Note');
     if (t) t.innerHTML = 'ESC 2026 regroups HFmrEF (41–49%) into HFrEF. Uses the latest recorded LVEF. The stored HF type is unchanged; the classic three-group chart remains above.';
   };
+  // ---- Update 31: readmission counter for all patients (all-cause and HF-related) ----
+  // Every recorded admission counts, dated or not. Readmissions = admissions after the first one.
+  window._cfAdmissionList = function (p) {
+    var list = [];
+    var idxHas = CF.iso(p.Admission_Date) || CF.iso(p.Admission_Discharge_Date) || (CF.undatedAdmission && CF.undatedAdmission(p)) || String(p.Admission_Reason || '').trim();
+    if (idxHas) list.push({ d: CF.iso(p.Admission_Date) || CF.iso(p.Admission_Discharge_Date) || '', dis: CF.iso(p.Admission_Discharge_Date), hf: (p.Admission_HF_Related || 'HF related') === 'HF related', idx: true });
+    CF.parseExtraAdmissions(p).forEach(function (a) { list.push({ d: CF.iso(a.date) || CF.iso(a.dischargeDate) || '', dis: CF.iso(a.dischargeDate), hf: (a.Admission_HF_Related || 'HF related') === 'HF related' }); });
+    // dated admissions in date order; undated ones after them, in entry order
+    var dated = list.filter(function (x) { return x.d; }).sort(function (a, b) { return a.d < b.d ? -1 : a.d > b.d ? 1 : 0; });
+    return dated.concat(list.filter(function (x) { return !x.d; }));
+  };
+  window._cfReadmitCount = function (p) {
+    var L = window._cfAdmissionList(p), r = L.slice(1), d30 = 0, d90 = 0;
+    r.forEach(function (a, i) {
+      var prev = L[i];
+      if (a.d && prev && prev.dis) { var g = CF.daysBetween(prev.dis, a.d); if (g != null && g >= 0 && g <= 30) d30++; if (g != null && g >= 0 && g <= 90) d90++; }
+    });
+    return { admissions: L.length, all: r.length, hf: r.filter(function (a) { return a.hf; }).length, d30: d30, d90: d90, last: r.length ? (r.filter(function (a) { return a.d; }).map(function (a) { return a.d; }).pop() || '') : '', undated: L.filter(function (a) { return !a.d; }).length };
+  };
+  function buildReadmitCounter(d) {
+    var host = document.getElementById('cfReadmCounter'); if (!host) return;
+    var rows = d.map(function (p) { return { p: p, c: window._cfReadmitCount(p) }; });
+    var withAdm = rows.filter(function (x) { return x.c.admissions > 0; }), readm = rows.filter(function (x) { return x.c.all > 0; });
+    var tot = readm.reduce(function (a, x) { return a + x.c.all; }, 0), totHF = readm.reduce(function (a, x) { return a + x.c.hf; }, 0);
+    var t30 = readm.reduce(function (a, x) { return a + x.c.d30; }, 0), t90 = readm.reduce(function (a, x) { return a + x.c.d90; }, 0);
+    var pct = function (a, b) { return b ? Math.round(a / b * 100) + '%' : '—'; };
+    var dist = [0, 0, 0, 0];
+    withAdm.forEach(function (x) { dist[Math.min(3, x.c.all)]++; });
+    var h = '<div class="cf-readm-kpis">' +
+      '<div class="cf-readm-kpi"><b>' + tot + '</b><small>readmissions (all causes)</small></div>' +
+      '<div class="cf-readm-kpi"><b>' + totHF + '</b><small>HF-related readmissions</small></div>' +
+      '<div class="cf-readm-kpi"><b>' + readm.length + ' <span style="font-size:.8rem">/ ' + withAdm.length + '</span></b><small>patients readmitted (' + pct(readm.length, withAdm.length) + ' of patients with an admission)</small></div>' +
+      '<div class="cf-readm-kpi"><b>' + t30 + ' · ' + t90 + '</b><small>within 30 · 90 days of the previous discharge</small></div>' +
+      '<div class="cf-readm-kpi"><b>' + (withAdm.length ? (tot / withAdm.length).toFixed(2) : '—') + '</b><small>readmissions per admitted patient</small></div></div>' +
+      '<div class="row g-2"><div class="col-12 col-md-4"><div class="analytics-chart-wrap-sm"><canvas id="cfReadmDist"></canvas></div><div class="small text-muted">Patients by number of readmissions (patients with at least one admission, n=' + withAdm.length + ').</div></div><div class="col-12 col-md-8">';
+    if (!readm.length) h += '<p class="text-muted small">No readmissions recorded.</p>';
+    else {
+      readm.sort(function (a, b) { return b.c.all - a.c.all || b.c.hf - a.c.hf || (a.c.last < b.c.last ? 1 : -1); });
+      h += '<div style="overflow-x:auto;max-height:320px;overflow-y:auto"><table class="table table-sm table-bordered mb-1" style="font-size:.8rem"><thead><tr><th>Patient</th><th>File</th><th>Admissions</th><th>Readmissions</th><th>HF-related</th><th>≤30 d</th><th>Last readmission</th></tr></thead><tbody>' +
+        readm.map(function (x) {
+          return '<tr><td style="text-align:left;font-weight:600">' + CF.esc(x.p.Patient_Name || '?') + (x.p._cf && x.p._cf.vital.dead ? ' <small class="text-muted">(died)</small>' : '') + '</td><td>' + CF.esc(x.p.File_No || '-') + '</td><td>' + x.c.admissions + '</td><td><b>' + x.c.all + '</b></td><td>' + x.c.hf + '</td><td>' + (x.c.d30 || '') + '</td><td>' + (x.c.last ? CF.fmt(x.c.last) : (x.c.undated ? '<i class="text-muted">no date</i>' : '')) + '</td></tr>';
+        }).join('') + '</tbody></table></div>';
+    }
+    h += '<div class="small text-muted">All patients, alive or deceased. Every recorded admission counts (index admission and each additional admission); readmissions are the admissions after the first. HF-related unless marked otherwise. Admissions without dates are counted, but not in the 30/90-day figures.</div></div></div>';
+    host.innerHTML = h;
+    chart('cfReadmDist', 'bar', ['0', '1', '2', '3 or more'], dist, ['#17b26a', '#f79009', '#E53935', '#7a1c1c']);
+  }
+  window.cfBuildReadmitCounter = buildReadmitCounter;
+
   var origOutcomes = window.buildOutcomes;
   window.buildOutcomes = function (d, n) {
     origOutcomes(d, n);
+    try { buildReadmitCounter(d); } catch (e) { if (window.console) console.warn('readmission counter', e); }
     var bands = {}; CF.READMIT_BANDS.forEach(function (b) { bands[b] = 0; });
     var hfReadmits = 0, unknown = 0;
     d.forEach(function (p) {
