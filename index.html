@@ -4147,9 +4147,10 @@ var VISIT_MED_GROUPS = [
         ]
     },
     {
-        label: 'Intravenous Iron',
+        label: 'Iron',
         meds: [
-            {id:'V_Ferinject', label:'Ferinject (ferric carboxymaltose)', doses:['','500 mg IV once','1000 mg IV once']}
+            {id:'V_Ferinject', label:'Ferinject (ferric carboxymaltose)', doses:['','500 mg IV once','1000 mg IV once']},
+            {id:'V_Ferrosac', label:'Ferrosac (oral iron)', doses:['','1 tab PO OD','1 tab PO BID','1 tab PO TID','1 tab PO EOD']}
         ]
     },
     {
@@ -5457,7 +5458,9 @@ function buildVaccBlock(){
             html+='<label class="small fw-bold mb-1">Date given</label><input type="date" class="form-control form-control-sm" style="max-width:190px;" id="vacc_'+v.id+'_date" onchange="onVaccDateChange(\''+v.id+'\')">';
             html+='<small class="text-muted d-block mt-1">Enter the administration date to complete this vaccine record.</small></div>';
             if(prior){
-                html+='<small class="text-muted d-block mt-1">Last dose: '+_fmtVaccDate(prior)+' — suppression expired, due again.</small>';
+                html+=(v.suppressYears===1
+                    ? '<small class="d-block mt-1" style="color:#b42318;font-weight:600;">Not given in the last 12 months (last dose '+_fmtVaccDate(prior)+'): due again this year.</small>'
+                    : '<small class="text-muted d-block mt-1">Last dose: '+_fmtVaccDate(prior)+' — suppression expired, due again.</small>');
             }
         }
         html+='</div></div>';
@@ -10422,6 +10425,8 @@ function generateCardHTML(data, id, latestVisit, allVisits, historyState){
         } else {
             // Not given, or suppression expired -> due
             missingVacc.push(c.short);
+            if(iso && c.sup===1) vaccGivenChips += "<span class='badge bg-danger me-1' style='font-weight:600;' title='Annual vaccine: more than 12 months since the last dose'><i class='fa fa-syringe me-1'></i>"
+                            + c.short+" not given (last "+_escHtml(_cardFmtDate(iso))+")</span>";
         }
     });
     headerBadges += vaccGivenChips;
@@ -15991,6 +15996,7 @@ var CF = (function () {
     Metolazone:  { generic: 'Metolazone', cls: 'thiazide' },
     HCTZ:        { generic: 'Hydrochlorothiazide', cls: 'thiazide' },
     Ferinject:   { generic: 'Ferric carboxymaltose', cls: 'iviron' },
+    Ferrosac:    { generic: 'Oral iron', cls: 'oraliron' },
     Mounjaro:    { generic: 'Tirzepatide', cls: 'glp1', weekly: true },
     Ozempic:     { generic: 'Semaglutide', cls: 'glp1', weekly: true },
     Warfarin:    { generic: 'Warfarin', cls: 'vka' },
@@ -17391,6 +17397,7 @@ var CF = (function () {
   function echoAfterTarget(p, visits, A) {
     A = A || analyse(p, visits);
     if (A.vital && A.vital.dead) return null;
+    if (!A.profile || A.profile.esc2026 !== 'HFrEF') return null; // Update 33: HFrEF (LVEF <50%) only
     var r = gdmtEverReached(p, A.visits, '');
     if (!r.reached) return null;
     var since = r.date || '';
@@ -17400,6 +17407,24 @@ var CF = (function () {
     return { reached: since, source: r.source, due: since ? addDays(since, 90) : todayIso(),
       text: 'Target GDMT doses reached' + (since ? ' on ' + fmt(since) : '') + ' (' + r.source + '). Request an echo to reassess LVEF and remodelling, ideally about 3 months on optimised therapy (' + (since ? fmt(addDays(since, 90)) : 'now') + '). The result guides ICD/CRT decisions and HFimpEF classification.' };
   }
+  // Update 33: vaccine status from every visit. Annual vaccines (influenza, COVID-19) count as given only
+  // for 12 months after the last dose; after that they are "not given in the last 12 months".
+  var VACC = [['Influenza', 'Influenza', 1], ['COVID', 'COVID-19', 1], ['RSV', 'RSV', 0], ['PSV2', 'PSV 2', 0], ['Shingrix', 'Shingrix', 0]];
+  function vaccineStatus(p, visits) {
+    var today = todayIso();
+    return VACC.map(function (c) {
+      var best = '';
+      (visits || []).forEach(function (v) {
+        var d = iso(v['V_Vacc_' + c[0] + '_Date']);
+        if (!d) { var y = parseInt(v['V_Vacc_' + c[0] + '_Year'], 10); if (y > 1900) d = y + '-01-01'; }
+        if (d && d > best) best = d;
+      });
+      if (!best) { var ly = parseInt((p || {})['Vacc_' + c[0] + '_Year'], 10); if (ly > 1900) best = ly + '-01-01'; }
+      var st = !best ? 'never' : c[2] === 1 ? (addMonthsIso(best, 12) > today ? 'given' : 'expired') : 'given';
+      return { id: c[0], label: c[1], annual: c[2] === 1, last: best, status: st, until: c[2] === 1 && best ? addMonthsIso(best, 12) : '' };
+    });
+  }
+  function addMonthsIso(d, m) { var x = new Date(iso(d) + 'T00:00:00Z'); if (isNaN(x)) return ''; x.setUTCMonth(x.getUTCMonth() + m); return x.toISOString().slice(0, 10); }
   function undatedAdmission(p) {
     p = p || {};
     var has = !!(snapshotFrom(p, 'A_') || legacySnapshot(p)) || ['Lab_K', 'Lab_Creat', 'Lab_eGFR', 'Lab_BNP', 'Lab_Hb', 'Admission_Reason'].some(function (k) { return s(p[k]); });
@@ -17419,7 +17444,7 @@ var CF = (function () {
     DRUGS: DRUGS, CLASS_LABEL: CLASS_LABEL, PILLARS: PILLARS, REASONS: REASONS, ACTIONS: ACTIONS, RULES: RULES, READMIT_BANDS: READMIT_BANDS,
     s: s, num: num, iso: iso, todayIso: todayIso, addDays: addDays, daysBetween: daysBetween, fmt: fmt, esc: esc,
     baseKey: baseKey, drugLabel: drugLabel, parseDose: parseDose, isIVDose: isIVDose, freqFromPreset: freqFromPreset, plausibility: plausibility,
-    readDrug: readDrug, doseText: doseText, pctTarget: pctTarget, gdmtTarget: gdmtTarget, gdmtEverReached: gdmtEverReached, undatedAdmission: undatedAdmission, echoAfterTarget: echoAfterTarget, targetFor: targetFor, targetCtx: targetCtx, TARGET_REF: TARGET_REF, TARGET_PEF: TARGET_PEF, presetsFor: presetsFor, nextPreset: nextPreset,
+    readDrug: readDrug, doseText: doseText, pctTarget: pctTarget, gdmtTarget: gdmtTarget, gdmtEverReached: gdmtEverReached, undatedAdmission: undatedAdmission, echoAfterTarget: echoAfterTarget, vaccineStatus: vaccineStatus, targetFor: targetFor, targetCtx: targetCtx, TARGET_REF: TARGET_REF, TARGET_PEF: TARGET_PEF, presetsFor: presetsFor, nextPreset: nextPreset,
     medSnapshots: medSnapshots, medHistory: medHistory, onClass: onClass, onPillar: onPillar,
     series: series, last: last, profile: profile, vitalStatus: vitalStatus, followUpStatus: followUpStatus,
     labSuggestions: labSuggestions, medSuggestions: medSuggestions, medReview: medReview, fastingAdvice: fastingAdvice, smokingStatus: smokingStatus, kccqStatus: kccqStatus, walkStatus: walkStatus, ironDose: ironDose, IRON: IRON, REVIEW: REVIEW, deviceSuggestions: deviceSuggestions, latestECG: latestECG, currentDevice: currentDevice, omtSince: omtSince, DEVICE: DEVICE, glp1Plan: glp1Plan,
@@ -17823,6 +17848,7 @@ var CFUI = (function () {
       if (vd && $('V_Max_GDMT')) {
         var rv = CF.gdmtEverReached(p, all, CF.iso(vd));
         var firstHere = rv.reached && rv.date === CF.iso(vd) && !CF.gdmtEverReached(p, saved, '').reached;
+        if (firstHere) { try { firstHere = CF.analyse(p, all).profile.esc2026 === 'HFrEF'; } catch (e) { firstHere = false; } }
         setAuto('V_Max_GDMT', rv.reached, hintFor(rv, CF.iso(vd)) + (firstHere ? '<div class="cf-echo-alert"><i class="fa fa-heart-pulse me-1"></i><b>Echo alert:</b> target GDMT reached at this visit for the first time. Request an echo to reassess LVEF (ideally about 3 months on optimised therapy, ' + CF.fmt(CF.addDays(CF.iso(vd), 90)) + '). The patient overview keeps this reminder until the echo is recorded.</div>' : ''));
       }
       // patient (admission) outcome: across every record
@@ -18704,6 +18730,12 @@ var CFUI = (function () {
     }
     alarms.forEach(function (a, i) {
       if (a.key === 'kccq' || a.key === 'walk') return; // replaced by the items above
+      if (a.key === 'vaccines') {
+        try {
+          var vs = CF.vaccineStatus(ovState.p || {}, A.visits).filter(function (x) { return x.status !== 'given'; });
+          if (vs.length) a = Object.assign({}, a, { detail: vs.map(function (x) { return x.label + ': ' + (x.status === 'expired' ? 'not given in the last 12 months (last dose ' + CF.fmt(x.last) + ')' : 'not recorded'); }).join(' · ') });
+        } catch (e) {}
+      }
       if (a.key === 'appointment' && a.level !== 'danger') return; // shown in the header
       items.push({ lvl: levelOf('alarm', a), icon: a.icon, cat: 'Clinic', title: a.name, detail: a.detail, btn: { refill: 'Start visit · refill', registration: 'Start visit · register', kccq: 'Record KCCQ', vaccines: 'Record vaccines' }[a.key] || 'Start visit', act: 'alarm:' + a.key });
     });
