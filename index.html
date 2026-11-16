@@ -1997,6 +1997,10 @@ label.cf-ai-filled{background:#fffbe6;border-radius:4px;box-shadow:0 0 0 2px #fa
 
 .cf-readm-h{font-weight:700;font-size:.85rem;color:#0b2d5b;margin:4px 0 6px}
 
+.cf-echo{margin-top:10px}
+.cf-echo-rows{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 12px;margin-top:6px;font-size:.82rem}
+.cf-echo-rows span{display:block;font-size:.68rem;color:#667085;text-transform:uppercase;letter-spacing:.03em}
+
 </style>
 
 </head>
@@ -17425,6 +17429,30 @@ var CF = (function () {
     });
   }
   function addMonthsIso(d, m) { var x = new Date(iso(d) + 'T00:00:00Z'); if (isNaN(x)) return ''; x.setUTCMonth(x.getUTCMonth() + m); return x.toISOString().slice(0, 10); }
+  // Update 34: latest echo (visit echo, index or additional admission echo) and latest medication refill.
+  function lastEcho(p, visits) {
+    p = p || {};
+    var c = [];
+    function add(d, ef, edvi, esvi, other, change, src) {
+      if (!d) return;
+      if (num(ef) == null && !s(edvi) && !s(esvi) && !s(other) && !s(change)) return;
+      c.push({ date: d, ef: num(ef), edvi: s(edvi), esvi: s(esvi), other: s(other), change: s(change), source: src });
+    }
+    add(iso(p.Admission_Date) || iso(p.Admission_Discharge_Date), p.Echo_EF, p.Echo_EDVI, p.Echo_ESVI, p.ECHO, '', 'Index admission');
+    parseExtraAdmissions(p).forEach(function (a, i) { add(iso(a.date) || iso(a.dischargeDate), a.Echo_EF, a.Echo_EDVI, a.Echo_ESVI, a.ECHO, '', 'Admission ' + (i + 2)); });
+    (visits || []).forEach(function (v) {
+      var d = visitIso(v);
+      if (s(v.V_Echo_Done) === 'Yes' && num(v.V_Echo_EF) == null && !s(v.V_Echo_Other) && !s(v.V_Echo_EDVI)) { if (d) c.push({ date: d, ef: null, edvi: '', esvi: '', other: '', change: '', source: (v.visitType || 'Visit') + ' (echo done, no result entered)' }); return; }
+      add(d, v.V_Echo_EF, v.V_Echo_EDVI, v.V_Echo_ESVI, v.V_Echo_Other, v.V_EF_Change, v.visitType || 'Visit');
+    });
+    c.sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
+    return c.length ? c[c.length - 1] : null;
+  }
+  function lastRefill(visits) {
+    var best = '';
+    (visits || []).forEach(function (v) { var d = visitIso(v); if (d && s(v.V_Med_Refill_Today) === 'Yes' && d > best) best = d; });
+    return best ? { date: best, due: addDays(best, 56), overdue: addDays(best, 56) <= todayIso() } : null;
+  }
   function undatedAdmission(p) {
     p = p || {};
     var has = !!(snapshotFrom(p, 'A_') || legacySnapshot(p)) || ['Lab_K', 'Lab_Creat', 'Lab_eGFR', 'Lab_BNP', 'Lab_Hb', 'Admission_Reason'].some(function (k) { return s(p[k]); });
@@ -17444,7 +17472,7 @@ var CF = (function () {
     DRUGS: DRUGS, CLASS_LABEL: CLASS_LABEL, PILLARS: PILLARS, REASONS: REASONS, ACTIONS: ACTIONS, RULES: RULES, READMIT_BANDS: READMIT_BANDS,
     s: s, num: num, iso: iso, todayIso: todayIso, addDays: addDays, daysBetween: daysBetween, fmt: fmt, esc: esc,
     baseKey: baseKey, drugLabel: drugLabel, parseDose: parseDose, isIVDose: isIVDose, freqFromPreset: freqFromPreset, plausibility: plausibility,
-    readDrug: readDrug, doseText: doseText, pctTarget: pctTarget, gdmtTarget: gdmtTarget, gdmtEverReached: gdmtEverReached, undatedAdmission: undatedAdmission, echoAfterTarget: echoAfterTarget, vaccineStatus: vaccineStatus, targetFor: targetFor, targetCtx: targetCtx, TARGET_REF: TARGET_REF, TARGET_PEF: TARGET_PEF, presetsFor: presetsFor, nextPreset: nextPreset,
+    readDrug: readDrug, doseText: doseText, pctTarget: pctTarget, gdmtTarget: gdmtTarget, gdmtEverReached: gdmtEverReached, undatedAdmission: undatedAdmission, echoAfterTarget: echoAfterTarget, vaccineStatus: vaccineStatus, lastEcho: lastEcho, lastRefill: lastRefill, targetFor: targetFor, targetCtx: targetCtx, TARGET_REF: TARGET_REF, TARGET_PEF: TARGET_PEF, presetsFor: presetsFor, nextPreset: nextPreset,
     medSnapshots: medSnapshots, medHistory: medHistory, onClass: onClass, onPillar: onPillar,
     series: series, last: last, profile: profile, vitalStatus: vitalStatus, followUpStatus: followUpStatus,
     labSuggestions: labSuggestions, medSuggestions: medSuggestions, medReview: medReview, fastingAdvice: fastingAdvice, smokingStatus: smokingStatus, kccqStatus: kccqStatus, walkStatus: walkStatus, ironDose: ironDose, IRON: IRON, REVIEW: REVIEW, deviceSuggestions: deviceSuggestions, latestECG: latestECG, currentDevice: currentDevice, omtSince: omtSince, DEVICE: DEVICE, glp1Plan: glp1Plan,
@@ -18808,7 +18836,7 @@ var CFUI = (function () {
       vit += '<div class="cf-trend' + (bv >= 30 || bv < 18.5 ? ' cf-bmi-flag' : '') + '"><small>BMI</small><b>' + bv + ' <i>kg/m² · ' + bc + '</i></b>' + sparkline(bmiS, '#0B2D5B') + '<em>' + CF.fmt(bl.date) + (pr.height ? ' · height ' + pr.height + ' cm' : '') + '</em></div>';
     }
     return (rows ? '<div class="table-responsive"><table class="cf-labs"><thead><tr><th>Test</th><th>Latest</th><th>Change</th><th>Trend</th><th>Date</th><th>Next</th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '<div class="cf-empty">No results recorded yet.</div>') +
-      (vit ? '<div class="cf-trends mt-2">' + vit + '</div>' : '') + ecgCard(A);
+      (vit ? '<div class="cf-trends mt-2">' + vit + '</div>' : '') + ecgCard(A) + echoCard(A);
   }
   // every ECG image on record (admissions and visits), newest first
   function ecgImages(p, visits) {
@@ -18834,6 +18862,18 @@ var CFUI = (function () {
     } else {
       h += '<div class="cf-ecg-meta"><b>' + CF.fmt(ecg.date) + '</b> <span>(' + ago(ecg.date) + ')</span><br><small>' + esc(ecg.src) + (facts ? ' · ' + esc(facts) : '') + '</small><br><small class="text-muted">No ECG image attached.</small></div>';
     }
+    return h + '</div>';
+  }
+  // Update 34b: latest echo, under the latest ECG
+  function echoCard(A) {
+    var e = CF.lastEcho(ovState.p || {}, A.visits);
+    var h = '<div class="cf-ecg cf-echo"><div class="cf-ecg-h"><i class="fa fa-wave-square"></i> Latest echo</div>';
+    if (!e) return h + '<div class="cf-ecg-meta"><small class="text-muted">No echo result recorded.</small></div></div>';
+    var efs = (A.S.EF || []).filter(function (o) { return !/diagnosis/i.test(o.source); });
+    var rows = [['LVEF', e.ef != null ? '<b>' + e.ef + '%</b>' : ''], ['Change in EF', esc(e.change)], ['EDVI / EDD', esc(e.edvi)], ['ESVI / ESD', esc(e.esvi)], ['Other findings', esc(e.other)]].filter(function (r) { return r[1]; });
+    h += '<div class="cf-ecg-meta"><b>' + CF.fmt(e.date) + '</b> <span>(' + ago(e.date) + ')</span><br><small>' + esc(e.source) + '</small>' +
+      (rows.length ? '<div class="cf-echo-rows">' + rows.map(function (r) { return '<div><span>' + r[0] + '</span>' + r[1] + '</div>'; }).join('') + '</div>' : '') +
+      (efs.length > 1 ? '<div class="cf-ecg-more">LVEF trend: ' + efs.slice(-5).map(function (o) { return o.value + '% (' + CF.fmt(o.date) + ')'; }).join(' → ') + '</div>' : '') + '</div>';
     return h + '</div>';
   }
   // Risk factors and comorbidities from the record (any visit saying Yes counts; smoking takes the worst status)
@@ -18931,6 +18971,15 @@ var CFUI = (function () {
       (function () { if (A.vital.dead) return ''; var w = CF.walkStatus(A.S);
         if (w.state === 'missing') return '<span class="cf-chip warn" title="No 6-minute walk test on record">6MWT not recorded</span>';
         return '<span class="cf-chip' + (w.state === 'overdue' ? ' warn' : '') + '" title="Next due ' + CF.fmt(w.due) + '">6MWT ' + w.last.value + ' m · ' + CF.fmt(w.last.date) + (w.state === 'overdue' ? ' · overdue' : '') + '</span>'; })() + (pr.bmi != null ? '<span class="cf-chip">BMI ' + Math.round(pr.bmi * 10) / 10 + '</span>' : '') + status +
+      (function () {
+        var out = '';
+        if (!A.vital.dead) {
+          var r = CF.lastRefill(A.visits);
+          out += r ? '<span class="cf-chip' + (r.overdue ? ' warn' : '') + '" title="Next refill due ' + CF.fmt(r.due) + '"><i class="fa fa-prescription-bottle-medical"></i> Last refill ' + CF.fmt(r.date) + (r.overdue ? ' · due' : '') + '</span>'
+            : '<span class="cf-chip warn" title="No visit marked as a medication refill">No refill recorded</span>';
+        }
+        return out;
+      })() +
       (appt && !A.vital.dead ? '<span class="cf-chip appt"><i class="fa fa-calendar"></i> Next ' + CF.fmt(appt) + '</span>' : '') + '</div>' + riskRow(p, A) + '</div>' +
       '<div class="cf-ov-btns"><button class="btn btn-primary" data-ov="visit"><i class="fa fa-stethoscope me-1"></i>Start visit</button>' + (window.CFAI ? '<button class="btn cf-ai-btn" data-ov="labs"><i class="fa fa-flask me-1"></i>Lab slip</button>' : '') +
       '<button class="btn btn-outline-primary" data-ov="edit"><i class="fa fa-pen me-1"></i>Edit record</button>' +
