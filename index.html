@@ -2178,6 +2178,7 @@ label.cf-ai-filled{background:#fffbe6;border-radius:4px;box-shadow:0 0 0 2px #fa
                     </div>
                     <input type="hidden" id="Valvular_Type">
                 </div>
+                <div class="col-6 col-md-3"><label>ABO Blood Group</label><select class="form-select" id="ABO_Group"><option value="">Select...</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option><option>Unknown</option></select></div>
                 <div class="col-6 col-md-3"><label>Number of Admissions Last Year</label><input type="text" class="form-control" id="Admissions" inputmode="text"></div>
                 <div class="col-6 col-md-3"><label>Last Admission Date</label><input type="date" class="form-control" id="Last_Admission"></div>
                 <div class="col-6 col-md-3"><label>Length of Stay (Days)</label><input type="text" class="form-control" id="LOS" inputmode="text"></div>
@@ -3169,7 +3170,7 @@ label.cf-ai-filled{background:#fffbe6;border-radius:4px;box-shadow:0 0 0 2px #fa
                     <h6 class="col-12 text-secondary"><i class="fa fa-stethoscope"></i> Investigations and Procedures</h6>
                     <div class="col-12 vertical-entry-group">
                         <div class="entry-title"><i class="fa fa-heartbeat"></i> ECG</div>
-                        <div class="yes-no-field"><label>Performed</label><select class="form-select" id="V_ECG_Done" onchange="toggleVisitECGDetails()"><option>No</option><option>Yes</option></select></div>
+                        <div class="yes-no-field"><label>Performed</label><select class="form-select" id="V_ECG_Done" onchange="toggleVisitECGDetails()"><option>No</option><option>Yes</option></select></div><div class="yes-no-field cf-req-field"><label>Requested</label><select class="form-select" id="V_ECG_Requested" onchange="if(window.CFUI&&CFUI.onRequested)CFUI.onRequested(this)"><option>No</option><option>Yes</option></select></div>
                         <div id="vEcgDetailsWrap" style="display:none;">
                             <div class="row g-2 entry-detail-panel">
                                 <div class="col-12"><label>LBBB</label><select class="form-select" id="V_LBBB"><option>No</option><option>Yes</option></select></div>
@@ -3199,7 +3200,7 @@ label.cf-ai-filled{background:#fffbe6;border-radius:4px;box-shadow:0 0 0 2px #fa
                     <div class="col-12 text-secondary m-0 visit-subhead"><i class="fa fa-wave-square"></i> Holter Results</div>
                     <div class="col-12 vertical-entry-group">
                         <div class="entry-title"><i class="fa fa-wave-square"></i> Holter</div>
-                        <div class="yes-no-field"><label>Performed</label><select class="form-select" id="V_Holter_Done" onchange="toggleVisitHolter()"><option>No</option><option>Yes</option></select></div>
+                        <div class="yes-no-field"><label>Performed</label><select class="form-select" id="V_Holter_Done" onchange="toggleVisitHolter()"><option>No</option><option>Yes</option></select></div><div class="yes-no-field cf-req-field"><label>Requested</label><select class="form-select" id="V_Holter_Requested" onchange="if(window.CFUI&&CFUI.onRequested)CFUI.onRequested(this)"><option>No</option><option>Yes</option></select></div>
                         <div id="vHolterDetailsWrap" style="display:none;">
                             <div class="row g-2 entry-detail-panel">
                                 <div class="col-12" id="vHolterDateWrap" style="display:none;"><label>Date</label><input type="date" class="form-control" id="V_Holter_Date"></div>
@@ -3216,7 +3217,7 @@ label.cf-ai-filled{background:#fffbe6;border-radius:4px;box-shadow:0 0 0 2px #fa
                     <div class="col-12 text-secondary m-0 visit-subhead"><i class="fa fa-heart"></i> F/U Echo</div>
                     <div class="col-12 vertical-entry-group">
                         <div class="entry-title"><i class="fa fa-heart"></i> F/U Echo</div>
-                        <div class="yes-no-field"><label>Performed</label><select class="form-select" id="V_Echo_Done" onchange="toggleVisitEchoDetails()"><option>No</option><option>Yes</option></select></div>
+                        <div class="yes-no-field"><label>Performed</label><select class="form-select" id="V_Echo_Done" onchange="toggleVisitEchoDetails()"><option>No</option><option>Yes</option></select></div><div class="yes-no-field cf-req-field"><label>Requested</label><select class="form-select" id="V_Echo_Requested" onchange="if(window.CFUI&&CFUI.onRequested)CFUI.onRequested(this)"><option>No</option><option>Yes</option></select></div>
                         <div id="vEchoDetailsWrap" style="display:none;">
                             <div class="row g-2 entry-detail-panel">
                                 <div class="col-12"><label>Change in EF</label><input type="text" class="form-control" id="V_EF_Change"></div>
@@ -3231,7 +3232,7 @@ label.cf-ai-filled{background:#fffbe6;border-radius:4px;box-shadow:0 0 0 2px #fa
                     <div class="col-12 text-secondary m-0 visit-subhead"><i class="fa fa-magnet"></i> F/U CMR</div>
                     <div class="col-12 vertical-entry-group">
                         <div class="entry-title"><i class="fa fa-magnet"></i> F/U CMR</div>
-                        <div class="yes-no-field"><label>Performed</label><select class="form-select" id="V_CMR_Done" onchange="toggleVisitCMRDetails()"><option>No</option><option>Yes</option></select></div>
+                        <div class="yes-no-field"><label>Performed</label><select class="form-select" id="V_CMR_Done" onchange="toggleVisitCMRDetails()"><option>No</option><option>Yes</option></select></div><div class="yes-no-field cf-req-field"><label>Requested</label><select class="form-select" id="V_CMR_Requested" onchange="if(window.CFUI&&CFUI.onRequested)CFUI.onRequested(this)"><option>No</option><option>Yes</option></select></div>
                         <div id="vCmrDetailsWrap" style="display:none;">
                             <div class="row g-2 entry-detail-panel">
                                 <div class="col-12"><label>LVEDVI/EDD</label><input type="text" class="form-control" id="V_CMR_LVEDVI" placeholder="LVEDVI/EDD"></div>
@@ -3250,7 +3251,7 @@ label.cf-ai-filled{background:#fffbe6;border-radius:4px;box-shadow:0 0 0 2px #fa
                     <div class="col-12 text-secondary m-0 visit-subhead"><i class="fa fa-walking"></i> F/U 6 Minute Walk Test</div>
                     <div class="col-12 vertical-entry-group">
                         <div class="entry-title"><i class="fa fa-walking"></i> 6 Minute Walk Test</div>
-                        <div class="yes-no-field"><label>Completed</label><select class="form-select" id="V_Walk_Completed" onchange="toggleVisitWalkMeters()"><option>N</option><option>Y</option></select></div>
+                        <div class="yes-no-field"><label>Completed</label><select class="form-select" id="V_Walk_Completed" onchange="toggleVisitWalkMeters()"><option>N</option><option>Y</option></select></div><div class="yes-no-field cf-req-field"><label>Requested</label><select class="form-select" id="V_Walk_Requested" onchange="if(window.CFUI&&CFUI.onRequested)CFUI.onRequested(this)"><option>No</option><option>Yes</option></select></div>
                         <div id="vWalkMetersWrap" style="display:none;">
                             <div class="row g-2 entry-detail-panel">
                                 <div class="col-6"><label>Meters Walked</label><input type="text" class="form-control" id="V_Walk_Meters" inputmode="text"></div><div class="col-6"><label>Date of test</label><input type="date" class="form-control" id="V_Walk_Date"></div>
@@ -3262,7 +3263,7 @@ label.cf-ai-filled{background:#fffbe6;border-radius:4px;box-shadow:0 0 0 2px #fa
                     <div class="col-12 text-secondary m-0 visit-subhead"><i class="fa fa-lungs"></i> F/U CPET</div>
                     <div class="col-12 vertical-entry-group">
                         <div class="entry-title"><i class="fa fa-lungs"></i> CPET</div>
-                        <div class="yes-no-field"><label>Performed</label><select class="form-select" id="V_CPET_Done" onchange="toggleVisitCPETDetails()"><option>No</option><option>Yes</option></select></div>
+                        <div class="yes-no-field"><label>Performed</label><select class="form-select" id="V_CPET_Done" onchange="toggleVisitCPETDetails()"><option>No</option><option>Yes</option></select></div><div class="yes-no-field cf-req-field"><label>Requested</label><select class="form-select" id="V_CPET_Requested" onchange="if(window.CFUI&&CFUI.onRequested)CFUI.onRequested(this)"><option>No</option><option>Yes</option></select></div>
                         <div id="vCpetDetailsWrap" style="display:none;">
                             <div class="row g-2 entry-detail-panel">
                                 <div class="col-12"><label>Peak VO2</label><input type="text" class="form-control" id="V_CPET_PeakVO2" placeholder="ml/kg/min"></div>
@@ -3279,7 +3280,7 @@ label.cf-ai-filled{background:#fffbe6;border-radius:4px;box-shadow:0 0 0 2px #fa
                     <div class="col-12 text-secondary m-0 visit-subhead"><i class="fa fa-syringe"></i> F/U Right Side Cath</div>
                     <div class="col-12 vertical-entry-group">
                         <div class="entry-title"><i class="fa fa-syringe"></i> Right Side Cath</div>
-                        <div class="yes-no-field"><label>Performed</label><select class="form-select" id="V_RHC_Done" onchange="toggleVisitRHCDetails()"><option>No</option><option>Yes</option></select></div>
+                        <div class="yes-no-field"><label>Performed</label><select class="form-select" id="V_RHC_Done" onchange="toggleVisitRHCDetails()"><option>No</option><option>Yes</option></select></div><div class="yes-no-field cf-req-field"><label>Requested</label><select class="form-select" id="V_RHC_Requested" onchange="if(window.CFUI&&CFUI.onRequested)CFUI.onRequested(this)"><option>No</option><option>Yes</option></select></div>
                         <div id="vRhcDetailsWrap" style="display:none;">
                             <div class="row g-2 entry-detail-panel">
                                 <div class="col-12"><label>C.I (L/min/m2)</label><input type="text" class="form-control" id="V_RHC_CI" inputmode="text"></div>
@@ -3299,7 +3300,7 @@ label.cf-ai-filled{background:#fffbe6;border-radius:4px;box-shadow:0 0 0 2px #fa
                     <div class="col-12 text-secondary m-0 visit-subhead"><i class="fa fa-heart-circle-bolt"></i> F/U CAG/PCI</div>
                     <div class="col-12 vertical-entry-group">
                         <div class="entry-title"><i class="fa fa-heart-circle-bolt"></i> F/U CAG/PCI</div>
-                        <div class="yes-no-field"><label>CAG Performed</label><select class="form-select" id="V_CAG_Done" onchange="toggleVisitCAGDetails()"><option>No</option><option>Yes</option></select></div>
+                        <div class="yes-no-field"><label>CAG Performed</label><select class="form-select" id="V_CAG_Done" onchange="toggleVisitCAGDetails()"><option>No</option><option>Yes</option></select></div><div class="yes-no-field cf-req-field"><label>Requested</label><select class="form-select" id="V_CAG_Requested" onchange="if(window.CFUI&&CFUI.onRequested)CFUI.onRequested(this)"><option>No</option><option>Yes</option></select></div>
                         <div id="vCagDetailsWrap" style="display:none;">
                             <div class="row g-2 entry-detail-panel">
                                 <div class="col-12"><label>CAG Date</label><input type="date" class="form-control" id="V_CAG_Date"></div>
@@ -3314,6 +3315,32 @@ label.cf-ai-filled{background:#fffbe6;border-radius:4px;box-shadow:0 0 0 2px #fa
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    <div class="col-12 cf-dev-only" id="cfDevIntWrap" style="display:none;">
+                    <div class="text-secondary m-0 visit-subhead"><i class="fa fa-microchip"></i> Device interrogation</div>
+                    <div class="vertical-entry-group">
+                        <div class="entry-title"><i class="fa fa-microchip"></i> Device interrogation</div>
+                        <div class="yes-no-field"><label>Performed</label><select class="form-select" id="V_DevInt_Done" onchange="var w=document.getElementById('vDevIntWrap');if(w)w.style.display=this.value==='Yes'?'':'none';"><option>No</option><option>Yes</option></select></div><div class="yes-no-field cf-req-field"><label>Requested</label><select class="form-select" id="V_DevInt_Requested" onchange="if(window.CFUI&&CFUI.onRequested)CFUI.onRequested(this)"><option>No</option><option>Yes</option></select></div>
+                        <div id="vDevIntWrap" style="display:none;">
+                            <div class="row g-2 entry-detail-panel">
+                                <div class="col-12 col-md-4"><label>Date</label><input type="date" class="form-control" id="V_DevInt_Date"></div>
+                                <div class="col-12 col-md-8"><label>Findings</label><input type="text" class="form-control" id="V_DevInt_Findings" placeholder="battery, lead parameters, % pacing, arrhythmia episodes, therapies (ATP/shocks)"></div>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                    <div class="col-12 cf-dev-only" id="cfCrtOptWrap" style="display:none;">
+                    <div class="text-secondary m-0 visit-subhead"><i class="fa fa-sliders"></i> CRT optimisation</div>
+                    <div class="vertical-entry-group">
+                        <div class="entry-title"><i class="fa fa-sliders"></i> CRT optimisation</div>
+                        <div class="yes-no-field"><label>Performed</label><select class="form-select" id="V_CRTOpt_Done" onchange="var w=document.getElementById('vCRTOptWrap');if(w)w.style.display=this.value==='Yes'?'':'none';"><option>No</option><option>Yes</option></select></div><div class="yes-no-field cf-req-field"><label>Requested</label><select class="form-select" id="V_CRTOpt_Requested" onchange="if(window.CFUI&&CFUI.onRequested)CFUI.onRequested(this)"><option>No</option><option>Yes</option></select></div>
+                        <div id="vCRTOptWrap" style="display:none;">
+                            <div class="row g-2 entry-detail-panel">
+                                <div class="col-12 col-md-4"><label>Date</label><input type="date" class="form-control" id="V_CRTOpt_Date"></div>
+                                <div class="col-12 col-md-8"><label>Findings</label><input type="text" class="form-control" id="V_CRTOpt_Findings" placeholder="BiV pacing %, AV / VV delays, echo-guided optimisation result"></div>
+                            </div>
+                        </div>
+                    </div>
                     </div>
                     <div class="col-12"><hr class="my-2"></div>
                     <h6 class="col-12 text-secondary"><i class="fa fa-flask"></i> Visit Labs <small class="text-muted fw-normal">— Kuwait SI units</small></h6>
@@ -17453,6 +17480,42 @@ var CF = (function () {
     (visits || []).forEach(function (v) { var d = visitIso(v); if (d && s(v.V_Med_Refill_Today) === 'Yes' && d > best) best = d; });
     return best ? { date: best, due: addDays(best, 56), overdue: addDays(best, 56) <= todayIso() } : null;
   }
+  // Update 35: device history and requested investigations
+  function deviceInfo(p, visits) {
+    p = p || {};
+    var types = [];
+    function add(t, yes) { t = s(t); if (t && !/^(no|none|n\/a|select\.*)$/i.test(t)) types.push(t); else if (yes) types.push('Device'); }
+    add(p.Device_Type, yes(p.Device_Done)); add(p.Proc_Device_Type, yes(p.Proc_Device_Done));
+    parseExtraAdmissions(p).forEach(function (a) { add(a.Device_Type, a.Device_Done === 'Yes'); add(a.Proc_Device_Type, a.Proc_Device_Done === 'Yes'); });
+    (visits || []).forEach(function (v) { add(v.V_Device_Type, s(v.V_Device_Done) === 'Yes'); add(v.V_Proc_Device_Type, s(v.V_Proc_Device_Done) === 'Yes'); });
+    var real = types.filter(function (t) { return !/loop recorder|ILR/i.test(t); });
+    return { has: real.length > 0, crt: types.some(function (t) { return /CRT/i.test(t); }), types: types };
+  }
+  var INVEST = [
+    { key: 'ECG', label: 'ECG', req: 'V_ECG_Requested', field: 'V_ECG_Done', done: function (v) { return s(v.V_ECG_Done) === 'Yes' || num(v.V_QRS) != null; } },
+    { key: 'Holter', label: 'Holter', req: 'V_Holter_Requested', field: 'V_Holter_Done', done: function (v) { return s(v.V_Holter_Done) === 'Yes'; } },
+    { key: 'Echo', label: 'Echocardiogram', req: 'V_Echo_Requested', field: 'V_Echo_Done', done: function (v) { return s(v.V_Echo_Done) === 'Yes' || num(v.V_Echo_EF) != null; } },
+    { key: 'CMR', label: 'Cardiac MRI', req: 'V_CMR_Requested', field: 'V_CMR_Done', done: function (v) { return s(v.V_CMR_Done) === 'Yes' || num(v.V_CMR_LVEF) != null; } },
+    { key: 'Walk', label: '6-minute walk test', req: 'V_Walk_Requested', field: 'V_Walk_Completed', done: function (v) { return s(v.V_Walk_Completed) === 'Y' || num(v.V_Walk_Meters) != null; } },
+    { key: 'CPET', label: 'CPET', req: 'V_CPET_Requested', field: 'V_CPET_Done', done: function (v) { return s(v.V_CPET_Done) === 'Yes'; } },
+    { key: 'RHC', label: 'Right heart catheterisation', req: 'V_RHC_Requested', field: 'V_RHC_Done', done: function (v) { return s(v.V_RHC_Done) === 'Yes'; } },
+    { key: 'CAG', label: 'Coronary angiography', req: 'V_CAG_Requested', field: 'V_CAG_Done', done: function (v) { return s(v.V_CAG_Done) === 'Yes'; } },
+    { key: 'DevInt', label: 'Device interrogation', req: 'V_DevInt_Requested', field: 'V_DevInt_Done', done: function (v) { return s(v.V_DevInt_Done) === 'Yes'; } },
+    { key: 'CRTOpt', label: 'CRT optimisation', req: 'V_CRTOpt_Requested', field: 'V_CRTOpt_Done', done: function (v) { return s(v.V_CRTOpt_Done) === 'Yes'; } }
+  ];
+  // A request stays pending until the investigation is recorded as performed on or after the request date.
+  function pendingInvestigations(p, visits) {
+    var vs = (visits || []).filter(function (v) { return visitIso(v); });
+    var out = [];
+    INVEST.forEach(function (it) {
+      var reqs = vs.filter(function (v) { return s(v[it.req]) === 'Yes'; }).map(function (v) { return { date: visitIso(v), type: v.visitType || 'Visit' }; }).sort(function (a, b) { return a.date < b.date ? -1 : 1; });
+      if (!reqs.length) return;
+      var r = reqs[reqs.length - 1];
+      var done = vs.some(function (v) { return visitIso(v) >= r.date && it.done(v); });
+      if (!done) out.push({ key: it.key, label: it.label, field: it.field, date: r.date, source: r.type, days: daysBetween(r.date, todayIso()) });
+    });
+    return out;
+  }
   function undatedAdmission(p) {
     p = p || {};
     var has = !!(snapshotFrom(p, 'A_') || legacySnapshot(p)) || ['Lab_K', 'Lab_Creat', 'Lab_eGFR', 'Lab_BNP', 'Lab_Hb', 'Admission_Reason'].some(function (k) { return s(p[k]); });
@@ -17472,7 +17535,7 @@ var CF = (function () {
     DRUGS: DRUGS, CLASS_LABEL: CLASS_LABEL, PILLARS: PILLARS, REASONS: REASONS, ACTIONS: ACTIONS, RULES: RULES, READMIT_BANDS: READMIT_BANDS,
     s: s, num: num, iso: iso, todayIso: todayIso, addDays: addDays, daysBetween: daysBetween, fmt: fmt, esc: esc,
     baseKey: baseKey, drugLabel: drugLabel, parseDose: parseDose, isIVDose: isIVDose, freqFromPreset: freqFromPreset, plausibility: plausibility,
-    readDrug: readDrug, doseText: doseText, pctTarget: pctTarget, gdmtTarget: gdmtTarget, gdmtEverReached: gdmtEverReached, undatedAdmission: undatedAdmission, echoAfterTarget: echoAfterTarget, vaccineStatus: vaccineStatus, lastEcho: lastEcho, lastRefill: lastRefill, targetFor: targetFor, targetCtx: targetCtx, TARGET_REF: TARGET_REF, TARGET_PEF: TARGET_PEF, presetsFor: presetsFor, nextPreset: nextPreset,
+    readDrug: readDrug, doseText: doseText, pctTarget: pctTarget, gdmtTarget: gdmtTarget, gdmtEverReached: gdmtEverReached, undatedAdmission: undatedAdmission, echoAfterTarget: echoAfterTarget, vaccineStatus: vaccineStatus, lastEcho: lastEcho, lastRefill: lastRefill, deviceInfo: deviceInfo, pendingInvestigations: pendingInvestigations, INVEST: INVEST, targetFor: targetFor, targetCtx: targetCtx, TARGET_REF: TARGET_REF, TARGET_PEF: TARGET_PEF, presetsFor: presetsFor, nextPreset: nextPreset,
     medSnapshots: medSnapshots, medHistory: medHistory, onClass: onClass, onPillar: onPillar,
     series: series, last: last, profile: profile, vitalStatus: vitalStatus, followUpStatus: followUpStatus,
     labSuggestions: labSuggestions, medSuggestions: medSuggestions, medReview: medReview, fastingAdvice: fastingAdvice, smokingStatus: smokingStatus, kccqStatus: kccqStatus, walkStatus: walkStatus, ironDose: ironDose, IRON: IRON, REVIEW: REVIEW, deviceSuggestions: deviceSuggestions, latestECG: latestECG, currentDevice: currentDevice, omtSince: omtSince, DEVICE: DEVICE, glp1Plan: glp1Plan,
@@ -17935,6 +17998,18 @@ var CFUI = (function () {
     });
     ndcSync();
   }
+  // ---- Update 35: device interrogation / CRT optimisation only for patients with a device / CRT ----
+  function syncDeviceBlocks() {
+    var cp = currentPatient(), p = Object.assign({}, cp.data || {});
+    ['Device_Type', 'Device_Done', 'Proc_Device_Type', 'Proc_Device_Done'].forEach(function (k) { var e = $(k); if (e && e.value) p[k] = e.value; });
+    var vs = (typeof visits !== 'undefined' ? visits : []).slice();
+    vs.push({ V_Device_Type: val('V_Device_Type'), V_Device_Done: val('V_Device_Done'), V_Proc_Device_Type: val('V_Proc_Device_Type'), V_Proc_Device_Done: val('V_Proc_Device_Done') });
+    var d = CF.deviceInfo(p, vs);
+    var a = $('cfDevIntWrap'), b = $('cfCrtOptWrap');
+    if (a) a.style.display = d.has || val('V_DevInt_Done') === 'Yes' ? '' : 'none';
+    if (b) b.style.display = d.crt || val('V_CRTOpt_Done') === 'Yes' ? '' : 'none';
+    ['DevInt', 'CRTOpt'].forEach(function (k) { var w = $('v' + k + 'Wrap'); if (w) w.style.display = val('V_' + k + '_Done') === 'Yes' ? '' : 'none'; });
+  }
   function contextVisits(includeForm) {
     var list = (typeof visits !== 'undefined' ? visits : []).filter(function (v) { return !(typeof editingVisitId !== 'undefined' && editingVisitId && v.id === editingVisitId); });
     if (includeForm && val('Visit_Date')) list = [formVisit()].concat(list);
@@ -18118,6 +18193,7 @@ var CFUI = (function () {
         } else if (wrap) wrap.remove();
       }
     });
+    try { syncDeviceBlocks(); } catch (e) {}
     var q = $('cfQuadHint');
     if (q) q.textContent = 'Computed from medications: ' + quad + '/4 pillars' + (quad === 4 ? ' (quadruple therapy)' : '');
     scheduleAutoMax();
@@ -18777,6 +18853,11 @@ var CFUI = (function () {
       items.push({ lvl: levelOf('lab', l), icon: 'fa-vials', cat: 'Labs', title: l.labs + (l.level === 'upcoming' ? ' · due ' + CF.fmt(l.due) : l.level === 'urgent' ? ' · urgent' : ' · due ' + CF.fmt(l.due)), detail: l.because, btn: 'Enter result', act: 'lab:' + (LAB_FIELD[l.key] || 'V_Lab_Others') });
     });
     try {
+      if (!A.vital.dead) CF.pendingInvestigations(ovState.p || {}, A.visits).forEach(function (q) {
+        items.push({ lvl: 'due', icon: 'fa-clipboard-check', cat: 'Clinic', title: 'Requested: ' + q.label, detail: 'Requested on ' + CF.fmt(q.date) + ' (' + q.source + ' visit' + (q.days != null ? ', ' + q.days + ' days ago' : '') + '). Not yet recorded as performed; the alert clears when it is marked performed in a visit.', btn: 'Record result', act: 'lab:' + q.field });
+      });
+    } catch (e) {}
+    try {
       var ea = A.vital.dead ? null : CF.echoAfterTarget(ovState.p || {}, A.visits, A);
       if (ea) items.push({ lvl: 'due', icon: 'fa-heart-pulse', cat: 'Device', title: 'Echo: target GDMT reached', detail: ea.text + ' This alert appears once and clears when the echo is recorded.', btn: 'Add to visit plan', act: 'plan:Echo to reassess LVEF after reaching target GDMT doses (' + CF.fmt(ea.reached) + ').' });
     } catch (e) {}
@@ -19401,16 +19482,20 @@ var CFUI = (function () {
     document.addEventListener('change', function (e) {
       var id = e.target && e.target.id || '';
       if (!id || /Max_GDMT/.test(id) || !e.target.closest || !e.target.closest('#hfForm')) return;
+      if (/Device/.test(id)) { try { syncDeviceBlocks(); } catch (x) {} }
       scheduleAutoMax();
     }, true);
     wrap('_renderExtraAdmissions', function () { scheduleAutoMax(); });
     ndcBind();
+    // ECG "Performed" starts at No in every new visit
+    wrap('clearVisitForm', function () { var e = $('V_ECG_Done'); if (e) { e.value = 'No'; if (typeof toggleVisitECGDetails === 'function') toggleVisitECGDetails(); } try { syncDeviceBlocks(); } catch (x) {} });
+    wrap('editVisit', function () { try { syncDeviceBlocks(); } catch (x) {} });
     wrap('resetForm', function () { ndcSync(); });
     wrap('editPt', function () { setTimeout(scheduleAutoMax, 400); ndcSync(); });
   }
   return {
     install: install, openOverview: openOverview, startVisit: startVisit, headerChips: headerChips, smartBody: smartBody, renderAssist: renderAssist,
-    markVisitTouched: function () { visitTouched = true; }, admissionDateProblems: admissionDateProblems, calHistory: calHistory, renderPdf: renderPdf, pdfCss: pdfCss, patientReport: patientReport, riskFactors: riskFactors, refreshEditor: refreshEditor, clearDraft: clearDraft
+    markVisitTouched: function () { visitTouched = true; }, admissionDateProblems: admissionDateProblems, onRequested: function () { markDirty(); }, syncDeviceBlocks: function () { syncDeviceBlocks(); }, calHistory: calHistory, renderPdf: renderPdf, pdfCss: pdfCss, patientReport: patientReport, riskFactors: riskFactors, refreshEditor: refreshEditor, clearDraft: clearDraft
   };
 })();
 CFUI.install();
@@ -19428,7 +19513,7 @@ CFUI.install();
   'use strict';
   if (typeof ALL_PATIENT_FIELDS !== 'undefined') {
     ['HF_Readmission', 'HF_Readmission_Interval', 'Death_Date', 'Death_Cause', 'Walk_Date',
-      'NDC_Diagnosis', 'NDC_Pharmacist', 'NDC_Weight', 'NDC_SodiumFluid', 'NDC_WarningSigns', 'NDC_Handout', 'NDC_KCCQ', 'NDC_FollowUp', 'NDC_Labs', 'NDC_Caregiver', 'NDC_Nurse', 'NDC_Date'].forEach(function (f) { if (ALL_PATIENT_FIELDS.indexOf(f) < 0) ALL_PATIENT_FIELDS.push(f); });
+      'NDC_Diagnosis', 'NDC_Pharmacist', 'NDC_Weight', 'NDC_SodiumFluid', 'NDC_WarningSigns', 'NDC_Handout', 'NDC_KCCQ', 'NDC_FollowUp', 'NDC_Labs', 'NDC_Caregiver', 'NDC_Nurse', 'NDC_Date', 'ABO_Group'].forEach(function (f) { if (ALL_PATIENT_FIELDS.indexOf(f) < 0) ALL_PATIENT_FIELDS.push(f); });
   }
 
   // ---- computed helpers used by the patched analytics code ----
