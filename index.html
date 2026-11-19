@@ -4178,10 +4178,10 @@ var VISIT_MED_GROUPS = [
         ]
     },
     {
-        label: 'Iron',
+        label: 'Intravenous Iron',
         meds: [
             {id:'V_Ferinject', label:'Ferinject (ferric carboxymaltose)', doses:['','500 mg IV once','1000 mg IV once']},
-            {id:'V_Ferrosac', label:'Ferrosac (oral iron)', doses:['','1 tab PO OD','1 tab PO BID','1 tab PO TID','1 tab PO EOD']}
+            {id:'V_Ferrosac', label:'Ferrosac (iron sucrose IV)', doses:['','100 mg IV once','200 mg IV once','100 mg IV weekly','200 mg IV weekly']}
         ]
     },
     {
@@ -12610,7 +12610,7 @@ function buildSpecial(){
     ih+='<tr><td>Iron-deficient among screened (ESC criteria)</td><td><b>'+(screened.length?_fmtPct(idef.length,screened.length):'—')+'</b></td></tr>';
     ih+='<tr><td>On iron therapy among deficient</td><td><b>'+(idef.length?_fmtPct(treated.length,idef.length):'—')+'</b></td></tr>';
     ih+='</table>';
-    ih+='<div class="small text-muted">Criteria: ferritin &lt;100 µg/L OR (100-300 + TSAT &lt;20%) OR TSAT &lt;20% alone. Treated = IV iron (Ferinject) recorded in any admission or visit medication list.</div>';
+    ih+='<div class="small text-muted">Criteria: ferritin &lt;100 µg/L OR (100-300 + TSAT &lt;20%) OR TSAT &lt;20% alone. Treated = IV iron (Ferinject or Ferrosac) recorded in any admission or visit medication list.</div>';
     document.getElementById('ironBody').innerHTML = ih;
 
     // Echo by phenotype
@@ -16027,7 +16027,7 @@ var CF = (function () {
     Metolazone:  { generic: 'Metolazone', cls: 'thiazide' },
     HCTZ:        { generic: 'Hydrochlorothiazide', cls: 'thiazide' },
     Ferinject:   { generic: 'Ferric carboxymaltose', cls: 'iviron' },
-    Ferrosac:    { generic: 'Oral iron', cls: 'oraliron' },
+    Ferrosac:    { generic: 'Iron sucrose IV', cls: 'iviron' },
     Mounjaro:    { generic: 'Tirzepatide', cls: 'glp1', weekly: true },
     Ozempic:     { generic: 'Semaglutide', cls: 'glp1', weekly: true },
     Warfarin:    { generic: 'Warfarin', cls: 'vka' },
@@ -16759,8 +16759,8 @@ var CF = (function () {
     }
     // E. iron
     var fer = last(S, 'Ferritin');
-    var ivIron = hist.drugs.Ferinject;
-    var ivDate = ivIron && ivIron.events.length ? ivIron.events[ivIron.events.length - 1].date : '';
+    // IV iron = Ferinject or Ferrosac (iron sucrose), whichever was given last
+    var ivDate = ivIronEvents(hist).map(function (e) { return e.date; }).sort().pop() || '';
     if (ivDate && !(S.Ferritin || []).some(function (o) { return o.date > ivDate; })) push('iron-after-iv', 'Ferritin + TSAT', addDays(ivDate, RULES.ironAfterIVDays), 'IV iron given ' + fmt(ivDate) + '; reassess iron stores at 3 months');
     else push('iron', 'Ferritin + TSAT (+ Hb)', dueFrom(fer, RULES.ironEveryMonths), fer ? 'Last iron studies ' + fmt(fer.date) : 'No iron studies recorded; screen every HF patient');
     // F. NT-proBNP
@@ -16887,8 +16887,7 @@ var CF = (function () {
     if (fer) {
       var tsat = ts && Math.abs(daysBetween(ts.date, fer.date)) <= 30 ? ts.value : null;
       var deficient = (fer.value != null && (fer.value < 100 || (fer.value < 300 && tsat != null && tsat < 20))) || (tsat != null && tsat < 20);
-      var iv = hist.drugs.Ferinject;
-      var treatedSince = iv && iv.events.some(function (e) { return e.date >= fer.date; });
+      var treatedSince = ivIronEvents(hist).some(function (e) { return e.date >= fer.date; });
       if (deficient && !treatedSince) add('warn', 'Iron deficiency not yet treated', (fer.value != null ? 'Ferritin ' + fer.value + (tsat != null ? ', TSAT ' + tsat + '%' : '') : 'TSAT ' + tsat + '% (no ferritin)') + ' on ' + fmt(fer.date) +
         (fer.value != null && fer.value >= 300 ? ' (TSAT <20% rule; ferritin ≥300: exclude inflammation first)' : '') + '. IV ferric carboxymaltose improves symptoms and reduces HF hospitalisation (ESC class IIa); oral iron is ineffective.', { drug: 'Ferinject', act: 'Start' });
     }
@@ -17516,6 +17515,11 @@ var CF = (function () {
     });
     return out;
   }
+  function ivIronEvents(hist) {
+    var out = [];
+    ['Ferinject', 'Ferrosac'].forEach(function (k) { var d = hist && hist.drugs && hist.drugs[k]; if (d && d.events) out = out.concat(d.events); });
+    return out;
+  }
   function undatedAdmission(p) {
     p = p || {};
     var has = !!(snapshotFrom(p, 'A_') || legacySnapshot(p)) || ['Lab_K', 'Lab_Creat', 'Lab_eGFR', 'Lab_BNP', 'Lab_Hb', 'Admission_Reason'].some(function (k) { return s(p[k]); });
@@ -17535,7 +17539,7 @@ var CF = (function () {
     DRUGS: DRUGS, CLASS_LABEL: CLASS_LABEL, PILLARS: PILLARS, REASONS: REASONS, ACTIONS: ACTIONS, RULES: RULES, READMIT_BANDS: READMIT_BANDS,
     s: s, num: num, iso: iso, todayIso: todayIso, addDays: addDays, daysBetween: daysBetween, fmt: fmt, esc: esc,
     baseKey: baseKey, drugLabel: drugLabel, parseDose: parseDose, isIVDose: isIVDose, freqFromPreset: freqFromPreset, plausibility: plausibility,
-    readDrug: readDrug, doseText: doseText, pctTarget: pctTarget, gdmtTarget: gdmtTarget, gdmtEverReached: gdmtEverReached, undatedAdmission: undatedAdmission, echoAfterTarget: echoAfterTarget, vaccineStatus: vaccineStatus, lastEcho: lastEcho, lastRefill: lastRefill, deviceInfo: deviceInfo, pendingInvestigations: pendingInvestigations, INVEST: INVEST, targetFor: targetFor, targetCtx: targetCtx, TARGET_REF: TARGET_REF, TARGET_PEF: TARGET_PEF, presetsFor: presetsFor, nextPreset: nextPreset,
+    readDrug: readDrug, doseText: doseText, pctTarget: pctTarget, gdmtTarget: gdmtTarget, gdmtEverReached: gdmtEverReached, undatedAdmission: undatedAdmission, echoAfterTarget: echoAfterTarget, vaccineStatus: vaccineStatus, lastEcho: lastEcho, lastRefill: lastRefill, deviceInfo: deviceInfo, ivIronEvents: ivIronEvents, pendingInvestigations: pendingInvestigations, INVEST: INVEST, targetFor: targetFor, targetCtx: targetCtx, TARGET_REF: TARGET_REF, TARGET_PEF: TARGET_PEF, presetsFor: presetsFor, nextPreset: nextPreset,
     medSnapshots: medSnapshots, medHistory: medHistory, onClass: onClass, onPillar: onPillar,
     series: series, last: last, profile: profile, vitalStatus: vitalStatus, followUpStatus: followUpStatus,
     labSuggestions: labSuggestions, medSuggestions: medSuggestions, medReview: medReview, fastingAdvice: fastingAdvice, smokingStatus: smokingStatus, kccqStatus: kccqStatus, walkStatus: walkStatus, ironDose: ironDose, IRON: IRON, REVIEW: REVIEW, deviceSuggestions: deviceSuggestions, latestECG: latestECG, currentDevice: currentDevice, omtSince: omtSince, DEVICE: DEVICE, glp1Plan: glp1Plan,
@@ -19554,8 +19558,8 @@ CFUI.install();
     return n ? ['', 'I', 'II', 'III', 'IV'][n.value] : (p ? p.NYHA : '');
   };
   window._cfIronTreated = function (p) {
-    if (p && p._cf && p._cf.hist.drugs.Ferinject) return true;
-    return /ferinject|ferric carboxymaltose|venofer|monofer/i.test([p.Med_Others, p.Notes, p.Lab_Others].join(' '));
+    if (p && p._cf && (p._cf.hist.drugs.Ferinject || p._cf.hist.drugs.Ferrosac)) return true;
+    return /ferinject|ferric carboxymaltose|venofer|monofer|ferrosac|ferosac|iron sucrose/i.test([p.Med_Others, p.Notes, p.Lab_Others].join(' '));
   };
   window._cfDeathTime = function (p, t0) {
     var dd = p && p._cf && p._cf.vital.date;
